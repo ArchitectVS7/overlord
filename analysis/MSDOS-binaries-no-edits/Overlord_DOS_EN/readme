@@ -1,0 +1,62 @@
+
+
+
+Instructions when running from floppy.
+
+*****NOTE***** Use UPPER CASE COMMANDS ONLY!!
+
+Use the following command format.
+
+GAME (SWITCH1) (SWITCH2) (SWITCH3)
+
+
+
+-------------------------------------------------------------
+Switch 1 will determine your graphic card type.
+These are the availible commands.
+
+M - MCGA
+E - EGA
+T - Tandy 16
+C - CGA
+-------------------------------------------------------------
+
+
+
+-------------------------------------------------------------
+Switch 2 will determine your input type.
+These are the avaible commands.
+
+M - Mouse input.
+K - Keyboard input.
+-------------------------------------------------------------
+
+
+
+-------------------------------------------------------------
+Switch 3 will determine your sound card support.
+
+R - Will support the Roland MT-32 or LAPC-1 sound card.
+A - Will support Adlib or Soundblaster card.
+
+If you do not have a sound card, do not use any switch.
+------------------------------------------------------------
+
+
+EXAMPLES:
+
+GAME M M R .... Will run game with MCGA, MOUSE, and Roland.
+GAME E K A .... Will run game with EGA, Keyboard, and Adlib.
+GAME C K   .... Will run game with CGA, Keyboard, and no sound.
+
+
+
+Any Problems?  Call Virgin Mastertronic Customer Service at:
+
+Virgin Mastertronic
+18001 Cowan Ste. A & B
+Irvine, CA  92714
+(714)833-8710
+
+
+
