@@ -285,6 +285,18 @@ public class ResourceCollection
     }
 
     /// <summary>
+    /// Subtracts resources (spending). Clamps to non-negative values.
+    /// </summary>
+    public void Subtract(Models.ResourceCost cost)
+    {
+        Credits = Math.Max(0, Credits - cost.Credits);
+        Minerals = Math.Max(0, Minerals - cost.Minerals);
+        Fuel = Math.Max(0, Fuel - cost.Fuel);
+        Food = Math.Max(0, Food - cost.Food);
+        Energy = Math.Max(0, Energy - cost.Energy);
+    }
+
+    /// <summary>
     /// Checks if this collection can afford a delta (all values would remain non-negative).
     /// </summary>
     public bool CanAfford(Models.ResourceDelta delta)
@@ -294,5 +306,25 @@ public class ResourceCollection
                Fuel + delta.Fuel >= 0 &&
                Food + delta.Food >= 0 &&
                Energy + delta.Energy >= 0;
+    }
+
+    /// <summary>
+    /// Checks if this collection can afford a cost.
+    /// </summary>
+    public bool CanAfford(Models.ResourceCost cost)
+    {
+        return Credits >= cost.Credits &&
+               Minerals >= cost.Minerals &&
+               Fuel >= cost.Fuel &&
+               Food >= cost.Food &&
+               Energy >= cost.Energy;
+    }
+
+    /// <summary>
+    /// Returns a string representation of the resource collection.
+    /// </summary>
+    public override string ToString()
+    {
+        return $"Credits: {Credits}, Minerals: {Minerals}, Fuel: {Fuel}, Food: {Food}, Energy: {Energy}";
     }
 }

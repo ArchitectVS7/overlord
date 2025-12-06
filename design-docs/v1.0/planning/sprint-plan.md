@@ -192,22 +192,26 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement resource economy and income system
 
 **Tasks:**
-- **WBS-2.2.1** [20h] Implement ResourceSystem (AFS-021)
+- **WBS-2.2.1** [20h] ✅ Implement ResourceSystem (AFS-021)
   - 5 resource types (Credits, Minerals, Fuel, Food, Energy)
   - Resource storage per faction
   - Resource spending validation
-- **WBS-2.2.2** [20h] Implement IncomeSystem (AFS-022)
+  - Critical resource warnings
+- **WBS-2.2.2** [20h] ✅ Implement IncomeSystem (AFS-022)
   - Income calculation per planet
   - Production bonuses from buildings
   - Resource generation each turn
-- **WBS-2.2.3** [16h] Implement PopulationSystem (AFS-023)
+  - Crew allocation system
+- **WBS-2.2.3** [16h] ✅ Implement PopulationSystem (AFS-023)
   - Population growth (food-dependent)
-  - Morale system
-  - Maximum population caps
-- **WBS-2.2.4** [16h] Implement TaxationSystem (AFS-024)
-  - Tax rate slider (0-100%)
+  - Morale system (0-100%)
+  - Food consumption (0.5 per person)
+  - Starvation and tax rate effects on morale
+- **WBS-2.2.4** [16h] ✅ Implement TaxationSystem (AFS-024)
+  - Tax rate adjustment (0-100%)
   - Income vs morale trade-off
-- **WBS-2.2.5** [8h] Unit tests for economy systems
+  - Metropolis bonus (2x Credits)
+- **WBS-2.2.5** [8h] ✅ Unit tests for economy systems
 
 **Total Hours:** 80h
 
