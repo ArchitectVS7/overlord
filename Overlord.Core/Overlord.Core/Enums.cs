@@ -6,7 +6,8 @@ namespace Overlord.Core;
 public enum FactionType
 {
     Player,
-    AI
+    AI,
+    Neutral // For unclaimed planets
 }
 
 /// <summary>
@@ -43,4 +44,16 @@ public enum ChangeType
     ResourcesChanged,
     TurnChanged,
     PhaseChanged
+}
+
+/// <summary>
+/// Resource types in the game.
+/// </summary>
+public enum ResourceType
+{
+    Food,      // Feeds population, required for growth
+    Minerals,  // Building material for structures and craft
+    Fuel,      // Powers craft movement and construction
+    Energy,    // Powers structures and systems
+    Credits    // Currency for purchases
 }

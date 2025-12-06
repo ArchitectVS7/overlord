@@ -63,17 +63,17 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement turn system and save/load with System.Text.Json
 
 **Tasks:**
-- **WBS-1.2.1** [20h] Implement TurnSystem in Overlord.Core (AFS-002)
+- **WBS-1.2.1** [20h] ✅ Implement TurnSystem in Overlord.Core (AFS-002)
   - Turn counter, income phase, end turn logic
   - Event system (OnTurnStarted, OnTurnEnded)
-- **WBS-1.2.2** [24h] Implement SaveSystem with System.Text.Json (AFS-003)
+- **WBS-1.2.2** [24h] ✅ Implement SaveSystem with System.Text.Json (AFS-003)
   - SaveData model with versioning
   - Serialization/deserialization with camelCase policy
   - GZip compression
   - MD5 checksum validation
-- **WBS-1.2.3** [16h] Write unit tests for TurnSystem and SaveSystem (70% coverage target)
-- **WBS-1.2.4** [12h] Implement Unity SaveManager wrapper (implements ISaveSystem)
-- **WBS-1.2.5** [8h] Basic debug UI for testing turn system
+- **WBS-1.2.3** [16h] ✅ Write unit tests for TurnSystem and SaveSystem (70% coverage target)
+- **WBS-1.2.4** [12h] Implement Unity SaveManager wrapper (implements ISaveSystem) (⚠️ BLOCKED - requires Unity setup)
+- **WBS-1.2.5** [8h] Basic debug UI for testing turn system (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
@@ -104,18 +104,18 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Complete Phase 1 with Settings, Input, and Galaxy View
 
 **Tasks:**
-- **WBS-1.3.1** [16h] Implement SettingsManager (AFS-004)
+- **WBS-1.3.1** [16h] ✅ Implement SettingsManager (AFS-004)
   - Graphics, Audio, Gameplay settings
   - Settings persistence (System.Text.Json)
-- **WBS-1.3.2** [12h] Implement InputSystem with Unity New Input System (AFS-005)
+- **WBS-1.3.2** [12h] Implement InputSystem with Unity New Input System (AFS-005) (⚠️ BLOCKED - requires Unity setup)
   - Mouse, keyboard, touch, gamepad support
   - IInputProvider implementation
-- **WBS-1.3.3** [28h] Create basic 3D Galaxy View (AFS-013)
+- **WBS-1.3.3** [28h] Create basic 3D Galaxy View (AFS-013) (⚠️ BLOCKED - requires Unity setup)
   - Camera controls (pan, zoom, rotate)
   - Planet rendering with URP shaders
   - Skybox and lighting setup
-- **WBS-1.3.4** [16h] Unit tests for SettingsManager
-- **WBS-1.3.5** [8h] Integration testing (save → load → turn → save)
+- **WBS-1.3.4** [16h] ✅ Unit tests for SettingsManager
+- **WBS-1.3.5** [8h] Integration testing (save → load → turn → save) (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
@@ -149,19 +149,19 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement galaxy generation and planet system
 
 **Tasks:**
-- **WBS-2.1.1** [20h] Implement GalaxyGenerator (AFS-011)
+- **WBS-2.1.1** [20h] ✅ Implement GalaxyGenerator (AFS-011)
   - Procedural planet placement (4-6 planets)
   - Planet type assignment (Volcanic, Desert, Tropical, Metropolis)
-  - Home planet assignment
-- **WBS-2.1.2** [24h] Implement PlanetSystem (AFS-012)
+  - Home planet assignment (Starbase for Player, Hitotsu for AI)
+- **WBS-2.1.2** [24h] ✅ Implement PlanetSystem (AFS-012)
   - Planet model (resources, population, buildings)
   - Production multipliers per planet type
   - Planet ownership and faction assignment
-- **WBS-2.1.3** [16h] Implement NavigationSystem (AFS-014)
+- **WBS-2.1.3** [16h] Implement NavigationSystem (AFS-014) (⚠️ BLOCKED - requires Unity setup)
   - Planet selection and focus
   - Camera focusing on selected planet
-- **WBS-2.1.4** [12h] Unit tests for Galaxy and Planet systems
-- **WBS-2.1.5** [8h] Galaxy View integration (render generated planets)
+- **WBS-2.1.4** [12h] ✅ Unit tests for Galaxy and Planet systems
+- **WBS-2.1.5** [8h] Galaxy View integration (render generated planets) (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
@@ -192,22 +192,26 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement resource economy and income system
 
 **Tasks:**
-- **WBS-2.2.1** [20h] Implement ResourceSystem (AFS-021)
+- **WBS-2.2.1** [20h] ✅ Implement ResourceSystem (AFS-021)
   - 5 resource types (Credits, Minerals, Fuel, Food, Energy)
   - Resource storage per faction
   - Resource spending validation
-- **WBS-2.2.2** [20h] Implement IncomeSystem (AFS-022)
+  - Critical resource warnings
+- **WBS-2.2.2** [20h] ✅ Implement IncomeSystem (AFS-022)
   - Income calculation per planet
   - Production bonuses from buildings
   - Resource generation each turn
-- **WBS-2.2.3** [16h] Implement PopulationSystem (AFS-023)
+  - Crew allocation system
+- **WBS-2.2.3** [16h] ✅ Implement PopulationSystem (AFS-023)
   - Population growth (food-dependent)
-  - Morale system
-  - Maximum population caps
-- **WBS-2.2.4** [16h] Implement TaxationSystem (AFS-024)
-  - Tax rate slider (0-100%)
+  - Morale system (0-100%)
+  - Food consumption (0.5 per person)
+  - Starvation and tax rate effects on morale
+- **WBS-2.2.4** [16h] ✅ Implement TaxationSystem (AFS-024)
+  - Tax rate adjustment (0-100%)
   - Income vs morale trade-off
-- **WBS-2.2.5** [8h] Unit tests for economy systems
+  - Metropolis bonus (2x Credits)
+- **WBS-2.2.5** [8h] ✅ Unit tests for economy systems
 
 **Total Hours:** 80h
 
@@ -236,48 +240,53 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 
 ## Phase 3: Entities & Buildings
 
-### Sprint 6 (Weeks 10-11)
+### Sprint 6 (Weeks 10-11) ✅ COMPLETE (Platform-Agnostic Only)
 
 **Sprint Goal:** Implement entity management and craft system
 
 **Tasks:**
-- **WBS-3.1.1** [16h] Implement EntitySystem (AFS-031)
+- **WBS-3.1.1** [16h] ✅ Implement EntitySystem (AFS-031)
   - Entity limits (32 craft, 24 platoons)
   - Entity ID generation and tracking
   - Entity lifecycle management
-- **WBS-3.1.2** [28h] Implement CraftSystem (AFS-032)
+  - Events for entity creation/destruction
+- **WBS-3.1.2** [28h] ✅ Implement CraftSystem (AFS-032)
   - Battle Cruiser, Cargo Cruiser, Solar Satellite, Atmosphere Processor
-  - Purchase system with resource costs
-  - Craft deployment to planets
-  - Craft stats (strength, fuel consumption)
-- **WBS-3.1.3** [16h] 3D models for craft (placeholder low-poly assets)
+  - Purchase system with resource/crew costs
+  - Scrap system with 50% refund
+  - Platoon embark/disembark (Battle Cruiser)
+  - Cargo load/unload (Cargo Cruiser)
+  - Solar Satellite and Atmosphere Processor deployment
+- **WBS-3.1.3** [16h] ⚠️ BLOCKED - 3D models for craft (Unity-dependent)
   - Battle Cruiser model (300-400 tris)
   - Cargo Cruiser model (200-300 tris)
   - Solar Satellite model (100-150 tris)
   - Atmosphere Processor model (150-200 tris)
-- **WBS-3.1.4** [12h] Craft rendering in Galaxy View (URP shaders)
-- **WBS-3.1.5** [8h] Unit tests for EntitySystem and CraftSystem
+- **WBS-3.1.4** [12h] ⚠️ BLOCKED - Craft rendering in Galaxy View (Unity-dependent)
+- **WBS-3.1.5** [8h] ✅ Unit tests for EntitySystem and CraftSystem (136 tests passing)
 
-**Total Hours:** 80h
+**Total Hours:** 80h (44h completed, 36h blocked)
 
 **AFS References:** AFS-031, AFS-032
 
 **Dependencies:** Sprint 5 (ResourceSystem for craft costs)
 
 **Acceptance Criteria:**
-- [x] Can purchase craft with resources
-- [x] Entity limits enforced (32 craft max)
-- [x] Craft deployed to planets correctly
-- [x] Craft render in 3D Galaxy View
+- [x] Can purchase craft with resources ✅
+- [x] Entity limits enforced (32 craft max) ✅
+- [x] Craft deployed to planets correctly ✅
+- [ ] Craft render in 3D Galaxy View ⚠️ BLOCKED (Unity)
 
 **Risks:**
 - 3D model quality (placeholder assets may need refinement)
 - Entity limit UI feedback
 
 **Deliverables:**
-- EntitySystem
-- CraftSystem
-- Craft 3D models (placeholder)
+- ✅ EntitySystem (Overlord.Core)
+- ✅ CraftSystem (Overlord.Core)
+- ✅ EntitySystemTests (29 tests)
+- ✅ CraftSystemTests (38 tests)
+- ⚠️ Craft 3D models (BLOCKED - Unity setup required)
 
 ---
 
@@ -320,11 +329,15 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 - Upgrade balancing (cost vs benefit)
 
 **Deliverables:**
-- PlatoonSystem
-- BuildingSystem
-- UpgradeSystem
-- DefenseStructures
-- **PHASE 3 COMPLETE**
+- ✅ PlatoonSystem (Overlord.Core)
+- ✅ BuildingSystem (Overlord.Core)
+- ✅ UpgradeSystem (Overlord.Core)
+- ✅ DefenseSystem (Overlord.Core)
+- ✅ PlatoonSystemTests (11 tests)
+- ✅ BuildingSystemTests (21 tests)
+- ✅ UpgradeSystemTests (20 tests)
+- ✅ DefenseSystemTests (19 tests)
+- ✅ **PHASE 3 COMPLETE** - 254 total tests passing
 
 ---
 
@@ -365,8 +378,14 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 - Math errors in strength calculations
 
 **Deliverables:**
-- CombatSystem
-- SpaceCombat
+- ✅ CombatSystem (ground combat with aggression mechanics)
+- ✅ SpaceCombatSystem (space combat with weapon upgrades and orbital defenses)
+- ✅ CombatModels (Battle, BattleResult, SpaceBattle, SpaceBattleResult)
+- ✅ Unit Tests: 37 new tests (286 total)
+  - CombatSystemTests: 18 tests
+  - SpaceCombatSystemTests: 19 tests
+
+**Status:** ✅ COMPLETE (December 6, 2025)
 
 ---
 

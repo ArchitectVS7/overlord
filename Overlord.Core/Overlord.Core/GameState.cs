@@ -105,13 +105,49 @@ public class GameState
 /// </summary>
 public class CraftEntity
 {
+    // Core properties
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int PlanetID { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.CraftType Type { get; set; }
+
     public FactionType Owner { get; set; }
+
+    // Location
+    public int PlanetID { get; set; } // Current planet ID (-1 if in transit)
+    public Models.Position3D Position { get; set; } = new Models.Position3D();
+    public bool InTransit { get; set; }
+
+    // Combat stats
     public int Health { get; set; } = 100;
     public int Attack { get; set; } = 10;
     public int Defense { get; set; } = 10;
+
+    // Type-specific properties
+    public List<int> CarriedPlatoonIDs { get; set; } = new List<int>(); // Battle Cruiser only
+    public Models.ResourceDelta? CargoHold { get; set; } // Cargo Cruiser only
+    public bool Active { get; set; } // Solar Satellite only
+    public int DeployedAtPlanetID { get; set; } = -1; // Atmosphere Processor/Solar Satellite
+    public int TerraformingTurnsRemaining { get; set; } // Atmosphere Processor only
+
+    /// <summary>
+    /// Gets whether this craft is deployed (Solar Satellite or Atmosphere Processor).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsDeployed => DeployedAtPlanetID >= 0;
+
+    /// <summary>
+    /// Gets the crew requirement for this craft.
+    /// </summary>
+    [JsonIgnore]
+    public int CrewRequired => Models.CraftCrewRequirements.GetCrewRequired(Type);
+
+    /// <summary>
+    /// Gets the specifications for this craft.
+    /// </summary>
+    [JsonIgnore]
+    public Models.CraftSpecs Specs => Models.CraftSpecs.GetSpecs(Type);
 }
 
 /// <summary>
@@ -121,9 +157,36 @@ public class PlatoonEntity
 {
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int PlanetID { get; set; }
+    public int PlanetID { get; set; } // -1 if carried by craft
     public FactionType Owner { get; set; }
-    public int Strength { get; set; } = 100;
+
+    // Platoon composition
+    public int TroopCount { get; set; } = 100; // 1-200 troops
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.EquipmentLevel Equipment { get; set; } = Models.EquipmentLevel.Basic;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.WeaponLevel Weapon { get; set; } = Models.WeaponLevel.Rifle;
+
+    // Training state
+    public int TrainingLevel { get; set; } = 0; // 0-100%
+    public int TrainingTurnsRemaining { get; set; } = 10; // Turns until fully trained
+
+    // Combat stats
+    public int Strength { get; set; } = 100; // Calculated military strength
+
+    /// <summary>
+    /// Gets whether this platoon is fully trained (100%).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsFullyTrained => TrainingLevel >= 100;
+
+    /// <summary>
+    /// Gets whether this platoon is currently under training.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsTraining => TrainingTurnsRemaining > 0 && TrainingLevel < 100;
 }
 
 /// <summary>
@@ -131,11 +194,135 @@ public class PlatoonEntity
 /// </summary>
 public class PlanetEntity
 {
+    // Core Attributes
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.PlanetType Type { get; set; }
+
     public FactionType Owner { get; set; }
+    public Models.Position3D Position { get; set; } = new Models.Position3D();
+    public int VisualSeed { get; set; }
+
+    // Visual Properties
+    public float RotationSpeed { get; set; } = 0.3f;
+    public float ScaleMultiplier { get; set; } = 1.0f;
+
+    // Resources
     public ResourceCollection Resources { get; set; } = new ResourceCollection();
+
+    // Population
     public int Population { get; set; }
+    public int Morale { get; set; } = 50; // 0-100
+    public int TaxRate { get; set; } = 50; // 0-100
+    public float GrowthRate { get; set; } // Calculated each turn
+
+    // Structures
+    public List<Models.Structure> Structures { get; set; } = new List<Models.Structure>();
+
+    // Military Presence
+    public List<int> DockedCraftIDs { get; set; } = new List<int>();
+    public List<int> GarrisonedPlatoonIDs { get; set; } = new List<int>();
+
+    // Colonization State
+    public bool Colonized { get; set; }
+    public int TerraformingProgress { get; set; } // 0-10 turns
+
+    // Combat State
+    public bool UnderAttack { get; set; }
+
+    /// <summary>
+    /// Gets resource production multipliers based on planet type.
+    /// </summary>
+    [JsonIgnore]
+    public Models.ResourceMultipliers ResourceMultipliers
+    {
+        get
+        {
+            var multipliers = new Models.ResourceMultipliers();
+
+            switch (Type)
+            {
+                case Models.PlanetType.Volcanic:
+                    multipliers.Minerals = 5.0f;
+                    multipliers.Fuel = 3.0f;
+                    multipliers.Food = 0.5f;
+                    break;
+
+                case Models.PlanetType.Desert:
+                    multipliers.Energy = 2.0f;
+                    multipliers.Food = 0.25f;
+                    break;
+
+                case Models.PlanetType.Tropical:
+                    multipliers.Food = 2.0f;
+                    multipliers.Energy = 0.75f;
+                    break;
+
+                case Models.PlanetType.Metropolis:
+                    multipliers.Credits = 2.0f;
+                    break;
+            }
+
+            return multipliers;
+        }
+    }
+
+    /// <summary>
+    /// Checks if planet is habitable (colonized or Metropolis).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsHabitable => Colonized || Type == Models.PlanetType.Metropolis;
+
+    /// <summary>
+    /// Gets count of Docking Bays (max 3).
+    /// </summary>
+    [JsonIgnore]
+    public int DockingBayCount => Structures.Count(s => s.Type == Models.BuildingType.DockingBay && s.Status == Models.BuildingStatus.Active);
+
+    /// <summary>
+    /// Gets count of Surface Platforms (max 6).
+    /// </summary>
+    [JsonIgnore]
+    public int SurfacePlatformCount => Structures.Count(s => s.Type != Models.BuildingType.DockingBay && s.Status == Models.BuildingStatus.Active);
+
+    /// <summary>
+    /// Checks if another Docking Bay can be built.
+    /// Counts both Active and UnderConstruction orbital structures.
+    /// </summary>
+    public bool CanBuildDockingBay()
+    {
+        // Count all orbital structures (DockingBay and OrbitalDefense)
+        int orbitalCount = Structures.Count(s =>
+            s.Type == Models.BuildingType.DockingBay ||
+            s.Type == Models.BuildingType.OrbitalDefense);
+        return orbitalCount < 3;
+    }
+
+    /// <summary>
+    /// Checks if another Surface Structure can be built.
+    /// Counts both Active and UnderConstruction surface structures.
+    /// </summary>
+    public bool CanBuildSurfaceStructure()
+    {
+        // Count all surface structures (SurfacePlatform, MiningStation, HorticulturalStation)
+        int surfaceCount = Structures.Count(s =>
+            s.Type == Models.BuildingType.SurfacePlatform ||
+            s.Type == Models.BuildingType.MiningStation ||
+            s.Type == Models.BuildingType.HorticulturalStation);
+        return surfaceCount < 6;
+    }
+
+    /// <summary>
+    /// Gets available docking slots (2 craft per bay).
+    /// </summary>
+    public int GetAvailableDockingSlots()
+    {
+        int maxSlots = DockingBayCount * 2;
+        int usedSlots = DockedCraftIDs.Count;
+        return Math.Max(0, maxSlots - usedSlots);
+    }
 }
 
 /// <summary>
@@ -145,6 +332,7 @@ public class FactionState
 {
     public List<int> OwnedPlanetIDs { get; set; } = new List<int>();
     public int MilitaryStrength { get; set; }
+    public ResourceCollection Resources { get; set; } = new ResourceCollection();
 }
 
 /// <summary>
@@ -171,6 +359,18 @@ public class ResourceCollection
     }
 
     /// <summary>
+    /// Subtracts resources (spending). Clamps to non-negative values.
+    /// </summary>
+    public void Subtract(Models.ResourceCost cost)
+    {
+        Credits = Math.Max(0, Credits - cost.Credits);
+        Minerals = Math.Max(0, Minerals - cost.Minerals);
+        Fuel = Math.Max(0, Fuel - cost.Fuel);
+        Food = Math.Max(0, Food - cost.Food);
+        Energy = Math.Max(0, Energy - cost.Energy);
+    }
+
+    /// <summary>
     /// Checks if this collection can afford a delta (all values would remain non-negative).
     /// </summary>
     public bool CanAfford(Models.ResourceDelta delta)
@@ -180,5 +380,25 @@ public class ResourceCollection
                Fuel + delta.Fuel >= 0 &&
                Food + delta.Food >= 0 &&
                Energy + delta.Energy >= 0;
+    }
+
+    /// <summary>
+    /// Checks if this collection can afford a cost.
+    /// </summary>
+    public bool CanAfford(Models.ResourceCost cost)
+    {
+        return Credits >= cost.Credits &&
+               Minerals >= cost.Minerals &&
+               Fuel >= cost.Fuel &&
+               Food >= cost.Food &&
+               Energy >= cost.Energy;
+    }
+
+    /// <summary>
+    /// Returns a string representation of the resource collection.
+    /// </summary>
+    public override string ToString()
+    {
+        return $"Credits: {Credits}, Minerals: {Minerals}, Fuel: {Fuel}, Food: {Food}, Energy: {Energy}";
     }
 }
