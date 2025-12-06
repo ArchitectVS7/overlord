@@ -145,6 +145,7 @@ public class FactionState
 {
     public List<int> OwnedPlanetIDs { get; set; } = new List<int>();
     public int MilitaryStrength { get; set; }
+    public ResourceCollection Resources { get; set; } = new ResourceCollection();
 }
 
 /// <summary>
