@@ -6,7 +6,8 @@ namespace Overlord.Core;
 public enum FactionType
 {
     Player,
-    AI
+    AI,
+    Neutral // For unclaimed planets
 }
 
 /// <summary>

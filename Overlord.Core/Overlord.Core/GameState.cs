@@ -131,11 +131,124 @@ public class PlatoonEntity
 /// </summary>
 public class PlanetEntity
 {
+    // Core Attributes
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.PlanetType Type { get; set; }
+
     public FactionType Owner { get; set; }
+    public Models.Position3D Position { get; set; } = new Models.Position3D();
+    public int VisualSeed { get; set; }
+
+    // Visual Properties
+    public float RotationSpeed { get; set; } = 0.3f;
+    public float ScaleMultiplier { get; set; } = 1.0f;
+
+    // Resources
     public ResourceCollection Resources { get; set; } = new ResourceCollection();
+
+    // Population
     public int Population { get; set; }
+    public int Morale { get; set; } = 50; // 0-100
+    public int TaxRate { get; set; } = 50; // 0-100
+    public float GrowthRate { get; set; } // Calculated each turn
+
+    // Structures
+    public List<Models.Structure> Structures { get; set; } = new List<Models.Structure>();
+
+    // Military Presence
+    public List<int> DockedCraftIDs { get; set; } = new List<int>();
+    public List<int> GarrisonedPlatoonIDs { get; set; } = new List<int>();
+
+    // Colonization State
+    public bool Colonized { get; set; }
+    public int TerraformingProgress { get; set; } // 0-10 turns
+
+    // Combat State
+    public bool UnderAttack { get; set; }
+
+    /// <summary>
+    /// Gets resource production multipliers based on planet type.
+    /// </summary>
+    [JsonIgnore]
+    public Models.ResourceMultipliers ResourceMultipliers
+    {
+        get
+        {
+            var multipliers = new Models.ResourceMultipliers();
+
+            switch (Type)
+            {
+                case Models.PlanetType.Volcanic:
+                    multipliers.Minerals = 5.0f;
+                    multipliers.Fuel = 3.0f;
+                    multipliers.Food = 0.5f;
+                    break;
+
+                case Models.PlanetType.Desert:
+                    multipliers.Energy = 2.0f;
+                    multipliers.Food = 0.25f;
+                    break;
+
+                case Models.PlanetType.Tropical:
+                    multipliers.Food = 2.0f;
+                    multipliers.Energy = 0.75f;
+                    break;
+
+                case Models.PlanetType.Metropolis:
+                    multipliers.Credits = 2.0f;
+                    break;
+            }
+
+            return multipliers;
+        }
+    }
+
+    /// <summary>
+    /// Checks if planet is habitable (colonized or Metropolis).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsHabitable => Colonized || Type == Models.PlanetType.Metropolis;
+
+    /// <summary>
+    /// Gets count of Docking Bays (max 3).
+    /// </summary>
+    [JsonIgnore]
+    public int DockingBayCount => Structures.Count(s => s.Type == Models.BuildingType.DockingBay && s.Status == Models.BuildingStatus.Active);
+
+    /// <summary>
+    /// Gets count of Surface Platforms (max 6).
+    /// </summary>
+    [JsonIgnore]
+    public int SurfacePlatformCount => Structures.Count(s => s.Type != Models.BuildingType.DockingBay && s.Status == Models.BuildingStatus.Active);
+
+    /// <summary>
+    /// Checks if another Docking Bay can be built.
+    /// </summary>
+    public bool CanBuildDockingBay()
+    {
+        return DockingBayCount < 3;
+    }
+
+    /// <summary>
+    /// Checks if another Surface Structure can be built.
+    /// </summary>
+    public bool CanBuildSurfaceStructure()
+    {
+        return SurfacePlatformCount < 6;
+    }
+
+    /// <summary>
+    /// Gets available docking slots (2 craft per bay).
+    /// </summary>
+    public int GetAvailableDockingSlots()
+    {
+        int maxSlots = DockingBayCount * 2;
+        int usedSlots = DockedCraftIDs.Count;
+        return Math.Max(0, maxSlots - usedSlots);
+    }
 }
 
 /// <summary>
