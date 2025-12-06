@@ -63,17 +63,17 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement turn system and save/load with System.Text.Json
 
 **Tasks:**
-- **WBS-1.2.1** [20h] Implement TurnSystem in Overlord.Core (AFS-002)
+- **WBS-1.2.1** [20h] ✅ Implement TurnSystem in Overlord.Core (AFS-002)
   - Turn counter, income phase, end turn logic
   - Event system (OnTurnStarted, OnTurnEnded)
-- **WBS-1.2.2** [24h] Implement SaveSystem with System.Text.Json (AFS-003)
+- **WBS-1.2.2** [24h] ✅ Implement SaveSystem with System.Text.Json (AFS-003)
   - SaveData model with versioning
   - Serialization/deserialization with camelCase policy
   - GZip compression
   - MD5 checksum validation
-- **WBS-1.2.3** [16h] Write unit tests for TurnSystem and SaveSystem (70% coverage target)
-- **WBS-1.2.4** [12h] Implement Unity SaveManager wrapper (implements ISaveSystem)
-- **WBS-1.2.5** [8h] Basic debug UI for testing turn system
+- **WBS-1.2.3** [16h] ✅ Write unit tests for TurnSystem and SaveSystem (70% coverage target)
+- **WBS-1.2.4** [12h] Implement Unity SaveManager wrapper (implements ISaveSystem) (⚠️ BLOCKED - requires Unity setup)
+- **WBS-1.2.5** [8h] Basic debug UI for testing turn system (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
