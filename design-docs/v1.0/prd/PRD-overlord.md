@@ -854,8 +854,12 @@ Resource Collection (Enhanced)
 ### External Dependencies
 
 **Technology Stack**
-- Unity 2022 LTS or newer
-- Unity Input System package
+- Unity 6000 LTS (aligned with company warzones project)
+- Universal Render Pipeline (URP) 17.3.0+
+- Unity New Input System 1.16.0+
+- Dual-library architecture (Overlord.Core + Unity presentation layer)
+- System.Text.Json for serialization (checksum validation)
+- xUnit + Unity Test Framework for comprehensive testing
 - Unity Cloud Save (if cloud features implemented)
 
 **Third-Party Assets**

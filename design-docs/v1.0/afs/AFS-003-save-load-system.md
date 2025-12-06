@@ -1,9 +1,10 @@
 # AFS-003: Save/Load System
 
-**Status:** Draft
+**Status:** Updated (Post Design Review)
 **Priority:** P0 (Critical)
 **Owner:** Lead Developer
 **PRD Reference:** FR-CORE-003
+**Design Review:** Updated to use System.Text.Json (aligned with warzones project)
 
 ---
 
@@ -149,6 +150,15 @@ Persistent save/load system that serializes complete game state to JSON files, m
 ### Implementation Approach
 
 ```csharp
+using System;
+using System.IO;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using UnityEngine;
+
 public class SaveSystem : MonoBehaviour
 {
     private static SaveSystem _instance;
@@ -157,10 +167,20 @@ public class SaveSystem : MonoBehaviour
     private const string SaveFileExtension = ".sav";
     private const int MaxManualSlots = 10;
 
+    // System.Text.Json serialization options (aligned with warzones project)
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = false, // Compressed JSON for smaller file size
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     public void SaveGame(int slotIndex, string saveName = null)
     {
         var saveData = CreateSaveData();
-        var json = JsonUtility.ToJson(saveData, prettyPrint: false);
+
+        // Use System.Text.Json instead of JsonUtility
+        var json = JsonSerializer.Serialize(saveData, JsonOptions);
         var compressed = CompressString(json);
         var filePath = GetSaveFilePath(slotIndex);
 
@@ -187,7 +207,9 @@ public class SaveSystem : MonoBehaviour
 
         var compressed = File.ReadAllBytes(filePath);
         var json = DecompressString(compressed);
-        var saveData = JsonUtility.FromJson<SaveData>(json);
+
+        // Use System.Text.Json instead of JsonUtility
+        var saveData = JsonSerializer.Deserialize<SaveData>(json, JsonOptions);
 
         // Validate checksum
         if (!ValidateChecksum(saveData))
@@ -218,7 +240,7 @@ public class SaveSystem : MonoBehaviour
         var saveData = new SaveData
         {
             Version = Application.version,
-            Timestamp = DateTime.UtcNow.ToString("o"),
+            SavedAt = DateTime.UtcNow, // Use DateTime directly (System.Text.Json handles serialization)
             TurnNumber = GameStateManager.Instance.GetCurrentTurn(),
             Playtime = Time.realtimeSinceStartup,
             GameState = GameStateManager.Instance.GetState(),
@@ -252,7 +274,8 @@ public class SaveSystem : MonoBehaviour
 
     private string CalculateChecksum(SaveData data)
     {
-        var json = JsonUtility.ToJson(data.GameState);
+        // Serialize game state without checksum for validation
+        var json = JsonSerializer.Serialize(data.GameState, JsonOptions);
         using (var md5 = MD5.Create())
         {
             var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(json));
@@ -267,38 +290,44 @@ public class SaveSystem : MonoBehaviour
     }
 }
 
-[Serializable]
+// SaveData class using System.Text.Json (aligned with warzones SaveSystem)
 public class SaveData
 {
-    public string Version;
-    public string Timestamp;
-    public int TurnNumber;
-    public float Playtime;
-    public string Checksum;
-    public byte[] Thumbnail; // PNG encoded
-    public GameState GameState;
+    public string Version { get; set; }
+    public DateTime SavedAt { get; set; } // System.Text.Json auto-serializes DateTime to ISO 8601
+    public int TurnNumber { get; set; }
+    public float Playtime { get; set; }
+    public string Checksum { get; set; }
+    public byte[] Thumbnail { get; set; } // PNG encoded (Base64 in JSON)
+    public GameState GameState { get; set; }
 }
 ```
 
-### Save File Structure
+### Save File Structure (System.Text.Json Format)
 
 ```json
 {
-  "Version": "1.0.0",
-  "Timestamp": "2025-12-06T14:32:15Z",
-  "TurnNumber": 42,
-  "Playtime": 3542.5,
-  "Checksum": "3f7a9e2b1c4d5e6f...",
-  "Thumbnail": "<base64-encoded PNG>",
-  "GameState": {
-    "CurrentTurn": 42,
-    "CurrentPhase": "PlayerAction",
-    "Craft": [...],
-    "Platoons": [...],
-    "Planets": [...]
+  "version": "1.0.0",
+  "savedAt": "2025-12-06T14:32:15.123Z",
+  "turnNumber": 42,
+  "playtime": 3542.5,
+  "checksum": "3f7a9e2b1c4d5e6f...",
+  "thumbnail": "<base64-encoded PNG>",
+  "gameState": {
+    "currentTurn": 42,
+    "currentPhase": "PlayerAction",
+    "craft": [...],
+    "platoons": [...],
+    "planets": [...]
   }
 }
 ```
+
+**Notes:**
+- Property names use camelCase (via `JsonNamingPolicy.CamelCase`)
+- DateTime serialized automatically to ISO 8601 format
+- Checksum validation prevents corrupted saves from loading
+- Format aligned with warzones project SaveSystem.cs
 
 ### Cloud Save Integration
 

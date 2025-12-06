@@ -1,9 +1,10 @@
 # AFS-051: AI Decision System
 
-**Status:** Draft
+**Status:** Updated (Post Design Review)
 **Priority:** P0 (Critical)
 **Owner:** Lead Developer
 **PRD Reference:** FR-AI-001, FR-AI-002, FR-AI-003
+**Design Review:** Added AI personality traits for varied opponent behavior
 
 ---
 
@@ -66,6 +67,83 @@ AI opponent decision-making system that executes full game loop for enemy factio
    - Economic Assessment: Player resources ÷ AI resources
    - Territorial Assessment: Player planets ÷ AI planets
    - Aggression Threshold: Varies by difficulty
+
+### AI Personality Traits (NEW)
+
+**Purpose:** Provide varied opponent behavior and strategic diversity across playthroughs. Each AI opponent has a personality archetype that influences decision-making, creating distinct play experiences.
+
+1. **Aggressive (Warmonger)**
+   - **Name:** Commander Kratos
+   - **Portrait:** Red armor, stern expression
+   - **Playstyle:**
+     - Prioritizes military production over economy
+     - Attacks early (Turn 5-10) if militarily advantageous
+     - Builds mostly Battle Cruisers (80% military budget)
+     - Constructs Orbital Defense Platforms aggressively
+     - Low economic investment (minimal Mining/Horticultural Stations)
+   - **Strengths:** Strong early-game military pressure
+   - **Weaknesses:** Weak late-game economy, vulnerable to attrition
+   - **Aggression Modifier:** +50% (attacks at lower thresholds)
+   - **Economic Modifier:** -30% (builds fewer economic structures)
+   - **Quote:** "Strength through conquest! Your planets will fall."
+
+2. **Defensive (Turtle)**
+   - **Name:** Overseer Aegis
+   - **Portrait:** Blue armor, calculating gaze
+   - **Playstyle:**
+     - Prioritizes defense over offense
+     - Builds Orbital Defense Platforms on all planets
+     - Rarely attacks unless player is significantly weaker
+     - Balanced economic development
+     - Keeps large garrison forces on all planets
+   - **Strengths:** Difficult to invade, strong late-game
+   - **Weaknesses:** Passive early-game, allows player to expand
+   - **Aggression Modifier:** -50% (attacks only when overwhelmingly superior)
+   - **Defense Modifier:** +40% (prioritizes defensive structures)
+   - **Quote:** "Patience is the strongest fortress. I can wait."
+
+3. **Economic (Expansionist)**
+   - **Name:** Magistrate Midas
+   - **Portrait:** Gold-trimmed robes, confident smile
+   - **Playstyle:**
+     - Prioritizes resource production infrastructure
+     - Builds many Mining/Horticultural Stations early
+     - Deploys Solar Satellites for energy dominance
+     - Minimal military until mid-game (Turn 15+)
+     - Uses economic advantage to outproduce player late-game
+   - **Strengths:** Dominant late-game economy, can outproduce player
+   - **Weaknesses:** Vulnerable early-game, weak initial defenses
+   - **Aggression Modifier:** -30% (defensive until economically dominant)
+   - **Economic Modifier:** +50% (builds economic structures aggressively)
+   - **Quote:** "Credits are power. My wealth will crush you."
+
+4. **Balanced (Tactical)**
+   - **Name:** General Nexus
+   - **Portrait:** Gray armor, tactical visor
+   - **Playstyle:**
+     - Balanced approach (50% economy, 50% military)
+     - Adapts strategy based on player actions
+     - Attacks when advantageous, defends when threatened
+     - Moderate infrastructure development
+     - No extreme tendencies (default AI behavior)
+   - **Strengths:** Adaptable, no obvious weaknesses
+   - **Weaknesses:** No standout strengths, can be outplayed in specific areas
+   - **Aggression Modifier:** 0% (standard thresholds)
+   - **Economic Modifier:** 0% (balanced investment)
+   - **Quote:** "Strategy, not emotion, wins wars."
+
+**Personality Selection:**
+- **Random Assignment:** Each new game selects random personality (25% chance each)
+- **Player Choice (Optional):** Allow player to select AI personality in New Game menu
+- **Visual Indicator:** AI portrait and name displayed in HUD
+- **Personality Lock:** AI personality does not change mid-game
+
+**Implementation Notes:**
+- Personality modifiers applied to decision weights and priority system
+- Aggressive AI has higher attack priority, lower defense priority
+- Defensive AI has higher defense priority, lower attack priority
+- Economic AI delays military production, prioritizes infrastructure
+- Balanced AI uses standard weights (no modifiers)
 
 ### Economic Strategy
 
