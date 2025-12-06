@@ -24,13 +24,13 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Establish dual-library architecture and Unity 6000 LTS foundation
 
 **Tasks:**
-- **WBS-1.1.1** [16h] Upgrade Unity project to Unity 6000 LTS
-- **WBS-1.1.2** [8h] Set up Universal Render Pipeline (URP 17.3.0+)
-- **WBS-1.1.3** [12h] Create Overlord.Core .NET 8.0 class library project structure
-- **WBS-1.1.4** [8h] Create Overlord.Core.Tests xUnit test project
-- **WBS-1.1.5** [12h] Define core interfaces (IGameSettings, IRenderer, IInputProvider, IAudioMixer)
-- **WBS-1.1.6** [16h] Implement GameState model in Overlord.Core (AFS-001)
-- **WBS-1.1.7** [8h] Set up GitHub Actions CI/CD for automated testing
+- **WBS-1.1.1** [16h] Upgrade Unity project to Unity 6000 LTS (⚠️ MANUAL - requires Unity Editor)
+- **WBS-1.1.2** [8h] Set up Universal Render Pipeline (URP 17.3.0+) (⚠️ MANUAL - requires Unity Editor)
+- **WBS-1.1.3** [12h] ✅ Create Overlord.Core .NET 8.0 class library project structure
+- **WBS-1.1.4** [8h] ✅ Create Overlord.Core.Tests xUnit test project
+- **WBS-1.1.5** [12h] ✅ Define core interfaces (IGameSettings, IRenderer, IInputProvider, IAudioMixer)
+- **WBS-1.1.6** [16h] ✅ Implement GameState model in Overlord.Core (AFS-001)
+- **WBS-1.1.7** [8h] ✅ Set up GitHub Actions CI/CD for automated testing
 
 **Total Hours:** 80h
 
