@@ -1,9 +1,10 @@
 # AFS-082: Visual Effects System
 
-**Status:** Draft
+**Status:** Updated (Post Design Review)
 **Priority:** P2 (Medium)
 **Owner:** Lead Developer
 **PRD Reference:** FR-VFX-001, FR-GRAPHICS-002
+**Design Review:** Updated to specify URP shaders (aligned with warzones project)
 
 ---
 
@@ -87,21 +88,43 @@ Visual effects system implementing particle effects, animations, and visual feed
    - **Resource Update**: Number count-up (500ms)
    - **Alert**: Pulse glow (1s loop)
 
-### Post-Processing Effects
+### Universal Render Pipeline (URP) Integration
+
+**Render Pipeline:** Universal Render Pipeline (URP) 17.3.0+ (aligned with warzones project)
+
+1. **URP Shader Graph Usage**
+   - Particle systems use URP Lit/Unlit Particle shaders
+   - Custom VFX shaders created using Shader Graph (not legacy shaders)
+   - Supports URP rendering features: depth texture, color grading, bloom
+
+2. **URP Post-Processing Stack**
+   - All post-processing effects use URP Volume system
+   - Volume profiles for different game states (Space, Combat, Victory)
+   - Global Volume for base effects, local volumes for specific areas
+
+3. **URP Renderer Features**
+   - Forward rendering path (mobile-friendly)
+   - HDR enabled for bloom and glow effects
+   - MSAA (2x/4x) for anti-aliasing (PC only, FXAA on mobile)
+
+### Post-Processing Effects (URP Volume System)
 
 1. **Bloom** (Glow Effect)
    - **Intensity**: 0.5 (default)
    - **Threshold**: 1.0 (bright pixels only)
    - **Usage**: Laser beams, explosions, engines
+   - **URP Component**: Bloom override in Volume profile
 
-2. **Color Grading**
-   - **Space**: Cool blue tint
-   - **Combat**: Desaturated + high contrast
-   - **Victory**: Warm golden tint
+2. **Color Grading** (URP)
+   - **Space**: Cool blue tint (Lift +10% blue)
+   - **Combat**: Desaturated (-20% saturation) + high contrast
+   - **Victory**: Warm golden tint (Lift +15% orange)
+   - **URP Component**: Color Adjustments + Tonemapping overrides
 
-3. **Vignette**
+3. **Vignette** (URP)
    - **Intensity**: 0.2 (subtle)
    - **Usage**: Focus attention on center
+   - **URP Component**: Vignette override
 
 ### Performance Optimization
 

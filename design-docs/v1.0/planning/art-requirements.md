@@ -1,9 +1,11 @@
 # Art Requirements Document
 
-**Version:** 1.0
+**Version:** 1.1
 **Last Updated:** December 6, 2025
-**Status:** Complete
+**Status:** Updated (Post Design Review)
 **Art Style:** Prodeus-Inspired Low-Poly 3D
+**Render Pipeline:** Universal Render Pipeline (URP) 17.3.0+
+**Engine:** Unity 6000 LTS
 
 ---
 
@@ -222,6 +224,42 @@
 ---
 
 ## Technical Specifications
+
+### Universal Render Pipeline (URP) Requirements
+
+**Render Pipeline:** URP 17.3.0+ (Unity 6000 LTS)
+
+**Shader Strategy:**
+- **Primary Method:** URP Shader Graph for all custom shaders
+- **No Legacy Shaders:** All shaders must be URP-compatible (no Built-in RP shaders)
+- **Mobile Optimization:** Use URP Mobile-optimized shader variants for mobile builds
+
+**Material Types:**
+1. **Lit Materials** (for most 3D models)
+   - URP/Lit shader or custom Shader Graph
+   - Supports normal maps, emissive maps, smoothness
+   - Mobile variant: Simplified lighting calculations
+
+2. **Unlit Materials** (for UI, particles, special effects)
+   - URP/Unlit shader or custom Shader Graph
+   - No lighting calculations (performance-optimized)
+   - Used for: HUD elements, particle effects, flat-shaded objects
+
+3. **Particle Materials** (for VFX)
+   - URP/Particles/Lit or URP/Particles/Unlit
+   - Additive, Alpha-blended, or Multiply blend modes
+   - Used for: Explosions, laser beams, engine trails
+
+**Post-Processing:**
+- Use URP Volume system for all post-processing
+- Volume profiles: Space, Combat, Victory/Defeat
+- Effects: Bloom, Color Grading, Vignette (see AFS-082 for details)
+
+**Lighting:**
+- **Baked Lighting:** Mixed mode for static objects (planets, stations)
+- **Realtime Lights:** Point lights for ship engines, explosions
+- **Shadows:** Enabled on PC (medium quality), disabled on mobile
+- **Ambient Lighting:** Skybox-based with subtle gradient
 
 ### Texture Formats
 

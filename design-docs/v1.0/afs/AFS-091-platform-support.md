@@ -1,15 +1,18 @@
 # AFS-091: Platform Support
 
-**Status:** Draft
+**Status:** Updated (Post Design Review)
 **Priority:** P1 (High)
 **Owner:** Lead Developer
 **PRD Reference:** FR-PLATFORM-001, FR-CROSS-PLATFORM-001
+**Design Review:** Updated to specify Unity 6000 LTS baseline (aligned with warzones project)
 
 ---
 
 ## Summary
 
 Cross-platform support system implementing platform-specific optimizations, input handling, screen resolutions, and build configurations for PC (Windows, Mac, Linux), Mobile (iOS, Android), ensuring consistent gameplay experience across all target platforms.
+
+**Engine Baseline:** Unity 6000 LTS with Universal Render Pipeline (URP) 17.3.0+ (aligned with company warzones project)
 
 ---
 

@@ -1,9 +1,9 @@
 # Implementation Plan
 
-**Version:** 1.0
+**Version:** 1.1
 **Last Updated:** December 6, 2025
-**Status:** Draft
-**Target:** Unity 2022 LTS | C# | Cross-Platform
+**Status:** Approved (Post Design Review)
+**Target:** Unity 6000 LTS | C# .NET 8.0 | URP | Cross-Platform
 
 ---
 
@@ -15,28 +15,45 @@ This implementation plan outlines the development roadmap for Overlord, a Unity-
 
 ## Development Phases
 
-### Phase 1: Foundation (Weeks 1-4)
+### Phase 1: Foundation + Tech Stack Alignment (Weeks 1-5)
 
-**Goal:** Establish core infrastructure and basic gameplay loop
+**Goal:** Establish core infrastructure, dual-library architecture, and basic gameplay loop
+
+**NEW: Tech Stack Alignment Tasks (Week 1):**
+- Day 1: Upgrade Unity project to Unity 6000 LTS
+- Day 1: Set up Universal Render Pipeline (URP 17.3.0+)
+- Day 2-3: Create Overlord.Core .NET 8.0 class library
+- Day 3: Create Overlord.Core.Tests xUnit test project
+- Day 4-5: Move GameState logic to Overlord.Core (interface-based design)
+- Day 5: Set up GitHub Actions CI/CD for automated testing
 
 **Milestones:**
-- Unity project setup with folder structure
-- Core systems operational (Game State, Turn, Save/Load)
-- Basic 3D Galaxy View rendering
+- Unity 6000 LTS project with URP pipeline
+- Dual-library architecture (Overlord.Core + Unity presentation layer)
+- Core systems operational (Game State, Turn, Save/Load with System.Text.Json)
+- Testing framework with 70% coverage target
+- Basic 3D Galaxy View rendering with URP shaders
 - Placeholder art assets
 
 **Deliverables:**
-- ✅ AFS-001: Game State Manager
-- ✅ AFS-002: Turn System
-- ✅ AFS-003: Save/Load System
+- ✅ AFS-001: Game State Manager (in Overlord.Core)
+- ✅ AFS-002: Turn System (in Overlord.Core)
+- ✅ AFS-003: Save/Load System (using System.Text.Json with checksum validation)
 - ✅ AFS-004: Settings Manager
-- ✅ AFS-005: Input System
-- ✅ AFS-013: Galaxy View (basic 3D scene)
+- ✅ AFS-005: Input System (Unity New Input System)
+- ✅ AFS-013: Galaxy View (URP shaders, 3D scene)
+- ✅ NEW: Overlord.Core library with interfaces (IGameSettings, IRenderer, etc.)
+- ✅ NEW: Overlord.Core.Tests with 70%+ test coverage
+- ✅ NEW: URP render pipeline configured
 
 **Acceptance Test:**
 - Can start new game, advance turns, save/load game
-- Galaxy View displays planets in 3D space
+- Galaxy View displays planets in 3D space with URP shaders
 - Settings persist across sessions
+- Save files use System.Text.Json format with checksum validation
+- Core systems have 70%+ unit test coverage (fast xUnit tests)
+- All tests pass in GitHub Actions CI/CD
+- Project runs on Unity 6000 LTS
 
 ---
 
@@ -141,25 +158,29 @@ This implementation plan outlines the development roadmap for Overlord, a Unity-
 
 ### Phase 6: UI & UX (Weeks 21-24)
 
-**Goal:** Polish user interface, notifications, and player experience
+**Goal:** Polish user interface, notifications, tutorial system, and player experience
 
 **Milestones:**
 - UI state machine (screen navigation)
 - HUD system (resource display, turn info)
 - Planet management UI (building panels, garrison)
 - Notification system (toasts, modals, alerts)
+- **NEW: Tutorial system** (onboarding for new players)
 
 **Deliverables:**
 - ✅ AFS-071: UI State Machine
 - ✅ AFS-072: HUD System
 - ✅ AFS-073: Planet Management UI
 - ✅ AFS-074: Notification System
+- ✅ **NEW: AFS-075: Tutorial System** (tooltips, guided tours, first-time experience)
 
 **Acceptance Test:**
 - UI navigation smooth and intuitive
 - HUD displays accurate real-time data
 - Planet management UI functional
 - Notifications inform player of events
+- **NEW: Tutorial guides new players through first 5 turns**
+- **NEW: Tooltips explain key mechanics**
 
 ---
 
@@ -275,22 +296,49 @@ This implementation plan outlines the development roadmap for Overlord, a Unity-
 ## Technology Stack
 
 **Engine:**
-- Unity 2022 LTS (C#)
+- Unity 6000 LTS (C# / .NET 8.0)
+- Universal Render Pipeline (URP) 17.3.0+
+- Unity New Input System 1.16.0+
+
+**Architecture:**
+- **Dual-Library Pattern** (aligned with company warzones project)
+  - **Overlord.Core:** .NET 8.0 class library (platform-agnostic game logic)
+  - **Unity Project:** Presentation layer (rendering, input, UI)
+  - Interface-based design (IGameSettings, IRenderer, IInputProvider)
+
+**Serialization:**
+- System.Text.Json 8.0.5+ (with checksum validation, versioned save format)
+
+**Testing:**
+- **xUnit** 2.6.6+ for Overlord.Core (fast, no Unity editor required)
+- **Unity Test Framework** 1.6.0+ for Unity-specific code
+- Target: 70% code coverage for core systems
+- GitHub Actions CI/CD for automated test execution
 
 **Version Control:**
 - Git + GitHub
+- Feature branch workflow
+- Pull request reviews required
 
 **CI/CD:**
-- Unity Cloud Build or GitHub Actions
+- GitHub Actions (primary)
+  - Automated unit tests on commit
+  - Build validation
+  - Code coverage reports
+- Unity Cloud Build (optional, for platform builds)
 
 **Project Management:**
 - GitHub Projects or Jira
+- Weekly sprint planning
+- Daily standups
 
 **Communication:**
 - Discord, Slack
 
 **Asset Management:**
-- Unity Asset Store, Blender (3D), Aseprite (pixel art)
+- Unity Asset Store
+- Blender (3D modeling)
+- Aseprite (pixel art, if needed)
 
 ---
 
@@ -332,21 +380,69 @@ This implementation plan outlines the development roadmap for Overlord, a Unity-
 
 ---
 
+## Deferred Features (Post-Prototype Playtesting)
+
+The following features have been **deferred** until after initial prototype playtesting, per design review decisions. These features will be evaluated based on playtesting feedback and may be integrated into post-MVP releases:
+
+### Story & Narrative Elements (DEFERRED)
+**Status:** Stub/scaffold only in MVP
+**Rationale:** Game engine and core playability take priority. Narrative elements add flavor but are not critical to core 4X gameplay loop.
+**Planned Approach:**
+- MVP: Minimal story scaffolding
+  - Generic planet names (Volcanic, Desert, Tropical, Metropolis)
+  - Basic AI opponent identification (AI Player 1, AI Player 2)
+  - No backstory, lore, or campaign narrative
+- Post-Playtesting: Evaluate player feedback on interest in narrative
+  - Add flavor text for planets (descriptions, historical notes)
+  - Create AI opponent profiles (names, portraits, personality descriptions)
+  - Opening text crawl explaining conflict
+  - Victory/defeat narrative closure
+  - Consider campaign mode with story missions
+
+**Implementation Trigger:** Positive playtesting feedback on core gameplay + player requests for more narrative context
+**Owner:** Narrative Designer (or Lead Developer if no dedicated narrative role)
+**Estimated Effort:** 2-3 weeks (post-MVP)
+
+### Undo/Redo System (DEFERRED)
+**Status:** Not included in MVP
+**Rationale:** Turn-based games benefit from undo/redo (prevents mis-click frustration), but core gameplay must be solid first. Evaluate during playtesting whether players request this feature.
+**Planned Approach:**
+- MVP: No undo/redo (actions are final)
+- Playtesting: Note player feedback on mis-click frustration
+- Post-Playtesting: If players report significant frustration with accidental actions, implement undo/redo
+  - Implement command pattern for reversible actions
+  - Add "Undo Last Action" button to UI
+  - Limit to 1-3 undo steps (not full history)
+
+**Implementation Trigger:** Player feedback indicates mis-click frustration during playtesting
+**Owner:** Gameplay Engineer
+**Estimated Effort:** 1 week (if needed)
+**AFS Document:** Would extend AFS-002 (Turn System) or AFS-005 (Input System)
+
+**Note:** Comment preserved in design-review-notes.md for future reference.
+
+---
+
 ## Milestone Timeline
 
 ```
-Week 1-4:   Phase 1 - Foundation
-Week 5-8:   Phase 2 - Galaxy & Economy
-Week 9-12:  Phase 3 - Entities & Buildings
-Week 13-16: Phase 4 - Combat Systems
-Week 17-20: Phase 5 - AI & Difficulty
-Week 21-24: Phase 6 - UI & UX
-Week 25-28: Phase 7 - Audio & Visual Polish
-Week 29-32: Phase 8 - Platform Support
-Week 33-36: Phase 9 - Testing & Bug Fixing
-Week 37-40: Phase 10 - Release Preparation
+Week 1-5:   Phase 1 - Foundation + Tech Stack Alignment (UPDATED: +1 week for dual-library setup)
+Week 6-9:   Phase 2 - Galaxy & Economy
+Week 10-13: Phase 3 - Entities & Buildings
+Week 14-17: Phase 4 - Combat Systems
+Week 18-21: Phase 5 - AI & Difficulty
+Week 22-25: Phase 6 - UI & UX (includes Tutorial System)
+Week 26-29: Phase 7 - Audio & Visual Polish
+Week 30-33: Phase 8 - Platform Support
+Week 34-37: Phase 9 - Testing & Bug Fixing
+Week 38-41: Phase 10 - Release Preparation
 
-TOTAL: 40 weeks (~9 months)
+TOTAL: 41 weeks (~9.5 months)
+
+CHANGE NOTES:
+- Phase 1 extended by 1 week for tech stack alignment (Unity 6000, dual-library, URP, testing)
+- All subsequent phases shifted by 1 week
+- Total timeline increased by 1 week (acceptable trade-off for long-term maintainability)
 ```
 
 ---

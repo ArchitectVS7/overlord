@@ -1,8 +1,8 @@
 # Traceability Matrix
 
-**Version:** 1.0
+**Version:** 1.1
 **Last Updated:** December 6, 2025
-**Status:** Complete
+**Status:** Updated (Post Design Review)
 
 ---
 
@@ -80,6 +80,7 @@ This traceability matrix maps Product Requirements Document (PRD) functional req
 | FR-UI-002 | HUD System | AFS-072 | HUD System | ✅ Complete |
 | FR-UI-003 | Planet Management UI | AFS-073 | Planet Management UI | ✅ Complete |
 | FR-UI-004 | Notifications | AFS-074 | Notification System | ✅ Complete |
+| FR-UI-005 | Tutorial System | AFS-075 | Tutorial System | ✅ Complete |
 
 ## Audio/Visual
 
@@ -98,8 +99,8 @@ This traceability matrix maps Product Requirements Document (PRD) functional req
 
 ## Coverage Summary
 
-**Total Requirements:** 25
-**AFS Documents:** 34
+**Total Requirements:** 26
+**AFS Documents:** 33
 **Coverage:** 100%
 **Status:** All critical requirements covered
 
@@ -128,7 +129,10 @@ AFS-061 (Building System)
 AFS-071 (UI State Machine)
     ├── AFS-072 (HUD System)
     ├── AFS-073 (Planet Management UI)
-    └── AFS-074 (Notification System)
+    ├── AFS-074 (Notification System)
+    └── AFS-075 (Tutorial System)
+        ├── Depends on AFS-071, AFS-072, AFS-074
+        └── Depends on AFS-002 (Turn System)
 ```
 
 ---
