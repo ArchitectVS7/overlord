@@ -105,13 +105,49 @@ public class GameState
 /// </summary>
 public class CraftEntity
 {
+    // Core properties
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int PlanetID { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.CraftType Type { get; set; }
+
     public FactionType Owner { get; set; }
+
+    // Location
+    public int PlanetID { get; set; } // Current planet ID (-1 if in transit)
+    public Models.Position3D Position { get; set; } = new Models.Position3D();
+    public bool InTransit { get; set; }
+
+    // Combat stats
     public int Health { get; set; } = 100;
     public int Attack { get; set; } = 10;
     public int Defense { get; set; } = 10;
+
+    // Type-specific properties
+    public List<int> CarriedPlatoonIDs { get; set; } = new List<int>(); // Battle Cruiser only
+    public Models.ResourceDelta? CargoHold { get; set; } // Cargo Cruiser only
+    public bool Active { get; set; } // Solar Satellite only
+    public int DeployedAtPlanetID { get; set; } = -1; // Atmosphere Processor/Solar Satellite
+    public int TerraformingTurnsRemaining { get; set; } // Atmosphere Processor only
+
+    /// <summary>
+    /// Gets whether this craft is deployed (Solar Satellite or Atmosphere Processor).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsDeployed => DeployedAtPlanetID >= 0;
+
+    /// <summary>
+    /// Gets the crew requirement for this craft.
+    /// </summary>
+    [JsonIgnore]
+    public int CrewRequired => Models.CraftCrewRequirements.GetCrewRequired(Type);
+
+    /// <summary>
+    /// Gets the specifications for this craft.
+    /// </summary>
+    [JsonIgnore]
+    public Models.CraftSpecs Specs => Models.CraftSpecs.GetSpecs(Type);
 }
 
 /// <summary>
@@ -121,9 +157,36 @@ public class PlatoonEntity
 {
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int PlanetID { get; set; }
+    public int PlanetID { get; set; } // -1 if carried by craft
     public FactionType Owner { get; set; }
-    public int Strength { get; set; } = 100;
+
+    // Platoon composition
+    public int TroopCount { get; set; } = 100; // 1-200 troops
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.EquipmentLevel Equipment { get; set; } = Models.EquipmentLevel.Basic;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.WeaponLevel Weapon { get; set; } = Models.WeaponLevel.Rifle;
+
+    // Training state
+    public int TrainingLevel { get; set; } = 0; // 0-100%
+    public int TrainingTurnsRemaining { get; set; } = 10; // Turns until fully trained
+
+    // Combat stats
+    public int Strength { get; set; } = 100; // Calculated military strength
+
+    /// <summary>
+    /// Gets whether this platoon is fully trained (100%).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsFullyTrained => TrainingLevel >= 100;
+
+    /// <summary>
+    /// Gets whether this platoon is currently under training.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsTraining => TrainingTurnsRemaining > 0 && TrainingLevel < 100;
 }
 
 /// <summary>
@@ -226,18 +289,29 @@ public class PlanetEntity
 
     /// <summary>
     /// Checks if another Docking Bay can be built.
+    /// Counts both Active and UnderConstruction orbital structures.
     /// </summary>
     public bool CanBuildDockingBay()
     {
-        return DockingBayCount < 3;
+        // Count all orbital structures (DockingBay and OrbitalDefense)
+        int orbitalCount = Structures.Count(s =>
+            s.Type == Models.BuildingType.DockingBay ||
+            s.Type == Models.BuildingType.OrbitalDefense);
+        return orbitalCount < 3;
     }
 
     /// <summary>
     /// Checks if another Surface Structure can be built.
+    /// Counts both Active and UnderConstruction surface structures.
     /// </summary>
     public bool CanBuildSurfaceStructure()
     {
-        return SurfacePlatformCount < 6;
+        // Count all surface structures (SurfacePlatform, MiningStation, HorticulturalStation)
+        int surfaceCount = Structures.Count(s =>
+            s.Type == Models.BuildingType.SurfacePlatform ||
+            s.Type == Models.BuildingType.MiningStation ||
+            s.Type == Models.BuildingType.HorticulturalStation);
+        return surfaceCount < 6;
     }
 
     /// <summary>

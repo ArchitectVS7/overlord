@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Overlord.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14c769e0fc91bf622ac07d39ab396326b84dae22")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d905c967907f4678b94e054bcfbbfab63add8ad9")]
 [assembly: System.Reflection.AssemblyProductAttribute("Overlord.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Overlord.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
