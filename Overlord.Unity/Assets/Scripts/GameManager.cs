@@ -103,18 +103,24 @@ namespace Overlord.Unity
             GameState = new GameState();
 
             // Initialize core systems
-            SaveSystem = new SaveSystem();
             SettingsManager = new SettingsManager();
-            GalaxyGenerator = new GalaxyGenerator(new Random());
+            GalaxyGenerator = new GalaxyGenerator();
 
             // Generate galaxy
-            var galaxyData = GalaxyGenerator.GenerateGalaxy(GameState, 10, 42);
-            Debug.Log($"Galaxy generated: {galaxyData.Planets.Count} planets");
+            var galaxy = GalaxyGenerator.GenerateGalaxy(seed: 42, difficulty: Overlord.Core.Difficulty.Normal);
+            Debug.Log($"Galaxy generated: {galaxy.Planets.Count} planets");
+
+            // Populate GameState with generated planets
+            GameState.Planets = galaxy.Planets;
+            GameState.RebuildLookups();
+
+            // Initialize save system (needs GameState)
+            SaveSystem = new SaveSystem(GameState);
 
             // Initialize resource and economy systems
             ResourceSystem = new ResourceSystem(GameState);
             IncomeSystem = new IncomeSystem(GameState, ResourceSystem);
-            PopulationSystem = new PopulationSystem(GameState);
+            PopulationSystem = new PopulationSystem(GameState, ResourceSystem);
             TaxationSystem = new TaxationSystem(GameState, ResourceSystem);
 
             // Initialize entity systems
@@ -128,10 +134,10 @@ namespace Overlord.Unity
             DefenseSystem = new DefenseSystem(GameState);
 
             // Initialize combat systems
-            CombatSystem = new CombatSystem(GameState, PlatoonSystem, DefenseSystem);
-            SpaceCombatSystem = new SpaceCombatSystem(GameState, CombatSystem, DefenseSystem);
-            BombardmentSystem = new BombardmentSystem(GameState, CombatSystem);
-            InvasionSystem = new InvasionSystem(GameState, CombatSystem, PlatoonSystem);
+            CombatSystem = new CombatSystem(GameState, PlatoonSystem);
+            SpaceCombatSystem = new SpaceCombatSystem(GameState, UpgradeSystem, DefenseSystem);
+            BombardmentSystem = new BombardmentSystem(GameState);
+            InvasionSystem = new InvasionSystem(GameState, CombatSystem);
 
             // Initialize AI system
             AIDecisionSystem = new AIDecisionSystem(
@@ -145,16 +151,7 @@ namespace Overlord.Unity
                 aiDifficulty);
 
             // Initialize turn system (must be last)
-            TurnSystem = new TurnSystem(
-                GameState,
-                IncomeSystem,
-                PopulationSystem,
-                TaxationSystem,
-                BuildingSystem,
-                UpgradeSystem,
-                CraftSystem,
-                PlatoonSystem,
-                CombatSystem);
+            TurnSystem = new TurnSystem(GameState);
 
             // Subscribe to events
             SubscribeToEvents();
@@ -171,15 +168,49 @@ namespace Overlord.Unity
 
             try
             {
-                SaveSystem = new SaveSystem();
-                string json = System.IO.File.ReadAllText(saveFilePath);
-                GameState = SaveSystem.Deserialize(json);
+                // Read compressed save file
+                byte[] compressedData = System.IO.File.ReadAllBytes(saveFilePath);
+
+                // Initialize SaveSystem with empty GameState temporarily
+                GameState = new GameState();
+                SaveSystem = new SaveSystem(GameState);
+
+                // Deserialize save data
+                var saveData = SaveSystem.Deserialize(compressedData);
+
+                // Apply loaded game state
+                SaveSystem.ApplyToGameState(saveData);
 
                 // Re-initialize all systems with loaded game state
-                // (Similar to NewGame but without generating new galaxy)
                 ResourceSystem = new ResourceSystem(GameState);
                 IncomeSystem = new IncomeSystem(GameState, ResourceSystem);
-                // ... (initialize other systems)
+                PopulationSystem = new PopulationSystem(GameState, ResourceSystem);
+                TaxationSystem = new TaxationSystem(GameState, ResourceSystem);
+
+                EntitySystem = new EntitySystem(GameState);
+                CraftSystem = new CraftSystem(GameState, EntitySystem, ResourceSystem);
+                PlatoonSystem = new PlatoonSystem(GameState, EntitySystem);
+
+                BuildingSystem = new BuildingSystem(GameState);
+                UpgradeSystem = new UpgradeSystem(GameState);
+                DefenseSystem = new DefenseSystem(GameState);
+
+                CombatSystem = new CombatSystem(GameState, PlatoonSystem);
+                SpaceCombatSystem = new SpaceCombatSystem(GameState, UpgradeSystem, DefenseSystem);
+                BombardmentSystem = new BombardmentSystem(GameState);
+                InvasionSystem = new InvasionSystem(GameState, CombatSystem);
+
+                AIDecisionSystem = new AIDecisionSystem(
+                    GameState,
+                    IncomeSystem,
+                    ResourceSystem,
+                    BuildingSystem,
+                    CraftSystem,
+                    PlatoonSystem,
+                    AIPersonality.Balanced,
+                    AIDifficulty.Normal);
+
+                TurnSystem = new TurnSystem(GameState);
 
                 SubscribeToEvents();
 
@@ -200,8 +231,18 @@ namespace Overlord.Unity
 
             try
             {
-                string json = SaveSystem.Serialize(GameState);
-                System.IO.File.WriteAllText(saveFilePath, json);
+                // Create save data snapshot
+                var saveData = SaveSystem.CreateSaveData(
+                    version: "1.0.0",
+                    playtime: Time.time,
+                    saveName: $"Save {GameState.CurrentTurn}",
+                    thumbnail: null);
+
+                // Serialize to compressed byte array
+                byte[] compressedData = SaveSystem.Serialize(saveData);
+
+                // Write to file
+                System.IO.File.WriteAllBytes(saveFilePath, compressedData);
                 Debug.Log("Game saved successfully");
             }
             catch (Exception ex)
@@ -221,9 +262,9 @@ namespace Overlord.Unity
             TurnSystem.OnTurnEnded += OnTurnEnded;
 
             // Combat events
-            CombatSystem.OnCombatResolved += OnCombatResolved;
-            BombardmentSystem.OnBombardmentComplete += OnBombardmentComplete;
-            InvasionSystem.OnInvasionComplete += OnInvasionComplete;
+            CombatSystem.OnBattleCompleted += OnBattleCompleted;
+            BombardmentSystem.OnStructureDestroyed += OnStructureDestroyed;
+            InvasionSystem.OnPlanetCaptured += OnPlanetCaptured;
 
             // AI events
             AIDecisionSystem.OnAITurnStarted += OnAITurnStarted;
@@ -242,19 +283,19 @@ namespace Overlord.Unity
             Debug.Log($"Turn {turn} ended");
         }
 
-        private void OnCombatResolved(CombatResult result)
+        private void OnBattleCompleted(Battle battle, BattleResult result)
         {
-            Debug.Log($"Combat resolved: {result.Winner} wins at planet {result.PlanetID}");
+            Debug.Log($"Battle at {battle.PlanetName}: {(result.AttackerWins ? battle.AttackerFaction : battle.DefenderFaction)} wins");
         }
 
-        private void OnBombardmentComplete(int planetID, int structuresDestroyed)
+        private void OnStructureDestroyed(int planetID, int structuresDestroyed)
         {
             Debug.Log($"Bombardment at planet {planetID}: {structuresDestroyed} structures destroyed");
         }
 
-        private void OnInvasionComplete(int planetID, FactionType newOwner)
+        private void OnPlanetCaptured(int planetID, FactionType newOwner, ResourceDelta resources)
         {
-            Debug.Log($"Invasion at planet {planetID}: Now owned by {newOwner}");
+            Debug.Log($"Planet {planetID} captured by {newOwner} (gained {resources.Credits} credits)");
         }
 
         private void OnAITurnStarted()
@@ -293,7 +334,7 @@ namespace Overlord.Unity
             }
 
             Debug.Log($"Ending turn {GameState.CurrentTurn}...");
-            TurnSystem.EndTurn();
+            TurnSystem.AdvancePhase();
 
             // Execute AI turn
             Debug.Log("Executing AI turn...");
