@@ -3,7 +3,7 @@
 **Status:** Draft
 **Priority:** P0 (Critical)
 **Owner:** Lead Developer
-**PRD Reference:** FR-UI-003, FR-UX-002
+**PRD Reference:** FR-UI-003
 
 ---
 

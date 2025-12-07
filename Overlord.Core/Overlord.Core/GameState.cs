@@ -20,6 +20,11 @@ public class GameState
     public TurnPhase CurrentPhase { get; set; } = TurnPhase.Income;
 
     /// <summary>
+    /// Flag indicating if game has ended (victory or defeat).
+    /// </summary>
+    public bool IsGameOver { get; set; } = false;
+
+    /// <summary>
     /// Timestamp of last action for auto-save timing.
     /// </summary>
     public DateTime LastActionTime { get; set; } = DateTime.UtcNow;

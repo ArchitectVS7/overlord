@@ -110,40 +110,212 @@ See **analysis/DECOMPILATION-SUCCESS.md** for complete details.
 
 ## Game Remake Project
 
-**Status:** ✅ **DESIGN DOCUMENTATION IN PROGRESS**
+**Status:** ✅ **CORE SYSTEMS IMPLEMENTED - UNITY INTEGRATION IN PROGRESS**
 
-The repository now includes comprehensive design documentation for a modern Unity-based remake of Overlord.
+The repository includes a complete Unity 6 remake with platform-agnostic game logic.
 
-**Design Documentation:**
-- `design-docs/v1.0/` - Complete design documentation
-  - `executive-summary.md` - High-level project overview
-  - `PRD-overlord.md` - Product Requirements Document (750+ lines)
-  - `afs/` - Atomic Feature Specifications (~35 documents)
-    - Core Systems (AFS-001 to AFS-010)
-    - Galaxy Map (AFS-011 to AFS-020)
-    - Economy (AFS-021 to AFS-030)
-    - Entities (AFS-031 to AFS-040)
-    - Combat (AFS-041 to AFS-050)
-    - AI (AFS-051 to AFS-060)
-    - Units & Buildings (AFS-061 to AFS-070)
-    - UI/UX (AFS-071 to AFS-080)
-    - Audio/Visual (AFS-081 to AFS-090)
-    - Platform (AFS-091 to AFS-100)
+### Architecture Overview
 
-**Remake Architecture:**
-- Unity 2022 LTS game engine
-- Turn-based 4X strategy gameplay
-- Prodeus-style low-poly 3D graphics
-- Cross-platform (PC, Mobile, Mac)
-- Event-driven architecture with C# singletons
-- ScriptableObjects for game data
+This project uses a **strict platform-agnostic architecture**:
 
-**Key Game Systems:**
-- Turn-based gameplay (Income → Action → Combat → End phases)
-- Resource management (Credits, Minerals, Fuel, Food, Energy)
-- Fleet combat and planetary invasion
-- AI opponents with difficulty levels
-- Building construction and technology upgrades
-- Galaxy map with 3D visualization
+```
+Overlord.Core (netstandard2.1)
+    ↓ Platform-independent business logic
+    ↓ All game systems, models, and AI
+    ↓ Serialization, state management
+    ↓
+Overlord.Unity (Unity 6)
+    ↓ Thin presentation layer
+    ↓ Rendering, input, UI, audio
+    ↓ GameManager singleton coordinates Core systems
+```
 
-See `design-docs/v1.0/executive-summary.md` for complete project overview.
+**Critical Principle:** Unity scripts are **thin wrappers** only. ALL game logic lives in Overlord.Core.
+
+### Building Overlord.Core
+
+Overlord.Core **must be built for .NET Standard 2.1** for Unity compatibility:
+
+```bash
+# Build for Unity (Release mode)
+cd Overlord.Core
+dotnet build Overlord.Core/Overlord.Core.csproj --configuration Release
+
+# Copy ALL required DLLs to Unity (5 DLLs total)
+PLUGINS_DIR="../Overlord.Unity/Assets/Plugins/Overlord.Core"
+
+# 1. Core DLL
+cp Overlord.Core/bin/Release/netstandard2.1/Overlord.Core.dll $PLUGINS_DIR/
+
+# 2. System.Text.Json and ALL its transitive dependencies
+cp ~/.nuget/packages/system.text.json/5.0.2/lib/netstandard2.0/System.Text.Json.dll $PLUGINS_DIR/
+cp ~/.nuget/packages/system.text.encodings.web/5.0.1/lib/netstandard2.0/System.Text.Encodings.Web.dll $PLUGINS_DIR/
+cp ~/.nuget/packages/microsoft.bcl.asyncinterfaces/5.0.0/lib/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.dll $PLUGINS_DIR/
+cp ~/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll $PLUGINS_DIR/
+```
+
+**Why .NET Standard 2.1?**
+- Unity 6 uses .NET Standard 2.1 runtime
+- Building for net8.0 causes CS1705 errors (System.Runtime version conflicts)
+- System.Text.Json 5.0.2 is the highest compatible version
+
+**Why 5 DLLs?**
+- Unity requires ALL transitive dependencies to be physically present
+- System.Text.Json depends on System.Text.Encodings.Web, Microsoft.Bcl.AsyncInterfaces, and System.Runtime.CompilerServices.Unsafe
+- Missing any dependency causes "Reference has errors" in Unity
+
+**Complete reference:** See `Overlord.Unity/UNITY-DLL-DEPENDENCIES.md` for full details
+
+### Running Tests
+
+```bash
+# Run all Core tests (328 tests)
+cd Overlord.Core.Tests
+dotnet test
+
+# Run specific test
+dotnet test --filter "FullyQualifiedName~AIDecisionSystemTests"
+
+# Run with coverage
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+**Test Coverage Target:** 70%+ for all Core systems
+
+### Opening Unity Project
+
+1. Open Unity Hub
+2. Add project: `Overlord.Unity/`
+3. Unity 6000.3.0f1 or later required
+4. First import takes 2-5 minutes (URP packages)
+
+**Unity Dependencies:**
+- Universal Render Pipeline (URP) 17.0.3
+- Input System 1.11.2
+- TextMeshPro 3.2.0-pre.11
+
+### Core System Architecture
+
+All 18 game systems are implemented in `Overlord.Core/`:
+
+**State Management:**
+- `GameState` - Central game state with entity lookups
+- `SaveSystem` - JSON serialization with GZip compression
+- `TurnSystem` - Turn phases (Income → Action → Combat → End)
+
+**Economy:**
+- `ResourceSystem` - 5 resource types (Credits, Minerals, Fuel, Food, Energy)
+- `IncomeSystem` - Per-turn resource generation
+- `PopulationSystem` - Population growth and morale
+- `TaxationSystem` - Tax rate management
+
+**Entities:**
+- `EntitySystem` - Base entity management
+- `CraftSystem` - Spacecraft (Scouts, Battle Cruisers, Bombers)
+- `PlatoonSystem` - Ground forces with equipment/weapons/training
+
+**Infrastructure:**
+- `BuildingSystem` - Planetary structures (Mines, Factories, Labs, etc.)
+- `UpgradeSystem` - Technology levels (Equipment, Weapons, Training)
+- `DefenseSystem` - Planetary defenses (Shields, Missiles, Laser Batteries)
+
+**Combat:**
+- `CombatSystem` - Ground combat (platoon vs platoon)
+- `SpaceCombatSystem` - Fleet battles
+- `BombardmentSystem` - Orbital bombardment
+- `InvasionSystem` - Planetary invasions
+
+**AI:**
+- `AIDecisionSystem` - 4 personalities (Aggressive, Defensive, Economic, Balanced)
+- 3 difficulty levels (Easy, Normal, Hard)
+- Priority-based decision tree (Defense → Military → Economy → Attack)
+
+**Galaxy:**
+- `GalaxyGenerator` - Procedural 4-6 planet systems
+- `SettingsManager` - Game settings persistence
+
+### Unity Integration Pattern
+
+`GameManager.cs` (singleton) coordinates all Core systems:
+
+```csharp
+// Initialize Core systems
+GameState = new GameState();
+GalaxyGenerator = new GalaxyGenerator();
+var galaxy = GalaxyGenerator.GenerateGalaxy(seed: 42);
+
+// All 18 systems initialized with GameState
+ResourceSystem = new ResourceSystem(GameState);
+TurnSystem = new TurnSystem(GameState);
+AIDecisionSystem = new AIDecisionSystem(
+    GameState, IncomeSystem, ResourceSystem,
+    BuildingSystem, CraftSystem, PlatoonSystem,
+    personality, difficulty);
+
+// Subscribe to events
+TurnSystem.OnPhaseChanged += OnPhaseChanged;
+CombatSystem.OnBattleCompleted += OnBattleCompleted;
+```
+
+**Event-Driven Communication:**
+- Core systems fire C# `Action` events
+- Unity scripts subscribe and update UI/rendering
+- No direct Core → Unity dependencies
+
+### Key Implementation Details
+
+**GameState Lookups:**
+- All entities stored in `List<T>` for serialization
+- Dictionary lookups rebuilt after load: `GameState.RebuildLookups()`
+- O(1) entity access via `PlanetLookup`, `CraftLookup`, `PlatoonLookup`
+
+**Constructor Dependencies:**
+- Most systems take `GameState` as first parameter
+- Some take additional system dependencies (e.g., `CombatSystem` needs `PlatoonSystem`)
+- AI system needs 6 dependencies (GameState + 5 systems)
+
+**Save/Load:**
+- Saves are GZip-compressed JSON with SHA256 checksum
+- `SaveSystem.CreateSaveData()` → `SaveSystem.Serialize()` → byte[]
+- `SaveSystem.Deserialize(byte[])` → `SaveSystem.ApplyToGameState()`
+
+### Design Documentation
+
+- `design-docs/v1.0/executive-summary.md` - Project overview
+- `design-docs/v1.0/PRD-overlord.md` - Full requirements (750+ lines)
+- `design-docs/v1.0/afs/` - 60+ Atomic Feature Specifications
+  - AFS-001 to AFS-010: Core Systems
+  - AFS-011 to AFS-020: Galaxy Map
+  - AFS-021 to AFS-030: Economy
+  - AFS-031 to AFS-040: Entities
+  - AFS-041 to AFS-050: Combat
+  - AFS-051 to AFS-060: AI
+
+### Common Issues
+
+**CS1705 Error (System.Runtime version conflict):**
+- Overlord.Core built for wrong framework
+- Solution: Rebuild for netstandard2.1 (see "Building Overlord.Core")
+
+**"Unable to resolve reference 'System.Text.Json'" or "Reference has errors":**
+- Missing transitive dependencies for System.Text.Json
+- Solution: Copy ALL 5 DLLs (see "Building Overlord.Core" section above)
+- Quick fix script in `Overlord.Unity/UNITY-DLL-DEPENDENCIES.md`
+
+**"Unable to resolve reference 'System.Text.Encodings.Web'" or 'Microsoft.Bcl.AsyncInterfaces':**
+- Missing System.Text.Json dependencies
+- Solution: Run the 5-DLL copy script from "Building Overlord.Core"
+- These are transitive dependencies that Unity requires explicitly
+
+**"Assembly will not be loaded due to errors":**
+- One or more DLLs missing from Plugins folder
+- Solution: Verify all 5 DLLs present in `Assets/Plugins/Overlord.Core/`:
+  1. Overlord.Core.dll (118 KB)
+  2. System.Text.Json.dll (344 KB)
+  3. System.Text.Encodings.Web.dll (67 KB)
+  4. Microsoft.Bcl.AsyncInterfaces.dll (21 KB)
+  5. System.Runtime.CompilerServices.Unsafe.dll (17 KB)
+
+**Constructor signature mismatches:**
+- Core API changed after GameManager.cs was written
+- Solution: Check actual constructor in Core source files (many take fewer parameters than expected)

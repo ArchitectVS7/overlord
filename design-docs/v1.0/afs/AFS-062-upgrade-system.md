@@ -3,7 +3,7 @@
 **Status:** Draft
 **Priority:** P2 (Medium)
 **Owner:** Lead Developer
-**PRD Reference:** FR-TECH-001, FR-CRAFT-004, FR-MILITARY-006
+**PRD Reference:** FR-MILITARY-002
 
 ---
 

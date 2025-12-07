@@ -3,7 +3,7 @@
 **Status:** Draft
 **Priority:** P1 (High)
 **Owner:** Lead Developer
-**PRD Reference:** FR-UI-004, FR-UX-004
+**PRD Reference:** FR-UI-004
 
 ---
 

@@ -3,7 +3,7 @@
 **Status:** Draft
 **Priority:** P0 (Critical)
 **Owner:** Lead Developer
-**PRD Reference:** FR-COLONY-002, FR-PROD-001
+**PRD Reference:** FR-COLONY-002
 
 ---
 

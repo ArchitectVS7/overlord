@@ -1,0 +1,12 @@
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\bin\Release\net8.0\Overlord.Core.deps.json
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\bin\Release\net8.0\Overlord.Core.dll
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\bin\Release\net8.0\Overlord.Core.pdb
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.AssemblyInfoInputs.cache
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.AssemblyInfo.cs
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.csproj.CoreCompileInputs.cache
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.sourcelink.json
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.dll
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\refint\Overlord.Core.dll
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\Overlord.Core.pdb
+C:\dev\GIT\Overlord\Overlord.Core\Overlord.Core\obj\Release\net8.0\ref\Overlord.Core.dll
