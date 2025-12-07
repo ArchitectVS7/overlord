@@ -141,19 +141,30 @@ Overlord.Core **must be built for .NET Standard 2.1** for Unity compatibility:
 cd Overlord.Core
 dotnet build Overlord.Core/Overlord.Core.csproj --configuration Release
 
-# Copy DLL to Unity
-cp Overlord.Core/bin/Release/netstandard2.1/Overlord.Core.dll \
-   ../Overlord.Unity/Assets/Plugins/Overlord.Core/
+# Copy ALL required DLLs to Unity (5 DLLs total)
+PLUGINS_DIR="../Overlord.Unity/Assets/Plugins/Overlord.Core"
 
-# IMPORTANT: Also copy System.Text.Json dependency
-cp ~/.nuget/packages/system.text.json/5.0.2/lib/netstandard2.0/System.Text.Json.dll \
-   ../Overlord.Unity/Assets/Plugins/Overlord.Core/
+# 1. Core DLL
+cp Overlord.Core/bin/Release/netstandard2.1/Overlord.Core.dll $PLUGINS_DIR/
+
+# 2. System.Text.Json and ALL its transitive dependencies
+cp ~/.nuget/packages/system.text.json/5.0.2/lib/netstandard2.0/System.Text.Json.dll $PLUGINS_DIR/
+cp ~/.nuget/packages/system.text.encodings.web/5.0.1/lib/netstandard2.0/System.Text.Encodings.Web.dll $PLUGINS_DIR/
+cp ~/.nuget/packages/microsoft.bcl.asyncinterfaces/5.0.0/lib/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.dll $PLUGINS_DIR/
+cp ~/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll $PLUGINS_DIR/
 ```
 
 **Why .NET Standard 2.1?**
 - Unity 6 uses .NET Standard 2.1 runtime
 - Building for net8.0 causes CS1705 errors (System.Runtime version conflicts)
 - System.Text.Json 5.0.2 is the highest compatible version
+
+**Why 5 DLLs?**
+- Unity requires ALL transitive dependencies to be physically present
+- System.Text.Json depends on System.Text.Encodings.Web, Microsoft.Bcl.AsyncInterfaces, and System.Runtime.CompilerServices.Unsafe
+- Missing any dependency causes "Reference has errors" in Unity
+
+**Complete reference:** See `Overlord.Unity/UNITY-DLL-DEPENDENCIES.md` for full details
 
 ### Running Tests
 
@@ -286,9 +297,24 @@ CombatSystem.OnBattleCompleted += OnBattleCompleted;
 - Overlord.Core built for wrong framework
 - Solution: Rebuild for netstandard2.1 (see "Building Overlord.Core")
 
-**"Unable to resolve reference 'System.Text.Json'":**
-- Dependency DLL missing from Unity Plugins
-- Solution: Copy System.Text.Json.dll 5.0.2 to Assets/Plugins/Overlord.Core/
+**"Unable to resolve reference 'System.Text.Json'" or "Reference has errors":**
+- Missing transitive dependencies for System.Text.Json
+- Solution: Copy ALL 5 DLLs (see "Building Overlord.Core" section above)
+- Quick fix script in `Overlord.Unity/UNITY-DLL-DEPENDENCIES.md`
+
+**"Unable to resolve reference 'System.Text.Encodings.Web'" or 'Microsoft.Bcl.AsyncInterfaces':**
+- Missing System.Text.Json dependencies
+- Solution: Run the 5-DLL copy script from "Building Overlord.Core"
+- These are transitive dependencies that Unity requires explicitly
+
+**"Assembly will not be loaded due to errors":**
+- One or more DLLs missing from Plugins folder
+- Solution: Verify all 5 DLLs present in `Assets/Plugins/Overlord.Core/`:
+  1. Overlord.Core.dll (118 KB)
+  2. System.Text.Json.dll (344 KB)
+  3. System.Text.Encodings.Web.dll (67 KB)
+  4. Microsoft.Bcl.AsyncInterfaces.dll (21 KB)
+  5. System.Runtime.CompilerServices.Unsafe.dll (17 KB)
 
 **Constructor signature mismatches:**
 - Core API changed after GameManager.cs was written
