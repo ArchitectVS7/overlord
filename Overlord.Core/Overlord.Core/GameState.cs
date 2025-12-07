@@ -157,9 +157,36 @@ public class PlatoonEntity
 {
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int PlanetID { get; set; }
+    public int PlanetID { get; set; } // -1 if carried by craft
     public FactionType Owner { get; set; }
-    public int Strength { get; set; } = 100;
+
+    // Platoon composition
+    public int TroopCount { get; set; } = 100; // 1-200 troops
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.EquipmentLevel Equipment { get; set; } = Models.EquipmentLevel.Basic;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.WeaponLevel Weapon { get; set; } = Models.WeaponLevel.Rifle;
+
+    // Training state
+    public int TrainingLevel { get; set; } = 0; // 0-100%
+    public int TrainingTurnsRemaining { get; set; } = 10; // Turns until fully trained
+
+    // Combat stats
+    public int Strength { get; set; } = 100; // Calculated military strength
+
+    /// <summary>
+    /// Gets whether this platoon is fully trained (100%).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsFullyTrained => TrainingLevel >= 100;
+
+    /// <summary>
+    /// Gets whether this platoon is currently under training.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsTraining => TrainingTurnsRemaining > 0 && TrainingLevel < 100;
 }
 
 /// <summary>
@@ -262,18 +289,29 @@ public class PlanetEntity
 
     /// <summary>
     /// Checks if another Docking Bay can be built.
+    /// Counts both Active and UnderConstruction orbital structures.
     /// </summary>
     public bool CanBuildDockingBay()
     {
-        return DockingBayCount < 3;
+        // Count all orbital structures (DockingBay and OrbitalDefense)
+        int orbitalCount = Structures.Count(s =>
+            s.Type == Models.BuildingType.DockingBay ||
+            s.Type == Models.BuildingType.OrbitalDefense);
+        return orbitalCount < 3;
     }
 
     /// <summary>
     /// Checks if another Surface Structure can be built.
+    /// Counts both Active and UnderConstruction surface structures.
     /// </summary>
     public bool CanBuildSurfaceStructure()
     {
-        return SurfacePlatformCount < 6;
+        // Count all surface structures (SurfacePlatform, MiningStation, HorticulturalStation)
+        int surfaceCount = Structures.Count(s =>
+            s.Type == Models.BuildingType.SurfacePlatform ||
+            s.Type == Models.BuildingType.MiningStation ||
+            s.Type == Models.BuildingType.HorticulturalStation);
+        return surfaceCount < 6;
     }
 
     /// <summary>

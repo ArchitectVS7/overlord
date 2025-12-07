@@ -158,6 +158,9 @@ public class CraftSystemTests
         // Arrange
         var (gameState, entitySystem, resourceSystem, craftSystem) = CreateTestSystems();
 
+        // Increase credits to afford all 4 craft types
+        gameState.PlanetLookup[0].Resources.Credits = 200000;
+
         // Act & Assert - Battle Cruiser
         int bc = craftSystem.PurchaseCraft(CraftType.BattleCruiser, 0, FactionType.Player);
         Assert.NotEqual(-1, bc);
@@ -385,7 +388,7 @@ public class CraftSystemTests
         // Check planet resources deducted
         var planet = gameState.PlanetLookup[0];
         Assert.Equal(9500, planet.Resources.Food); // 10000 - 500
-        Assert.Equal(49700, planet.Resources.Minerals); // 50000 - 300
+        Assert.Equal(44700, planet.Resources.Minerals); // 50000 - 5000 (purchase) - 300 (cargo)
     }
 
     [Fact]
@@ -494,9 +497,11 @@ public class CraftSystemTests
     {
         // Arrange
         var (gameState, entitySystem, resourceSystem, craftSystem) = CreateTestSystems();
+        int craftID = craftSystem.PurchaseCraft(CraftType.SolarSatellite, 0, FactionType.Player);
+
+        // Reduce population after purchase
         var planet = gameState.PlanetLookup[0];
         planet.Population = 3; // Less than 5 required
-        int craftID = craftSystem.PurchaseCraft(CraftType.SolarSatellite, 0, FactionType.Player);
 
         // Act
         bool result = craftSystem.DeploySolarSatellite(craftID);
