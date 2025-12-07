@@ -1,0 +1,80 @@
+using UnityEngine;
+
+namespace Overlord.Unity.UI
+{
+    /// <summary>
+    /// Singleton manager for UI state and panel management.
+    /// Coordinates UI elements across scenes.
+    /// </summary>
+    public class UIManager : MonoBehaviour
+    {
+        #region Singleton
+
+        private static UIManager _instance;
+
+        public static UIManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindFirstObjectByType<UIManager>();
+                    if (_instance == null)
+                    {
+                        var go = new GameObject("UIManager");
+                        _instance = go.AddComponent<UIManager>();
+                    }
+                }
+                return _instance;
+            }
+        }
+
+        #endregion
+
+        #region Unity Lifecycle
+
+        void Awake()
+        {
+            if (_instance != null && _instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            Debug.Log("UIManager initialized");
+        }
+
+        void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
+        }
+
+        #endregion
+
+        #region Public API
+
+        /// <summary>
+        /// Shows a UI panel by name.
+        /// </summary>
+        public void ShowPanel(string panelName)
+        {
+            Debug.Log($"ShowPanel: {panelName}");
+        }
+
+        /// <summary>
+        /// Hides a UI panel by name.
+        /// </summary>
+        public void HidePanel(string panelName)
+        {
+            Debug.Log($"HidePanel: {panelName}");
+        }
+
+        #endregion
+    }
+}
