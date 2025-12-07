@@ -105,13 +105,49 @@ public class GameState
 /// </summary>
 public class CraftEntity
 {
+    // Core properties
     public int ID { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int PlanetID { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Models.CraftType Type { get; set; }
+
     public FactionType Owner { get; set; }
+
+    // Location
+    public int PlanetID { get; set; } // Current planet ID (-1 if in transit)
+    public Models.Position3D Position { get; set; } = new Models.Position3D();
+    public bool InTransit { get; set; }
+
+    // Combat stats
     public int Health { get; set; } = 100;
     public int Attack { get; set; } = 10;
     public int Defense { get; set; } = 10;
+
+    // Type-specific properties
+    public List<int> CarriedPlatoonIDs { get; set; } = new List<int>(); // Battle Cruiser only
+    public Models.ResourceDelta? CargoHold { get; set; } // Cargo Cruiser only
+    public bool Active { get; set; } // Solar Satellite only
+    public int DeployedAtPlanetID { get; set; } = -1; // Atmosphere Processor/Solar Satellite
+    public int TerraformingTurnsRemaining { get; set; } // Atmosphere Processor only
+
+    /// <summary>
+    /// Gets whether this craft is deployed (Solar Satellite or Atmosphere Processor).
+    /// </summary>
+    [JsonIgnore]
+    public bool IsDeployed => DeployedAtPlanetID >= 0;
+
+    /// <summary>
+    /// Gets the crew requirement for this craft.
+    /// </summary>
+    [JsonIgnore]
+    public int CrewRequired => Models.CraftCrewRequirements.GetCrewRequired(Type);
+
+    /// <summary>
+    /// Gets the specifications for this craft.
+    /// </summary>
+    [JsonIgnore]
+    public Models.CraftSpecs Specs => Models.CraftSpecs.GetSpecs(Type);
 }
 
 /// <summary>

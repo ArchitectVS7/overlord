@@ -240,48 +240,53 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 
 ## Phase 3: Entities & Buildings
 
-### Sprint 6 (Weeks 10-11)
+### Sprint 6 (Weeks 10-11) ✅ COMPLETE (Platform-Agnostic Only)
 
 **Sprint Goal:** Implement entity management and craft system
 
 **Tasks:**
-- **WBS-3.1.1** [16h] Implement EntitySystem (AFS-031)
+- **WBS-3.1.1** [16h] ✅ Implement EntitySystem (AFS-031)
   - Entity limits (32 craft, 24 platoons)
   - Entity ID generation and tracking
   - Entity lifecycle management
-- **WBS-3.1.2** [28h] Implement CraftSystem (AFS-032)
+  - Events for entity creation/destruction
+- **WBS-3.1.2** [28h] ✅ Implement CraftSystem (AFS-032)
   - Battle Cruiser, Cargo Cruiser, Solar Satellite, Atmosphere Processor
-  - Purchase system with resource costs
-  - Craft deployment to planets
-  - Craft stats (strength, fuel consumption)
-- **WBS-3.1.3** [16h] 3D models for craft (placeholder low-poly assets)
+  - Purchase system with resource/crew costs
+  - Scrap system with 50% refund
+  - Platoon embark/disembark (Battle Cruiser)
+  - Cargo load/unload (Cargo Cruiser)
+  - Solar Satellite and Atmosphere Processor deployment
+- **WBS-3.1.3** [16h] ⚠️ BLOCKED - 3D models for craft (Unity-dependent)
   - Battle Cruiser model (300-400 tris)
   - Cargo Cruiser model (200-300 tris)
   - Solar Satellite model (100-150 tris)
   - Atmosphere Processor model (150-200 tris)
-- **WBS-3.1.4** [12h] Craft rendering in Galaxy View (URP shaders)
-- **WBS-3.1.5** [8h] Unit tests for EntitySystem and CraftSystem
+- **WBS-3.1.4** [12h] ⚠️ BLOCKED - Craft rendering in Galaxy View (Unity-dependent)
+- **WBS-3.1.5** [8h] ✅ Unit tests for EntitySystem and CraftSystem (136 tests passing)
 
-**Total Hours:** 80h
+**Total Hours:** 80h (44h completed, 36h blocked)
 
 **AFS References:** AFS-031, AFS-032
 
 **Dependencies:** Sprint 5 (ResourceSystem for craft costs)
 
 **Acceptance Criteria:**
-- [x] Can purchase craft with resources
-- [x] Entity limits enforced (32 craft max)
-- [x] Craft deployed to planets correctly
-- [x] Craft render in 3D Galaxy View
+- [x] Can purchase craft with resources ✅
+- [x] Entity limits enforced (32 craft max) ✅
+- [x] Craft deployed to planets correctly ✅
+- [ ] Craft render in 3D Galaxy View ⚠️ BLOCKED (Unity)
 
 **Risks:**
 - 3D model quality (placeholder assets may need refinement)
 - Entity limit UI feedback
 
 **Deliverables:**
-- EntitySystem
-- CraftSystem
-- Craft 3D models (placeholder)
+- ✅ EntitySystem (Overlord.Core)
+- ✅ CraftSystem (Overlord.Core)
+- ✅ EntitySystemTests (29 tests)
+- ✅ CraftSystemTests (38 tests)
+- ⚠️ Craft 3D models (BLOCKED - Unity setup required)
 
 ---
 
