@@ -63,17 +63,17 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement turn system and save/load with System.Text.Json
 
 **Tasks:**
-- **WBS-1.2.1** [20h] Implement TurnSystem in Overlord.Core (AFS-002)
+- **WBS-1.2.1** [20h] ✅ Implement TurnSystem in Overlord.Core (AFS-002)
   - Turn counter, income phase, end turn logic
   - Event system (OnTurnStarted, OnTurnEnded)
-- **WBS-1.2.2** [24h] Implement SaveSystem with System.Text.Json (AFS-003)
+- **WBS-1.2.2** [24h] ✅ Implement SaveSystem with System.Text.Json (AFS-003)
   - SaveData model with versioning
   - Serialization/deserialization with camelCase policy
   - GZip compression
   - MD5 checksum validation
-- **WBS-1.2.3** [16h] Write unit tests for TurnSystem and SaveSystem (70% coverage target)
-- **WBS-1.2.4** [12h] Implement Unity SaveManager wrapper (implements ISaveSystem)
-- **WBS-1.2.5** [8h] Basic debug UI for testing turn system
+- **WBS-1.2.3** [16h] ✅ Write unit tests for TurnSystem and SaveSystem (70% coverage target)
+- **WBS-1.2.4** [12h] Implement Unity SaveManager wrapper (implements ISaveSystem) (⚠️ BLOCKED - requires Unity setup)
+- **WBS-1.2.5** [8h] Basic debug UI for testing turn system (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
@@ -104,18 +104,18 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Complete Phase 1 with Settings, Input, and Galaxy View
 
 **Tasks:**
-- **WBS-1.3.1** [16h] Implement SettingsManager (AFS-004)
+- **WBS-1.3.1** [16h] ✅ Implement SettingsManager (AFS-004)
   - Graphics, Audio, Gameplay settings
   - Settings persistence (System.Text.Json)
-- **WBS-1.3.2** [12h] Implement InputSystem with Unity New Input System (AFS-005)
+- **WBS-1.3.2** [12h] Implement InputSystem with Unity New Input System (AFS-005) (⚠️ BLOCKED - requires Unity setup)
   - Mouse, keyboard, touch, gamepad support
   - IInputProvider implementation
-- **WBS-1.3.3** [28h] Create basic 3D Galaxy View (AFS-013)
+- **WBS-1.3.3** [28h] Create basic 3D Galaxy View (AFS-013) (⚠️ BLOCKED - requires Unity setup)
   - Camera controls (pan, zoom, rotate)
   - Planet rendering with URP shaders
   - Skybox and lighting setup
-- **WBS-1.3.4** [16h] Unit tests for SettingsManager
-- **WBS-1.3.5** [8h] Integration testing (save → load → turn → save)
+- **WBS-1.3.4** [16h] ✅ Unit tests for SettingsManager
+- **WBS-1.3.5** [8h] Integration testing (save → load → turn → save) (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
@@ -149,19 +149,19 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement galaxy generation and planet system
 
 **Tasks:**
-- **WBS-2.1.1** [20h] Implement GalaxyGenerator (AFS-011)
+- **WBS-2.1.1** [20h] ✅ Implement GalaxyGenerator (AFS-011)
   - Procedural planet placement (4-6 planets)
   - Planet type assignment (Volcanic, Desert, Tropical, Metropolis)
-  - Home planet assignment
-- **WBS-2.1.2** [24h] Implement PlanetSystem (AFS-012)
+  - Home planet assignment (Starbase for Player, Hitotsu for AI)
+- **WBS-2.1.2** [24h] ✅ Implement PlanetSystem (AFS-012)
   - Planet model (resources, population, buildings)
   - Production multipliers per planet type
   - Planet ownership and faction assignment
-- **WBS-2.1.3** [16h] Implement NavigationSystem (AFS-014)
+- **WBS-2.1.3** [16h] Implement NavigationSystem (AFS-014) (⚠️ BLOCKED - requires Unity setup)
   - Planet selection and focus
   - Camera focusing on selected planet
-- **WBS-2.1.4** [12h] Unit tests for Galaxy and Planet systems
-- **WBS-2.1.5** [8h] Galaxy View integration (render generated planets)
+- **WBS-2.1.4** [12h] ✅ Unit tests for Galaxy and Planet systems
+- **WBS-2.1.5** [8h] Galaxy View integration (render generated planets) (⚠️ BLOCKED - requires Unity setup)
 
 **Total Hours:** 80h
 
@@ -192,22 +192,26 @@ This sprint plan breaks down the 41-week Overlord implementation plan into 21 tw
 **Sprint Goal:** Implement resource economy and income system
 
 **Tasks:**
-- **WBS-2.2.1** [20h] Implement ResourceSystem (AFS-021)
+- **WBS-2.2.1** [20h] ✅ Implement ResourceSystem (AFS-021)
   - 5 resource types (Credits, Minerals, Fuel, Food, Energy)
   - Resource storage per faction
   - Resource spending validation
-- **WBS-2.2.2** [20h] Implement IncomeSystem (AFS-022)
+  - Critical resource warnings
+- **WBS-2.2.2** [20h] ✅ Implement IncomeSystem (AFS-022)
   - Income calculation per planet
   - Production bonuses from buildings
   - Resource generation each turn
-- **WBS-2.2.3** [16h] Implement PopulationSystem (AFS-023)
+  - Crew allocation system
+- **WBS-2.2.3** [16h] ✅ Implement PopulationSystem (AFS-023)
   - Population growth (food-dependent)
-  - Morale system
-  - Maximum population caps
-- **WBS-2.2.4** [16h] Implement TaxationSystem (AFS-024)
-  - Tax rate slider (0-100%)
+  - Morale system (0-100%)
+  - Food consumption (0.5 per person)
+  - Starvation and tax rate effects on morale
+- **WBS-2.2.4** [16h] ✅ Implement TaxationSystem (AFS-024)
+  - Tax rate adjustment (0-100%)
   - Income vs morale trade-off
-- **WBS-2.2.5** [8h] Unit tests for economy systems
+  - Metropolis bonus (2x Credits)
+- **WBS-2.2.5** [8h] ✅ Unit tests for economy systems
 
 **Total Hours:** 80h
 
