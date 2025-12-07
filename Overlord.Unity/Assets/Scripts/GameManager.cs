@@ -61,6 +61,31 @@ namespace Overlord.Unity
 
         #endregion
 
+        #region UI State
+
+        /// <summary>
+        /// Currently selected planet ID for UI panels.
+        /// -1 indicates no planet is selected.
+        /// </summary>
+        public int SelectedPlanetID { get; set; } = -1;
+
+        /// <summary>
+        /// Get the currently selected planet entity.
+        /// </summary>
+        /// <returns>Selected PlanetEntity or null if none selected or not found</returns>
+        public PlanetEntity GetSelectedPlanet()
+        {
+            if (SelectedPlanetID < 0 || GameState == null)
+                return null;
+
+            if (GameState.PlanetLookup.TryGetValue(SelectedPlanetID, out var planet))
+                return planet;
+
+            return null;
+        }
+
+        #endregion
+
         #region Unity Lifecycle
 
         private void Awake()
