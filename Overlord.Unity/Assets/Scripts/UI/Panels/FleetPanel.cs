@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Linq;
 using Overlord.Core;
+using Overlord.Core.Models;
 
 namespace Overlord.Unity.UI.Panels
 {

@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using Overlord.Core;
+using Overlord.Core.Models;
 using System.Linq;
 
 namespace Overlord.Unity.UI.Panels

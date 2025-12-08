@@ -3,6 +3,7 @@ using TMPro;
 using System.Linq;
 using System.Text;
 using Overlord.Core;
+using Overlord.Core.Models;
 
 namespace Overlord.Unity.UI.Panels
 {
