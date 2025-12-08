@@ -71,11 +71,6 @@ namespace Overlord.Unity.UI.Panels
                 GameManager.Instance.BuildingSystem.OnConstructionCompleted += OnBuildingChanged;
             }
 
-            if (GameManager.Instance?.DefenseSystem != null)
-            {
-                GameManager.Instance.DefenseSystem.OnDefenseConstructed += OnDefenseChanged;
-            }
-
             if (GameManager.Instance?.TaxationSystem != null)
             {
                 GameManager.Instance.TaxationSystem.OnTaxRateChanged += OnTaxRateChanged;
@@ -97,11 +92,6 @@ namespace Overlord.Unity.UI.Panels
             {
                 GameManager.Instance.BuildingSystem.OnConstructionStarted -= OnBuildingChanged;
                 GameManager.Instance.BuildingSystem.OnConstructionCompleted -= OnBuildingChanged;
-            }
-
-            if (GameManager.Instance?.DefenseSystem != null)
-            {
-                GameManager.Instance.DefenseSystem.OnDefenseConstructed -= OnDefenseChanged;
             }
 
             if (GameManager.Instance?.TaxationSystem != null)
@@ -131,14 +121,6 @@ namespace Overlord.Unity.UI.Panels
         }
 
         private void OnBuildingChanged(int planetId, BuildingType buildingType)
-        {
-            if (planetId == GameManager.Instance?.SelectedPlanetID)
-            {
-                RefreshDetails(planetId);
-            }
-        }
-
-        private void OnDefenseChanged(int planetId, DefenseType defenseType)
         {
             if (planetId == GameManager.Instance?.SelectedPlanetID)
             {
