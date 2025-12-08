@@ -897,6 +897,969 @@ public class ResponsiveUIManager : MonoBehaviour {
 
 ---
 
+## Error States & Validation
+
+### Error State Philosophy
+
+**Empathy Over Blame:** Errors are opportunities to GUIDE players, not punish them. Every error message should:
+1. **Explain WHAT went wrong** (clear problem statement)
+2. **Explain WHY it matters** (context and consequences)
+3. **Show HOW to fix it** (actionable next steps)
+
+### Error Dialog Template
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│                      ❌ [ERROR TITLE]                         │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  [CLEAR PROBLEM STATEMENT]                               │ │
+│  │                                                          │ │
+│  │  Why this matters:                                       │ │
+│  │  [CONTEXT EXPLAINING IMPACT]                             │ │
+│  │                                                          │ │
+│  │  How to fix:                                             │ │
+│  │  • [ACTIONABLE STEP 1]                                   │ │
+│  │  • [ACTIONABLE STEP 2]                                   │ │
+│  │                                                          │ │
+│  │                 [Dismiss] [Go to Solution]               │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Common Error Scenarios
+
+#### 1. Insufficient Credits
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              ❌ Insufficient Credits                          │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  You need 150,000 Credits to purchase a Battle Cruiser  │ │
+│  │  but only have 45,000 Credits available.                │ │
+│  │                                                          │ │
+│  │  Why this matters:                                       │ │
+│  │  Battle Cruisers are essential for planetary assault    │ │
+│  │  and transporting platoons between planets.             │ │
+│  │                                                          │ │
+│  │  How to earn more Credits:                               │ │
+│  │  • Wait 21 turns (+5,000 Credits/turn)                  │ │
+│  │  • Increase tax rate in Government Screen               │ │
+│  │  • Colonize more planets for income boost               │ │
+│  │                                                          │ │
+│  │           [Dismiss] [Go to Government Screen]            │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key UX Patterns:**
+- Shows exact shortfall (105,000 Credits needed)
+- Calculates turns to wait (21 turns × 5,000 = 105,000)
+- Offers [Go to Government Screen] quick action button
+- Red error color (#FF0000) for icon, neutral text for readability
+
+#### 2. Insufficient Crew
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              ⚠️ Cannot Launch - Insufficient Crew             │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  Battle Cruiser BC-01 requires 20 crew but currently    │ │
+│  │  has 0 crew assigned.                                   │ │
+│  │                                                          │ │
+│  │  Why this matters:                                       │ │
+│  │  Unmanned spacecraft cannot navigate or operate systems.│ │
+│  │  Your platoons would be stranded without a crew.        │ │
+│  │                                                          │ │
+│  │  How to assign crew:                                     │ │
+│  │  1. Go to Cargo Bay Screen                              │ │
+│  │  2. Select BC-01                                         │ │
+│  │  3. Click [Assign Crew] button                          │ │
+│  │  4. Transfer 20 civilians from planet population        │ │
+│  │                                                          │ │
+│  │  Available crew on Starbase: 1,500 civilians ✓          │ │
+│  │                                                          │ │
+│  │           [Dismiss] [Go to Cargo Bay]                    │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key UX Patterns:**
+- Shows available crew (1,500) with checkmark (✓) to reassure player
+- Numbered steps for clarity
+- Orange warning color (#FFAA00) - serious but fixable
+
+#### 3. Insufficient Fuel
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              ⛽ Insufficient Fuel for Journey                 │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  Journey to Hitotsu requires 70 Fuel, but BC-01 only    │ │
+│  │  has 30 Fuel remaining.                                 │ │
+│  │                                                          │ │
+│  │  Shortfall: 40 Fuel needed                               │ │
+│  │                                                          │ │
+│  │  How to refuel:                                          │ │
+│  │  1. Return to Starbase (0 Fuel cost)                    │ │
+│  │  2. Go to Cargo Bay Screen                              │ │
+│  │  3. Transfer Fuel from planet stores (800 available)    │ │
+│  │                                                          │ │
+│  │  Alternative: Build Mining Stations for +75 Fuel/turn   │ │
+│  │                                                          │ │
+│  │           [Dismiss] [Return to Starbase]                 │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### 4. Maximum Limit Reached
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              ⚠️ Atmosphere Processor Limit Reached            │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  You can only own 1 Atmosphere Processor at a time.     │ │
+│  │  Currently owned: 1 (traveling to Volcanic Planet)      │ │
+│  │                                                          │ │
+│  │  Why this limit exists:                                  │ │
+│  │  Atmosphere Processors are single-use terraforming      │ │
+│  │  devices. Wait for current processor to complete its    │ │
+│  │  mission before purchasing another.                     │ │
+│  │                                                          │ │
+│  │  Current processor status:                               │ │
+│  │  • Destination: Volcanic Planet                          │ │
+│  │  • ETA: 2 days                                           │ │
+│  │  • Terraforming time: ~5 turns after arrival            │ │
+│  │                                                          │ │
+│  │  You can purchase another in ~7 turns.                  │ │
+│  │                                                          │ │
+│  │                    [Dismiss]                             │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key UX Patterns:**
+- Shows WHERE the existing item is (traveling to Volcanic Planet)
+- Calculates WHEN they can buy another (7 turns)
+- Explains WHY the limit exists (single-use device)
+
+#### 5. Construction Queue Full
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              🏗️ Construction Queue Full                       │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  Your Starbase construction queue is at maximum         │ │
+│  │  capacity (5/5 items).                                  │ │
+│  │                                                          │ │
+│  │  Current queue:                                          │ │
+│  │  1. Battle Cruiser (3 turns remaining)                  │ │
+│  │  2. Cargo Cruiser (5 turns remaining)                   │ │
+│  │  3. Mining Station (2 turns remaining)                  │ │
+│  │  4. Platoon 04 (4 turns remaining)                      │ │
+│  │  5. Solar Satellite (6 turns remaining)                 │ │
+│  │                                                          │ │
+│  │  Next available slot: 2 turns (when Mining Stn done)    │ │
+│  │                                                          │ │
+│  │  Options:                                                │ │
+│  │  • Wait 2 turns for a slot to free up                   │ │
+│  │  • Cancel an existing queue item (refund 50%)           │ │
+│  │                                                          │ │
+│  │           [Dismiss] [View Queue]                         │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Inline Validation (Prevent Errors Before They Happen)
+
+#### Purchase Button States
+
+**Enabled (Sufficient Credits):**
+```
+┌──────────────────────────────────┐
+│  🚀 Battle Cruiser                │
+│  150,000 Credits | 5 turns        │
+│                                   │
+│  [Purchase]                       │  ← Blue, clickable
+└──────────────────────────────────┘
+```
+
+**Disabled with Tooltip (Insufficient Credits):**
+```
+┌──────────────────────────────────┐
+│  🚀 Battle Cruiser                │
+│  150,000 Credits | 5 turns        │
+│                                   │
+│  [Purchase]                       │  ← Grayed out
+│  ↑                                │
+│  💡 Need 105,000 more Credits     │  ← Tooltip on hover
+└──────────────────────────────────┘
+```
+
+**Warning State (Low Resources After Purchase):**
+```
+┌──────────────────────────────────┐
+│  🚀 Battle Cruiser                │
+│  150,000 Credits | 5 turns        │
+│                                   │
+│  [Purchase] ⚠️                    │  ← Yellow warning icon
+│                                   │
+│  💡 This will leave you with only │  ← Tooltip
+│     5,000 Credits. Consider       │
+│     waiting for more income.      │
+└──────────────────────────────────┘
+```
+
+### Confirmation Dialogs (High-Stakes Actions)
+
+#### Purchase Confirmation (Expensive Items)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              Confirm Purchase                                 │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  Battle Cruiser                                          │ │
+│  │  ─────────────────────────────────────────────────────   │ │
+│  │                                                          │ │
+│  │  Cost: 150,000 Credits                                   │ │
+│  │  Build Time: 5 turns                                     │ │
+│  │                                                          │ │
+│  │  Your Credits after purchase: 45,000 → -105,000 ❌       │ │
+│  │                                                          │ │
+│  │  ⚠️ WARNING: This purchase will exceed your budget.      │ │
+│  │  You need to earn 105,000 more Credits first.           │ │
+│  │                                                          │ │
+│  │                [Cancel] [Confirm]                        │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Decommission Platoon Confirmation (Irreversible)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│              ⚠️ Confirm Decommission                          │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  Platoon 03 (175 troops, Level 2 Equipment)             │ │
+│  │                                                          │ │
+│  │  This action will:                                       │ │
+│  │  ✓ Return 175 troops to civilian population             │ │
+│  │  ✗ Lose equipment investment (55,000 Credits)           │ │
+│  │  ✗ Lose weapon investment (18,000 Credits)              │ │
+│  │  ✗ Lose 100% training progress                          │ │
+│  │                                                          │ │
+│  │  Total value lost: 73,000 Credits (non-refundable)      │ │
+│  │                                                          │ │
+│  │  ⚠️ This action cannot be undone.                        │ │
+│  │                                                          │ │
+│  │          [Cancel] [Yes, Decommission]                    │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key UX Patterns:**
+- Uses ✓/✗ to show gains vs. losses
+- Calculates total value lost
+- Red text for irreversible warning
+- [Yes, Decommission] button uses action verb (not just "OK")
+
+---
+
+## First-Time User Experience
+
+### Onboarding Philosophy
+
+**Progressive Disclosure:** Don't overwhelm new players with everything at once. Reveal features as they become relevant.
+
+**Contextual Tooltips:** Teach through discovery, not lectures. Show tooltips WHEN players interact, not before.
+
+**Empty State Guidance:** When a screen has no data yet, use it as a teaching moment.
+
+### First-Time Tutorial Flow
+
+```
+Start Screen (First Launch)
+    ↓
+[New Game] clicked
+    ↓
+Game Setup Screen
+    ├─ Player Name: [________]
+    ├─ Difficulty: ○ Easy  ● Normal  ○ Hard
+    └─ [Start]
+        ↓
+Tutorial Welcome Screen
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│                  Welcome to Overlord!                         │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  You're about to command a galactic empire, managing    │ │
+│  │  resources, building fleets, and conquering planets.    │ │
+│  │                                                          │ │
+│  │  🎓 Tutorial (Recommended for first-time players)       │ │
+│  │     Learn the basics through guided missions            │ │
+│  │     Time: ~10 minutes                                   │ │
+│  │                                                          │ │
+│  │     [Begin Tutorial]                                     │ │
+│  │                                                          │ │
+│  │  ──────────────────────────────────────────────────      │ │
+│  │                                                          │ │
+│  │  🚀 Skip Tutorial (Jump right in)                       │ │
+│  │     Tooltips will guide you as you explore              │ │
+│  │                                                          │ │
+│  │     [Skip to Galaxy Map]                                 │ │
+│  │                                                          │ │
+│  │  You can replay the tutorial anytime from Settings.     │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Tutorial Missions (Guided Path)
+
+**Mission 1: Explore Your Empire**
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Tutorial Mission 1/5: Explore Your Empire      [Skip →]     │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  💡 This is your Galaxy Map. From here you can see all       │
+│     planets, spacecraft, and control your empire.            │
+│                                                               │
+│                        ⭐ [Starbase]  ← CLICK ME!            │
+│                       (Player Home)                           │
+│                                                               │
+│  👆 Click on your home planet (Starbase) to continue.        │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+*After clicking Starbase:*
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Tutorial Mission 1/5: Explore Your Empire      [Skip →]     │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  ✓ Great! You've selected your home planet.                  │
+│                                                               │
+│  💡 At the bottom of the screen, you'll see 6 buttons:       │
+│     • Government - View resources and income                 │
+│     • Buy - Purchase ships, buildings, platoons              │
+│     • Navigation - Move spacecraft between planets           │
+│     • Platoons - Manage your military forces                 │
+│     • Settings - Adjust game settings                        │
+│     • Help - Access this tutorial anytime                    │
+│                                                               │
+│  👆 Click [Government] to see your resources.                │
+│                                                               │
+│  [Government] [Buy] [Navigation] [Platoons] [Settings] [Help]│
+│      ↑ CLICK                                                  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Mission 2: Understand Resources**
+**Mission 3: Build Your First Structure**
+**Mission 4: Create a Platoon**
+**Mission 5: Your First Turn**
+
+### Contextual Tooltips (Skip Tutorial Path)
+
+When a player skips the tutorial, show ONE tooltip per interaction for the first 5 interactions:
+
+**First Interaction: Hover over Starbase**
+```
+┌─────────────────────────────────────┐
+│  💡 Your Home Planet                │
+│  ─────────────────────────────      │
+│  This is Starbase, your starting    │
+│  planet. Click to view details or   │
+│  double-click to see the surface.   │
+│                                     │
+│  [Got it, don't show again]         │
+└─────────────────────────────────────┘
+```
+
+**Second Interaction: Hover over End Turn**
+```
+┌─────────────────────────────────────┐
+│  💡 Advance to Next Turn             │
+│  ─────────────────────────────      │
+│  Click here when you're done with   │
+│  your actions. Resources will be    │
+│  generated and construction will    │
+│  progress.                          │
+│                                     │
+│  Shortcut: Spacebar                 │
+│  [Got it]                           │
+└─────────────────────────────────────┘
+```
+
+**Third Interaction: First visit to Buy Screen**
+```
+┌─────────────────────────────────────┐
+│  💡 Purchase Screen                  │
+│  ─────────────────────────────      │
+│  Here you can buy spacecraft,       │
+│  buildings, and military units.     │
+│  Items are added to a construction  │
+│  queue and take several turns.      │
+│                                     │
+│  Current Credits: 195,000           │
+│  [Got it]                           │
+└─────────────────────────────────────┘
+```
+
+### Empty State Screens
+
+#### Navigation Screen (No Spacecraft)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Navigation                          Turn: 1       │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│                                                               │
+│                   🚀 No Spacecraft Yet                        │
+│                                                               │
+│  You don't own any spacecraft yet. Visit the Buy Screen      │
+│  to purchase your first Battle Cruiser or Cargo Cruiser.     │
+│                                                               │
+│  Recommended first purchase:                                  │
+│  • Battle Cruiser (150,000 Credits, 5 turns)                 │
+│    Carries platoons for planetary assault                    │
+│                                                               │
+│  Current Credits: 195,000 ✓ (enough to purchase)             │
+│                                                               │
+│              [Go to Buy Screen] [Dismiss]                     │
+│                                                               │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key UX Patterns:**
+- Friendly icon (🚀) not error icon (❌)
+- Shows recommended action
+- Checks if player can afford it (✓)
+- Quick action button [Go to Buy Screen]
+
+#### Platoon Management (No Platoons)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Platoon Management              Platoons: 0/24    │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│                                                               │
+│                   ⚔️ No Platoons Commissioned                 │
+│                                                               │
+│  Platoons are ground forces used to capture and defend       │
+│  planets. You can commission up to 24 platoons.              │
+│                                                               │
+│  To create your first platoon:                               │
+│  1. Click [Commission New Platoon] below                     │
+│  2. Set troop count (50-100 recommended for first)           │
+│  3. Choose equipment level (Level 1 is fine to start)        │
+│  4. Choose weapon level (Level 1 is fine to start)           │
+│  5. Confirm purchase (~25,000-35,000 Credits)                │
+│  6. Wait 4 turns for training to complete                    │
+│                                                               │
+│  Current Credits: 195,000 ✓                                  │
+│                                                               │
+│              [Commission New Platoon]                         │
+│                                                               │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Cargo Bay (No Craft Docked)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Cargo Bay - Starbase            Docking: 0/3      │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│                                                               │
+│                   📦 Docking Bays Empty                       │
+│                                                               │
+│  No spacecraft are currently docked at Starbase.             │
+│                                                               │
+│  Spacecraft automatically dock when:                          │
+│  • You purchase them from Buy Screen                         │
+│  • They complete a journey and return to Starbase            │
+│  • You manually land them from Navigation Screen             │
+│                                                               │
+│  Once docked, you can:                                        │
+│  • Load/unload cargo (resources, crew)                       │
+│  • Assign platoons to Battle Cruisers                        │
+│  • Refuel spacecraft                                         │
+│  • Launch them to other planets                              │
+│                                                               │
+│              [Go to Buy Screen] [Dismiss]                     │
+│                                                               │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Progressive Feature Unlocking
+
+Certain UI elements are HIDDEN until prerequisites are met:
+
+**Turn 1-3:**
+- Show: Government, Buy, Settings, Help
+- Hide: Navigation (no spacecraft), Platoons (no platoons), Cargo Bay
+
+**After First Purchase:**
+- Unlock: Navigation Screen (when first spacecraft purchased)
+- Show tooltip: "🎉 Navigation unlocked! Visit Navigation to move your spacecraft."
+
+**After First Platoon:**
+- Unlock: Platoon Management Screen
+- Show tooltip: "🎉 Platoon Management unlocked! Train and equip your forces here."
+
+**Turn 5+:**
+- Unlock: Cargo Bay (assume player has docked craft by now)
+
+### Hint System (Gentle Nudges)
+
+After 3 turns of inactivity on a key action, show a gentle hint:
+
+**No Purchases After 5 Turns:**
+```
+┌─────────────────────────────────────┐
+│  💡 Tip: Start Building!             │
+│  ─────────────────────────────      │
+│  You have 195,000 Credits but       │
+│  haven't purchased anything yet.    │
+│  Consider buying a Battle Cruiser   │
+│  or building infrastructure.        │
+│                                     │
+│  [Go to Buy Screen] [Dismiss]       │
+└─────────────────────────────────────┘
+```
+
+**No Platoons After 10 Turns:**
+```
+┌─────────────────────────────────────┐
+│  ⚔️ Tip: Build Your Army!            │
+│  ─────────────────────────────      │
+│  You'll need platoons to capture    │
+│  enemy planets. Consider creating   │
+│  2-3 platoons before attacking.     │
+│                                     │
+│  [Go to Platoons] [Dismiss]         │
+└─────────────────────────────────────┘
+```
+
+---
+
+## Loading & Progress States
+
+### Loading Philosophy
+
+**Transparency Over Mystery:** Players should ALWAYS know:
+1. **What** is loading/processing
+2. **How long** it will take
+3. **What happens next**
+
+**Perceived Performance:** Use progress indicators and animations to make waits feel shorter.
+
+### Construction Queue Display
+
+**Location:** Persistent banner at top of Buy Screen
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Buy Screen                        Credits: 45,000 │
+├──────────────────────────────────────────────────────────────┤
+│  🏗️ CONSTRUCTION QUEUE (3/5)              [View Full Queue] │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Battle Cruiser    [████████░░░░░] 3 turns  |  Mining Stn│ │
+│  │                   (67% complete)            |  2 turns   │ │
+│  └─────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│  [Spacecraft] [Buildings] [Upgrades] [Platoons]              │
+│  ...
+```
+
+**Expanded Queue View:**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│              Construction Queue (3/5 slots)                   │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  1. 🚀 Battle Cruiser                                         │
+│     [████████████░░░░░] 60% (3/5 turns)                      │
+│     Started: Turn 12  |  Completes: Turn 17                  │
+│                                                [Cancel 50%]   │
+│                                                               │
+│  2. ⛏️ Mining Station                                         │
+│     [███████████████░] 75% (2/4 turns)                       │
+│     Started: Turn 13  |  Completes: Turn 17                  │
+│                                                [Cancel 50%]   │
+│                                                               │
+│  3. ⚔️ Platoon 04 (150 troops, Lvl 2 Equipment)               │
+│     [██████░░░░░░░░░] 33% (1/3 turns)                        │
+│     Started: Turn 14  |  Completes: Turn 17                  │
+│                                                [Cancel 50%]   │
+│                                                               │
+│  📌 All items complete Turn 17 (2 turns from now)            │
+│                                                               │
+│  Available slots: 2/5                                         │
+│                                                               │
+│                           [Close]                             │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key UX Patterns:**
+- Progress bars with percentage AND turn count
+- Shows start turn and completion turn
+- Groups items completing on same turn
+- [Cancel 50%] offers 50% refund for cancellations
+
+### Turn Processing Screen
+
+**Triggered:** When player clicks [End Turn]
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│                    ⏳ Processing Turn 15...                   │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  ✓ Generating resources                                 │ │
+│  │  ✓ Calculating tax income                               │ │
+│  │  ✓ Updating construction queue                          │ │
+│  │  ⏳ Processing AI turn...                                │ │
+│  │  ░ Resolving combat                                      │ │
+│  │  ░ Updating planet ownership                             │ │
+│  │                                                          │ │
+│  │  [████████████░░░░░] 67%                                 │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│                    Estimated time: 2 seconds                  │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Micro-Animation:**
+- Checkmarks (✓) appear as each step completes
+- Current step shows spinner (⏳)
+- Pending steps show empty box (░)
+- Progress bar fills smoothly
+
+**Performance Optimization:**
+- If turn processing < 500ms, skip this screen entirely (instant transition)
+- If turn processing > 2 seconds, show estimated time
+
+### Journey Progress Indicator
+
+**Location:** Appears when spacecraft is traveling
+
+**Galaxy Map Overlay:**
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [≡ Menu]  Overlord              Turn: 15  [End Turn]        │
+├──────────────────────────────────────────────────────────────┤
+│  🚀 TRAVELING: BC-01 → Hitotsu            [View Details]     │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ [Starbase]━━━━━🚀━━━━━━━━[Hitotsu]  ETA: 2 days (40%)  │ │
+│  └─────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│                        ⭐ [Starbase]                          │
+│                                                               │
+│                                          🔴 [Hitotsu]         │
+│                                          ↑ BC-01 approaching  │
+│  ...
+```
+
+**Detailed Journey View:**
+```
+┌──────────────────────────────────────────────────────────────┐
+│              Journey in Progress                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Spacecraft: BC-01 (Battle Cruiser)                          │
+│  From: Starbase                                               │
+│  To: Hitotsu (Enemy planet)                                  │
+│                                                               │
+│  Progress:                                                    │
+│  [Starbase]━━━━━━━🚀━━━━━━━━━━━━[Hitotsu]                   │
+│   Day 1      Day 3 ↑      Day 5           Day 7              │
+│            (You are here)                                     │
+│                                                               │
+│  Status: On schedule  |  ETA: 2 days (Turn 17)               │
+│  Fuel consumed: 30/70 (40 remaining) ✓                       │
+│                                                               │
+│  ⚠️ Combat will begin automatically upon arrival              │
+│     Platoons onboard: 3/4                                    │
+│     Combined strength: 450 troops (1,350 combat power)       │
+│                                                               │
+│                    [Abort Journey]                            │
+│                    (Return to Starbase)                       │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Terraforming Progress
+
+**Galaxy Map Planet Indicator:**
+```
+     🌋 [Volcanic]
+     ⚡⚡⚡ Terraforming (3/8 turns)
+     (Neutral → Player)
+```
+
+**Detailed Terraforming View:**
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Planet: Volcanic            Status: Terraforming  │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│                   ⚡ Terraforming in Progress                 │
+│                                                               │
+│  🌍 Planet Type: Volcanic                                     │
+│  🔧 Atmosphere Processor: Active                             │
+│                                                               │
+│  Progress:                                                    │
+│  [██████░░░░░░░░░░] 38% (3/8 turns)                          │
+│                                                               │
+│  Phase 1: Oxygen generation     ✓ Complete                   │
+│  Phase 2: Atmospheric pressure  ✓ Complete                   │
+│  Phase 3: Temperature regulation ⏳ In progress (2 turns)     │
+│  Phase 4: Water cycle           ░ Pending (3 turns)          │
+│                                                               │
+│  Completion: Turn 23 (5 turns from now)                      │
+│                                                               │
+│  Upon completion:                                             │
+│  • Planet becomes habitable                                  │
+│  • Ownership transfers to you                                │
+│  • You can build infrastructure                              │
+│                                                               │
+│                          [Close]                              │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Visual Animations:**
+- Planet slowly rotates with particle effects (energy waves)
+- Progress bar fills 1/8th each turn
+- Current phase shows spinner (⏳)
+
+### Research Progress (If Upgrade System Implemented)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  🔬 RESEARCH: Missile Upgrade            [View Details]      │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ [████████░░░░░░░░] 40% (2/5 turns)  |  Completion: T20  │ │
+│  └─────────────────────────────────────────────────────────┘ │
+```
+
+### Combat Processing
+
+**Real-time Combat Display:**
+```
+┌──────────────────────────────────────────────────────────────┐
+│  PLANETARY ASSAULT: Hitotsu   │  Turn: 3/10  │ Status: Active│
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  💥 COMBAT IN PROGRESS...                                    │
+│                                                               │
+│  Player: 450 troops (1,350 STR)  [████████░░] 80%           │
+│  Enemy:  280 troops (840 STR)    [██████░░░] 60%            │
+│                                                               │
+│  ⏳ Calculating casualties...                                │
+│                                                               │
+│  Recent events:                                               │
+│  • Player dealt 45 damage                                    │
+│  • Enemy dealt 30 damage                                     │
+│  • Player casualties: 30 troops                              │
+│  • Enemy casualties: 70 troops                               │
+│                                                               │
+│  [Retreating] [████░░░░░░░░] 33%                             │
+│  (Escape in 2 turns)                                         │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Completion Notifications
+
+**Toast Notification (Non-Intrusive):**
+```
+┌─────────────────────────────────────────┐
+│  ✅ Battle Cruiser Complete!            │
+│  ─────────────────────────────────      │
+│  BC-02 is ready at Starbase.            │
+│  Visit Cargo Bay to assign crew.        │
+│                                         │
+│  [View] [Dismiss]        5 seconds ago  │
+└─────────────────────────────────────────┘
+```
+
+**Position:** Top-right corner of screen
+**Duration:** Auto-dismiss after 10 seconds OR user clicks [Dismiss]
+**Stack:** Up to 3 notifications visible at once
+
+**Modal Notification (Important Events):**
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│                  🎉 Planet Colonized!                         │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  Volcanic Planet has been successfully terraformed!      │ │
+│  │                                                          │ │
+│  │  New colony details:                                     │ │
+│  │  • Name: Volcanic Colony                                 │ │
+│  │  • Type: Volcanic (5× Mineral, 3× Fuel bonus)           │ │
+│  │  • Population: 0 (send civilians to populate)            │ │
+│  │  • Platforms: 6 available for construction               │ │
+│  │                                                          │ │
+│  │  What to do next:                                        │ │
+│  │  1. Build Mining Stations (utilize 5× Mineral bonus)    │ │
+│  │  2. Send civilians via Cargo Cruiser                    │ │
+│  │  3. Garrison platoons for defense                       │ │
+│  │                                                          │ │
+│  │              [View Planet] [Continue]                    │ │
+│  │                                                          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Loading Skeleton Screens
+
+**When loading screen data (e.g., transitioning to Government Screen):**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Government Screen                   Turn: 15      │
+├──────────────────────────────────────────────────────────────┤
+│  RESOURCE SUMMARY                                            │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Credits:   ░░░░░   (░░░░░/turn)  💰                     │ │
+│  │ Minerals:  ░░░░░   (░░░░░/turn)  ⛏️                      │ │
+│  │ Fuel:      ░░░░░   (░░░░░/turn)  ⛽                      │ │
+│  │ ...loading...                                            │ │
+│  └─────────────────────────────────────────────────────────┘ │
+```
+
+**Micro-animation:** Gray boxes (░) pulse with shimmer effect
+
+---
+
+## Landscape Orientation (Mobile)
+
+### Breakpoint Detection
+
+```css
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Phone landscape mode */
+}
+```
+
+### Galaxy Map Adaptation
+
+**Portrait Mode (Default):**
+```
+┌───────────────────┐
+│    [≡] Overlord   │ ← Header (compact)
+├───────────────────┤
+│                   │
+│    🌍 Galaxy      │
+│    (Square)       │
+│                   │
+├───────────────────┤
+│ [Gov] [Buy] [Nav] │ ← Bottom nav
+└───────────────────┘
+```
+
+**Landscape Mode:**
+```
+┌────────────────────────────────────────────────┐
+│ [≡] Turn: 15     Galaxy Map        [End Turn] │ ← Compact header
+├────────────────────────────────────────────────┤
+│ [G] │                                          │
+│ [B] │         🌍 Galaxy                        │
+│ [N] │       (Wide view)                        │ ← Side nav
+│ [P] │                                          │
+│ [S] │                                          │
+└─────┴──────────────────────────────────────────┘
+```
+
+**Key Changes:**
+- Navigation moves from bottom to LEFT SIDE (easier thumb access)
+- Header shrinks to single line
+- Galaxy map gets more horizontal space
+- Buttons become icon-only: [G]overnment, [B]uy, etc.
+
+### Button Adaptation
+
+**Portrait:** Full text buttons
+```
+[Government] [Buy] [Navigation]
+```
+
+**Landscape:** Icon + letter
+```
+[💰 G] [🛒 B] [🚀 N]
+```
+
+### Dialog Positioning
+
+**Portrait:** Center-aligned, 80% width
+**Landscape:** Left-aligned, 60% width (leaves space for map visible in background)
+
+---
+
 ## Conclusion
 
 This UX design specification provides comprehensive guidelines for implementing consistent, accessible, and user-friendly interfaces across all platforms (PC, mobile, tablet). All wireframes, interaction patterns, and accessibility features are designed to support the core gameplay mechanics while ensuring an intuitive experience for players of all skill levels.
