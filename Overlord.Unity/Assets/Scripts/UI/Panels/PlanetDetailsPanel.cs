@@ -67,8 +67,8 @@ namespace Overlord.Unity.UI.Panels
 
             if (GameManager.Instance?.BuildingSystem != null)
             {
-                GameManager.Instance.BuildingSystem.OnConstructionStarted += OnBuildingChanged;
-                GameManager.Instance.BuildingSystem.OnConstructionCompleted += OnBuildingChanged;
+                GameManager.Instance.BuildingSystem.OnBuildingStarted += OnBuildingChanged;
+                GameManager.Instance.BuildingSystem.OnBuildingCompleted += OnBuildingChanged;
             }
 
             if (GameManager.Instance?.TaxationSystem != null)
@@ -90,8 +90,8 @@ namespace Overlord.Unity.UI.Panels
 
             if (GameManager.Instance?.BuildingSystem != null)
             {
-                GameManager.Instance.BuildingSystem.OnConstructionStarted -= OnBuildingChanged;
-                GameManager.Instance.BuildingSystem.OnConstructionCompleted -= OnBuildingChanged;
+                GameManager.Instance.BuildingSystem.OnBuildingStarted -= OnBuildingChanged;
+                GameManager.Instance.BuildingSystem.OnBuildingCompleted -= OnBuildingChanged;
             }
 
             if (GameManager.Instance?.TaxationSystem != null)
@@ -262,15 +262,17 @@ namespace Overlord.Unity.UI.Panels
         /// </summary>
         private string FormatBuildingsList(PlanetEntity planet)
         {
-            if (planet.Buildings == null || planet.Buildings.Count == 0)
+            if (planet.Structures == null || planet.Structures.Count == 0)
                 return string.Empty;
 
             var sb = new StringBuilder();
 
-            foreach (var building in planet.Buildings)
+            foreach (var structure in planet.Structures)
             {
-                string status = building.IsActive ? "[Active]" : $"[{building.TurnsRemaining}T]";
-                sb.AppendLine($"  {building.Type} {status}");
+                string status = structure.Status == BuildingStatus.Active ? "[Active]" :
+                               structure.Status == BuildingStatus.UnderConstruction ? $"[{structure.TurnsRemaining}T]" :
+                               $"[{structure.Status}]";
+                sb.AppendLine($"  {structure.Type} {status}");
             }
 
             return sb.ToString().TrimEnd();
@@ -281,19 +283,16 @@ namespace Overlord.Unity.UI.Panels
         /// </summary>
         private string FormatDefensesText(PlanetEntity planet)
         {
-            if (planet.Defenses == null)
+            if (planet.Structures == null || planet.Structures.Count == 0)
                 return string.Empty;
 
             var sb = new StringBuilder();
 
-            if (planet.Defenses.ShieldCount > 0)
-                sb.AppendLine($"  Shields: {planet.Defenses.ShieldCount}");
+            // Count defensive structures
+            var orbitalDefenses = planet.Structures.Count(s => s.Type == BuildingType.OrbitalDefense && s.Status == BuildingStatus.Active);
 
-            if (planet.Defenses.MissileCount > 0)
-                sb.AppendLine($"  Missiles: {planet.Defenses.MissileCount}");
-
-            if (planet.Defenses.LaserBatteryCount > 0)
-                sb.AppendLine($"  Lasers: {planet.Defenses.LaserBatteryCount}");
+            if (orbitalDefenses > 0)
+                sb.AppendLine($"  Orbital Defenses: {orbitalDefenses}");
 
             return sb.ToString().TrimEnd();
         }

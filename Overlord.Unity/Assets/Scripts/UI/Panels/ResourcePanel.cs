@@ -148,7 +148,7 @@ namespace Overlord.Unity.UI.Panels
             if (planet == null) return;
 
             // Calculate income for this planet
-            var income = GameManager.Instance.IncomeSystem.CalculateIncome(planetID);
+            var income = GameManager.Instance.IncomeSystem.CalculatePlanetIncome(planetID);
 
             UpdateIncomeText(creditsIncomeText, income.Credits);
             UpdateIncomeText(mineralsIncomeText, income.Minerals);

@@ -77,21 +77,20 @@ namespace Overlord.Unity.UI.Panels
             // Building system events
             if (GameManager.Instance?.BuildingSystem != null)
             {
-                GameManager.Instance.BuildingSystem.OnConstructionStarted += OnConstructionStarted;
-                GameManager.Instance.BuildingSystem.OnConstructionCompleted += OnConstructionCompleted;
+                GameManager.Instance.BuildingSystem.OnBuildingStarted += OnBuildingStarted;
+                GameManager.Instance.BuildingSystem.OnBuildingCompleted += OnBuildingCompleted;
             }
 
             // Craft system events
             if (GameManager.Instance?.CraftSystem != null)
             {
                 GameManager.Instance.CraftSystem.OnCraftPurchased += OnCraftPurchased;
-                GameManager.Instance.CraftSystem.OnCraftDestroyed += OnCraftDestroyed;
             }
 
             // Income system events
             if (GameManager.Instance?.IncomeSystem != null)
             {
-                GameManager.Instance.IncomeSystem.OnIncomeGenerated += OnIncomeGenerated;
+                GameManager.Instance.IncomeSystem.OnIncomeCalculated += OnIncomeCalculated;
             }
         }
 
@@ -119,19 +118,18 @@ namespace Overlord.Unity.UI.Panels
 
             if (GameManager.Instance?.BuildingSystem != null)
             {
-                GameManager.Instance.BuildingSystem.OnConstructionStarted -= OnConstructionStarted;
-                GameManager.Instance.BuildingSystem.OnConstructionCompleted -= OnConstructionCompleted;
+                GameManager.Instance.BuildingSystem.OnBuildingStarted -= OnBuildingStarted;
+                GameManager.Instance.BuildingSystem.OnBuildingCompleted -= OnBuildingCompleted;
             }
 
             if (GameManager.Instance?.CraftSystem != null)
             {
                 GameManager.Instance.CraftSystem.OnCraftPurchased -= OnCraftPurchased;
-                GameManager.Instance.CraftSystem.OnCraftDestroyed -= OnCraftDestroyed;
             }
 
             if (GameManager.Instance?.IncomeSystem != null)
             {
-                GameManager.Instance.IncomeSystem.OnIncomeGenerated -= OnIncomeGenerated;
+                GameManager.Instance.IncomeSystem.OnIncomeCalculated -= OnIncomeCalculated;
             }
         }
 
@@ -165,41 +163,44 @@ namespace Overlord.Unity.UI.Panels
             AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(warningColor)}>WARNING: {planetName} - {resourceType} critically low!</color>");
         }
 
-        private void OnBattleCompleted(int attackerPlanetId, int defenderPlanetId, bool attackerWon)
+        private void OnBattleCompleted(Battle battle, BattleResult result)
         {
-            string attackerName = GetPlanetName(attackerPlanetId);
-            string defenderName = GetPlanetName(defenderPlanetId);
-            string result = attackerWon ? "VICTORY" : "DEFEAT";
-            AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(combatColor)}>BATTLE: {attackerName} vs {defenderName} - {result}</color>");
+            string planetName = GetPlanetName(battle.PlanetID);
+            string attackerName = battle.AttackerFaction == FactionType.Player ? "Player" : "AI";
+            string defenderName = battle.DefenderFaction == FactionType.Player ? "Player" : "AI";
+            string outcome = result.AttackerWins ? "VICTORY" : "DEFEAT";
+            AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(combatColor)}>BATTLE at {planetName}: {attackerName} vs {defenderName} - {outcome}</color>");
         }
 
-        private void OnConstructionStarted(int planetId, BuildingType buildingType)
+        private void OnBuildingStarted(int planetId, BuildingType buildingType)
         {
             string planetName = GetPlanetName(planetId);
             AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(playerActionColor)}>{planetName}: Construction started - {buildingType}</color>");
         }
 
-        private void OnConstructionCompleted(int planetId, BuildingType buildingType)
+        private void OnBuildingCompleted(int planetId, BuildingType buildingType)
         {
             string planetName = GetPlanetName(planetId);
             AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(playerActionColor)}>{planetName}: {buildingType} completed</color>");
         }
 
-        private void OnCraftPurchased(int planetId, CraftType craftType)
+        private void OnCraftPurchased(int craftId)
         {
-            string planetName = GetPlanetName(planetId);
-            AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(playerActionColor)}>{planetName}: Purchased {craftType}</color>");
+            // Look up craft to get location and type
+            if (GameManager.Instance?.GameState?.CraftLookup.TryGetValue(craftId, out var craft) == true)
+            {
+                string planetName = GetPlanetName(craft.PlanetID);
+                AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(playerActionColor)}>{planetName}: Purchased {craft.Type}</color>");
+            }
         }
 
-        private void OnCraftDestroyed(int craftId)
-        {
-            AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(combatColor)}>Craft destroyed: ID {craftId}</color>");
-        }
-
-        private void OnIncomeGenerated(int planetId, ResourceDelta income)
+        private void OnIncomeCalculated(int planetId, ResourceDelta income)
         {
             string planetName = GetPlanetName(planetId);
-            AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(systemMessageColor)}>{planetName}: Income +{income.Credits} Credits</color>");
+            if (income.Credits > 0)
+            {
+                AddMessage($"<color=#{ColorUtility.ToHtmlStringRGB(systemMessageColor)}>{planetName}: Income +{income.Credits} Credits</color>");
+            }
         }
 
         #endregion

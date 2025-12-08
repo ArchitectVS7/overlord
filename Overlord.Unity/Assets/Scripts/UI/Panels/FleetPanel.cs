@@ -48,14 +48,14 @@ namespace Overlord.Unity.UI.Panels
         {
             if (GameManager.Instance?.CraftSystem != null)
             {
-                GameManager.Instance.CraftSystem.OnCraftPurchased += OnCraftChanged;
-                GameManager.Instance.CraftSystem.OnCraftDestroyed += OnCraftDestroyed;
+                GameManager.Instance.CraftSystem.OnCraftPurchased += OnCraftPurchased;
+                GameManager.Instance.CraftSystem.OnCraftScrapped += OnCraftScrapped;
             }
 
             if (GameManager.Instance?.PlatoonSystem != null)
             {
-                GameManager.Instance.PlatoonSystem.OnPlatoonCommissioned += OnPlatoonChanged;
-                GameManager.Instance.PlatoonSystem.OnPlatoonDisbanded += OnPlatoonDisbanded;
+                GameManager.Instance.PlatoonSystem.OnPlatoonCommissioned += OnPlatoonCommissioned;
+                GameManager.Instance.PlatoonSystem.OnPlatoonDecommissioned += OnPlatoonDecommissioned;
             }
         }
 
@@ -66,14 +66,14 @@ namespace Overlord.Unity.UI.Panels
         {
             if (GameManager.Instance?.CraftSystem != null)
             {
-                GameManager.Instance.CraftSystem.OnCraftPurchased -= OnCraftChanged;
-                GameManager.Instance.CraftSystem.OnCraftDestroyed -= OnCraftDestroyed;
+                GameManager.Instance.CraftSystem.OnCraftPurchased -= OnCraftPurchased;
+                GameManager.Instance.CraftSystem.OnCraftScrapped -= OnCraftScrapped;
             }
 
             if (GameManager.Instance?.PlatoonSystem != null)
             {
-                GameManager.Instance.PlatoonSystem.OnPlatoonCommissioned -= OnPlatoonChanged;
-                GameManager.Instance.PlatoonSystem.OnPlatoonDisbanded -= OnPlatoonDisbanded;
+                GameManager.Instance.PlatoonSystem.OnPlatoonCommissioned -= OnPlatoonCommissioned;
+                GameManager.Instance.PlatoonSystem.OnPlatoonDecommissioned -= OnPlatoonDecommissioned;
             }
         }
 
@@ -84,40 +84,48 @@ namespace Overlord.Unity.UI.Panels
         /// <summary>
         /// Called when a craft is purchased.
         /// </summary>
-        private void OnCraftChanged(int planetId, CraftType craftType)
+        private void OnCraftPurchased(int craftId)
         {
-            if (planetId == GameManager.Instance?.SelectedPlanetID)
+            // Look up craft to get its location
+            if (GameManager.Instance?.GameState?.CraftLookup.TryGetValue(craftId, out var craft) == true)
             {
-                RefreshFleet(planetId);
+                if (craft.PlanetID == GameManager.Instance?.SelectedPlanetID)
+                {
+                    RefreshFleet(craft.PlanetID);
+                }
             }
         }
 
         /// <summary>
-        /// Called when a craft is destroyed.
+        /// Called when a craft is scrapped.
         /// </summary>
-        private void OnCraftDestroyed(int craftId)
+        private void OnCraftScrapped(int craftId)
         {
-            // Refresh if current planet has this craft
+            // Refresh current planet (craft might have been here)
             RefreshFleet(GameManager.Instance?.SelectedPlanetID ?? -1);
         }
 
         /// <summary>
         /// Called when a platoon is commissioned.
         /// </summary>
-        private void OnPlatoonChanged(int planetId, int platoonId)
+        private void OnPlatoonCommissioned(int platoonId)
         {
-            if (planetId == GameManager.Instance?.SelectedPlanetID)
+            // Look up platoon to get its location
+            if (GameManager.Instance?.GameState?.PlatoonLookup.TryGetValue(platoonId, out var platoon) == true)
             {
-                RefreshFleet(planetId);
+                if (platoon.PlanetID == GameManager.Instance?.SelectedPlanetID)
+                {
+                    RefreshFleet(platoon.PlanetID);
+                }
             }
         }
 
         /// <summary>
-        /// Called when a platoon is disbanded.
+        /// Called when a platoon is decommissioned.
         /// </summary>
-        private void OnPlatoonDisbanded(int platoonId)
+        private void OnPlatoonDecommissioned(int platoonId)
         {
-            // Refresh if current planet might be affected
+            // Refresh current planet (platoon might have been here)
             RefreshFleet(GameManager.Instance?.SelectedPlanetID ?? -1);
         }
 
@@ -170,7 +178,7 @@ namespace Overlord.Unity.UI.Panels
 
             // Get all craft at this planet
             var craftsAtPlanet = GameManager.Instance.GameState.Craft
-                .Where(c => c.Location == planetID)
+                .Where(c => c.PlanetID == planetID)
                 .ToList();
 
             if (craftsAtPlanet.Count == 0)
@@ -181,19 +189,19 @@ namespace Overlord.Unity.UI.Panels
             }
 
             // Count by type
-            var scoutCount = craftsAtPlanet.Count(c => c.Type == CraftType.Scout);
             var bcCount = craftsAtPlanet.Count(c => c.Type == CraftType.BattleCruiser);
             var ccCount = craftsAtPlanet.Count(c => c.Type == CraftType.CargoCruiser);
-            var bomberCount = craftsAtPlanet.Count(c => c.Type == CraftType.Bomber);
+            var ssCount = craftsAtPlanet.Count(c => c.Type == CraftType.SolarSatellite);
+            var apCount = craftsAtPlanet.Count(c => c.Type == CraftType.AtmosphereProcessor);
 
             // Build summary text
             var summary = "CRAFT:\n";
-            if (scoutCount > 0) summary += $"  Scouts: {scoutCount}\n";
             if (bcCount > 0) summary += $"  B.Cruisers: {bcCount}\n";
             if (ccCount > 0) summary += $"  C.Cruisers: {ccCount}\n";
-            if (bomberCount > 0) summary += $"  Bombers: {bomberCount}\n";
+            if (ssCount > 0) summary += $"  Satellites: {ssCount}\n";
+            if (apCount > 0) summary += $"  Processors: {apCount}\n";
 
-            summary += $"  Total: {craftsAtPlanet.Count}";
+            summary += $"  Total: {craftsAtPlanet.Count()}";
 
             craftSummaryText.text = summary;
             craftSummaryText.color = craftColor;
@@ -215,7 +223,7 @@ namespace Overlord.Unity.UI.Panels
 
             // Get all platoons at this planet
             var platoonsAtPlanet = GameManager.Instance.GameState.Platoons
-                .Where(p => p.Location == planetID)
+                .Where(p => p.PlanetID == planetID)
                 .ToList();
 
             if (platoonsAtPlanet.Count == 0)
@@ -225,22 +233,22 @@ namespace Overlord.Unity.UI.Panels
                 return;
             }
 
-            // Count by equipment type
-            var infantryCount = platoonsAtPlanet.Count(p => p.EquipmentType == EquipmentType.Infantry);
-            var gliderCount = platoonsAtPlanet.Count(p => p.EquipmentType == EquipmentType.Glider);
-            var tankCount = platoonsAtPlanet.Count(p => p.EquipmentType == EquipmentType.Tank);
-            var artilleryCount = platoonsAtPlanet.Count(p => p.EquipmentType == EquipmentType.Artillery);
-            var airMobileCount = platoonsAtPlanet.Count(p => p.EquipmentType == EquipmentType.AirMobile);
+            // Count by equipment level
+            var civilianCount = platoonsAtPlanet.Count(p => p.Equipment == EquipmentLevel.Civilian);
+            var basicCount = platoonsAtPlanet.Count(p => p.Equipment == EquipmentLevel.Basic);
+            var standardCount = platoonsAtPlanet.Count(p => p.Equipment == EquipmentLevel.Standard);
+            var advancedCount = platoonsAtPlanet.Count(p => p.Equipment == EquipmentLevel.Advanced);
+            var eliteCount = platoonsAtPlanet.Count(p => p.Equipment == EquipmentLevel.Elite);
 
             // Build summary text
             var summary = "PLATOONS:\n";
-            if (infantryCount > 0) summary += $"  Infantry: {infantryCount}\n";
-            if (gliderCount > 0) summary += $"  Glider: {gliderCount}\n";
-            if (tankCount > 0) summary += $"  Tank: {tankCount}\n";
-            if (artilleryCount > 0) summary += $"  Artillery: {artilleryCount}\n";
-            if (airMobileCount > 0) summary += $"  Air Mobile: {airMobileCount}\n";
+            if (civilianCount > 0) summary += $"  Civilian: {civilianCount}\n";
+            if (basicCount > 0) summary += $"  Basic: {basicCount}\n";
+            if (standardCount > 0) summary += $"  Standard: {standardCount}\n";
+            if (advancedCount > 0) summary += $"  Advanced: {advancedCount}\n";
+            if (eliteCount > 0) summary += $"  Elite: {eliteCount}\n";
 
-            summary += $"  Total: {platoonsAtPlanet.Count}";
+            summary += $"  Total: {platoonsAtPlanet.Count()}";
 
             platoonSummaryText.text = summary;
             platoonSummaryText.color = platoonColor;
