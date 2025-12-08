@@ -67,6 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Overlord.Unity.slnx",
-    "dotnet.dotnetPath": "C:\\Program Files\\dotnet\\dotnet.exe"
+    "dotnet.defaultSolution": "Overlord.Unity.slnx"
 }
