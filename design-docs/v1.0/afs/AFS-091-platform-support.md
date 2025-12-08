@@ -3,7 +3,7 @@
 **Status:** Updated (Post Design Review)
 **Priority:** P1 (High)
 **Owner:** Lead Developer
-**PRD Reference:** FR-PLATFORM-001, FR-CROSS-PLATFORM-001
+**PRD Reference:** FR-PLATFORM-001
 **Design Review:** Updated to specify Unity 6000 LTS baseline (aligned with warzones project)
 
 ---

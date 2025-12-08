@@ -3,7 +3,7 @@
 **Status:** Draft
 **Priority:** P1 (High)
 **Owner:** Lead Developer
-**PRD Reference:** FR-AI-002, FR-GAMEPLAY-005
+**PRD Reference:** FR-AI-003
 
 ---
 

@@ -3,7 +3,7 @@
 **Status:** Updated (Post Design Review)
 **Priority:** P2 (Medium)
 **Owner:** Lead Developer
-**PRD Reference:** FR-VFX-001, FR-GRAPHICS-002
+**PRD Reference:** FR-VFX-001
 **Design Review:** Updated to specify URP shaders (aligned with warzones project)
 
 ---

@@ -3,7 +3,7 @@
 **Status:** Draft
 **Priority:** P2 (Medium)
 **Owner:** Lead Developer
-**PRD Reference:** FR-AUDIO-001, FR-UX-005
+**PRD Reference:** FR-AUDIO-001
 
 ---
 
