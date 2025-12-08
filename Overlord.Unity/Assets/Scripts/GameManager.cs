@@ -57,6 +57,7 @@ namespace Overlord.Unity
         public SpaceCombatSystem SpaceCombatSystem { get; private set; }
         public BombardmentSystem BombardmentSystem { get; private set; }
         public InvasionSystem InvasionSystem { get; private set; }
+        public NavigationSystem NavigationSystem { get; private set; }
         public AIDecisionSystem AIDecisionSystem { get; private set; }
 
         #endregion
@@ -68,6 +69,12 @@ namespace Overlord.Unity
         /// -1 indicates no planet is selected.
         /// </summary>
         public int SelectedPlanetID { get; set; } = -1;
+
+        /// <summary>
+        /// Currently selected craft ID for navigation.
+        /// -1 indicates no craft is selected.
+        /// </summary>
+        public int SelectedCraftID { get; set; } = -1;
 
         /// <summary>
         /// Get the currently selected planet entity.
@@ -82,6 +89,84 @@ namespace Overlord.Unity
                 return planet;
 
             return null;
+        }
+
+        /// <summary>
+        /// Selects a planet. If no ship is selected and planet has player ships, auto-select first ship.
+        /// If a ship is selected, this becomes the navigation destination.
+        /// </summary>
+        /// <param name="planetID">Planet ID to select</param>
+        public void SelectPlanet(int planetID)
+        {
+            // If a craft is already selected, attempt navigation
+            if (SelectedCraftID >= 0)
+            {
+                MoveSelectedShipToPlanet(planetID);
+                return;
+            }
+
+            // Otherwise, just select the planet
+            SelectedPlanetID = planetID;
+            Debug.Log($"Planet selected: {planetID}");
+
+            // Auto-select first player ship at this planet (if any)
+            if (NavigationSystem != null)
+            {
+                var playerShips = NavigationSystem.GetPlayerShipsAtPlanet(planetID);
+                if (playerShips.Count > 0)
+                {
+                    SelectShip(playerShips[0].ID);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Selects a ship for navigation.
+        /// </summary>
+        /// <param name="craftID">Craft ID to select</param>
+        public void SelectShip(int craftID)
+        {
+            SelectedCraftID = craftID;
+
+            if (GameState.CraftLookup.TryGetValue(craftID, out var craft))
+            {
+                Debug.Log($"Ship selected: {craft.Name} ({craft.Type}) at planet {craft.PlanetID}");
+            }
+        }
+
+        /// <summary>
+        /// Moves the currently selected ship to a destination planet.
+        /// </summary>
+        /// <param name="destinationPlanetID">Destination planet ID</param>
+        public void MoveSelectedShipToPlanet(int destinationPlanetID)
+        {
+            if (SelectedCraftID < 0)
+            {
+                Debug.LogWarning("No ship selected for movement");
+                return;
+            }
+
+            if (NavigationSystem == null)
+            {
+                Debug.LogError("NavigationSystem not initialized");
+                return;
+            }
+
+            bool success = NavigationSystem.MoveShip(SelectedCraftID, destinationPlanetID);
+            if (success)
+            {
+                Debug.Log($"Ship {SelectedCraftID} moved to planet {destinationPlanetID}");
+
+                // Deselect ship after successful move
+                SelectedCraftID = -1;
+
+                // Select the destination planet
+                SelectedPlanetID = destinationPlanetID;
+            }
+            else
+            {
+                Debug.LogWarning($"Failed to move ship {SelectedCraftID} to planet {destinationPlanetID}");
+            }
         }
 
         #endregion
@@ -102,6 +187,18 @@ namespace Overlord.Unity
 
             Debug.Log("GameManager initialized");
         }
+
+        // TEMPORARILY DISABLED - Using SimpleInitializer for manual control
+        // Uncomment this after verifying planets spawn correctly
+        // private void Start()
+        // {
+        //     // Auto-initialize new game if no GameState exists
+        //     if (GameState == null)
+        //     {
+        //         Debug.Log("No GameState found - auto-initializing new game");
+        //         NewGame();
+        //     }
+        // }
 
         private void OnDestroy()
         {
@@ -164,6 +261,9 @@ namespace Overlord.Unity
             BombardmentSystem = new BombardmentSystem(GameState);
             InvasionSystem = new InvasionSystem(GameState, CombatSystem);
 
+            // Initialize navigation system
+            NavigationSystem = new NavigationSystem(GameState, ResourceSystem, CombatSystem);
+
             // Initialize AI system
             AIDecisionSystem = new AIDecisionSystem(
                 GameState,
@@ -225,6 +325,8 @@ namespace Overlord.Unity
                 BombardmentSystem = new BombardmentSystem(GameState);
                 InvasionSystem = new InvasionSystem(GameState, CombatSystem);
 
+                NavigationSystem = new NavigationSystem(GameState, ResourceSystem, CombatSystem);
+
                 AIDecisionSystem = new AIDecisionSystem(
                     GameState,
                     IncomeSystem,
@@ -285,6 +387,7 @@ namespace Overlord.Unity
             // Turn events
             TurnSystem.OnPhaseChanged += OnPhaseChanged;
             TurnSystem.OnTurnEnded += OnTurnEnded;
+            TurnSystem.OnVictoryAchieved += OnVictoryAchieved;
 
             // Combat events
             CombatSystem.OnBattleCompleted += OnBattleCompleted;
@@ -343,6 +446,24 @@ namespace Overlord.Unity
             Debug.Log($"AI is building {buildingType} on planet {planetID}");
         }
 
+        private void OnVictoryAchieved(VictoryResult result)
+        {
+            Debug.Log($"Victory Achieved: {result}");
+
+            // Set game over flag
+            GameState.IsGameOver = true;
+
+            // Show victory/defeat message
+            if (result == VictoryResult.PlayerVictory)
+            {
+                Debug.Log("VICTORY! You have conquered all enemy planets!");
+            }
+            else if (result == VictoryResult.AIVictory)
+            {
+                Debug.Log("DEFEAT! The enemy has destroyed you.");
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -355,6 +476,13 @@ namespace Overlord.Unity
             if (TurnSystem == null || GameState == null)
             {
                 Debug.LogWarning("Cannot end turn - game not initialized");
+                return;
+            }
+
+            // Check if game is over
+            if (GameState.IsGameOver)
+            {
+                Debug.LogWarning("Game is over - cannot advance turn");
                 return;
             }
 

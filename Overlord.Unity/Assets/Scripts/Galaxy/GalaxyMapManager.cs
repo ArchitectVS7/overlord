@@ -41,6 +41,7 @@ namespace Overlord.Unity.Galaxy
 
         private Dictionary<int, PlanetVisual> planetVisuals = new Dictionary<int, PlanetVisual>();
         private bool isInitialized;
+        private bool hasStartedInitialization = false;
 
         #endregion
 
@@ -59,8 +60,31 @@ namespace Overlord.Unity.Galaxy
             Debug.Log("GalaxyMapManager awakened");
         }
 
-        void Start()
+        // TEMPORARILY DISABLED - Using SimpleInitializer for manual control
+        // Uncomment this after verifying planets spawn correctly
+        // void Start()
+        // {
+        //     if (hasStartedInitialization)
+        //     {
+        //         Debug.LogWarning("GalaxyMapManager.Start() called but initialization already started! Skipping.");
+        //         return;
+        //     }
+        //
+        //     hasStartedInitialization = true;
+        //     // Wait one frame to ensure GameManager.Start() has completed
+        //     StartCoroutine(InitializeNextFrame());
+        // }
+
+        private System.Collections.IEnumerator InitializeNextFrame()
         {
+            yield return null; // Wait one frame
+
+            if (isInitialized)
+            {
+                Debug.LogWarning("InitializeNextFrame() called but already initialized! Skipping.");
+                yield break;
+            }
+
             InitializeGalaxyMap();
         }
 
@@ -73,6 +97,8 @@ namespace Overlord.Unity.Galaxy
         /// </summary>
         private void InitializeGalaxyMap()
         {
+            Debug.Log($"[DEBUG] InitializeGalaxyMap() called. isInitialized={isInitialized}, StackTrace:\n{System.Environment.StackTrace}");
+
             if (isInitialized)
             {
                 Debug.LogWarning("GalaxyMapManager already initialized");

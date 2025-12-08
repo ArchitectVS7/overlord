@@ -185,7 +185,7 @@ Cargo Bay Screen
 
 ## Screen Wireframes
 
-### 1. Main Screen (Galaxy Map)
+### 1. Galaxy View
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -510,9 +510,24 @@ Cargo Bay Screen
 │  │ 3-tn cool.│  │  │ Enemy:  ███  │  │  │                  │  │
 │  └──────────┘  │  └──────────────┘  │  └──────────────────┘  │
 ├──────────────────────────────────────────────────────────────┤
+│ AGGRESSION (Player Only):                                     │
+│ Cautious [████████░░░░░░░░░░] Aggressive                      │
+│ 50% (Balanced) - More strength = more casualties              │
+│ [Confirm Engagement]                                          │
+├──────────────────────────────────────────────────────────────┤
 │ [Battle continues...]                                         │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+**Combat Features:**
+- **Aggression Slider (Player Only):** 0-100% (Cautious → Aggressive)
+  - Low aggression: 0.8× strength, fewer casualties
+  - Balanced (50%): 1.0× strength, normal casualties
+  - High aggression: 1.2× strength, more casualties
+- **Action Buttons:** Continue (standard attack), Bombard (orbital strike, cooldown), Retreat (save troops, concede planet)
+- **Combat Visualization:** Animated battle with force bars showing relative strength
+- **Combat Log:** Turn-by-turn text display of actions and damage
+- **AI Aggression:** Fixed at 50% (Easy: 30%, Normal: 50%, Hard: 70%)
 
 ### 9. Victory/Defeat Screen
 
@@ -521,11 +536,14 @@ Cargo Bay Screen
 │                                                               │
 │                      ✅ VICTORY!                              │
 │                                                               │
-│             You have conquered the star system                │
+│                   MILITARY VICTORY ACHIEVED                   │
+│             You captured all enemy planets and                │
+│              eliminated all opposing military forces          │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │ STATISTICS                                               │ │
 │  │                                                          │ │
+│  │ Victory Type: Military Conquest                          │ │
 │  │ Total Turns: 42                                          │ │
 │  │ Planets Controlled: 6/6                                  │ │
 │  │ Enemy Forces Destroyed: 24 platoons                      │ │
@@ -548,6 +566,123 @@ Cargo Bay Screen
 - Victory music plays (triumphant fanfare)
 - [Return to Main Menu] navigates to Start Screen
 - [View Detailed Statistics] shows turn-by-turn breakdown
+
+### 10. Save/Load Screen
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [← Back]  Save/Load Game               [Sort: Recent ▼]     │
+├──────────────────────────────────────────────────────────────┤
+│  SAVE SLOTS (10 minimum, expandable):                         │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ 1. [AUTOSAVE] ☁️  Turn 42 - Military Victory          │  │
+│  │    Dec 8, 2025 10:23 PM    [💾 Save] [🗑️ Delete]      │  │
+│  │    [Preview: Starbase with 6 planets controlled]       │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ 2. Campaign Playthrough    Turn 38 - In Progress       │  │
+│  │    Dec 8, 2025 9:15 PM     [📂 Load] [🗑️ Delete]      │  │
+│  │    [Preview: 4/6 planets, building fleet]              │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ 3. Hard Difficulty         Turn 25 - In Progress       │  │
+│  │    Dec 7, 2025 8:42 PM     [📂 Load] [🗑️ Delete]      │  │
+│  │    [Preview: 3/6 planets, defensive position]          │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ 4. [EMPTY SLOT]                                         │  │
+│  │    No save data            [💾 Save to this slot]      │  │
+│  │                                                         │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ 5-10: [Additional slots below, scroll to view]         │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+├──────────────────────────────────────────────────────────────┤
+│ Cloud Sync: ☁️ Enabled (Last sync: 2 min ago)               │
+│ [Refresh Cloud Saves] [Manage Storage]                       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Save/Load Features:**
+- **10+ Save Slots:** Minimum 10 (PR FR-CORE-003), expandable to 20 on PC
+- **Autosave Slot:** Slot 1 reserved for autosave (created each turn start)
+- **Save Metadata:**
+  - Turn number and game state (e.g., "Turn 42 - Military Victory")
+  - Date and time of save
+  - Preview text (planet count, strategic position)
+  - Optional: Thumbnail screenshot (64×64 galaxy view snapshot)
+- **Cloud Sync Indicator:** ☁️ icon shows cloud save status
+  - Green ☁️ = synced
+  - Orange ⚠️ = sync pending
+  - Red ❌ = sync failed (offline)
+- **Actions:**
+  - **[Save]**: Overwrite slot with current game state
+  - **[Load]**: Load game from slot (with confirmation if unsaved changes)
+  - **[Delete]**: Delete save (with confirmation)
+  - **[Rename]**: Rename save slot (optional)
+- **Sorting:**
+  - Recent (default)
+  - Turn number (ascending/descending)
+  - Alphabetical
+- **Quick Save/Load Hotkeys (PC):**
+  - F5 = Quick Save (saves to last used slot)
+  - F9 = Quick Load (loads from last used slot)
+
+### 11. Pause Menu
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                               │
+│                         ⏸️ PAUSED                            │
+│                                                               │
+│                   ┌──────────────────────┐                    │
+│                   │                      │                    │
+│                   │  [▶️ Resume Game]    │                    │
+│                   │                      │                    │
+│                   │  [💾 Save Game]      │                    │
+│                   │                      │                    │
+│                   │  [📂 Load Game]      │                    │
+│                   │                      │                    │
+│                   │  [⚙️ Settings]        │                    │
+│                   │                      │                    │
+│                   │  [📖 Help]           │                    │
+│                   │                      │                    │
+│                   │  [🏠 Main Menu]      │                    │
+│                   │                      │                    │
+│                   │  [❌ Quit to Desktop]│                    │
+│                   │                      │                    │
+│                   └──────────────────────┘                    │
+│                                                               │
+│            (Galaxy View dimmed in background)                 │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Pause Menu Features:**
+- **Modal Overlay:** Dims Galaxy View background (z-index: modal layer)
+- **Accessible via ESC Key:** From Galaxy View only (AFS-071)
+- **Menu Options:**
+  1. **Resume Game**: Close pause menu, return to Galaxy View
+  2. **Save Game**: Opens Save/Load screen (save mode)
+  3. **Load Game**: Opens Save/Load screen (load mode, warns about unsaved changes)
+  4. **Settings**: Opens Settings screen (graphics, audio, controls)
+  5. **Help**: Opens in-game help/tutorial menu
+  6. **Main Menu**: Return to title screen (with "Save before quitting?" confirmation)
+  7. **Quit to Desktop**: Exit game (with confirmation)
+- **Input:**
+  - **ESC Key**: Toggle pause menu (open/close)
+  - **Mouse/Touch**: Click buttons
+  - **Gamepad**: D-pad navigation, A/B buttons
+- **Auto-Pause Triggers:**
+  - ESC key pressed during Galaxy View
+  - Window loses focus (PC only, optional setting)
+  - Home button pressed (mobile)
 
 ---
 
@@ -886,14 +1021,15 @@ public class ResponsiveUIManager : MonoBehaviour {
 
 ### Z-Index Layers
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `z-index-base` | 0 | Default layer |
-| `z-index-dropdown` | 100 | Dropdown menus |
-| `z-index-modal` | 200 | Modal dialogs |
-| `z-index-tooltip` | 300 | Tooltips |
-| `z-index-notification` | 400 | Toast notifications |
-| `z-index-tutorial` | 500 | Tutorial overlays (highest) |
+*Aligned with AFS-071 Panel Stacking (5 layers):*
+
+| Token | Value | Usage | Canvas Layer |
+|-------|-------|-------|--------------|
+| `z-index-base` | 0 | 3D Galaxy View, default layer | Layer 0 |
+| `z-index-hud` | 100 | Resource bars, turn counter, persistent HUD | Layer 1 |
+| `z-index-panel` | 200 | Planet Management, screens, dropdowns | Layer 2 |
+| `z-index-modal` | 300 | Modal dialogs, confirmations, tutorial overlays | Layer 3 |
+| `z-index-tooltip` | 400 | Tooltips, toast notifications (always on top) | Layer 4 |
 
 ---
 

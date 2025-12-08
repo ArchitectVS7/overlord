@@ -135,9 +135,14 @@ namespace Overlord.Unity.Galaxy
         {
             Debug.Log($"Planet clicked: {corePlanet?.Name ?? "Unknown"}");
 
-            // Notify selection system (will be hooked up in Phase 5)
-            // For now, just toggle selection for testing
-            SetSelected(!isSelected);
+            // Notify GameManager for planet selection and navigation
+            if (GameManager.Instance != null && corePlanet != null)
+            {
+                GameManager.Instance.SelectPlanet(corePlanet.ID);
+
+                // Visual selection feedback
+                SetSelected(true);
+            }
         }
 
         #endregion
