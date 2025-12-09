@@ -8,7 +8,7 @@ This is an archive and remake repository for the classic game "Overlord" (also k
 
 1. **Preservation:** Original game files (C64, MS-DOS) archived for historical reference
 2. **Analysis:** Decompilation and reverse engineering to understand game mechanics
-3. **Remake Development:** Modern Unity 6 remake with platform-agnostic architecture
+3. **Remake Development:** Modern **Phaser 3 + TypeScript** web-based remake with platform-agnostic architecture
 
 ## Repository Structure
 
@@ -22,223 +22,276 @@ This is an archive and remake repository for the classic game "Overlord" (also k
   - `dos/game.exe.c` - Decompiled MS-DOS version
   - `c64/` - Decompiled C64 ROM banks
 
-- **Overlord.Core/** - Platform-agnostic game logic (.NET Standard 2.1)
-  - All 18 game systems (combat, AI, resources, etc.)
-  - Models, interfaces, save system
+- **Overlord.Phaser/** - **PRIMARY ACTIVE CODEBASE** (Phaser 3 + TypeScript)
+  - `src/core/` - Platform-agnostic game logic (all 18 systems)
+  - `src/scenes/` - Phaser-specific rendering (BootScene, GalaxyMapScene)
+  - `src/config/` - Phaser configuration
+  - `tests/` - Jest test suite (304 tests, 93.78% coverage)
 
-- **Overlord.Core.Tests/** - xUnit test suite (.NET 8.0)
-  - 328+ tests, target 70%+ coverage
+- **Overlord.Core/** - Legacy C# .NET Standard 2.1 library (no longer primary)
+  - Contains 18 game systems ported to TypeScript in Overlord.Phaser
+  - Kept for reference, but Phaser is now the canonical implementation
 
-- **Overlord.Unity/** - Unity 6 presentation layer
-  - Thin wrappers around Overlord.Core
-  - UI, rendering, input, audio
+- **Overlord.Core.Tests/** - Legacy xUnit test suite (.NET 8.0)
+  - 328+ tests for C# version
 
-- **design-docs/v1.0/** - Comprehensive design documentation
-  - PRD, AFS (Atomic Feature Specifications), architecture diagrams
+- **Overlord.Unity/** - Legacy Unity 6 presentation layer (deprecated)
+  - Migration to Phaser completed (commit 56bdfcb)
+  - Kept for reference only
+
+- **design-docs/** - Design documentation
+  - `artifacts/prd.md` - Current Product Requirements Document (Phaser-focused)
+  - `PROTOTYPE-BATTLE-PLAN.md` - Development roadmap
 
 ## Critical Architecture Principle
 
-This project uses **strict separation of concerns**:
+This project uses **strict separation of concerns** with a web-first approach:
 
 ```
-Overlord.Core (netstandard2.1)
+Overlord.Phaser/src/core/ (TypeScript)
     ↓ Platform-independent business logic
     ↓ ALL game systems, models, AI, serialization
-    ↓ NO Unity dependencies
+    ↓ NO Phaser dependencies
     ↓
-Overlord.Unity (Unity 6)
+Overlord.Phaser/src/scenes/ (Phaser 3)
     ↓ Presentation layer ONLY
     ↓ Rendering, input, UI, audio
-    ↓ GameManager singleton coordinates Core systems
+    ↓ Subscribes to Core events for state updates
 ```
 
-**NEVER put game logic in Unity scripts.** Unity code should only:
-- Call Overlord.Core methods
+**NEVER put game logic in Phaser scenes.** Scene code should only:
+- Call Core system methods
 - Subscribe to Core events
-- Update UI/rendering based on Core state
+- Update rendering based on Core state
 
-## Building Overlord.Core
+## Development Workflow
 
-Overlord.Core **must be built for .NET Standard 2.1** (not net8.0) for Unity compatibility:
+### Quick Start
 
 ```bash
 # From repository root
+cd Overlord.Phaser
+
+# Install dependencies
+npm install
+
+# Start development server (http://localhost:8080, opens browser)
+npm start
+
+# Run tests
+npm test
+
+# Run tests with watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Build for production
+npm run build
+```
+
+### Project Commands
+
+**Development:**
+- `npm start` - Start Webpack dev server with hot reload (port 8080)
+- `npm run build` - Production build to `dist/` directory
+
+**Testing:**
+- `npm test` - Run all Jest tests once
+- `npm run test:watch` - Run tests in watch mode (recommended during development)
+- `npm run test:coverage` - Generate coverage report (target: >70%)
+
+**Code Quality:**
+- Use TypeScript path aliases: `@core/*`, `@scenes/*`, `@config/*`
+- Strict TypeScript enabled (no `any` types, all functions must have return types)
+- Jest tests required for all Core systems (scenes can have minimal coverage)
+
+### Running C# Legacy Code (Reference Only)
+
+The C# implementation is no longer the primary codebase but remains for reference:
+
+```bash
+# From repository root - build C# Core library
 cd Overlord.Core
 dotnet build Overlord.Core/Overlord.Core.csproj --configuration Release --framework netstandard2.1
-```
 
-**Why .NET Standard 2.1?**
-- Unity 6 runtime is .NET Standard 2.1
-- Building for net8.0 causes CS1705 errors (System.Runtime version conflicts)
-- System.Text.Json 5.0.2 is the highest compatible version
-
-### Copying DLLs to Unity
-
-Unity requires **ALL 5 DLLs** (Core + System.Text.Json dependencies):
-
-**PowerShell (Windows):**
-```powershell
-# From repository root
-$pluginsDir = "Overlord.Unity/Assets/Plugins/Overlord.Core"
-
-# 1. Core DLL
-Copy-Item "Overlord.Core/Overlord.Core/bin/Release/netstandard2.1/Overlord.Core.dll" $pluginsDir
-
-# 2. System.Text.Json and ALL transitive dependencies
-Copy-Item "$env:USERPROFILE/.nuget/packages/system.text.json/5.0.2/lib/netstandard2.0/System.Text.Json.dll" $pluginsDir
-Copy-Item "$env:USERPROFILE/.nuget/packages/system.text.encodings.web/5.0.1/lib/netstandard2.0/System.Text.Encodings.Web.dll" $pluginsDir
-Copy-Item "$env:USERPROFILE/.nuget/packages/microsoft.bcl.asyncinterfaces/5.0.0/lib/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.dll" $pluginsDir
-Copy-Item "$env:USERPROFILE/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll" $pluginsDir
-
-Write-Host "All DLLs copied successfully!"
-```
-
-**Bash (Git Bash/WSL/Linux/Mac):**
-```bash
-# From repository root
-PLUGINS_DIR="Overlord.Unity/Assets/Plugins/Overlord.Core"
-
-cp Overlord.Core/Overlord.Core/bin/Release/netstandard2.1/Overlord.Core.dll $PLUGINS_DIR/
-cp ~/.nuget/packages/system.text.json/5.0.2/lib/netstandard2.0/System.Text.Json.dll $PLUGINS_DIR/
-cp ~/.nuget/packages/system.text.encodings.web/5.0.1/lib/netstandard2.0/System.Text.Encodings.Web.dll $PLUGINS_DIR/
-cp ~/.nuget/packages/microsoft.bcl.asyncinterfaces/5.0.0/lib/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.dll $PLUGINS_DIR/
-cp ~/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll $PLUGINS_DIR/
-
-echo "All DLLs copied successfully!"
-```
-
-**Complete reference:** `Overlord.Unity/UNITY-DLL-DEPENDENCIES.md`
-
-## Running Tests
-
-```bash
-# From repository root - run all 328 tests
+# Run C# tests
 cd Overlord.Core.Tests
 dotnet test
 
 # Run specific test class
 dotnet test --filter "FullyQualifiedName~AIDecisionSystemTests"
-
-# Run with code coverage
-dotnet test --collect:"XPlat Code Coverage"
 ```
-
-**Important:** Tests use .NET 8.0, but Overlord.Core itself targets netstandard2.1 when built for Unity.
-
-## Opening Unity Project
-
-1. Open Unity Hub
-2. Add project: `Overlord.Unity/`
-3. Unity 6000.3.0f1 or later required
-4. First import takes 2-5 minutes (URP, Input System, TextMeshPro packages)
 
 ## Core System Architecture
 
-All 18 game systems implemented in `Overlord.Core/`:
+All 18 game systems implemented in `Overlord.Phaser/src/core/`:
 
 **State Management:**
-- `GameState` - Central state with entity lookup dictionaries
-- `SaveSystem` - GZip-compressed JSON serialization with SHA256 checksums
-- `TurnSystem` - Turn phases (Income → Action → Combat → End)
+- `GameState.ts` - Central state with entity lookup dictionaries
+- `SaveSystem.ts` - Compressed JSON serialization with checksums
+- `TurnSystem.ts` - Turn phases (Income → Action → Combat → End)
 
 **Economy:**
-- `ResourceSystem` - 5 resources (Credits, Minerals, Fuel, Food, Energy)
-- `IncomeSystem` - Per-turn resource generation
-- `PopulationSystem` - Growth, morale, happiness
-- `TaxationSystem` - Tax rate management
+- `ResourceSystem.ts` - 5 resources (Credits, Minerals, Fuel, Food, Energy)
+- `IncomeSystem.ts` - Per-turn resource generation
+- `PopulationSystem.ts` - Growth, morale, happiness
+- `TaxationSystem.ts` - Tax rate management
 
 **Entities:**
-- `EntitySystem` - Base entity management
-- `CraftSystem` - Spacecraft (Scouts, Battle Cruisers, Bombers)
-- `PlatoonSystem` - Ground forces with equipment/weapons/training
+- `EntitySystem.ts` - Base entity management
+- `CraftSystem.ts` - Spacecraft (Scouts, Battle Cruisers, Bombers)
+- `PlatoonSystem.ts` - Ground forces with equipment/weapons/training
 
 **Infrastructure:**
-- `BuildingSystem` - Planetary structures (Mines, Factories, Labs, etc.)
-- `UpgradeSystem` - Tech levels (Equipment, Weapons, Training)
-- `DefenseSystem` - Planetary defenses (Shields, Missiles, Laser Batteries)
+- `BuildingSystem.ts` - Planetary structures (Mines, Factories, Labs, etc.)
+- `UpgradeSystem.ts` - Tech levels (Equipment, Weapons, Training)
+- `DefenseSystem.ts` - Planetary defenses (Shields, Missiles, Laser Batteries)
 
 **Combat:**
-- `CombatSystem` - Ground combat (platoon vs platoon)
-- `SpaceCombatSystem` - Fleet battles
-- `BombardmentSystem` - Orbital bombardment
-- `InvasionSystem` - Planetary invasions
-- `NavigationSystem` - Spacecraft movement between planets
+- `CombatSystem.ts` - Ground combat (platoon vs platoon)
+- `SpaceCombatSystem.ts` - Fleet battles
+- `BombardmentSystem.ts` - Orbital bombardment
+- `InvasionSystem.ts` - Planetary invasions
+- `NavigationSystem.ts` - Spacecraft movement between planets
 
 **AI:**
-- `AIDecisionSystem` - 4 personalities (Aggressive, Defensive, Economic, Balanced)
+- `AIDecisionSystem.ts` - 4 personalities (Aggressive, Defensive, Economic, Balanced)
 - 3 difficulty levels (Easy, Normal, Hard)
 - Priority-based decision tree (Defense → Military → Economy → Attack)
 
 **Galaxy:**
-- `GalaxyGenerator` - Procedural 4-6 planet systems
+- `GalaxyGenerator.ts` - Deterministic seeded RNG, procedural 4-6 planet systems
 
-## Unity Integration Pattern
+## Phaser Integration Pattern
 
-`GameManager.cs` (singleton at `Overlord.Unity/Assets/Scripts/GameManager.cs`) coordinates all Core systems:
+Phaser scenes subscribe to Core events and update rendering:
 
-```csharp
-// Initialize Core systems
-GameState = new GameState();
-GalaxyGenerator = new GalaxyGenerator();
-var galaxy = GalaxyGenerator.GenerateGalaxy(seed: 42);
+```typescript
+// In BootScene.ts or GalaxyMapScene.ts
+import { GameState } from '@core/GameState';
+import { GalaxyGenerator } from '@core/GalaxyGenerator';
+import { TurnSystem } from '@core/TurnSystem';
 
-// Systems initialized with GameState
-ResourceSystem = new ResourceSystem(GameState);
-TurnSystem = new TurnSystem(GameState);
-AIDecisionSystem = new AIDecisionSystem(GameState, IncomeSystem, ResourceSystem,
-    BuildingSystem, CraftSystem, PlatoonSystem, personality, difficulty);
+export class GalaxyMapScene extends Phaser.Scene {
+  private gameState!: GameState;
+  private turnSystem!: TurnSystem;
 
-// Subscribe to events
-TurnSystem.OnPhaseChanged += OnPhaseChanged;
-CombatSystem.OnBattleCompleted += OnBattleCompleted;
+  create() {
+    // Initialize Core systems
+    this.gameState = new GameState();
+    const generator = new GalaxyGenerator();
+    const galaxy = generator.generateGalaxy(42); // Seeded RNG
+
+    this.turnSystem = new TurnSystem(this.gameState);
+
+    // Subscribe to events
+    this.turnSystem.onPhaseChanged = (phase) => {
+      this.updatePhaseUI(phase);
+    };
+
+    // Render planets from Core state
+    this.renderGalaxy(galaxy);
+  }
+}
 ```
 
 **Event-Driven Communication:**
-- Core systems fire C# `Action` events
-- Unity scripts subscribe and update UI/rendering
-- No direct Core → Unity dependencies
+- Core systems fire callbacks/events
+- Phaser scenes subscribe and update UI/rendering
+- No direct Core → Phaser dependencies
 
 ## Key Implementation Details
 
 **GameState Lookups:**
-- Entities stored in `List<T>` for JSON serialization
-- Dictionary lookups rebuilt after load: `GameState.RebuildLookups()`
-- O(1) access via `PlanetLookup`, `CraftLookup`, `PlatoonLookup`
+- Entities stored in `Map<string, T>` for O(1) access
+- All entities have unique IDs (UUIDs or generated IDs)
+- Lookups: `planetLookup`, `craftLookup`, `platoonLookup`
 
-**Constructor Dependencies:**
-- Most systems take `GameState` as first parameter
-- Some need additional dependencies (e.g., `CombatSystem` needs `PlatoonSystem`)
-- AI system has 6 dependencies (GameState + 5 systems)
+**Seeded Random Number Generation:**
+- `GalaxyGenerator` uses deterministic PRNG (seed 42 always produces same galaxy)
+- Critical for testing and reproducibility
+- Implemented as simple linear congruential generator (LCG)
 
 **Save/Load Flow:**
-- `SaveSystem.CreateSaveData(GameState)` → serializable POCO
-- `SaveSystem.Serialize(saveData)` → GZip-compressed byte[]
-- `SaveSystem.Deserialize(byte[])` → SaveData
-- `SaveSystem.ApplyToGameState(saveData, GameState)` → restores state
-- Call `GameState.RebuildLookups()` after load
+- `SaveSystem.createSaveData(gameState)` → serializable object
+- `SaveSystem.serialize(saveData)` → compressed JSON string
+- `SaveSystem.deserialize(json)` → SaveData object
+- `SaveSystem.applyToGameState(saveData, gameState)` → restores state
 
-## Common Issues
+**TypeScript Path Aliases:**
+- `@core/*` → `src/core/*`
+- `@scenes/*` → `src/scenes/*`
+- `@config/*` → `src/config/*`
 
-**CS1705 Error (System.Runtime version conflict):**
-- Cause: Overlord.Core built for net8.0 instead of netstandard2.1
-- Solution: Rebuild with `--framework netstandard2.1` flag
+Configured in both `tsconfig.json` and `webpack.config.js`.
 
-**"Unable to resolve reference 'System.Text.Json'" or "Reference has errors":**
-- Cause: Missing System.Text.Json transitive dependencies
-- Solution: Copy all 5 DLLs (see "Copying DLLs to Unity" above)
+## Testing Strategy
 
-**"Assembly will not be loaded due to errors":**
-- Verify all 5 DLLs present in `Assets/Plugins/Overlord.Core/`:
-  1. Overlord.Core.dll (118 KB)
-  2. System.Text.Json.dll (344 KB)
-  3. System.Text.Encodings.Web.dll (67 KB)
-  4. Microsoft.Bcl.AsyncInterfaces.dll (21 KB)
-  5. System.Runtime.CompilerServices.Unsafe.dll (17 KB)
+**Jest Configuration:**
+- Test files: `tests/unit/*.test.ts`, `tests/integration/*.test.ts`
+- Coverage threshold: 70% minimum (currently 93.78%)
+- Watch mode recommended during development
 
-**Constructor signature mismatches:**
-- Core API may have changed since GameManager.cs was written
-- Check actual constructor signatures in Core source files
-- Many constructors take fewer parameters than older versions
+**Test Structure:**
+```typescript
+// tests/unit/Position3D.test.ts
+import { Position3D } from '@core/models/Position3D';
+
+describe('Position3D', () => {
+  test('should calculate distance correctly', () => {
+    const p1 = new Position3D(0, 0, 0);
+    const p2 = new Position3D(3, 4, 0);
+    expect(p1.distanceTo(p2)).toBe(5);
+  });
+});
+```
+
+**Coverage Targets:**
+- Core systems (`src/core/*.ts`): 90%+ coverage (business logic critical)
+- Models (`src/core/models/*.ts`): 80%+ coverage
+- Scenes (`src/scenes/*.ts`): 50%+ coverage (rendering, less critical)
+
+Run `npm run test:coverage` to generate HTML coverage report in `coverage/` directory.
+
+## Common Development Tasks
+
+**Adding a New Core System:**
+1. Create TypeScript file in `src/core/` (e.g., `DiplomacySystem.ts`)
+2. Define models in `src/core/models/` if needed
+3. Write tests in `tests/unit/DiplomacySystem.test.ts`
+4. Ensure no Phaser imports in Core code
+5. Integrate with GameState and existing systems
+6. Update this CLAUDE.md if architecture changes
+
+**Adding a New Phaser Scene:**
+1. Create scene in `src/scenes/` (e.g., `DiplomacyScene.ts`)
+2. Extend `Phaser.Scene` base class
+3. Subscribe to Core system events in `create()`
+4. Update rendering in response to events
+5. Register scene in `src/config/PhaserConfig.ts`
+
+**Debugging:**
+- Source maps enabled in development mode (`eval-source-map`)
+- Browser DevTools work seamlessly with TypeScript
+- Hot reload active on file changes (Webpack dev server)
+- Check browser console for Phaser warnings/errors
+
+## Browser & Platform Support
+
+**Target Browsers:**
+- Desktop: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- Mobile: iOS Safari 14+, Chrome Mobile 90+
+
+**Rendering:**
+- Primary: WebGL 2.0 (60 FPS target desktop, 30 FPS mobile)
+- Fallback: Canvas 2D (30 FPS acceptable)
+- Phaser.AUTO auto-selects best renderer
+
+**Screen Sizes:**
+- Desktop: 1920×1080 optimized, 1280×720 minimum
+- Mobile: 375×667 minimum (iPhone 8), landscape recommended
 
 ## Archive Protection Rules
 
@@ -248,18 +301,62 @@ These are read-only preservation archives. Original binary integrity must be mai
 
 ## Design Documentation
 
-- `design-docs/v1.0/prd/PRD-overlord.md` - Product Requirements Document
-- `design-docs/v1.0/afs/` - 60+ Atomic Feature Specifications
-  - AFS-001 to AFS-010: Core Systems
-  - AFS-011 to AFS-020: Galaxy & Planets
-  - AFS-021 to AFS-030: Economy
-  - AFS-031 to AFS-040: Entities & Craft
-  - AFS-041 to AFS-050: Combat Systems
-  - AFS-051 to AFS-060: AI
-  - AFS-061 to AFS-070: Buildings & Infrastructure
-  - AFS-071 to AFS-080: UI Systems
-  - AFS-081 to AFS-092: Audio, VFX, Platform Support
+Current design docs reflect the **Phaser + TypeScript implementation**:
 
-## Development Workflow
+- `design-docs/artifacts/prd.md` - Product Requirements Document (Phaser-focused)
+- `design-docs/PROTOTYPE-BATTLE-PLAN.md` - Development roadmap and status
+- `design-docs/documentation-standards.md` - Documentation conventions
+
+**Legacy Unity/C# Design Docs (Archived):**
+- `design-docs/v1.0/` directory contains original Unity-focused documentation
+- These are reference only; Phaser PRD is canonical
+
+## Development Workflow Tools
 
 The repository includes BMAD (Business Modeling and Development) workflow system in `.bmad/` for project management and design workflows. These are optional tools and can be ignored if not needed.
+
+## Migration Notes (Unity → Phaser)
+
+**Why Phaser?**
+- AI-assisted development compatibility (Claude Code works seamlessly with TypeScript)
+- Zero-friction iteration (edit → save → browser refresh in 2 seconds)
+- Platform-agnostic Core (game logic has zero rendering dependencies)
+- Comprehensive testing (304 tests run in <5 seconds, no Unity editor required)
+
+**What Changed:**
+- ✅ All 18 Core systems ported from C# to TypeScript (functional parity)
+- ✅ 304 tests with 93.78% coverage (matching/exceeding C# test coverage)
+- ✅ Web-first deployment (browser-based, no native builds required)
+- ✅ Deterministic seeded RNG for galaxy generation (matches C# behavior)
+
+**What Stayed the Same:**
+- Core game architecture (platform-agnostic logic layer)
+- All 18 game systems and their interactions
+- Event-driven communication pattern
+- Save/load system design
+
+**Legacy Code Status:**
+- `Overlord.Core/` (C#): Reference only, not actively maintained
+- `Overlord.Unity/`: Deprecated, kept for reference
+- `Overlord.Phaser/`: **Primary active codebase**
+
+## Current Development Status
+
+**Working (as of commit 56bdfcb):**
+- ✅ All 18 core systems ported to TypeScript
+- ✅ 304 tests passing with 93.78% code coverage
+- ✅ Galaxy generation with deterministic seeded RNG
+- ✅ Basic Phaser rendering (planets, galaxy map)
+- ✅ Development server running at http://localhost:8080
+
+**In Progress:**
+- UI/UX implementation (galaxy map navigation, planet details)
+- Phaser scene integration with Core systems
+- Combat resolution UI
+- Save/load integration with Supabase (cloud backend)
+
+**Planned:**
+- Flash Scenarios system (quick-play tactical challenges)
+- Scenario Pack system (data-driven AI configurations)
+- Mobile web optimization (touch controls, responsive UI)
+- Audio system (sound effects, background music)

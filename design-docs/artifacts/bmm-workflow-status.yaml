@@ -71,12 +71,12 @@ workflow_status:
     required: true
     workflows:
       - id: "create-architecture"
-        status: "design-docs/v1.0/planning/architecture-diagram.md"
+        status: "design-docs/artifacts/game-architecture.md"
         agent: "architect"
         command: "create-architecture"
         output: "System architecture document"
-        note: "Complete system design with data flow, API reference"
-        completed_date: "pre-existing"
+        note: "Phaser 3 + TypeScript architecture with 5 ADRs, comprehensive implementation patterns, Supabase integration, Flash Scenarios & Scenario Pack patterns"
+        completed_date: "2025-12-09"
 
       - id: "create-epics-and-stories"
         status: "design-docs/v1.0/afs/"
