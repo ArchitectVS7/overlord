@@ -60,20 +60,19 @@ namespace Overlord.Unity.Galaxy
             Debug.Log("GalaxyMapManager awakened");
         }
 
-        // TEMPORARILY DISABLED - Using SimpleInitializer for manual control
-        // Uncomment this after verifying planets spawn correctly
-        // void Start()
-        // {
-        //     if (hasStartedInitialization)
-        //     {
-        //         Debug.LogWarning("GalaxyMapManager.Start() called but initialization already started! Skipping.");
-        //         return;
-        //     }
-        //
-        //     hasStartedInitialization = true;
-        //     // Wait one frame to ensure GameManager.Start() has completed
-        //     StartCoroutine(InitializeNextFrame());
-        // }
+        // AUTO-INITIALIZATION ENABLED
+        void Start()
+        {
+            if (hasStartedInitialization)
+            {
+                Debug.LogWarning("GalaxyMapManager.Start() called but initialization already started! Skipping.");
+                return;
+            }
+
+            hasStartedInitialization = true;
+            // Wait one frame to ensure GameManager.Start() has completed
+            StartCoroutine(InitializeNextFrame());
+        }
 
         private System.Collections.IEnumerator InitializeNextFrame()
         {

@@ -188,17 +188,16 @@ namespace Overlord.Unity
             Debug.Log("GameManager initialized");
         }
 
-        // TEMPORARILY DISABLED - Using SimpleInitializer for manual control
-        // Uncomment this after verifying planets spawn correctly
-        // private void Start()
-        // {
-        //     // Auto-initialize new game if no GameState exists
-        //     if (GameState == null)
-        //     {
-        //         Debug.Log("No GameState found - auto-initializing new game");
-        //         NewGame();
-        //     }
-        // }
+        // AUTO-INITIALIZATION ENABLED
+        private void Start()
+        {
+            // Auto-initialize new game if no GameState exists
+            if (GameState == null)
+            {
+                Debug.Log("No GameState found - auto-initializing new game");
+                NewGame();
+            }
+        }
 
         private void OnDestroy()
         {
@@ -207,6 +206,17 @@ namespace Overlord.Unity
                 _instance = null;
             }
         }
+
+#if UNITY_EDITOR
+        // Clean up when exiting Play mode in editor to avoid "GameObjects not cleaned up" warning
+        private void OnApplicationQuit()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
+        }
+#endif
 
         #endregion
 

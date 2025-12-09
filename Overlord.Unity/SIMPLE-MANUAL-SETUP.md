@@ -43,6 +43,7 @@ Let's bypass the SceneBootstrapper issues and do a simple manual setup.
    - Drag **Planets** GameObject into "Planets Container" field
 
 3. Select **PlanetFactory** in Hierarchy
+
 4. In Inspector:
    - Drag **Planets** GameObject into "Planets Container" field
    - Verify **Planet Prefab** is assigned
