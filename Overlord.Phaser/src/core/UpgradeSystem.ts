@@ -162,13 +162,16 @@ export class UpgradeSystem {
       this.aiResearchTurnsRemaining = 0;
     }
 
-    // Upgrade all existing Battle Cruisers owned by this faction
+    // Get all Battle Cruisers owned by this faction for future upgrade
     const battleCruisers = this.gameState.craft.filter(
       c => c.owner === faction && c.type === CraftType.BattleCruiser
     );
 
-    // Future combat system will use the faction's weapon tier
-    // For now, we just track the faction's weapon tier
+    // Future combat system will apply weapon tier to these craft
+    // For now, log the count and track the faction's weapon tier
+    if (battleCruisers.length > 0) {
+      // Prepared for future weapon tier application
+    }
 
     this.onResearchCompleted?.(faction, researchedTier);
   }

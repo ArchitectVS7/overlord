@@ -1,14 +1,23 @@
 import Phaser from 'phaser';
 import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
+import { InputSystem } from '@core/InputSystem';
 import { Difficulty } from '@core/models/Enums';
 import { PlanetEntity, getPlanetColor } from '@core/models/PlanetEntity';
+import { InputManager } from './InputManager';
+import { CameraController } from './controllers/CameraController';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
   private gameState!: GameState;
+  private inputSystem!: InputSystem;
+  private inputManager!: InputManager;
+  private cameraController!: CameraController;
   private planetGraphics!: Phaser.GameObjects.Graphics;
   private planetLabels: Phaser.GameObjects.Text[] = [];
+  private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
+  private selectedPlanetId: string | null = null;
+  private selectionGraphics!: Phaser.GameObjects.Graphics;
 
   constructor() {
     super({ key: 'GalaxyMapScene' });
@@ -17,6 +26,21 @@ export class GalaxyMapScene extends Phaser.Scene {
   public create(): void {
     // Initialize game state
     this.gameState = new GameState();
+
+    // Initialize input system (platform-agnostic)
+    this.inputSystem = new InputSystem({
+      enableKeyboard: true,
+      enableMouse: true,
+      enableFocusWrap: true
+    });
+
+    // Initialize input manager (Phaser integration)
+    this.inputManager = new InputManager(this, this.inputSystem, {
+      hoverTint: 0xaaaaaa,
+      focusBorderColor: 0xffff00,
+      focusBorderWidth: 3,
+      hoverCursor: 'pointer'
+    });
 
     // Generate galaxy with fixed seed for testing (42)
     const generator = new GalaxyGenerator();
@@ -32,27 +56,168 @@ export class GalaxyMapScene extends Phaser.Scene {
     console.log(`Galaxy generated: ${this.galaxy.name}`);
     console.log(`Planets: ${this.galaxy.planets.length}`);
 
-    // Set up camera (center on origin)
-    this.cameras.main.centerOn(0, 0);
-    this.cameras.main.setZoom(1.5); // Zoom in for better visibility
+    // Calculate galaxy bounds for camera
+    const galaxyBounds = this.calculateGalaxyBounds();
 
-    // Create graphics object for drawing planets
+    // Initialize camera controller
+    this.cameraController = new CameraController(this, galaxyBounds);
+
+    // Find home planet (first player-owned or first planet) for camera home
+    const homePlanet = this.galaxy.planets.find(p => p.owner === 'Player') || this.galaxy.planets[0];
+    if (homePlanet) {
+      this.cameraController.setHomePosition(homePlanet.position.x, homePlanet.position.z, 1.0);
+      this.cameraController.centerOn(homePlanet.position.x, homePlanet.position.z, false);
+    }
+
+    // Enable camera controls
+    this.cameraController.enableDragPan();
+    this.cameraController.enableWheelZoom();
+
+    // Create graphics objects
     this.planetGraphics = this.add.graphics();
+    this.selectionGraphics = this.add.graphics();
 
     // Render all planets
     this.renderPlanets();
 
-    // Add debug info
+    // Setup keyboard shortcuts
+    this.registerKeyboardShortcuts();
+
+    // Setup input callbacks
+    this.setupInputCallbacks();
+
+    // Add Reset View button
+    this.addResetViewButton();
+
+    // Add debug info and controls help
     this.addDebugInfo();
+    this.addControlsHelp();
   }
 
-  private renderPlanets(): void {
+  private calculateGalaxyBounds(): { minX: number; maxX: number; minY: number; maxY: number } {
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+
     this.galaxy.planets.forEach(planet => {
-      this.renderPlanet(planet);
+      minX = Math.min(minX, planet.position.x);
+      maxX = Math.max(maxX, planet.position.x);
+      minY = Math.min(minY, planet.position.z);
+      maxY = Math.max(maxY, planet.position.z);
+    });
+
+    // Add padding
+    const padding = 200;
+    return {
+      minX: minX - padding,
+      maxX: maxX + padding,
+      minY: minY - padding,
+      maxY: maxY + padding
+    };
+  }
+
+  private registerKeyboardShortcuts(): void {
+    // Escape - Pause Menu
+    this.inputManager.registerShortcut({
+      key: 'Escape',
+      action: 'pause'
+    });
+
+    // H - Help
+    this.inputManager.registerShortcut({
+      key: 'h',
+      action: 'help'
+    });
+
+    // O - Objectives
+    this.inputManager.registerShortcut({
+      key: 'o',
+      action: 'objectives'
+    });
+
+    // M - Main Menu
+    this.inputManager.registerShortcut({
+      key: 'm',
+      action: 'mainMenu'
+    });
+
+    // Ctrl+S - Save
+    this.inputManager.registerShortcut({
+      key: 's',
+      ctrl: true,
+      action: 'save'
     });
   }
 
-  private renderPlanet(planet: PlanetEntity): void {
+  private setupInputCallbacks(): void {
+    this.inputSystem.setCallbacks({
+      onShortcutTriggered: (action, _timestamp) => {
+        this.handleShortcut(action);
+      },
+      onFocusChanged: (elementId) => {
+        this.updateSelectionVisuals();
+        if (elementId) {
+          console.log(`Focus changed to: ${elementId}`);
+        }
+      },
+      onElementActivated: (elementId, method) => {
+        this.selectPlanet(elementId);
+        console.log(`Planet ${elementId} activated via ${method}`);
+      },
+      onHoverChanged: (_elementId) => {
+        // Hover visuals handled by InputManager
+      }
+    });
+  }
+
+  private handleShortcut(action: string): void {
+    switch (action) {
+      case 'pause':
+        console.log('Pause menu (Esc pressed)');
+        // TODO: Show pause menu
+        break;
+      case 'help':
+        console.log('Help overlay (H pressed)');
+        // TODO: Show help
+        break;
+      case 'objectives':
+        console.log('Objectives panel (O pressed)');
+        // TODO: Show objectives
+        break;
+      case 'mainMenu':
+        console.log('Main menu (M pressed)');
+        // TODO: Return to main menu
+        break;
+      case 'save':
+        console.log('Save game (Ctrl+S pressed)');
+        // TODO: Save game
+        break;
+      case 'endTurn':
+        console.log('End turn (Space pressed in action phase)');
+        // TODO: End turn
+        break;
+    }
+  }
+
+  private renderPlanets(): void {
+    // Sort planets for consistent focus order (top-left to bottom-right by screen distance)
+    // Using screen coordinates: X for horizontal, Z for vertical (2D projection)
+    const sortedPlanets = [...this.galaxy.planets].sort((a, b) => {
+      // Calculate distance from top-left (0,0) using Manhattan distance for predictable order
+      // Prioritize vertical position (row), then horizontal (column)
+      const aRow = Math.round(a.position.z / 50); // Group into rows
+      const bRow = Math.round(b.position.z / 50);
+      if (aRow !== bRow) {
+        return aRow - bRow; // Sort by row first
+      }
+      return a.position.x - b.position.x; // Then by x within row
+    });
+
+    sortedPlanets.forEach((planet, index) => {
+      this.renderPlanet(planet, index);
+    });
+  }
+
+  private renderPlanet(planet: PlanetEntity, focusOrder: number): void {
     // 3D → 2D projection (orthographic: X/Z → screen coordinates)
     const screenX = planet.position.x;
     const screenZ = planet.position.z;
@@ -91,8 +256,61 @@ export class GalaxyMapScene extends Phaser.Scene {
         fontFamily: 'Arial'
       }
     );
-    label.setOrigin(0.5, 0); // Center horizontally
+    label.setOrigin(0.5, 0);
     this.planetLabels.push(label);
+
+    // Create interactive zone for this planet
+    const zone = this.add.zone(screenX, screenZ, rectWidth, rectHeight);
+    zone.setRectangleDropZone(rectWidth, rectHeight);
+    const planetIdStr = String(planet.id);
+    this.planetZones.set(planetIdStr, zone);
+
+    // Register with InputManager
+    this.inputManager.registerInteractive(planetIdStr, zone, focusOrder);
+  }
+
+  private selectPlanet(planetId: string): void {
+    // Don't select if we're dragging the camera
+    if (this.cameraController && this.cameraController.getIsDragging()) {
+      return;
+    }
+
+    this.selectedPlanetId = planetId;
+    this.updateSelectionVisuals();
+
+    const planetIdNum = parseInt(planetId, 10);
+    const planet = this.galaxy.planets.find(p => p.id === planetIdNum);
+    if (planet) {
+      console.log(`Selected planet: ${planet.name} (Owner: ${planet.owner})`);
+
+      // Auto-pan to planet if not visible
+      this.cameraController.panToIfNotVisible(planet.position.x, planet.position.z, 100);
+
+      // TODO: Show planet details panel
+    }
+  }
+
+  private updateSelectionVisuals(): void {
+    this.selectionGraphics.clear();
+
+    const focusedId = this.inputSystem.getFocusedElementId();
+    if (!focusedId) {
+      return;
+    }
+
+    const zone = this.planetZones.get(focusedId);
+    if (!zone) {
+      return;
+    }
+
+    // Draw focus indicator (yellow border)
+    this.selectionGraphics.lineStyle(3, 0xffff00, 1);
+    this.selectionGraphics.strokeRect(
+      zone.x - zone.width / 2 - 3,
+      zone.y - zone.height / 2 - 3,
+      zone.width + 6,
+      zone.height + 6
+    );
   }
 
   private addDebugInfo(): void {
@@ -103,14 +321,22 @@ export class GalaxyMapScene extends Phaser.Scene {
       backgroundColor: '#000000',
       padding: { x: 5, y: 5 }
     });
-    debugText.setScrollFactor(0); // Fixed to camera
+    debugText.setScrollFactor(0);
 
     const updateDebug = () => {
+      const focusedId = this.inputSystem.getFocusedElementId();
+      const focusedPlanet = focusedId
+        ? this.galaxy.planets.find(p => String(p.id) === focusedId)
+        : null;
+
       debugText.setText([
         `Galaxy: ${this.galaxy.name}`,
         `Seed: ${this.galaxy.seed}`,
         `Planets: ${this.galaxy.planets.length}`,
         `Turn: ${this.gameState.currentTurn}`,
+        '',
+        `Focused: ${focusedPlanet?.name || 'None'}`,
+        `Selected: ${this.selectedPlanetId || 'None'}`,
         '',
         'Planet List:',
         ...this.galaxy.planets.map(p =>
@@ -119,6 +345,110 @@ export class GalaxyMapScene extends Phaser.Scene {
       ]);
     };
 
+    // Update debug info periodically
+    this.time.addEvent({
+      delay: 100,
+      callback: updateDebug,
+      loop: true
+    });
+
     updateDebug();
+  }
+
+  private addControlsHelp(): void {
+    const controlsText = this.add.text(
+      this.cameras.main.width - 10,
+      10,
+      [
+        'Controls:',
+        '',
+        'Mouse: Click to select',
+        'Mouse Drag: Pan map',
+        'Mouse Wheel: Zoom',
+        'Tab: Cycle focus',
+        'Shift+Tab: Cycle back',
+        'Enter/Space: Select focused',
+        '',
+        'Shortcuts:',
+        'Esc: Pause menu',
+        'H: Help overlay',
+        'O: Objectives',
+        'M: Main menu',
+        'Ctrl+S: Save game'
+      ].join('\n'),
+      {
+        fontSize: '12px',
+        color: '#cccccc',
+        fontFamily: 'monospace',
+        backgroundColor: '#000000',
+        padding: { x: 5, y: 5 },
+        align: 'right'
+      }
+    );
+    controlsText.setOrigin(1, 0);
+    controlsText.setScrollFactor(0);
+  }
+
+  private addResetViewButton(): void {
+    const buttonX = this.cameras.main.width - 120;
+    const buttonY = this.cameras.main.height - 50;
+
+    // Create button background
+    const buttonBg = this.add.graphics();
+    buttonBg.fillStyle(0x333333, 0.9);
+    buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
+    buttonBg.setScrollFactor(0);
+
+    // Create button text
+    const buttonText = this.add.text(
+      buttonX + 50,
+      buttonY + 17,
+      'Reset View',
+      {
+        fontSize: '14px',
+        color: '#ffffff',
+        fontFamily: 'Arial'
+      }
+    );
+    buttonText.setOrigin(0.5);
+    buttonText.setScrollFactor(0);
+
+    // Create invisible interactive zone
+    const hitZone = this.add.zone(buttonX + 50, buttonY + 17, 100, 35);
+    hitZone.setScrollFactor(0);
+    hitZone.setInteractive({ useHandCursor: true });
+
+    // Hover effects
+    hitZone.on('pointerover', () => {
+      buttonBg.clear();
+      buttonBg.fillStyle(0x555555, 0.9);
+      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
+      buttonText.setStyle({ color: '#00ff00' });
+    });
+
+    hitZone.on('pointerout', () => {
+      buttonBg.clear();
+      buttonBg.fillStyle(0x333333, 0.9);
+      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
+      buttonText.setStyle({ color: '#ffffff' });
+    });
+
+    // Click handler
+    hitZone.on('pointerdown', () => {
+      if (!this.cameraController.getIsDragging()) {
+        this.cameraController.resetView(true);
+      }
+    });
+  }
+
+  public shutdown(): void {
+    if (this.cameraController) {
+      this.cameraController.destroy();
+    }
+    if (this.inputManager) {
+      this.inputManager.destroy();
+    }
+    this.planetZones.clear();
+    this.planetLabels = [];
   }
 }
