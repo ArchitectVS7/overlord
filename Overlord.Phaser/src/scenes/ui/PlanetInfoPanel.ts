@@ -34,6 +34,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private planet: PlanetEntity | null = null;
   private isVisible: boolean = false;
   private closeCallback: (() => void) | null = null;
+  private backdrop!: Phaser.GameObjects.Rectangle; // Fullscreen backdrop for click-outside-to-close
 
   // Text elements for updating
   private nameText!: Phaser.GameObjects.Text;
@@ -48,10 +49,27 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     super(scene, 0, 0);
     scene.add.existing(this);
 
+    this.createBackdrop();
     this.createPanel();
     this.setVisible(false);
     this.setDepth(1000); // Above all game elements
     this.setScrollFactor(0); // Fixed to camera
+  }
+
+  /**
+   * Creates a fullscreen backdrop for click-outside-to-close functionality (AC5)
+   */
+  private createBackdrop(): void {
+    const camera = this.scene.cameras.main;
+    this.backdrop = this.scene.add.rectangle(0, 0, camera.width, camera.height, 0x000000, 0);
+    this.backdrop.setOrigin(0, 0);
+    this.backdrop.setInteractive({ useHandCursor: false });
+    this.backdrop.setScrollFactor(0);
+    this.backdrop.setDepth(999); // Just below panel
+    this.backdrop.setVisible(false);
+
+    // Click on backdrop closes panel (AC5 requirement)
+    this.backdrop.on('pointerdown', () => this.hide());
   }
 
   /**
@@ -249,20 +267,31 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private createCloseButton(): void {
     const closeX = PANEL_WIDTH - 25;
     const closeY = 15;
+    const MIN_TOUCH_TARGET = 44; // WCAG 2.1 minimum touch target size
 
-    const closeButton = this.scene.add.text(closeX, closeY, '×', {
+    // Container for close button with proper touch target
+    const closeContainer = this.scene.add.container(closeX, closeY);
+
+    // Invisible zone for 44x44px touch target (accessibility requirement)
+    const touchZone = this.scene.add.zone(0, 0, MIN_TOUCH_TARGET, MIN_TOUCH_TARGET);
+    touchZone.setInteractive({ useHandCursor: true });
+    closeContainer.add(touchZone);
+
+    // Visible X text
+    const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '24px',
       fontFamily: 'Arial',
       color: '#888888'
     });
-    closeButton.setOrigin(0.5);
-    closeButton.setInteractive({ useHandCursor: true });
+    closeText.setOrigin(0.5);
+    closeContainer.add(closeText);
 
-    closeButton.on('pointerover', () => closeButton.setColor('#ffffff'));
-    closeButton.on('pointerout', () => closeButton.setColor('#888888'));
-    closeButton.on('pointerdown', () => this.hide());
+    // Event handlers on the touch zone
+    touchZone.on('pointerover', () => closeText.setColor('#ffffff'));
+    touchZone.on('pointerout', () => closeText.setColor('#888888'));
+    touchZone.on('pointerdown', () => this.hide());
 
-    this.add(closeButton);
+    this.add(closeContainer);
   }
 
   /**
@@ -356,7 +385,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Shows the panel with animation
+   * Shows the panel with animation (100ms per NFR-P3)
    */
   public show(onClose?: () => void): void {
     if (this.isVisible) return;
@@ -364,6 +393,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.closeCallback = onClose || null;
     this.isVisible = true;
     this.setVisible(true);
+    this.backdrop.setVisible(true); // Show backdrop for click-outside-to-close
 
     // Position on right side of screen
     const camera = this.scene.cameras.main;
@@ -372,31 +402,32 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
       (camera.height - PANEL_HEIGHT) / 2
     );
 
-    // Animate in from right
+    // Animate in from right (100ms per NFR-P3 requirement)
     this.setAlpha(0);
     this.x += 50;
     this.scene.tweens.add({
       targets: this,
       alpha: 1,
       x: camera.width - PANEL_WIDTH - 20,
-      duration: 150,
+      duration: 100,
       ease: 'Power2'
     });
   }
 
   /**
-   * Hides the panel with animation
+   * Hides the panel with animation (100ms per NFR-P3)
    */
   public hide(): void {
     if (!this.isVisible) return;
 
     this.isVisible = false;
+    this.backdrop.setVisible(false); // Hide backdrop
 
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
       x: this.x + 50,
-      duration: 150,
+      duration: 100,
       ease: 'Power2',
       onComplete: () => {
         this.setVisible(false);
@@ -418,8 +449,13 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
    * Cleans up the panel
    */
   public destroy(): void {
+    // Stop any running tweens to prevent memory leaks
+    this.scene.tweens.killTweensOf(this);
     this.resourceTexts = [];
     this.actionButtons = [];
+    if (this.backdrop) {
+      this.backdrop.destroy();
+    }
     super.destroy();
   }
 }
