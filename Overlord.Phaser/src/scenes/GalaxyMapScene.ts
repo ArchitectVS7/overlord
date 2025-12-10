@@ -8,6 +8,7 @@ import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
 import { PlanetRenderer } from './renderers/PlanetRenderer';
 import { StarFieldRenderer } from './renderers/StarFieldRenderer';
+import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -17,6 +18,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private cameraController!: CameraController;
   private planetRenderer!: PlanetRenderer;
   private starFieldRenderer!: StarFieldRenderer;
+  private planetInfoPanel!: PlanetInfoPanel;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -88,6 +90,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Create selection graphics (on top of planets)
     this.selectionGraphics = this.add.graphics();
     this.selectionGraphics.setDepth(100);
+
+    // Create planet info panel (fixed to camera, above everything)
+    this.planetInfoPanel = new PlanetInfoPanel(this);
 
     // Render all planets
     this.renderPlanets();
@@ -190,8 +195,13 @@ export class GalaxyMapScene extends Phaser.Scene {
   private handleShortcut(action: string): void {
     switch (action) {
       case 'pause':
-        console.log('Pause menu (Esc pressed)');
-        // TODO: Show pause menu
+        // Close planet info panel if open, otherwise show pause menu
+        if (this.planetInfoPanel && this.planetInfoPanel.getIsVisible()) {
+          this.planetInfoPanel.hide();
+        } else {
+          console.log('Pause menu (Esc pressed)');
+          // TODO: Show pause menu
+        }
         break;
       case 'help':
         console.log('Help overlay (H pressed)');
@@ -273,7 +283,9 @@ export class GalaxyMapScene extends Phaser.Scene {
       // Auto-pan to planet if not visible
       this.cameraController.panToIfNotVisible(planet.position.x, planet.position.z, 100);
 
-      // TODO: Show planet details panel
+      // Show planet info panel
+      this.planetInfoPanel.setPlanet(planet);
+      this.planetInfoPanel.show();
     }
   }
 
@@ -532,6 +544,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.starFieldRenderer) {
       this.starFieldRenderer.destroy();
+    }
+    if (this.planetInfoPanel) {
+      this.planetInfoPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();

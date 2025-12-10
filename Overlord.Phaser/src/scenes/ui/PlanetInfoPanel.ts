@@ -1,0 +1,425 @@
+/**
+ * PlanetInfoPanel - Displays detailed planet information when a planet is selected
+ *
+ * Features:
+ * - Shows planet name, type, owner with color coding
+ * - Displays population and morale stats
+ * - Shows resource income for player-owned planets
+ * - Provides action buttons (disabled for Epic 4/5/6 integration)
+ */
+
+import Phaser from 'phaser';
+import { PlanetEntity } from '@core/models/PlanetEntity';
+import { FactionType } from '@core/models/Enums';
+import { OWNER_COLORS } from '../../config/VisualConfig';
+
+// Panel dimensions and styling
+const PANEL_WIDTH = 280;
+const PANEL_HEIGHT = 380;
+const PADDING = 15;
+const HEADER_HEIGHT = 60;
+const BUTTON_HEIGHT = 36;
+
+// Colors
+const BG_COLOR = 0x1a1a2e;
+const BORDER_WIDTH = 3;
+const TEXT_COLOR = '#ffffff';
+const LABEL_COLOR = '#aaaaaa';
+const DISABLED_COLOR = '#666666';
+
+export class PlanetInfoPanel extends Phaser.GameObjects.Container {
+  private background!: Phaser.GameObjects.Graphics;
+  private borderGraphics!: Phaser.GameObjects.Graphics;
+  private contentContainer!: Phaser.GameObjects.Container;
+  private planet: PlanetEntity | null = null;
+  private isVisible: boolean = false;
+  private closeCallback: (() => void) | null = null;
+
+  // Text elements for updating
+  private nameText!: Phaser.GameObjects.Text;
+  private typeText!: Phaser.GameObjects.Text;
+  private ownerText!: Phaser.GameObjects.Text;
+  private populationText!: Phaser.GameObjects.Text;
+  private moraleText!: Phaser.GameObjects.Text;
+  private resourceTexts: Phaser.GameObjects.Text[] = [];
+  private actionButtons: Phaser.GameObjects.Container[] = [];
+
+  constructor(scene: Phaser.Scene) {
+    super(scene, 0, 0);
+    scene.add.existing(this);
+
+    this.createPanel();
+    this.setVisible(false);
+    this.setDepth(1000); // Above all game elements
+    this.setScrollFactor(0); // Fixed to camera
+  }
+
+  /**
+   * Creates the panel structure with all UI elements
+   */
+  private createPanel(): void {
+    // Background
+    this.background = this.scene.add.graphics();
+    this.background.fillStyle(BG_COLOR, 0.95);
+    this.background.fillRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.add(this.background);
+
+    // Border (will be colored by owner)
+    this.borderGraphics = this.scene.add.graphics();
+    this.add(this.borderGraphics);
+
+    // Content container
+    this.contentContainer = this.scene.add.container(PADDING, PADDING);
+    this.add(this.contentContainer);
+
+    // Create header section
+    this.createHeader();
+
+    // Create stats section
+    this.createStatsSection();
+
+    // Create resource section
+    this.createResourceSection();
+
+    // Create action buttons
+    this.createActionButtons();
+
+    // Create close button
+    this.createCloseButton();
+  }
+
+  private createHeader(): void {
+    // Planet name
+    this.nameText = this.scene.add.text(0, 0, 'Planet Name', {
+      fontSize: '18px',
+      fontFamily: 'Arial',
+      color: TEXT_COLOR,
+      fontStyle: 'bold'
+    });
+    this.contentContainer.add(this.nameText);
+
+    // Planet type
+    this.typeText = this.scene.add.text(0, 26, 'Type: Unknown', {
+      fontSize: '13px',
+      fontFamily: 'Arial',
+      color: LABEL_COLOR
+    });
+    this.contentContainer.add(this.typeText);
+
+    // Owner indicator
+    this.ownerText = this.scene.add.text(0, 44, 'Owner: Unknown', {
+      fontSize: '13px',
+      fontFamily: 'Arial',
+      color: LABEL_COLOR
+    });
+    this.contentContainer.add(this.ownerText);
+  }
+
+  private createStatsSection(): void {
+    const startY = HEADER_HEIGHT + 10;
+
+    // Section divider
+    const divider = this.scene.add.graphics();
+    divider.lineStyle(1, 0x444444, 1);
+    divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
+    this.contentContainer.add(divider);
+
+    // Stats header
+    const statsLabel = this.scene.add.text(0, startY, 'Stats', {
+      fontSize: '14px',
+      fontFamily: 'Arial',
+      color: TEXT_COLOR,
+      fontStyle: 'bold'
+    });
+    this.contentContainer.add(statsLabel);
+
+    // Population
+    this.populationText = this.scene.add.text(0, startY + 22, 'Population: 0 / 0', {
+      fontSize: '12px',
+      fontFamily: 'Arial',
+      color: LABEL_COLOR
+    });
+    this.contentContainer.add(this.populationText);
+
+    // Morale
+    this.moraleText = this.scene.add.text(0, startY + 44, 'Morale: 0%', {
+      fontSize: '12px',
+      fontFamily: 'Arial',
+      color: LABEL_COLOR
+    });
+    this.contentContainer.add(this.moraleText);
+  }
+
+  private createResourceSection(): void {
+    const startY = HEADER_HEIGHT + 85;
+
+    // Section divider
+    const divider = this.scene.add.graphics();
+    divider.lineStyle(1, 0x444444, 1);
+    divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
+    this.contentContainer.add(divider);
+
+    // Resources header
+    const resourcesLabel = this.scene.add.text(0, startY, 'Resources (stockpile)', {
+      fontSize: '14px',
+      fontFamily: 'Arial',
+      color: TEXT_COLOR,
+      fontStyle: 'bold'
+    });
+    this.contentContainer.add(resourcesLabel);
+
+    // Resource types with colors
+    const resources = [
+      { name: 'Credits', color: '#ffd700' },
+      { name: 'Minerals', color: '#c0c0c0' },
+      { name: 'Fuel', color: '#ff6600' },
+      { name: 'Food', color: '#00cc00' },
+      { name: 'Energy', color: '#00ccff' }
+    ];
+
+    resources.forEach((res, i) => {
+      const text = this.scene.add.text(0, startY + 22 + i * 18, `${res.name}: ---`, {
+        fontSize: '12px',
+        fontFamily: 'Arial',
+        color: res.color
+      });
+      this.contentContainer.add(text);
+      this.resourceTexts.push(text);
+    });
+  }
+
+  private createActionButtons(): void {
+    const startY = HEADER_HEIGHT + 200;
+
+    // Section divider
+    const divider = this.scene.add.graphics();
+    divider.lineStyle(1, 0x444444, 1);
+    divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
+    this.contentContainer.add(divider);
+
+    // Actions header
+    const actionsLabel = this.scene.add.text(0, startY, 'Actions', {
+      fontSize: '14px',
+      fontFamily: 'Arial',
+      color: TEXT_COLOR,
+      fontStyle: 'bold'
+    });
+    this.contentContainer.add(actionsLabel);
+
+    // Create placeholder buttons (will be updated based on planet owner)
+    const buttonY = startY + 25;
+    this.createButton('Build', 0, buttonY, true, 'Coming in Epic 4');
+    this.createButton('Manage', 125, buttonY, true, 'Coming soon');
+    this.createButton('Scout', 0, buttonY + 42, true, 'Coming in Epic 5');
+    this.createButton('Invade', 125, buttonY + 42, true, 'Coming in Epic 6');
+  }
+
+  private createButton(label: string, x: number, y: number, disabled: boolean, tooltip: string): void {
+    const buttonWidth = 115;
+    const buttonContainer = this.scene.add.container(x, y);
+
+    // Button background
+    const bg = this.scene.add.graphics();
+    bg.fillStyle(disabled ? 0x333333 : 0x4a4a6a, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    buttonContainer.add(bg);
+
+    // Button text
+    const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, label, {
+      fontSize: '12px',
+      fontFamily: 'Arial',
+      color: disabled ? DISABLED_COLOR : TEXT_COLOR
+    });
+    text.setOrigin(0.5);
+    buttonContainer.add(text);
+
+    // Interactive zone (if not disabled, for future use)
+    const zone = this.scene.add.zone(buttonWidth / 2, BUTTON_HEIGHT / 2, buttonWidth, BUTTON_HEIGHT);
+    zone.setInteractive({ useHandCursor: !disabled });
+    buttonContainer.add(zone);
+
+    // Store tooltip for future use
+    buttonContainer.setData('tooltip', tooltip);
+    buttonContainer.setData('disabled', disabled);
+
+    this.contentContainer.add(buttonContainer);
+    this.actionButtons.push(buttonContainer);
+  }
+
+  private createCloseButton(): void {
+    const closeX = PANEL_WIDTH - 25;
+    const closeY = 15;
+
+    const closeButton = this.scene.add.text(closeX, closeY, '×', {
+      fontSize: '24px',
+      fontFamily: 'Arial',
+      color: '#888888'
+    });
+    closeButton.setOrigin(0.5);
+    closeButton.setInteractive({ useHandCursor: true });
+
+    closeButton.on('pointerover', () => closeButton.setColor('#ffffff'));
+    closeButton.on('pointerout', () => closeButton.setColor('#888888'));
+    closeButton.on('pointerdown', () => this.hide());
+
+    this.add(closeButton);
+  }
+
+  /**
+   * Updates the panel to display information for the given planet
+   */
+  public setPlanet(planet: PlanetEntity): void {
+    this.planet = planet;
+    this.updateContent();
+  }
+
+  /**
+   * Updates all panel content based on current planet
+   */
+  private updateContent(): void {
+    if (!this.planet) return;
+
+    const isPlayerOwned = this.planet.owner === FactionType.Player;
+
+    // Update header
+    this.nameText.setText(this.planet.name);
+    this.typeText.setText(`Type: ${this.planet.type}`);
+
+    // Update owner with color
+    const ownerColorHex = this.getOwnerColorHex(this.planet.owner);
+    this.ownerText.setText(`Owner: ${this.planet.owner}`);
+    this.ownerText.setColor(ownerColorHex);
+
+    // Update border color
+    const ownerColor = OWNER_COLORS[this.planet.owner] || OWNER_COLORS.Neutral;
+    this.borderGraphics.clear();
+    this.borderGraphics.lineStyle(BORDER_WIDTH, ownerColor, 1);
+    this.borderGraphics.strokeRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+
+    // Update stats
+    this.populationText.setText(
+      `Population: ${this.planet.population.toLocaleString()}`
+    );
+
+    const moraleColor = this.getMoraleColor(this.planet.morale);
+    this.moraleText.setText(`Morale: ${this.planet.morale}%`);
+    this.moraleText.setColor(moraleColor);
+
+    // Update resources (only show for player-owned planets)
+    // Shows current stockpile from planet.resources
+    const resources = [
+      this.planet.resources.credits,
+      this.planet.resources.minerals,
+      this.planet.resources.fuel,
+      this.planet.resources.food,
+      this.planet.resources.energy
+    ];
+
+    this.resourceTexts.forEach((text, i) => {
+      const resourceNames = ['Credits', 'Minerals', 'Fuel', 'Food', 'Energy'];
+      if (isPlayerOwned) {
+        text.setText(`${resourceNames[i]}: ${resources[i].toLocaleString()}`);
+      } else {
+        text.setText(`${resourceNames[i]}: Unknown`);
+      }
+    });
+
+    // Update button visibility/states based on ownership
+    this.updateButtonStates(isPlayerOwned);
+  }
+
+  private updateButtonStates(isPlayerOwned: boolean): void {
+    // Buttons 0-1 are for player (Build, Manage)
+    // Buttons 2-3 are for AI/Neutral (Scout, Invade)
+    this.actionButtons.forEach((button, i) => {
+      if (isPlayerOwned) {
+        button.setVisible(i < 2); // Show Build, Manage
+      } else {
+        button.setVisible(i >= 2); // Show Scout, Invade
+      }
+    });
+  }
+
+  private getOwnerColorHex(owner: FactionType): string {
+    switch (owner) {
+      case FactionType.Player: return '#00ff00';
+      case FactionType.AI: return '#ff0000';
+      case FactionType.Neutral: return '#808080';
+      default: return '#ffffff';
+    }
+  }
+
+  private getMoraleColor(morale: number): string {
+    if (morale >= 70) return '#00cc00'; // Green - happy
+    if (morale >= 40) return '#cccc00'; // Yellow - neutral
+    return '#cc0000'; // Red - unhappy
+  }
+
+  /**
+   * Shows the panel with animation
+   */
+  public show(onClose?: () => void): void {
+    if (this.isVisible) return;
+
+    this.closeCallback = onClose || null;
+    this.isVisible = true;
+    this.setVisible(true);
+
+    // Position on right side of screen
+    const camera = this.scene.cameras.main;
+    this.setPosition(
+      camera.width - PANEL_WIDTH - 20,
+      (camera.height - PANEL_HEIGHT) / 2
+    );
+
+    // Animate in from right
+    this.setAlpha(0);
+    this.x += 50;
+    this.scene.tweens.add({
+      targets: this,
+      alpha: 1,
+      x: camera.width - PANEL_WIDTH - 20,
+      duration: 150,
+      ease: 'Power2'
+    });
+  }
+
+  /**
+   * Hides the panel with animation
+   */
+  public hide(): void {
+    if (!this.isVisible) return;
+
+    this.isVisible = false;
+
+    this.scene.tweens.add({
+      targets: this,
+      alpha: 0,
+      x: this.x + 50,
+      duration: 150,
+      ease: 'Power2',
+      onComplete: () => {
+        this.setVisible(false);
+        if (this.closeCallback) {
+          this.closeCallback();
+        }
+      }
+    });
+  }
+
+  /**
+   * Returns whether the panel is currently visible
+   */
+  public getIsVisible(): boolean {
+    return this.isVisible;
+  }
+
+  /**
+   * Cleans up the panel
+   */
+  public destroy(): void {
+    this.resourceTexts = [];
+    this.actionButtons = [];
+    super.destroy();
+  }
+}
