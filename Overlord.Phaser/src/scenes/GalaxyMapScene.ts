@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
+import { TurnSystem } from '@core/TurnSystem';
 import { Difficulty, FactionType } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
@@ -9,16 +10,19 @@ import { CameraController } from './controllers/CameraController';
 import { PlanetRenderer } from './renderers/PlanetRenderer';
 import { StarFieldRenderer } from './renderers/StarFieldRenderer';
 import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
+import { TurnHUD } from './ui/TurnHUD';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
   private gameState!: GameState;
+  private turnSystem!: TurnSystem;
   private inputSystem!: InputSystem;
   private inputManager!: InputManager;
   private cameraController!: CameraController;
   private planetRenderer!: PlanetRenderer;
   private starFieldRenderer!: StarFieldRenderer;
   private planetInfoPanel!: PlanetInfoPanel;
+  private turnHUD!: TurnHUD;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -33,10 +37,14 @@ export class GalaxyMapScene extends Phaser.Scene {
     const registryGameState = this.registry.get('gameState') as GameState | undefined;
     const registryGalaxy = this.registry.get('galaxy') as Galaxy | undefined;
 
+    // Try to get turnSystem from registry
+    const registryTurnSystem = this.registry.get('turnSystem') as TurnSystem | undefined;
+
     if (registryGameState && registryGalaxy) {
       // Use campaign-initialized state
       this.gameState = registryGameState;
       this.galaxy = registryGalaxy;
+      this.turnSystem = registryTurnSystem || new TurnSystem(this.gameState);
       console.log(`Using campaign state: Difficulty=${registryGameState.campaignConfig?.difficulty}, AI=${registryGameState.campaignConfig?.aiPersonality}`);
     } else {
       // Fallback for direct scene access (testing/development)
@@ -46,6 +54,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
       this.gameState.planets = this.galaxy.planets;
       this.gameState.rebuildLookups();
+      this.turnSystem = new TurnSystem(this.gameState);
     }
 
     // Initialize input system (platform-agnostic)
@@ -104,6 +113,11 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Create planet info panel (fixed to camera, above everything)
     this.planetInfoPanel = new PlanetInfoPanel(this);
+
+    // Create Turn HUD (top-left corner, fixed to camera)
+    this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem);
+    this.turnHUD.setScrollFactor(0);
+    this.turnHUD.setDepth(500);
 
     // Render all planets
     this.renderPlanets();
@@ -393,6 +407,7 @@ export class GalaxyMapScene extends Phaser.Scene {
         'Enter/Space: Select focused',
         '',
         'Shortcuts:',
+        'T: End Turn (Action phase)',
         'Esc: Pause menu',
         'H: Help overlay',
         'O: Objectives',
@@ -558,6 +573,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.planetInfoPanel) {
       this.planetInfoPanel.destroy();
+    }
+    if (this.turnHUD) {
+      this.turnHUD.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
