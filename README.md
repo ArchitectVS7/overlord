@@ -97,6 +97,13 @@ Development should follow this sequence to maximize existing code reuse:
 12. **Epic 11** (remaining) - Full accessibility
 13. **Epic 12** - Audio & immersion
 
+**Story Execution Flow**
+  1. Review sprint-status.yaml for complete tracking structure
+  2. Start first story - Use /bmad:bmm:workflows:create-story to draft Story X.Y
+  3. Mark story ready - Use /bmad:bmm:workflows:story-ready to move drafted story to ready-for-dev
+  4. Implement story - Use /bmad:bmm:workflows:dev-story to develop and test the story
+  5. Review and complete - Use /bmad:bmm:workflows:code-review and /bmad:bmm:workflows:story-done
+
 ## Architecture
 
 ```
