@@ -105,6 +105,20 @@ export class AIDecisionSystem {
   }
 
   /**
+   * Gets the income system (for future AI income-based decisions).
+   */
+  public getIncomeSystem(): IncomeSystem {
+    return this.incomeSystem;
+  }
+
+  /**
+   * Gets the resource system (for future AI resource-based decisions).
+   */
+  public getResourceSystem(): ResourceSystem {
+    return this.resourceSystem;
+  }
+
+  /**
    * Gets current AI personality.
    */
   public getPersonality(): AIPersonality {
