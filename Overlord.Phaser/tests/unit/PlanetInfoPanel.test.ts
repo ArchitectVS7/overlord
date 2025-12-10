@@ -3,7 +3,8 @@
  * Tests panel display logic without Phaser scene dependency
  */
 
-import { FactionType, PlanetType } from '@core/models/Enums';
+import { FactionType, PlanetType, BuildingType, BuildingStatus } from '@core/models/Enums';
+import { BuildingCosts, Structure } from '@core/models/BuildingModels';
 import { OWNER_COLORS } from '../../src/config/VisualConfig';
 
 describe('PlanetInfoPanel Logic', () => {
@@ -125,7 +126,7 @@ describe('PlanetInfoPanel Logic', () => {
 
   describe('Panel Dimensions', () => {
     const PANEL_WIDTH = 280;
-    const PANEL_HEIGHT = 380;
+    const PANEL_HEIGHT = 460; // Updated for construction section (Story 4-3)
     const MIN_TOUCH_TARGET = 44;
 
     test('Panel width is reasonable for mobile', () => {
@@ -143,6 +144,116 @@ describe('PlanetInfoPanel Logic', () => {
       // Close button touch area should be at least 44x44
       // This is documented but not enforced in current implementation
       expect(MIN_TOUCH_TARGET).toBe(44);
+    });
+  });
+
+  describe('Construction Progress Logic (Story 4-3)', () => {
+    // Helper to calculate construction progress
+    function calculateConstructionProgress(
+      turnsRemaining: number,
+      buildingType: BuildingType
+    ): { percentComplete: number; turnsCompleted: number; totalTurns: number } {
+      const totalTurns = BuildingCosts.getConstructionTime(buildingType);
+      const turnsCompleted = totalTurns - turnsRemaining;
+      const percentComplete = (turnsCompleted / totalTurns) * 100;
+      return { percentComplete, turnsCompleted, totalTurns };
+    }
+
+    // Helper to get building display name (mirrors panel logic)
+    function getBuildingDisplayName(type: BuildingType): string {
+      switch (type) {
+        case BuildingType.MiningStation: return 'Mining Station';
+        case BuildingType.HorticulturalStation: return 'Horticultural Station';
+        case BuildingType.DockingBay: return 'Docking Bay';
+        case BuildingType.OrbitalDefense: return 'Orbital Defense';
+        case BuildingType.SurfacePlatform: return 'Surface Platform';
+        default: return String(type);
+      }
+    }
+
+    test('Construction progress starts at 0%', () => {
+      // Mining Station: 3 turns, starts with 3 turns remaining
+      const progress = calculateConstructionProgress(3, BuildingType.MiningStation);
+      expect(progress.percentComplete).toBe(0);
+      expect(progress.turnsCompleted).toBe(0);
+      expect(progress.totalTurns).toBe(3);
+    });
+
+    test('Construction progress updates correctly at each turn', () => {
+      // Mining Station: 3 turns
+      // After 1 turn (2 remaining)
+      const progress1 = calculateConstructionProgress(2, BuildingType.MiningStation);
+      expect(progress1.percentComplete).toBeCloseTo(33.33, 1);
+      expect(progress1.turnsCompleted).toBe(1);
+
+      // After 2 turns (1 remaining)
+      const progress2 = calculateConstructionProgress(1, BuildingType.MiningStation);
+      expect(progress2.percentComplete).toBeCloseTo(66.67, 1);
+      expect(progress2.turnsCompleted).toBe(2);
+
+      // After 3 turns (0 remaining - about to complete)
+      const progress3 = calculateConstructionProgress(0, BuildingType.MiningStation);
+      expect(progress3.percentComplete).toBe(100);
+      expect(progress3.turnsCompleted).toBe(3);
+    });
+
+    test('Surface Platform completes in 1 turn', () => {
+      const progress = calculateConstructionProgress(1, BuildingType.SurfacePlatform);
+      expect(progress.totalTurns).toBe(1);
+      expect(progress.percentComplete).toBe(0); // Just started
+
+      const progressDone = calculateConstructionProgress(0, BuildingType.SurfacePlatform);
+      expect(progressDone.percentComplete).toBe(100);
+    });
+
+    test('All building types have display names', () => {
+      const buildingTypes = [
+        BuildingType.MiningStation,
+        BuildingType.HorticulturalStation,
+        BuildingType.DockingBay,
+        BuildingType.OrbitalDefense,
+        BuildingType.SurfacePlatform
+      ];
+
+      buildingTypes.forEach(type => {
+        const name = getBuildingDisplayName(type);
+        expect(name).not.toBe(String(type)); // Should have friendly name
+        expect(name.length).toBeGreaterThan(0);
+      });
+    });
+
+    test('Building construction times are correct', () => {
+      expect(BuildingCosts.getConstructionTime(BuildingType.MiningStation)).toBe(3);
+      expect(BuildingCosts.getConstructionTime(BuildingType.HorticulturalStation)).toBe(2);
+      expect(BuildingCosts.getConstructionTime(BuildingType.DockingBay)).toBe(2);
+      expect(BuildingCosts.getConstructionTime(BuildingType.OrbitalDefense)).toBe(3);
+      expect(BuildingCosts.getConstructionTime(BuildingType.SurfacePlatform)).toBe(1);
+    });
+
+    test('Construction visibility logic', () => {
+      // Construction section only shows for player-owned planets with buildings under construction
+      function shouldShowConstruction(
+        isPlayerOwned: boolean,
+        buildingsUnderConstruction: Structure[]
+      ): boolean {
+        return isPlayerOwned && buildingsUnderConstruction.length > 0;
+      }
+
+      const buildingUnderConstruction = new Structure();
+      buildingUnderConstruction.status = BuildingStatus.UnderConstruction;
+      buildingUnderConstruction.turnsRemaining = 2;
+
+      // Player-owned with construction
+      expect(shouldShowConstruction(true, [buildingUnderConstruction])).toBe(true);
+
+      // Player-owned without construction
+      expect(shouldShowConstruction(true, [])).toBe(false);
+
+      // AI-owned with construction
+      expect(shouldShowConstruction(false, [buildingUnderConstruction])).toBe(false);
+
+      // AI-owned without construction
+      expect(shouldShowConstruction(false, [])).toBe(false);
     });
   });
 

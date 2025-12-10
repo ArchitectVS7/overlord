@@ -10,12 +10,14 @@
 
 import Phaser from 'phaser';
 import { PlanetEntity } from '@core/models/PlanetEntity';
-import { FactionType } from '@core/models/Enums';
+import { FactionType, BuildingType, BuildingStatus } from '@core/models/Enums';
+import { BuildingCosts, Structure } from '@core/models/BuildingModels';
+import { BuildingSystem } from '@core/BuildingSystem';
 import { OWNER_COLORS } from '../../config/VisualConfig';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 280;
-const PANEL_HEIGHT = 380;
+const PANEL_HEIGHT = 460; // Increased for construction section
 const PADDING = 15;
 const HEADER_HEIGHT = 60;
 const BUTTON_HEIGHT = 36;
@@ -45,15 +47,33 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private resourceTexts: Phaser.GameObjects.Text[] = [];
   private actionButtons: Phaser.GameObjects.Container[] = [];
 
-  constructor(scene: Phaser.Scene) {
+  // Construction progress elements (Story 4-3)
+  private constructionContainer!: Phaser.GameObjects.Container;
+  private constructionText!: Phaser.GameObjects.Text;
+  private constructionProgressBar!: Phaser.GameObjects.Graphics;
+  private constructionTurnsText!: Phaser.GameObjects.Text;
+  private buildingSystem?: BuildingSystem;
+
+  // Action callbacks (Story 4-2)
+  public onBuildClick?: (planet: PlanetEntity) => void;
+
+  constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem) {
     super(scene, 0, 0);
     scene.add.existing(this);
+    this.buildingSystem = buildingSystem;
 
     this.createBackdrop();
     this.createPanel();
     this.setVisible(false);
     this.setDepth(1000); // Above all game elements
     this.setScrollFactor(0); // Fixed to camera
+  }
+
+  /**
+   * Sets the BuildingSystem reference for construction progress tracking (Story 4-3)
+   */
+  public setBuildingSystem(buildingSystem: BuildingSystem): void {
+    this.buildingSystem = buildingSystem;
   }
 
   /**
@@ -98,6 +118,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Create resource section
     this.createResourceSection();
+
+    // Create construction progress section (Story 4-3)
+    this.createConstructionSection();
 
     // Create action buttons
     this.createActionButtons();
@@ -206,8 +229,64 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     });
   }
 
+  /**
+   * Creates the construction progress section (Story 4-3)
+   * Shows: building name, progress bar, turns remaining
+   */
+  private createConstructionSection(): void {
+    const startY = HEADER_HEIGHT + 195;
+
+    // Container for construction elements (shown/hidden based on construction state)
+    this.constructionContainer = this.scene.add.container(0, startY);
+    this.contentContainer.add(this.constructionContainer);
+
+    // Section divider
+    const divider = this.scene.add.graphics();
+    divider.lineStyle(1, 0x444444, 1);
+    divider.lineBetween(0, -5, PANEL_WIDTH - PADDING * 2, -5);
+    this.constructionContainer.add(divider);
+
+    // Section header
+    const headerText = this.scene.add.text(0, 0, 'Construction', {
+      fontSize: '14px',
+      fontFamily: 'Arial',
+      color: TEXT_COLOR,
+      fontStyle: 'bold'
+    });
+    this.constructionContainer.add(headerText);
+
+    // Building name under construction
+    this.constructionText = this.scene.add.text(0, 22, 'Building: None', {
+      fontSize: '12px',
+      fontFamily: 'Arial',
+      color: '#ff9900' // Orange for construction
+    });
+    this.constructionContainer.add(this.constructionText);
+
+    // Progress bar background
+    const progressBarBg = this.scene.add.graphics();
+    progressBarBg.fillStyle(0x333333, 1);
+    progressBarBg.fillRoundedRect(0, 42, PANEL_WIDTH - PADDING * 2, 16, 4);
+    this.constructionContainer.add(progressBarBg);
+
+    // Progress bar fill
+    this.constructionProgressBar = this.scene.add.graphics();
+    this.constructionContainer.add(this.constructionProgressBar);
+
+    // Turns remaining text
+    this.constructionTurnsText = this.scene.add.text(0, 62, 'Completes in: 0 turns', {
+      fontSize: '11px',
+      fontFamily: 'Arial',
+      color: LABEL_COLOR
+    });
+    this.constructionContainer.add(this.constructionTurnsText);
+
+    // Initially hidden
+    this.constructionContainer.setVisible(false);
+  }
+
   private createActionButtons(): void {
-    const startY = HEADER_HEIGHT + 200;
+    const startY = HEADER_HEIGHT + 280; // Pushed down to accommodate construction section
 
     // Section divider
     const divider = this.scene.add.graphics();
@@ -224,15 +303,23 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     });
     this.contentContainer.add(actionsLabel);
 
-    // Create placeholder buttons (will be updated based on planet owner)
+    // Create placeholder buttons (will be updated based on planet owner in show())
+    // Actual enabled/disabled state is set when the panel is shown
     const buttonY = startY + 25;
-    this.createButton('Build', 0, buttonY, true, 'Coming in Epic 4');
+    this.createButton('Build', 0, buttonY, true, 'Open building construction menu');
     this.createButton('Manage', 125, buttonY, true, 'Coming soon');
     this.createButton('Scout', 0, buttonY + 42, true, 'Coming in Epic 5');
     this.createButton('Invade', 125, buttonY + 42, true, 'Coming in Epic 6');
   }
 
-  private createButton(label: string, x: number, y: number, disabled: boolean, tooltip: string): void {
+  private createButton(
+    label: string,
+    x: number,
+    y: number,
+    disabled: boolean,
+    tooltip: string,
+    onClick?: () => void
+  ): void {
     const buttonWidth = 115;
     const buttonContainer = this.scene.add.container(x, y);
 
@@ -251,14 +338,30 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     text.setOrigin(0.5);
     buttonContainer.add(text);
 
-    // Interactive zone (if not disabled, for future use)
+    // Interactive zone
     const zone = this.scene.add.zone(buttonWidth / 2, BUTTON_HEIGHT / 2, buttonWidth, BUTTON_HEIGHT);
     zone.setInteractive({ useHandCursor: !disabled });
     buttonContainer.add(zone);
 
+    // Add click handler if provided and not disabled
+    if (!disabled && onClick) {
+      zone.on('pointerdown', onClick);
+      zone.on('pointerover', () => {
+        bg.clear();
+        bg.fillStyle(0x5a5a7a, 1);
+        bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      });
+      zone.on('pointerout', () => {
+        bg.clear();
+        bg.fillStyle(0x4a4a6a, 1);
+        bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      });
+    }
+
     // Store tooltip for future use
     buttonContainer.setData('tooltip', tooltip);
     buttonContainer.setData('disabled', disabled);
+    buttonContainer.setData('label', label);
 
     this.contentContainer.add(buttonContainer);
     this.actionButtons.push(buttonContainer);
@@ -353,20 +456,146 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
       }
     });
 
+    // Update construction progress (Story 4-3)
+    this.updateConstructionProgress(isPlayerOwned);
+
     // Update button visibility/states based on ownership
     this.updateButtonStates(isPlayerOwned);
+  }
+
+  /**
+   * Updates the construction progress section (Story 4-3)
+   * AC1: Shows "Under Construction: [Building Name]", progress bar, estimated completion
+   */
+  private updateConstructionProgress(isPlayerOwned: boolean): void {
+    if (!isPlayerOwned || !this.planet) {
+      this.constructionContainer.setVisible(false);
+      return;
+    }
+
+    // Get buildings under construction from BuildingSystem or planet structures
+    let underConstruction: Structure[] = [];
+
+    if (this.buildingSystem) {
+      underConstruction = this.buildingSystem.getBuildingsUnderConstruction(this.planet.id);
+    } else {
+      // Fallback: check planet structures directly
+      underConstruction = this.planet.structures.filter(
+        s => s.status === BuildingStatus.UnderConstruction
+      );
+    }
+
+    if (underConstruction.length === 0) {
+      this.constructionContainer.setVisible(false);
+      return;
+    }
+
+    // Show construction section
+    this.constructionContainer.setVisible(true);
+
+    // Display first building under construction
+    const building = underConstruction[0];
+    const buildingName = this.getBuildingDisplayName(building.type);
+    const totalTurns = BuildingCosts.getConstructionTime(building.type);
+    const turnsCompleted = totalTurns - building.turnsRemaining;
+    const percentComplete = (turnsCompleted / totalTurns) * 100;
+
+    // Update building name text
+    this.constructionText.setText(`Under Construction: ${buildingName}`);
+
+    // Update progress bar
+    const barWidth = PANEL_WIDTH - PADDING * 2;
+    const fillWidth = (percentComplete / 100) * barWidth;
+
+    this.constructionProgressBar.clear();
+    if (fillWidth > 0) {
+      this.constructionProgressBar.fillStyle(0x00cc00, 1); // Green for progress
+      this.constructionProgressBar.fillRoundedRect(0, 42, fillWidth, 16, 4);
+    }
+
+    // Update turns remaining text
+    const turnsText = building.turnsRemaining === 1
+      ? 'Completes in: 1 turn'
+      : `Completes in: ${building.turnsRemaining} turns`;
+    this.constructionTurnsText.setText(`${turnsText} (Turn ${turnsCompleted + 1} of ${totalTurns})`);
+  }
+
+  /**
+   * Gets display name for a building type
+   */
+  private getBuildingDisplayName(type: BuildingType): string {
+    switch (type) {
+      case BuildingType.MiningStation: return 'Mining Station';
+      case BuildingType.HorticulturalStation: return 'Horticultural Station';
+      case BuildingType.DockingBay: return 'Docking Bay';
+      case BuildingType.OrbitalDefense: return 'Orbital Defense';
+      case BuildingType.SurfacePlatform: return 'Surface Platform';
+      default: return String(type);
+    }
   }
 
   private updateButtonStates(isPlayerOwned: boolean): void {
     // Buttons 0-1 are for player (Build, Manage)
     // Buttons 2-3 are for AI/Neutral (Scout, Invade)
     this.actionButtons.forEach((button, i) => {
+      const label = button.getData('label');
+
       if (isPlayerOwned) {
         button.setVisible(i < 2); // Show Build, Manage
+
+        // Enable Build button for player-owned planets (Story 4-2)
+        if (label === 'Build') {
+          this.enableButton(button, () => {
+            if (this.planet && this.onBuildClick) {
+              this.onBuildClick(this.planet);
+            }
+          });
+        }
       } else {
         button.setVisible(i >= 2); // Show Scout, Invade
       }
     });
+  }
+
+  /**
+   * Enables a button and sets up its click handler
+   */
+  private enableButton(buttonContainer: Phaser.GameObjects.Container, onClick: () => void): void {
+    const buttonWidth = 115;
+    const children = buttonContainer.getAll();
+
+    // Find the background graphics
+    const bg = children.find(c => c instanceof Phaser.GameObjects.Graphics) as Phaser.GameObjects.Graphics | undefined;
+    // Find the text
+    const text = children.find(c => c instanceof Phaser.GameObjects.Text) as Phaser.GameObjects.Text | undefined;
+    // Find the zone
+    const zone = children.find(c => c instanceof Phaser.GameObjects.Zone) as Phaser.GameObjects.Zone | undefined;
+
+    if (!bg || !text || !zone) return;
+
+    // Update appearance to enabled state
+    bg.clear();
+    bg.fillStyle(0x4a4a6a, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    text.setColor(TEXT_COLOR);
+
+    // Remove old listeners and add new ones
+    zone.removeAllListeners();
+    zone.setInteractive({ useHandCursor: true });
+
+    zone.on('pointerdown', onClick);
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x5a5a7a, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.fillStyle(0x4a4a6a, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    });
+
+    buttonContainer.setData('disabled', false);
   }
 
   private getOwnerColorHex(owner: FactionType): string {
