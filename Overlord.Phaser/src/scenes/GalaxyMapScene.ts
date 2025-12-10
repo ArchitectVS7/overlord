@@ -12,6 +12,8 @@ import { PlanetRenderer } from './renderers/PlanetRenderer';
 import { StarFieldRenderer } from './renderers/StarFieldRenderer';
 import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 import { TurnHUD } from './ui/TurnHUD';
+import { ResourceHUD } from './ui/ResourceHUD';
+import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -25,6 +27,8 @@ export class GalaxyMapScene extends Phaser.Scene {
   private starFieldRenderer!: StarFieldRenderer;
   private planetInfoPanel!: PlanetInfoPanel;
   private turnHUD!: TurnHUD;
+  private resourceHUD!: ResourceHUD;
+  private buildingMenuPanel!: BuildingMenuPanel;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -117,12 +121,81 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.selectionGraphics.setDepth(100);
 
     // Create planet info panel (fixed to camera, above everything)
-    this.planetInfoPanel = new PlanetInfoPanel(this);
+    // Pass BuildingSystem for construction progress tracking (Story 4-3)
+    this.planetInfoPanel = new PlanetInfoPanel(this, this.phaseProcessor.getBuildingSystem());
 
     // Create Turn HUD (top-left corner, fixed to camera)
     this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
     this.turnHUD.setScrollFactor(0);
     this.turnHUD.setDepth(500);
+
+    // Create Resource HUD (top-right corner, fixed to camera) - Story 4-1
+    this.resourceHUD = new ResourceHUD(
+      this,
+      this.cameras.main.width - 120,
+      95,
+      this.gameState,
+      this.phaseProcessor
+    );
+    this.resourceHUD.setScrollFactor(0);
+    this.resourceHUD.setDepth(500);
+
+    // Create Building Menu Panel - Story 4-2
+    this.buildingMenuPanel = new BuildingMenuPanel(
+      this,
+      this.gameState,
+      this.phaseProcessor.getBuildingSystem()
+    );
+
+    // Wire up PlanetInfoPanel Build button to BuildingMenuPanel
+    this.planetInfoPanel.onBuildClick = (planet) => {
+      this.planetInfoPanel.hide();
+      this.buildingMenuPanel.show(planet);
+    };
+
+    // Wire up building completion to refresh ResourceHUD
+    this.buildingMenuPanel.onBuildingSelected = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Wire up building completion notifications (Story 4-3: AC3)
+    this.phaseProcessor.onBuildingCompleted = (planetId, buildingType) => {
+      const planet = this.gameState.planetLookup.get(planetId);
+      const planetName = planet?.name || `Planet ${planetId}`;
+      const buildingName = this.getBuildingDisplayName(buildingType);
+
+      // Show completion notification (AC3: notification with benefit description)
+      this.showBuildingCompletedNotification(buildingName, planetName, buildingType);
+
+      // Refresh UI if the planet info panel is showing this planet
+      if (this.selectedPlanetId && parseInt(this.selectedPlanetId) === planetId) {
+        const selectedPlanet = this.gameState.planetLookup.get(planetId);
+        if (selectedPlanet) {
+          this.planetInfoPanel.setPlanet(selectedPlanet);
+        }
+      }
+    };
+
+    // Wire up income system notifications (Story 4-4: AC3, AC4)
+    const incomeSystem = this.phaseProcessor.getIncomeSystem();
+
+    // Story 4-4 AC3: Low morale income penalty warning
+    incomeSystem.onLowMoraleIncomePenalty = (_planetID, planetName, penaltyPercent) => {
+      this.showIncomeWarningNotification(
+        `⚠️ Low morale on ${planetName} reducing income by ${penaltyPercent}%`,
+        'warning'
+      );
+    };
+
+    // Story 4-4 AC4: No planets owned warning
+    incomeSystem.onNoPlanetsOwned = (faction) => {
+      if (faction === FactionType.Player) {
+        this.showIncomeWarningNotification(
+          '⚠️ No planets owned - no income generated!',
+          'critical'
+        );
+      }
+    };
 
     // Wire up victory/defeat detection (Story 2-4, 2-5)
     this.setupVictoryDetection();
@@ -598,6 +671,128 @@ export class GalaxyMapScene extends Phaser.Scene {
     };
   }
 
+  /**
+   * Gets display name for a building type (Story 4-3)
+   */
+  private getBuildingDisplayName(buildingType: string): string {
+    switch (buildingType) {
+      case 'MiningStation': return 'Mining Station';
+      case 'HorticulturalStation': return 'Horticultural Station';
+      case 'DockingBay': return 'Docking Bay';
+      case 'OrbitalDefense': return 'Orbital Defense';
+      case 'SurfacePlatform': return 'Surface Platform';
+      default: return buildingType;
+    }
+  }
+
+  /**
+   * Gets benefit description for a building type (Story 4-3)
+   */
+  private getBuildingBenefitDescription(buildingType: string): string {
+    switch (buildingType) {
+      case 'MiningStation': return '+50 Minerals/turn, +30 Fuel/turn';
+      case 'HorticulturalStation': return '+100 Food/turn';
+      case 'DockingBay': return '+1 Orbital Slot';
+      case 'OrbitalDefense': return '+20% Defense Bonus';
+      case 'SurfacePlatform': return '+1 Surface Slot';
+      default: return '';
+    }
+  }
+
+  /**
+   * Shows building completion notification (Story 4-3: AC3)
+   * "[Building Name] completed on [Planet Name]! +[benefit description]"
+   */
+  private showBuildingCompletedNotification(
+    buildingName: string,
+    planetName: string,
+    buildingType: string
+  ): void {
+    const benefit = this.getBuildingBenefitDescription(buildingType);
+    const message = benefit
+      ? `${buildingName} completed on ${planetName}! ${benefit}`
+      : `${buildingName} completed on ${planetName}!`;
+
+    // Create notification at bottom center
+    const notification = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height - 100,
+      message,
+      {
+        fontSize: '16px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
+        backgroundColor: 'rgba(0, 50, 0, 0.9)',
+        padding: { x: 15, y: 10 }
+      }
+    );
+    notification.setOrigin(0.5);
+    notification.setScrollFactor(0);
+    notification.setDepth(1200);
+
+    // Fade out after 3 seconds (AC4: can dismiss)
+    this.tweens.add({
+      targets: notification,
+      alpha: 0,
+      duration: 500,
+      delay: 3000,
+      onComplete: () => notification.destroy()
+    });
+
+    // Make notification dismissible by click
+    notification.setInteractive({ useHandCursor: true });
+    notification.on('pointerdown', () => {
+      this.tweens.killTweensOf(notification);
+      notification.destroy();
+    });
+  }
+
+  /**
+   * Shows income warning notification (Story 4-4: AC3, AC4)
+   * @param message Warning message to display
+   * @param severity 'warning' for yellow, 'critical' for red
+   */
+  private showIncomeWarningNotification(
+    message: string,
+    severity: 'warning' | 'critical'
+  ): void {
+    const color = severity === 'critical' ? '#ff4444' : '#ffcc00';
+    const bgColor = severity === 'critical' ? 'rgba(80, 0, 0, 0.9)' : 'rgba(80, 60, 0, 0.9)';
+
+    // Create notification at bottom center (stacked above building notifications)
+    const notification = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height - 140,
+      message,
+      {
+        fontSize: '14px',
+        color: color,
+        fontFamily: 'monospace',
+        backgroundColor: bgColor,
+        padding: { x: 15, y: 8 }
+      }
+    );
+    notification.setOrigin(0.5);
+    notification.setScrollFactor(0);
+    notification.setDepth(1200);
+
+    // Fade out after 4 seconds (longer for warnings)
+    this.tweens.add({
+      targets: notification,
+      alpha: 0,
+      duration: 500,
+      delay: 4000,
+      onComplete: () => notification.destroy()
+    });
+
+    // Make notification dismissible by click
+    notification.setInteractive({ useHandCursor: true });
+    notification.on('pointerdown', () => {
+      this.tweens.killTweensOf(notification);
+      notification.destroy();
+    });
+  }
+
   public shutdown(): void {
     if (this.cameraController) {
       this.cameraController.destroy();
@@ -613,6 +808,12 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.turnHUD) {
       this.turnHUD.destroy();
+    }
+    if (this.resourceHUD) {
+      this.resourceHUD.destroy();
+    }
+    if (this.buildingMenuPanel) {
+      this.buildingMenuPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();

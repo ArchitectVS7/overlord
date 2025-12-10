@@ -24,6 +24,21 @@ export class IncomeSystem {
    */
   public onInsufficientCrew?: (planetID: number, inactiveCount: number) => void;
 
+  /**
+   * Event fired when low morale reduces income (Story 4-4: AC3)
+   * Parameters: (planetID, planetName, penaltyPercent)
+   */
+  public onLowMoraleIncomePenalty?: (planetID: number, planetName: string, penaltyPercent: number) => void;
+
+  /**
+   * Event fired when faction has no planets (Story 4-4: AC4)
+   * Parameters: (faction)
+   */
+  public onNoPlanetsOwned?: (faction: FactionType) => void;
+
+  // Morale threshold for income penalty
+  public static readonly MoralePenaltyThreshold: number = 50;
+
   // Base production rates (per turn, per building)
   public static readonly BaseFoodProduction: number = 100; // Horticultural Station
   public static readonly BaseMineralProduction: number = 50; // Mining Station
@@ -56,6 +71,12 @@ export class IncomeSystem {
     const totalIncome = new ResourceDelta();
 
     const factionPlanets = this.gameState.planets.filter(p => p.owner === faction);
+
+    // Story 4-4 AC4: Handle "no planets owned" edge case
+    if (factionPlanets.length === 0) {
+      this.onNoPlanetsOwned?.(faction);
+      return totalIncome; // Return zero income
+    }
 
     for (const planet of factionPlanets) {
       const planetIncome = this.calculatePlanetIncome(planet.id);
@@ -104,6 +125,21 @@ export class IncomeSystem {
     income.minerals = this.calculateMineralProduction(planet, multipliers.minerals);
     income.fuel = this.calculateFuelProduction(planet, multipliers.fuel);
     income.energy = this.calculateEnergyProduction(planet, multipliers.energy);
+
+    // Apply morale penalty for low morale planets (Story 4-4: AC3)
+    // 50% morale = 50% income reduction, linearly scaled
+    if (planet.morale < IncomeSystem.MoralePenaltyThreshold) {
+      const moraleMultiplier = planet.morale / 100; // Convert morale % to multiplier
+      const penaltyPercent = Math.round((1 - moraleMultiplier) * 100);
+
+      income.food = Math.floor(income.food * moraleMultiplier);
+      income.minerals = Math.floor(income.minerals * moraleMultiplier);
+      income.fuel = Math.floor(income.fuel * moraleMultiplier);
+      income.energy = Math.floor(income.energy * moraleMultiplier);
+
+      // Fire low morale warning event
+      this.onLowMoraleIncomePenalty?.(planet.id, planet.name, penaltyPercent);
+    }
 
     return income;
   }
@@ -288,6 +324,63 @@ export class IncomeSystem {
       report += `  +${income.energy} Energy\n`;
     }
 
+    // Show morale penalty if applicable (Story 4-4: AC3)
+    if (planet.morale < IncomeSystem.MoralePenaltyThreshold) {
+      const penaltyPercent = Math.round((1 - planet.morale / 100) * 100);
+      report += `  ⚠️ Low morale (${planet.morale}%) reducing income by ${penaltyPercent}%\n`;
+    }
+
     return report;
+  }
+
+  /**
+   * Gets detailed income breakdown for a planet (Story 4-4: AC2)
+   * Returns base production, building bonuses, and total per resource
+   */
+  public getIncomeBreakdown(planetID: number): {
+    base: ResourceDelta;
+    buildings: ResourceDelta;
+    total: ResourceDelta;
+    moralePenalty: number; // 0-100%
+  } {
+    const planet = this.gameState.planetLookup.get(planetID);
+    const base = new ResourceDelta();
+    const buildings = new ResourceDelta();
+    const total = new ResourceDelta();
+    let moralePenalty = 0;
+
+    if (!planet || !planet.isHabitable) {
+      return { base, buildings, total, moralePenalty };
+    }
+
+    // Allocate crew first
+    this.allocateCrew(planet);
+
+    const multipliers = planet.resourceMultipliers;
+
+    // Calculate building production (all income comes from buildings in this game)
+    buildings.food = this.calculateFoodProduction(planet, multipliers.food);
+    buildings.minerals = this.calculateMineralProduction(planet, multipliers.minerals);
+    buildings.fuel = this.calculateFuelProduction(planet, multipliers.fuel);
+    buildings.energy = this.calculateEnergyProduction(planet, multipliers.energy);
+
+    // Total before morale penalty
+    total.food = buildings.food;
+    total.minerals = buildings.minerals;
+    total.fuel = buildings.fuel;
+    total.energy = buildings.energy;
+
+    // Apply morale penalty
+    if (planet.morale < IncomeSystem.MoralePenaltyThreshold) {
+      moralePenalty = Math.round((1 - planet.morale / 100) * 100);
+      const moraleMultiplier = planet.morale / 100;
+
+      total.food = Math.floor(total.food * moraleMultiplier);
+      total.minerals = Math.floor(total.minerals * moraleMultiplier);
+      total.fuel = Math.floor(total.fuel * moraleMultiplier);
+      total.energy = Math.floor(total.energy * moraleMultiplier);
+    }
+
+    return { base, buildings, total, moralePenalty };
   }
 }
