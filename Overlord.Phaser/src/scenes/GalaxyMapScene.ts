@@ -2,23 +2,29 @@ import Phaser from 'phaser';
 import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
-import { Difficulty, FactionType } from '@core/models/Enums';
+import { TurnSystem } from '@core/TurnSystem';
+import { PhaseProcessor } from '@core/PhaseProcessor';
+import { Difficulty, FactionType, VictoryResult } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
 import { PlanetRenderer } from './renderers/PlanetRenderer';
 import { StarFieldRenderer } from './renderers/StarFieldRenderer';
 import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
+import { TurnHUD } from './ui/TurnHUD';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
   private gameState!: GameState;
+  private turnSystem!: TurnSystem;
+  private phaseProcessor!: PhaseProcessor;
   private inputSystem!: InputSystem;
   private inputManager!: InputManager;
   private cameraController!: CameraController;
   private planetRenderer!: PlanetRenderer;
   private starFieldRenderer!: StarFieldRenderer;
   private planetInfoPanel!: PlanetInfoPanel;
+  private turnHUD!: TurnHUD;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -29,8 +35,32 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   public create(): void {
-    // Initialize game state
-    this.gameState = new GameState();
+    // Try to get campaign-initialized state from registry (set by CampaignConfigScene)
+    const registryGameState = this.registry.get('gameState') as GameState | undefined;
+    const registryGalaxy = this.registry.get('galaxy') as Galaxy | undefined;
+
+    // Try to get turnSystem and phaseProcessor from registry
+    const registryTurnSystem = this.registry.get('turnSystem') as TurnSystem | undefined;
+    const registryPhaseProcessor = this.registry.get('phaseProcessor') as PhaseProcessor | undefined;
+
+    if (registryGameState && registryGalaxy) {
+      // Use campaign-initialized state
+      this.gameState = registryGameState;
+      this.galaxy = registryGalaxy;
+      this.turnSystem = registryTurnSystem || new TurnSystem(this.gameState);
+      this.phaseProcessor = registryPhaseProcessor || new PhaseProcessor(this.gameState);
+      console.log(`Using campaign state: Difficulty=${registryGameState.campaignConfig?.difficulty}, AI=${registryGameState.campaignConfig?.aiPersonality}`);
+    } else {
+      // Fallback for direct scene access (testing/development)
+      console.warn('No campaign state in registry - creating default state');
+      this.gameState = new GameState();
+      const generator = new GalaxyGenerator();
+      this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
+      this.gameState.planets = this.galaxy.planets;
+      this.gameState.rebuildLookups();
+      this.turnSystem = new TurnSystem(this.gameState);
+      this.phaseProcessor = new PhaseProcessor(this.gameState);
+    }
 
     // Initialize input system (platform-agnostic)
     this.inputSystem = new InputSystem({
@@ -46,11 +76,6 @@ export class GalaxyMapScene extends Phaser.Scene {
       focusBorderWidth: 3,
       hoverCursor: 'pointer'
     });
-
-    // Generate galaxy with fixed seed for testing (42)
-    const generator = new GalaxyGenerator();
-    this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
-    this.gameState.planets = this.galaxy.planets;
 
     // Validate state
     if (!this.gameState.validate()) {
@@ -93,6 +118,14 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Create planet info panel (fixed to camera, above everything)
     this.planetInfoPanel = new PlanetInfoPanel(this);
+
+    // Create Turn HUD (top-left corner, fixed to camera)
+    this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
+    this.turnHUD.setScrollFactor(0);
+    this.turnHUD.setDepth(500);
+
+    // Wire up victory/defeat detection (Story 2-4, 2-5)
+    this.setupVictoryDetection();
 
     // Render all planets
     this.renderPlanets();
@@ -382,6 +415,7 @@ export class GalaxyMapScene extends Phaser.Scene {
         'Enter/Space: Select focused',
         '',
         'Shortcuts:',
+        'T: End Turn (Action phase)',
         'Esc: Pause menu',
         'H: Help overlay',
         'O: Objectives',
@@ -535,6 +569,35 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Sets up victory/defeat detection callbacks.
+   * Story 2-4: Victory detection when all AI planets captured
+   * Story 2-5: Defeat detection when all player planets lost
+   */
+  private setupVictoryDetection(): void {
+    // Store original callback for cleanup
+    const originalOnVictoryAchieved = this.turnSystem.onVictoryAchieved;
+
+    this.turnSystem.onVictoryAchieved = (result: VictoryResult) => {
+      // Chain with original callback
+      originalOnVictoryAchieved?.(result);
+
+      // Measure detection time for AC-1 compliance (< 1 second)
+      const startTime = performance.now();
+
+      if (result === VictoryResult.PlayerVictory) {
+        console.log('Victory achieved! Transitioning to Victory Scene...');
+        this.scene.start('VictoryScene');
+      } else if (result === VictoryResult.AIVictory) {
+        console.log('Defeat! Transitioning to Defeat Scene...');
+        this.scene.start('DefeatScene');
+      }
+
+      const detectionTime = performance.now() - startTime;
+      console.log(`Victory/defeat detection completed in ${detectionTime.toFixed(2)}ms`);
+    };
+  }
+
   public shutdown(): void {
     if (this.cameraController) {
       this.cameraController.destroy();
@@ -547,6 +610,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.planetInfoPanel) {
       this.planetInfoPanel.destroy();
+    }
+    if (this.turnHUD) {
+      this.turnHUD.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
