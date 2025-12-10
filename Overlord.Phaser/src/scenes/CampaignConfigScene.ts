@@ -274,6 +274,7 @@ export class CampaignConfigScene extends Phaser.Scene {
       this.registry.set('gameState', result.gameState);
       this.registry.set('galaxy', result.galaxy);
       this.registry.set('turnSystem', result.turnSystem);
+      this.registry.set('phaseProcessor', result.phaseProcessor);
 
       // Log performance (AC-4)
       console.log(`Campaign initialized in ${result.initializationTimeMs.toFixed(2)}ms`);

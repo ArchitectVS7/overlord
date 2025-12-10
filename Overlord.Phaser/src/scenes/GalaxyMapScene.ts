@@ -3,6 +3,7 @@ import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
 import { TurnSystem } from '@core/TurnSystem';
+import { PhaseProcessor } from '@core/PhaseProcessor';
 import { Difficulty, FactionType } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
@@ -16,6 +17,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
   private gameState!: GameState;
   private turnSystem!: TurnSystem;
+  private phaseProcessor!: PhaseProcessor;
   private inputSystem!: InputSystem;
   private inputManager!: InputManager;
   private cameraController!: CameraController;
@@ -37,14 +39,16 @@ export class GalaxyMapScene extends Phaser.Scene {
     const registryGameState = this.registry.get('gameState') as GameState | undefined;
     const registryGalaxy = this.registry.get('galaxy') as Galaxy | undefined;
 
-    // Try to get turnSystem from registry
+    // Try to get turnSystem and phaseProcessor from registry
     const registryTurnSystem = this.registry.get('turnSystem') as TurnSystem | undefined;
+    const registryPhaseProcessor = this.registry.get('phaseProcessor') as PhaseProcessor | undefined;
 
     if (registryGameState && registryGalaxy) {
       // Use campaign-initialized state
       this.gameState = registryGameState;
       this.galaxy = registryGalaxy;
       this.turnSystem = registryTurnSystem || new TurnSystem(this.gameState);
+      this.phaseProcessor = registryPhaseProcessor || new PhaseProcessor(this.gameState);
       console.log(`Using campaign state: Difficulty=${registryGameState.campaignConfig?.difficulty}, AI=${registryGameState.campaignConfig?.aiPersonality}`);
     } else {
       // Fallback for direct scene access (testing/development)
@@ -55,6 +59,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.gameState.planets = this.galaxy.planets;
       this.gameState.rebuildLookups();
       this.turnSystem = new TurnSystem(this.gameState);
+      this.phaseProcessor = new PhaseProcessor(this.gameState);
     }
 
     // Initialize input system (platform-agnostic)
@@ -115,7 +120,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.planetInfoPanel = new PlanetInfoPanel(this);
 
     // Create Turn HUD (top-left corner, fixed to camera)
-    this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem);
+    this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
     this.turnHUD.setScrollFactor(0);
     this.turnHUD.setDepth(500);
 

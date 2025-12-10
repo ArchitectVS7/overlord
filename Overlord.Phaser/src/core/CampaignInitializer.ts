@@ -1,6 +1,7 @@
 import { GameState } from './GameState';
 import { GalaxyGenerator, Galaxy } from './GalaxyGenerator';
 import { TurnSystem } from './TurnSystem';
+import { PhaseProcessor } from './PhaseProcessor';
 import { CampaignConfig, createCampaignConfig } from './models/CampaignConfig';
 import { TurnPhase, Difficulty } from './models/Enums';
 
@@ -11,6 +12,7 @@ export interface CampaignInitializationResult {
   gameState: GameState;
   galaxy: Galaxy;
   turnSystem: TurnSystem;
+  phaseProcessor: PhaseProcessor;
   success: boolean;
   initializationTimeMs: number;
   error?: string;
@@ -61,6 +63,9 @@ export class CampaignInitializer {
       // Initialize turn system
       const turnSystem = new TurnSystem(gameState);
 
+      // Initialize phase processor (Story 2-3)
+      const phaseProcessor = new PhaseProcessor(gameState);
+
       const endTime = performance.now();
       const initTimeMs = endTime - startTime;
 
@@ -73,6 +78,7 @@ export class CampaignInitializer {
         gameState,
         galaxy,
         turnSystem,
+        phaseProcessor,
         success: true,
         initializationTimeMs: initTimeMs,
       };
@@ -82,6 +88,7 @@ export class CampaignInitializer {
         gameState: emptyState,
         galaxy: { seed: 0, name: '', difficulty: Difficulty.Normal, planets: [] },
         turnSystem: new TurnSystem(emptyState), // Use same emptyState instance
+        phaseProcessor: new PhaseProcessor(emptyState), // Use same emptyState instance
         success: false,
         initializationTimeMs: endTime - startTime,
         error: error instanceof Error ? error.message : 'Unknown error during initialization',

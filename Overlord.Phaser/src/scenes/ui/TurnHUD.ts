@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
 import { GameState } from '@core/GameState';
 import { TurnSystem } from '@core/TurnSystem';
+import { PhaseProcessor } from '@core/PhaseProcessor';
 import { TurnPhase } from '@core/models/Enums';
+import { ResourceDelta } from '@core/models/ResourceModels';
 
 /**
  * Configuration options for TurnHUD
@@ -11,6 +13,8 @@ export interface TurnHUDConfig {
   autoAdvanceDelayMs?: number;
   /** Duration in ms for notification visibility (default: 500) */
   notificationDurationMs?: number;
+  /** Minimum population growth to show notification (default: 10) */
+  populationGrowthThreshold?: number;
 }
 
 /**
@@ -26,19 +30,27 @@ export class TurnHUD extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
   private gameState: GameState;
   private turnSystem: TurnSystem;
+  private phaseProcessor: PhaseProcessor;
   private notificationTween?: Phaser.Tweens.Tween;
 
   // Keyboard handler references for cleanup (CRITICAL-1 fix)
   private tKeyHandler?: () => void;
 
-  // Original callbacks for chaining (CRITICAL-2 fix)
+  // Original TurnSystem callbacks for chaining (CRITICAL-2 fix)
   private originalOnPhaseChanged?: (phase: TurnPhase) => void;
   private originalOnTurnStarted?: (turn: number) => void;
   private originalOnTurnEnded?: (turn: number) => void;
 
-  // Configurable timing (MAJOR-4 fix)
+  // Original PhaseProcessor callbacks for cleanup (CRITICAL-3 fix)
+  private originalOnIncomeProcessed?: (playerIncome: ResourceDelta, aiIncome: ResourceDelta) => void;
+  private originalOnBuildingCompleted?: (planetId: number, buildingType: string) => void;
+  private originalOnPopulationGrowth?: (planetId: number, growth: number) => void;
+  private originalOnPhaseProcessingError?: (phase: TurnPhase, error: string) => void;
+
+  // Configurable timing and thresholds (MAJOR-4, MAJOR-6 fixes)
   private readonly autoAdvanceDelayMs: number;
   private readonly notificationDurationMs: number;
+  private readonly populationGrowthThreshold: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -46,13 +58,19 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     y: number,
     gameState: GameState,
     turnSystem: TurnSystem,
+    phaseProcessor: PhaseProcessor,
     config?: TurnHUDConfig
   ) {
     super(scene, x, y);
     this.gameState = gameState;
     this.turnSystem = turnSystem;
+    this.phaseProcessor = phaseProcessor;
     this.autoAdvanceDelayMs = config?.autoAdvanceDelayMs ?? 1500;
     this.notificationDurationMs = config?.notificationDurationMs ?? 500;
+    this.populationGrowthThreshold = config?.populationGrowthThreshold ?? 10;
+
+    // Wire up phase processor events for notifications
+    this.setupPhaseProcessorEvents();
 
     // Background panel
     this.background = scene.add.rectangle(0, 0, 280, 100, 0x000000, 0.7);
@@ -168,6 +186,47 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     };
   }
 
+  private setupPhaseProcessorEvents(): void {
+    // Save original callbacks for cleanup (CRITICAL-3 fix)
+    this.originalOnIncomeProcessed = this.phaseProcessor.onIncomeProcessed;
+    this.originalOnBuildingCompleted = this.phaseProcessor.onBuildingCompleted;
+    this.originalOnPopulationGrowth = this.phaseProcessor.onPopulationGrowth;
+    this.originalOnPhaseProcessingError = this.phaseProcessor.onPhaseProcessingError;
+
+    // Income processing notifications (Story 2-3: AC-1)
+    this.phaseProcessor.onIncomeProcessed = (playerIncome: ResourceDelta, aiIncome: ResourceDelta) => {
+      this.originalOnIncomeProcessed?.(playerIncome, aiIncome);
+      const summary = this.formatIncomeSummary(playerIncome, 'Income');
+      this.showNotification(summary);
+    };
+
+    // Building completion notifications (Story 2-3: AC-5)
+    this.phaseProcessor.onBuildingCompleted = (planetId: number, buildingType: string) => {
+      this.originalOnBuildingCompleted?.(planetId, buildingType);
+      const planet = this.gameState.planetLookup.get(planetId);
+      if (planet) {
+        this.showNotification(`${buildingType} completed on ${planet.name}`);
+      }
+    };
+
+    // Population growth notifications (Story 2-3: AC-5)
+    // Uses configurable threshold (MAJOR-6 fix)
+    this.phaseProcessor.onPopulationGrowth = (planetId: number, growth: number) => {
+      this.originalOnPopulationGrowth?.(planetId, growth);
+      const planet = this.gameState.planetLookup.get(planetId);
+      if (planet && growth >= this.populationGrowthThreshold) {
+        this.showNotification(`${planet.name}: +${growth} population`);
+      }
+    };
+
+    // Error handling (Story 2-3: AC-6)
+    this.phaseProcessor.onPhaseProcessingError = (phase: TurnPhase, error: string) => {
+      this.originalOnPhaseProcessingError?.(phase, error);
+      console.error(`Phase processing error in ${this.getPhaseDisplayName(phase)}:`, error);
+      this.showNotification(`Error: ${error}`);
+    };
+  }
+
   private onEndTurnClicked(): void {
     if (this.gameState.currentPhase !== TurnPhase.Action) {
       return; // Can only end turn in Action phase
@@ -182,6 +241,13 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     this.showNotification(`${this.getPhaseDisplayName(newPhase)} Phase`);
     this.update();
 
+    // Process the phase using PhaseProcessor (Story 2-3)
+    // This handles Income calculations, End phase building/population updates, etc.
+    const result = this.phaseProcessor.processPhase(newPhase);
+    if (!result.success) {
+      console.error(`Phase processing failed: ${result.error}`);
+    }
+
     // Auto-advance Combat and End phases after configurable delay
     // Note: Income auto-advances within TurnSystem
     if (newPhase === TurnPhase.Combat || newPhase === TurnPhase.End) {
@@ -192,6 +258,8 @@ export class TurnHUD extends Phaser.GameObjects.Container {
   }
 
   private showNotification(message: string): void {
+    const startTime = performance.now();
+
     // Cancel any existing notification tween
     if (this.notificationTween) {
       this.notificationTween.stop();
@@ -201,6 +269,12 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     // Show notification immediately (NFR-P3: feedback within 100ms)
     this.notificationText.setText(message);
     this.notificationText.setAlpha(1);
+
+    // Verify notification timing (CRITICAL-2 fix: AC-5 instrumentation)
+    const displayTime = performance.now() - startTime;
+    if (displayTime > 100) {
+      console.warn(`Notification exceeded 100ms target: ${displayTime.toFixed(2)}ms`);
+    }
 
     // Fade out after configured duration (MAJOR-1 fix: configurable timing)
     this.notificationTween = this.scene.tweens.add({
@@ -227,6 +301,26 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     }
   }
 
+  /**
+   * Formats an income summary for notification display.
+   * UI-layer formatting (moved from Core per architecture requirements).
+   */
+  private formatIncomeSummary(income: ResourceDelta, label: string): string {
+    const parts: string[] = [];
+
+    if (income.credits > 0) parts.push(`+${income.credits} Credits`);
+    if (income.minerals > 0) parts.push(`+${income.minerals} Minerals`);
+    if (income.fuel > 0) parts.push(`+${income.fuel} Fuel`);
+    if (income.food > 0) parts.push(`+${income.food} Food`);
+    if (income.energy > 0) parts.push(`+${income.energy} Energy`);
+
+    if (parts.length === 0) {
+      return `${label}: No income`;
+    }
+
+    return `${label}: ${parts.join(', ')}`;
+  }
+
   public update(): void {
     // Update turn text
     this.turnText.setText(`Turn ${this.gameState.currentTurn}`);
@@ -250,7 +344,7 @@ export class TurnHUD extends Phaser.GameObjects.Container {
       this.scene.input.keyboard?.off('keydown-T', this.tKeyHandler);
     }
 
-    // Restore original callbacks (CRITICAL-2 fix)
+    // Restore original TurnSystem callbacks (CRITICAL-2 fix)
     if (this.originalOnPhaseChanged !== undefined) {
       this.turnSystem.onPhaseChanged = this.originalOnPhaseChanged;
     }
@@ -259,6 +353,20 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     }
     if (this.originalOnTurnEnded !== undefined) {
       this.turnSystem.onTurnEnded = this.originalOnTurnEnded;
+    }
+
+    // Restore original PhaseProcessor callbacks (CRITICAL-3 fix)
+    if (this.originalOnIncomeProcessed !== undefined) {
+      this.phaseProcessor.onIncomeProcessed = this.originalOnIncomeProcessed;
+    }
+    if (this.originalOnBuildingCompleted !== undefined) {
+      this.phaseProcessor.onBuildingCompleted = this.originalOnBuildingCompleted;
+    }
+    if (this.originalOnPopulationGrowth !== undefined) {
+      this.phaseProcessor.onPopulationGrowth = this.originalOnPopulationGrowth;
+    }
+    if (this.originalOnPhaseProcessingError !== undefined) {
+      this.phaseProcessor.onPhaseProcessingError = this.originalOnPhaseProcessingError;
     }
 
     // Clean up notification tween
