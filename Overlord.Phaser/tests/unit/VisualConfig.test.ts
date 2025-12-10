@@ -6,10 +6,11 @@ import { PLANET_VISUALS, OWNER_COLORS, VISUAL_CONSTANTS } from '../../src/config
 
 describe('VisualConfig', () => {
   describe('PLANET_VISUALS', () => {
-    test('should contain all planet types', () => {
+    test('should contain all visual planet types', () => {
+      // Visual types mapped from Core PlanetType enum:
+      // Tropical → Terran, Desert → Desert, Volcanic → Volcanic, Metropolis → GasGiant
       expect(PLANET_VISUALS).toHaveProperty('Terran');
       expect(PLANET_VISUALS).toHaveProperty('Desert');
-      expect(PLANET_VISUALS).toHaveProperty('Ice');
       expect(PLANET_VISUALS).toHaveProperty('Volcanic');
       expect(PLANET_VISUALS).toHaveProperty('GasGiant');
     });

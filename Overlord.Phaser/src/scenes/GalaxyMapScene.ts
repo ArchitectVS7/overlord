@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
-import { Difficulty } from '@core/models/Enums';
+import { Difficulty, FactionType } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
@@ -66,7 +66,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.cameraController = new CameraController(this, galaxyBounds);
 
     // Find home planet (first player-owned or first planet) for camera home
-    const homePlanet = this.galaxy.planets.find(p => p.owner === 'Player') || this.galaxy.planets[0];
+    const homePlanet = this.galaxy.planets.find(p => p.owner === FactionType.Player) || this.galaxy.planets[0];
     if (homePlanet) {
       this.cameraController.setHomePosition(homePlanet.position.x, homePlanet.position.z, 1.0);
       this.cameraController.centerOn(homePlanet.position.x, homePlanet.position.z, false);

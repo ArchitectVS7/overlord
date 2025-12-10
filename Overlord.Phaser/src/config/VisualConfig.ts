@@ -7,12 +7,18 @@ export interface PlanetVisualConfig {
   size: number;
 }
 
+/**
+ * Visual config keyed by logical type names mapped from PlanetType enum:
+ * - Desert → Desert
+ * - Volcanic → Volcanic
+ * - Tropical → Terran (green, lush worlds)
+ * - Metropolis → GasGiant (large, developed worlds)
+ */
 export const PLANET_VISUALS: Record<string, PlanetVisualConfig> = {
-  Terran: { color: 0x22aa22, size: 32 },
-  Desert: { color: 0xddaa77, size: 30 },
-  Ice: { color: 0xccffff, size: 28 },
-  Volcanic: { color: 0xff4422, size: 34 },
-  GasGiant: { color: 0xffaa44, size: 48 }
+  Terran: { color: 0x22aa22, size: 32 },    // Used for Tropical planets
+  Desert: { color: 0xddaa77, size: 30 },    // Desert planets
+  Volcanic: { color: 0xff4422, size: 34 },  // Volcanic planets
+  GasGiant: { color: 0xffaa44, size: 48 }   // Used for Metropolis planets (largest)
 };
 
 export const OWNER_COLORS: Record<string, number> = {
