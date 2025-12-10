@@ -121,7 +121,8 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.selectionGraphics.setDepth(100);
 
     // Create planet info panel (fixed to camera, above everything)
-    this.planetInfoPanel = new PlanetInfoPanel(this);
+    // Pass BuildingSystem for construction progress tracking (Story 4-3)
+    this.planetInfoPanel = new PlanetInfoPanel(this, this.phaseProcessor.getBuildingSystem());
 
     // Create Turn HUD (top-left corner, fixed to camera)
     this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
@@ -155,6 +156,24 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up building completion to refresh ResourceHUD
     this.buildingMenuPanel.onBuildingSelected = () => {
       this.resourceHUD.updateDisplay();
+    };
+
+    // Wire up building completion notifications (Story 4-3: AC3)
+    this.phaseProcessor.onBuildingCompleted = (planetId, buildingType) => {
+      const planet = this.gameState.planetLookup.get(planetId);
+      const planetName = planet?.name || `Planet ${planetId}`;
+      const buildingName = this.getBuildingDisplayName(buildingType);
+
+      // Show completion notification (AC3: notification with benefit description)
+      this.showBuildingCompletedNotification(buildingName, planetName, buildingType);
+
+      // Refresh UI if the planet info panel is showing this planet
+      if (this.selectedPlanetId && parseInt(this.selectedPlanetId) === planetId) {
+        const selectedPlanet = this.gameState.planetLookup.get(planetId);
+        if (selectedPlanet) {
+          this.planetInfoPanel.setPlanet(selectedPlanet);
+        }
+      }
     };
 
     // Wire up victory/defeat detection (Story 2-4, 2-5)
@@ -629,6 +648,82 @@ export class GalaxyMapScene extends Phaser.Scene {
       const detectionTime = performance.now() - startTime;
       console.log(`Victory/defeat detection completed in ${detectionTime.toFixed(2)}ms`);
     };
+  }
+
+  /**
+   * Gets display name for a building type (Story 4-3)
+   */
+  private getBuildingDisplayName(buildingType: string): string {
+    switch (buildingType) {
+      case 'MiningStation': return 'Mining Station';
+      case 'HorticulturalStation': return 'Horticultural Station';
+      case 'DockingBay': return 'Docking Bay';
+      case 'OrbitalDefense': return 'Orbital Defense';
+      case 'SurfacePlatform': return 'Surface Platform';
+      default: return buildingType;
+    }
+  }
+
+  /**
+   * Gets benefit description for a building type (Story 4-3)
+   */
+  private getBuildingBenefitDescription(buildingType: string): string {
+    switch (buildingType) {
+      case 'MiningStation': return '+50 Minerals/turn, +30 Fuel/turn';
+      case 'HorticulturalStation': return '+100 Food/turn';
+      case 'DockingBay': return '+1 Orbital Slot';
+      case 'OrbitalDefense': return '+20% Defense Bonus';
+      case 'SurfacePlatform': return '+1 Surface Slot';
+      default: return '';
+    }
+  }
+
+  /**
+   * Shows building completion notification (Story 4-3: AC3)
+   * "[Building Name] completed on [Planet Name]! +[benefit description]"
+   */
+  private showBuildingCompletedNotification(
+    buildingName: string,
+    planetName: string,
+    buildingType: string
+  ): void {
+    const benefit = this.getBuildingBenefitDescription(buildingType);
+    const message = benefit
+      ? `${buildingName} completed on ${planetName}! ${benefit}`
+      : `${buildingName} completed on ${planetName}!`;
+
+    // Create notification at bottom center
+    const notification = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height - 100,
+      message,
+      {
+        fontSize: '16px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
+        backgroundColor: 'rgba(0, 50, 0, 0.9)',
+        padding: { x: 15, y: 10 }
+      }
+    );
+    notification.setOrigin(0.5);
+    notification.setScrollFactor(0);
+    notification.setDepth(1200);
+
+    // Fade out after 3 seconds (AC4: can dismiss)
+    this.tweens.add({
+      targets: notification,
+      alpha: 0,
+      duration: 500,
+      delay: 3000,
+      onComplete: () => notification.destroy()
+    });
+
+    // Make notification dismissible by click
+    notification.setInteractive({ useHandCursor: true });
+    notification.on('pointerdown', () => {
+      this.tweens.killTweensOf(notification);
+      notification.destroy();
+    });
   }
 
   public shutdown(): void {
