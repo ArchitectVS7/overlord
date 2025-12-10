@@ -308,16 +308,23 @@ export class DefeatScene extends Phaser.Scene {
   }
 
   /**
-   * Returns to campaign config to try again.
+   * Returns to campaign config to try again (C2.5-1: preserves settings).
    */
   private tryAgain(): void {
+    // C2.5-1: Preserve campaign settings for retry
+    const previousConfig = this.gameState?.campaignConfig;
+
     // Clear registry data
     this.registry.remove('gameState');
     this.registry.remove('galaxy');
     this.registry.remove('turnSystem');
     this.registry.remove('phaseProcessor');
 
-    this.scene.start('CampaignConfigScene');
+    // Pass previous config to CampaignConfigScene for retry with same settings
+    this.scene.start('CampaignConfigScene', {
+      previousDifficulty: previousConfig?.difficulty,
+      previousPersonality: previousConfig?.aiPersonality,
+    });
   }
 
   /**

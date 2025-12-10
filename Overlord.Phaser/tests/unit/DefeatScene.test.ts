@@ -180,13 +180,18 @@ describe('DefeatScene', () => {
       (defeatScene as any).tryAgain.call({
         registry: mockRegistry,
         scene: mockScene,
+        gameState: undefined, // No game state, so previousConfig will be undefined
       });
 
       expect(mockRegistry.remove).toHaveBeenCalledWith('gameState');
       expect(mockRegistry.remove).toHaveBeenCalledWith('galaxy');
       expect(mockRegistry.remove).toHaveBeenCalledWith('turnSystem');
       expect(mockRegistry.remove).toHaveBeenCalledWith('phaseProcessor');
-      expect(mockScene.start).toHaveBeenCalledWith('CampaignConfigScene');
+      // C2.5-1: Now passes previous config settings (undefined when no gameState)
+      expect(mockScene.start).toHaveBeenCalledWith('CampaignConfigScene', {
+        previousDifficulty: undefined,
+        previousPersonality: undefined,
+      });
     });
   });
 
