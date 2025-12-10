@@ -10,7 +10,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   public create(): void {
-    // Start main galaxy map scene
-    this.scene.start('GalaxyMapScene');
+    // Start at main menu (AC-1)
+    this.scene.start('MainMenuScene');
   }
 }

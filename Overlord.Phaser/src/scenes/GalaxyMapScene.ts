@@ -29,8 +29,24 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   public create(): void {
-    // Initialize game state
-    this.gameState = new GameState();
+    // Try to get campaign-initialized state from registry (set by CampaignConfigScene)
+    const registryGameState = this.registry.get('gameState') as GameState | undefined;
+    const registryGalaxy = this.registry.get('galaxy') as Galaxy | undefined;
+
+    if (registryGameState && registryGalaxy) {
+      // Use campaign-initialized state
+      this.gameState = registryGameState;
+      this.galaxy = registryGalaxy;
+      console.log(`Using campaign state: Difficulty=${registryGameState.campaignConfig?.difficulty}, AI=${registryGameState.campaignConfig?.aiPersonality}`);
+    } else {
+      // Fallback for direct scene access (testing/development)
+      console.warn('No campaign state in registry - creating default state');
+      this.gameState = new GameState();
+      const generator = new GalaxyGenerator();
+      this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
+      this.gameState.planets = this.galaxy.planets;
+      this.gameState.rebuildLookups();
+    }
 
     // Initialize input system (platform-agnostic)
     this.inputSystem = new InputSystem({
@@ -46,11 +62,6 @@ export class GalaxyMapScene extends Phaser.Scene {
       focusBorderWidth: 3,
       hoverCursor: 'pointer'
     });
-
-    // Generate galaxy with fixed seed for testing (42)
-    const generator = new GalaxyGenerator();
-    this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
-    this.gameState.planets = this.galaxy.planets;
 
     // Validate state
     if (!this.gameState.validate()) {

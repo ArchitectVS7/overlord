@@ -3,6 +3,7 @@ import { CraftEntity } from './models/CraftEntity';
 import { PlatoonEntity } from './models/PlatoonEntity';
 import { TurnPhase } from './models/Enums';
 import { ResourceCollection } from './models/ResourceModels';
+import { CampaignConfig } from './models/CampaignConfig';
 
 /**
  * Faction state for player and AI.
@@ -23,6 +24,7 @@ export class GameState {
   public currentTurn: number = 1;
   public currentPhase: TurnPhase = TurnPhase.Action;
   public lastActionTime: Date = new Date();
+  public campaignConfig?: CampaignConfig;
   public planets: PlanetEntity[] = [];
   public craft: CraftEntity[] = [];
   public platoons: PlatoonEntity[] = [];
