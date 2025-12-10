@@ -45,14 +45,14 @@ This document provides the complete epic and story breakdown for Overlord, decom
 - FR23: AI opponents can make strategic decisions (build economy, train military, launch attacks)
 - FR24: AI opponents can adapt behavior based on personality type and difficulty level
 
-**Flash Scenarios:**
-- FR25: Players can access a Flash Scenarios menu separate from campaign mode
-- FR26: Players can select and start individual Flash Scenarios
-- FR27: Players can complete tutorial Flash Scenarios that teach specific game mechanics
-- FR28: Players can complete tactical Flash Scenarios as quick-play challenges
-- FR29: Players can view Flash Scenario victory conditions before starting
-- FR30: Players can view Flash Scenario completion results (success/failure, completion time)
-- FR31: System can track Flash Scenario completion history per user
+**Flash Conflicts:**
+- FR25: Players can access a Flash Conflicts menu separate from campaign mode
+- FR26: Players can select and start individual Flash Conflicts
+- FR27: Players can complete tutorial Flash Conflicts that teach specific game mechanics
+- FR28: Players can complete tactical Flash Conflicts as quick-play challenges
+- FR29: Players can view Flash Conflict victory conditions before starting
+- FR30: Players can view Flash Conflict completion results (success/failure, completion time)
+- FR31: System can track Flash Conflict completion history per user
 
 **Scenario Pack System:**
 - FR32: Players can browse available scenario packs from the main menu
@@ -67,7 +67,7 @@ This document provides the complete epic and story breakdown for Overlord, decom
 - FR39: Players can load previously saved campaigns
 - FR40: Players can access saved games from different devices (cross-device sync)
 - FR41: System can persist user settings and preferences across sessions
-- FR42: System can track user statistics (campaigns completed, Flash Scenarios completed, playtime)
+- FR42: System can track user statistics (campaigns completed, Flash Conflicts completed, playtime)
 
 **User Interface & Controls:**
 - FR43: Players can interact with the game using mouse and keyboard (desktop)
@@ -90,7 +90,7 @@ This document provides the complete epic and story breakdown for Overlord, decom
 
 **Performance:**
 - NFR-P1: Frame Rate - Desktop browsers must sustain 60 FPS; Mobile browsers must sustain 30 FPS
-- NFR-P2: Load Time - Initial page load to playable state within 5 seconds; Flash Scenario start within 2 seconds; Campaign load within 3 seconds
+- NFR-P2: Load Time - Initial page load to playable state within 5 seconds; Flash Conflict start within 2 seconds; Campaign load within 3 seconds
 - NFR-P3: Response Time - User interactions provide feedback within 100ms; Turn processing within 2 seconds; Combat resolution within 5 seconds
 - NFR-P4: Asset Loading - Critical assets in first 10 MB; On-demand assets within 500ms; Mobile uses 50% resolution on <4 GB RAM
 
@@ -112,8 +112,8 @@ This document provides the complete epic and story breakdown for Overlord, decom
 - NFR-S4: Privacy - No PII beyond email/username; Anonymized analytics only; Save games contain no PII
 
 **Usability:**
-- NFR-U1: Learnability - Tutorial Flash Scenarios teach mechanics in 5-10 min; "Genesis Device 101" >60% completion rate; Keyboard shortcuts discoverable via H key
-- NFR-U2: Efficiency - Experienced users complete Flash Scenarios 20-30% faster; Keyboard shortcuts reduce action time 50%; Turn advancement = single action
+- NFR-U1: Learnability - Tutorial Flash Conflicts teach mechanics in 5-10 min; "Genesis Device 101" >60% completion rate; Keyboard shortcuts discoverable via H key
+- NFR-U2: Efficiency - Experienced users complete Flash Conflicts 20-30% faster; Keyboard shortcuts reduce action time 50%; Turn advancement = single action
 - NFR-U3: Error Prevention - Destructive actions require confirmation; Clear error messages (not "Error 500"); Undo for reversible actions (post-MVP)
 - NFR-U4: Consistency - UI patterns consistent across screens; Keyboard shortcuts don't conflict with browser; Touch gestures match platform conventions
 
@@ -161,7 +161,7 @@ This document provides the complete epic and story breakdown for Overlord, decom
 - **Priority 3 (Cached):** Asset pools for frequent sprites, color tinting for factions, texture atlases
 - Mobile optimization: Detect `navigator.deviceMemory`, load 50% resolution on <4 GB RAM, disable particle effects on low FPS (<25), WebP compression (PNG fallback for Safari)
 
-**Flash Scenarios JSON Schema:**
+**Flash Conflicts JSON Schema:**
 - Scenario definitions stored in `public/assets/data/scenarios/{scenario_id}.json`
 - Schema includes: `scenario_id`, `name`, `type` (tutorial/tactical), `difficulty`, `duration_estimate_minutes`, `initial_state`, `victory_conditions`, `tutorial_steps`
 - ScenarioService validates JSON against schema before loading
@@ -196,7 +196,7 @@ This document provides the complete epic and story breakdown for Overlord, decom
 - ADR-002: Use Supabase for Backend (PostgreSQL, auth, RLS, generous free tier)
 - ADR-003: TypeScript Path Aliases (`@core/*`, `@scenes/*`, `@services/*`)
 - ADR-004: Platform-Agnostic Core Architecture (zero Phaser dependencies in `src/core/`)
-- ADR-005: Flash Scenarios as Dual-Purpose System (tutorials + quick-play unified)
+- ADR-005: Flash Conflicts as Dual-Purpose System (tutorials + quick-play unified)
 
 ### FR Coverage Map
 
@@ -224,10 +224,10 @@ This document provides the complete epic and story breakdown for Overlord, decom
 **FR22** → Epic 6: Combat & Planetary Invasion (view combat results)
 **FR23** → Epic 7: AI Opponent System (AI strategic decisions)
 **FR24** → Epic 7: AI Opponent System (AI personality/difficulty adaptation)
-**FR25** → Epic 1: Player Onboarding & Tutorials (Flash Scenarios menu)
+**FR25** → Epic 1: Player Onboarding & Tutorials (Flash Conflicts menu)
 **FR26** → Epic 1: Player Onboarding & Tutorials (select scenarios)
-**FR27** → Epic 1: Player Onboarding & Tutorials (tutorial Flash Scenarios)
-**FR28** → Epic 8: Quick-Play Tactical Scenarios (tactical Flash Scenarios)
+**FR27** → Epic 1: Player Onboarding & Tutorials (tutorial Flash Conflicts)
+**FR28** → Epic 8: Quick-Play Tactical Scenarios (tactical Flash Conflicts)
 **FR29** → Epic 1: Player Onboarding & Tutorials (view victory conditions)
 **FR30** → Epic 1: Player Onboarding & Tutorials (view completion results)
 **FR31** → Epic 1: Player Onboarding & Tutorials (track completion history)
@@ -260,11 +260,11 @@ This document provides the complete epic and story breakdown for Overlord, decom
 
 ### Epic 1: Player Onboarding & Tutorials
 
-**User Outcome:** New players learn game mechanics through interactive Flash Scenario tutorials before starting their first campaign.
+**User Outcome:** New players learn game mechanics through interactive Flash Conflict tutorials before starting their first campaign.
 
 **FRs Covered:** FR25, FR26, FR27, FR29, FR30, FR31
 
-**Implementation Notes:** Complete Flash Scenario system infrastructure (menu, selection, victory conditions, completion tracking). Initially used for tutorials to onboard new players (Sam's journey). This system provides the foundation for Epic 8 (Quick-Play Tactical Scenarios).
+**Implementation Notes:** Complete Flash Conflict system infrastructure (menu, selection, victory conditions, completion tracking). Initially used for tutorials to onboard new players (Sam's journey). This system provides the foundation for Epic 8 (Quick-Play Tactical Scenarios).
 
 ---
 
@@ -330,11 +330,11 @@ This document provides the complete epic and story breakdown for Overlord, decom
 
 ### Epic 8: Quick-Play Tactical Scenarios
 
-**User Outcome:** Players enjoy fast-paced tactical challenges through Flash Scenarios as replayable content after completing basic campaigns.
+**User Outcome:** Players enjoy fast-paced tactical challenges through Flash Conflicts as replayable content after completing basic campaigns.
 
 **FRs Covered:** FR28
 
-**Implementation Notes:** Tactical scenario configurations extending Epic 1's Flash Scenario infrastructure. Unlocked after campaign introduction to provide quick-play content (Jordan's commute gaming). Uses same menu/selection/tracking system from Epic 1 but with tactical challenges instead of tutorials.
+**Implementation Notes:** Tactical scenario configurations extending Epic 1's Flash Conflict infrastructure. Unlocked after campaign introduction to provide quick-play content (Jordan's commute gaming). Uses same menu/selection/tracking system from Epic 1 but with tactical challenges instead of tutorials.
 
 ---
 
@@ -380,38 +380,38 @@ This document provides the complete epic and story breakdown for Overlord, decom
 
 ## Epic 1: Player Onboarding & Tutorials
 
-**Epic Goal:** New players learn game mechanics through interactive Flash Scenario tutorials before starting their first campaign.
+**Epic Goal:** New players learn game mechanics through interactive Flash Conflict tutorials before starting their first campaign.
 
 **FRs Covered:** FR25, FR26, FR27, FR29, FR30, FR31
 
-### Story 1.1: Flash Scenarios Menu Access
+### Story 1.1: Flash Conflicts Menu Access
 
 As a new player,
-I want to access a Flash Scenarios menu from the main menu,
+I want to access a Flash Conflicts menu from the main menu,
 So that I can choose to learn game mechanics through tutorials before starting a campaign.
 
 **Acceptance Criteria:**
 
 **Given** the game has loaded and I am viewing the main menu
-**When** I click the "Flash Scenarios" menu option
-**Then** the Flash Scenarios scene is loaded within 2 seconds (NFR-P2)
-**And** the main menu is hidden/replaced with the Flash Scenarios interface
+**When** I click the "Flash Conflicts" menu option
+**Then** the Flash Conflicts scene is loaded within 2 seconds (NFR-P2)
+**And** the main menu is hidden/replaced with the Flash Conflicts interface
 **And** I can return to the main menu via a "Back" button
 
-**Given** I have not yet completed any Flash Scenarios
-**When** I access the Flash Scenarios menu for the first time
+**Given** I have not yet completed any Flash Conflicts
+**When** I access the Flash Conflicts menu for the first time
 **Then** I see tutorial scenarios prominently displayed
 **And** I see a "Recommended for Beginners" indicator on the first tutorial scenario
 
 ### Story 1.2: Scenario Selection Interface
 
 As a new player,
-I want to browse available Flash Scenarios and view their details,
+I want to browse available Flash Conflicts and view their details,
 So that I can choose an appropriate tutorial scenario to start learning.
 
 **Acceptance Criteria:**
 
-**Given** I am viewing the Flash Scenarios menu
+**Given** I am viewing the Flash Conflicts menu
 **When** the scenario list loads
 **Then** I see all available scenarios displayed in a scrollable list or grid
 **And** each scenario shows: name, type (tutorial/tactical), difficulty badge, estimated duration
@@ -436,7 +436,7 @@ So that I understand my objectives and start with the correct game configuration
 
 **Acceptance Criteria:**
 
-**Given** I have selected a Flash Scenario to start
+**Given** I have selected a Flash Conflict to start
 **When** the scenario loads
 **Then** the game state is initialized according to the scenario JSON configuration (`initial_state` section)
 **And** the galaxy is generated/configured per scenario specifications
@@ -453,7 +453,7 @@ So that I understand my objectives and start with the correct game configuration
 **Given** the scenario JSON is malformed or missing required fields
 **When** the scenario attempts to load
 **Then** I see a clear error message: "Unable to load scenario. Please try another scenario."
-**And** I am returned to the Flash Scenarios menu
+**And** I am returned to the Flash Conflicts menu
 **And** the error details are logged for debugging (NFR-S3 validation requirement)
 
 ### Story 1.4: Tutorial Step Guidance System
@@ -464,7 +464,7 @@ So that I learn specific game mechanics in a structured way.
 
 **Acceptance Criteria:**
 
-**Given** I am playing a tutorial-type Flash Scenario (type: "tutorial" in JSON)
+**Given** I am playing a tutorial-type Flash Conflict (type: "tutorial" in JSON)
 **When** the scenario starts
 **Then** I see the first tutorial step displayed in a guidance panel
 **And** the tutorial step shows: step number/total (e.g., "Step 1 of 5"), instructional text, highlighted UI element (if applicable)
@@ -489,7 +489,7 @@ So that I learn specific game mechanics in a structured way.
 **Given** a tutorial scenario does not have `tutorial_steps` in its JSON configuration
 **When** the scenario loads
 **Then** the tutorial guidance system does not activate
-**And** the scenario plays as a standard Flash Scenario without step-by-step guidance
+**And** the scenario plays as a standard Flash Conflict without step-by-step guidance
 
 ### Story 1.5: Scenario Completion and Results Display
 
@@ -499,7 +499,7 @@ So that I know I've succeeded and can see my performance metrics.
 
 **Acceptance Criteria:**
 
-**Given** I am playing a Flash Scenario
+**Given** I am playing a Flash Conflict
 **When** I meet the scenario's victory conditions (defined in scenario JSON)
 **Then** the game detects victory within 1 second
 **And** a "Scenario Complete!" results screen is displayed
@@ -511,7 +511,7 @@ So that I know I've succeeded and can see my performance metrics.
 **And** I see a "Continue" button to proceed
 **And** I see my best time for this scenario (if previously completed)
 
-**Given** I am playing a Flash Scenario
+**Given** I am playing a Flash Conflict
 **When** I meet the scenario's defeat conditions (if defined, e.g., all planets lost)
 **Then** a "Scenario Failed" results screen is displayed
 **And** I see: failure status ("Defeat"), time played before failure, reason for defeat
@@ -520,18 +520,18 @@ So that I know I've succeeded and can see my performance metrics.
 **Given** I click "Continue" on the victory results screen
 **When** the button is clicked
 **Then** the scenario completion is recorded (triggers Story 1.6)
-**And** I am returned to the Flash Scenarios menu
+**And** I am returned to the Flash Conflicts menu
 **And** the completed scenario shows a "Completed" badge in the scenario list
 
 ### Story 1.6: Scenario Completion History Tracking
 
 As a player,
-I want the system to track my Flash Scenario completion history across sessions and devices,
+I want the system to track my Flash Conflict completion history across sessions and devices,
 So that my progress is saved and I can see my best times and completion status.
 
 **Acceptance Criteria:**
 
-**Given** I have completed a Flash Scenario (reached victory conditions)
+**Given** I have completed a Flash Conflict (reached victory conditions)
 **When** I click "Continue" on the results screen
 **Then** a completion record is saved to Supabase `scenario_completions` table with: user_id (current user), scenario_id, completed=true, completion_time_seconds, completed_at (UTC timestamp), attempts (incremented), best_time_seconds (updated if new record)
 **And** the save operation succeeds >99.9% of the time (NFR-R1)
@@ -560,7 +560,7 @@ So that my progress is saved and I can see my best times and completion status.
 **And** I see a "Progress synced" notification
 **And** synced records are removed from LocalStorage queue
 
-**Given** I load the Flash Scenarios menu on a different device
+**Given** I load the Flash Conflicts menu on a different device
 **When** I am logged in with my account
 **Then** my scenario completion history is loaded from Supabase
 **And** all previously completed scenarios show "Completed" badges
@@ -1555,20 +1555,20 @@ So that I experience varied and appropriately challenging opponents.
 
 ## Epic 8: Quick-Play Tactical Scenarios
 
-**Epic Goal:** Players enjoy fast-paced tactical challenges through Flash Scenarios as replayable content after completing basic campaigns.
+**Epic Goal:** Players enjoy fast-paced tactical challenges through Flash Conflicts as replayable content after completing basic campaigns.
 
 **FRs Covered:** FR28
 
 ### Story 8.1: Tactical Scenario Content and Variety
 
 As a player who has completed tutorial scenarios,
-I want to access tactical Flash Scenarios as quick-play challenges,
+I want to access tactical Flash Conflicts as quick-play challenges,
 So that I can enjoy fast, replayable strategic gameplay during short play sessions.
 
 **Acceptance Criteria:**
 
-**Given** I have completed at least one tutorial Flash Scenario (from Epic 1)
-**When** I access the Flash Scenarios menu
+**Given** I have completed at least one tutorial Flash Conflict (from Epic 1)
+**When** I access the Flash Conflicts menu
 **Then** I see tactical scenarios unlocked and available
 **And** tactical scenarios are marked with type badge: "Tactical" (vs "Tutorial")
 **And** tactical scenarios are sorted by difficulty: Easy, Medium, Hard, Expert
@@ -1578,19 +1578,19 @@ So that I can enjoy fast, replayable strategic gameplay during short play sessio
 **Then** I see scenarios with varied objectives: "Conquer 3 planets in 10 turns", "Defend against overwhelming invasion", "Resource race: Reach 5000 Credits first", "Fleet battle: Destroy all enemy ships"
 **And** each tactical scenario has unique initial conditions and victory requirements
 
-**Given** I select a tactical Flash Scenario
+**Given** I select a tactical Flash Conflict
 **When** I view the scenario details
 **Then** I see: scenario name, difficulty badge, estimated completion time (5-15 minutes), victory conditions, optional: special rules (e.g., "No new platoon commissioning - use starting forces only"), best completion time (if completed), star rating (if replay)
 **And** I do NOT see tutorial step guidance (tactical scenarios skip the tutorial system)
 
-**Given** I start a tactical Flash Scenario
+**Given** I start a tactical Flash Conflict
 **When** the scenario initializes
 **Then** the game state is configured per the scenario JSON (initial_state)
 **And** I am dropped directly into gameplay (no tutorial overlay)
 **And** the scenario loads within 2 seconds (NFR-P2)
 **And** I see the victory conditions panel (can be reopened with O key)
 
-**Given** I complete a tactical Flash Scenario
+**Given** I complete a tactical Flash Conflict
 **When** I achieve victory
 **Then** I see the scenario completion results screen (same as Epic 1.5)
 **And** I see completion time, star rating (1-3 stars based on time/efficiency), personal best time, "Retry" and "Next Scenario" buttons
@@ -1649,7 +1649,7 @@ So that I experience fresh gameplay with different strategic challenges.
 
 **Given** I have selected a new scenario pack
 **When** I click "Select Pack"
-**Then** I see a confirmation prompt: "Switch to [Pack Name]? This will affect new campaigns and Flash Scenarios."
+**Then** I see a confirmation prompt: "Switch to [Pack Name]? This will affect new campaigns and Flash Conflicts."
 **And** I see a warning: "Active campaigns will not be affected. Only new games will use this pack."
 
 **Given** I confirm the pack switch
@@ -1657,7 +1657,7 @@ So that I experience fresh gameplay with different strategic challenges.
 **Then** the system loads the pack JSON configuration from `public/assets/data/packs/{pack_id}.json`
 **And** the JSON is validated against the scenario pack schema (NFR-S3)
 **And** the pack data is parsed and stored in application state
-**And** I see a notification: "[Pack Name] activated! Start a new campaign or Flash Scenario to experience it."
+**And** I see a notification: "[Pack Name] activated! Start a new campaign or Flash Conflict to experience it."
 
 **Given** the scenario pack JSON is loaded
 **When** the pack configuration is applied
@@ -1672,9 +1672,9 @@ So that I experience fresh gameplay with different strategic challenges.
 **And** faction colors/theme are applied to the UI (AI planets colored per pack theme)
 
 **Given** a scenario pack is active
-**When** I start a Flash Scenario
+**When** I start a Flash Conflict
 **Then** scenarios tagged with this pack use the pack configuration
-**Or** scenarios remain independent (implementation choice - packs may or may not affect Flash Scenarios)
+**Or** scenarios remain independent (implementation choice - packs may or may not affect Flash Conflicts)
 
 **Given** the scenario pack JSON is malformed or fails validation
 **When** the pack is loaded
@@ -1806,7 +1806,7 @@ So that I can continue my progress from where I left off.
 **And** I am redirected to the main menu (logged in state)
 **And** my user profile data is loaded from Supabase `user_profiles` table
 **And** my saved games list is loaded (available in "Load Game" menu)
-**And** my scenario completion history is loaded (for Flash Scenarios tracking)
+**And** my scenario completion history is loaded (for Flash Conflicts tracking)
 
 **Given** I submit incorrect credentials (wrong password or nonexistent email)
 **When** the login fails
@@ -1999,7 +1999,7 @@ So that my preferred UI scale, audio levels, and accessibility options are remem
 ### Story 10.7: User Statistics Tracking
 
 As a player,
-I want the system to track my statistics including campaigns completed, Flash Scenarios completed, and playtime,
+I want the system to track my statistics including campaigns completed, Flash Conflicts completed, and playtime,
 So that I can see my progress and achievements.
 
 **Acceptance Criteria:**
@@ -2009,7 +2009,7 @@ So that I can see my progress and achievements.
 **Then** my `campaigns_completed` counter increments in the user profile
 **And** the statistic is saved to Supabase
 
-**Given** I complete a Flash Scenario
+**Given** I complete a Flash Conflict
 **When** the scenario completion is recorded (Epic 1.6)
 **Then** my `scenarios_completed` counter increments
 **And** the statistic is updated in the user profile
@@ -2021,7 +2021,7 @@ So that I can see my progress and achievements.
 
 **Given** I access my profile or statistics screen
 **When** I view my stats
-**Then** I see: Campaigns Completed: [count], Flash Scenarios Completed: [count], Total Playtime: [hours:minutes], optional: Planets Conquered: [count], Battles Won: [count], Fastest Scenario Time: [time]
+**Then** I see: Campaigns Completed: [count], Flash Conflicts Completed: [count], Total Playtime: [hours:minutes], optional: Planets Conquered: [count], Battles Won: [count], Fastest Scenario Time: [time]
 **And** statistics are displayed in a clear, readable format
 
 **Given** I want to see my achievements
@@ -2304,7 +2304,7 @@ So that I can play the game without needing a mouse.
 
 **Given** I am playing the game
 **When** I use only the keyboard (no mouse)
-**Then** I can access all game functions: start/load campaigns, access Flash Scenarios, configure settings, navigate menus, play campaigns (select planets, build, commission units, end turn), save/load games, view help, quit game
+**Then** I can access all game functions: start/load campaigns, access Flash Conflicts, configure settings, navigate menus, play campaigns (select planets, build, commission units, end turn), save/load games, view help, quit game
 
 **Given** I am navigating menus with keyboard
 **When** I press Tab
@@ -2435,7 +2435,7 @@ So that I enjoy an immersive and atmospheric gaming experience.
 **Acceptance Criteria:**
 
 **Given** I am playing the game with audio enabled
-**When** I start a campaign or Flash Scenario
+**When** I start a campaign or Flash Conflict
 **Then** background music begins playing automatically
 **And** the music loops seamlessly (no gaps or abrupt restarts)
 **And** the music volume is set to the user's configured Music Volume level

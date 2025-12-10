@@ -19,6 +19,35 @@ date: '2025-12-09'
 
 ---
 
+## Terminology Reference
+
+**IMPORTANT:** This section defines key terminology used throughout this document. To rename terms in the future, update the definitions below and perform a global find-replace.
+
+### Core Game Modes
+
+- **Flash Conflict:** Quick-play tactical scenarios (5-15 minutes) that serve as both tutorials and standalone challenges. Inspired by Magic: The Gathering Arena's in-progress scenarios. Reuses existing game systems without introducing new mechanics.
+  - **Find-Replace Pattern:** `Flash Conflict` (to change terminology, replace all instances)
+  - **Alternative Names Considered:** Flash Conflict, Tactical Snapshots, Crisis Moments, Skirmish Protocols
+
+- **Campaign Mode:** Full 4X strategy game (45-60 minutes) where players compete against AI opponents for galactic conquest.
+
+- **Scenario Pack:** Data-driven JSON configuration defining AI personality, galaxy layout, faction lore, and resource settings. Enables hot-swappable content without code changes.
+
+### Quick Reference
+
+| Term | Type | Duration | Description |
+|------|------|----------|-------------|
+| Flash Conflict | Tactical Challenge | 5-15 min | Single scenario with pre-configured state and victory conditions |
+| Campaign | Full Game | 45-60 min | Complete 4X experience with all 18 systems |
+| Scenario Pack | Configuration | N/A | JSON-based AI and galaxy template |
+
+**Usage Notes:**
+- All instances of "Flash Conflict" in this document refer to the same feature
+- If renaming is needed, use global find-replace: `Flash Conflict` → `New Name`
+- Ensure consistency across PRD, Epics, Architecture, and code comments
+
+---
+
 ## Executive Summary
 
 ### Project Context
@@ -148,13 +177,13 @@ A user succeeds when they **complete a full campaign game** (player vs AI, achie
 
 1. **Session Engagement:**
    - **Full Campaign:** 45+ minute average session length (desktop web)
-   - **Flash Scenarios:** 5-15 minute quick-play sessions (mobile web friendly)
+   - **Flash Conflicts:** 5-15 minute quick-play sessions (mobile web friendly)
    - Day 7 return rate: >40%
    - Tutorial completion rate: >60%
 
 2. **Scenario Pack Adoption:**
    - **Primary Metric:** Average replays per scenario >2 (users finding scenarios worth replaying)
-   - Scenario completion rate: >50% for Flash Scenarios, >30% for full campaigns
+   - Scenario completion rate: >50% for Flash Conflicts, >30% for full campaigns
    - Scenario diversity: Users try >3 different scenario packs
 
 3. **Cross-Device Experience:**
@@ -163,13 +192,13 @@ A user succeeds when they **complete a full campaign game** (player vs AI, achie
    - Zero data loss incidents during device switches
 
 **User Delight Moments:**
-- **"Aha!" Moment:** First successful planetary invasion using Flash Scenario as training
+- **"Aha!" Moment:** First successful planetary invasion using Flash Conflict as training
 - **Replayability Moment:** "I want to try that scenario again with a different strategy"
 - **Convenience Moment:** "I can pick up exactly where I left off on my phone"
 
 ---
 
-### Flash Scenarios (New Feature)
+### Flash Conflicts (New Feature)
 
 **Concept:** Isolated, scenario-driven mini-games inspired by Magic: The Gathering Arena's in-progress scenarios. These serve dual purposes:
 
@@ -185,10 +214,10 @@ A user succeeds when they **complete a full campaign game** (player vs AI, achie
   - "Terraform Rush" - Deploy Atmosphere Processor under time pressure
   - "Invasion Landing" - Execute ground assault with limited forces
 
-**Success Metrics for Flash Scenarios:**
+**Success Metrics for Flash Conflicts:**
 - Completion rate: >60% (higher than full campaign due to shorter commitment)
 - Replay rate: >3 plays per scenario (replayability validation)
-- Tutorial effectiveness: Users who complete Flash Scenario tutorials have >50% higher campaign completion rate
+- Tutorial effectiveness: Users who complete Flash Conflict tutorials have >50% higher campaign completion rate
 
 **Naming:** *(To be determined collaboratively - suggestions welcome)*
 - **Flash Conflicts**
@@ -250,12 +279,12 @@ Business metrics, monetization strategy, and commercial viability will be evalua
 - ✅ Turn system advances correctly
 - ✅ Core combat loop executes (space battle → ground invasion → victory)
 - ✅ Save/load functional with Supabase
-- ✅ At least 1 Flash Scenario playable start to finish
+- ✅ At least 1 Flash Conflict playable start to finish
 
 **Alpha Phase (Post-Prototype):**
 - All 18 core systems integrated with Phaser rendering
 - 3-5 scenario packs available (1 tutorial-focused, 2-4 tactical challenges)
-- User feedback sessions validate Flash Scenario concept
+- User feedback sessions validate Flash Conflict concept
 - Cross-device save continuity verified
 
 **Beta Phase:**
@@ -266,7 +295,7 @@ Business metrics, monetization strategy, and commercial viability will be evalua
 
 **v1.0.0 Release:**
 - Full campaign mode stable and engaging (45+ min sessions)
-- 5-10 Flash Scenarios available
+- 5-10 Flash Conflicts available
 - Cross-device play seamless
 - Tutorial completion rate >60%
 - Day 7 retention >40%
@@ -287,7 +316,7 @@ Business metrics, monetization strategy, and commercial viability will be evalua
    - Turn-based gameplay (Income → Action → Combat → End phases)
    - Victory/defeat conditions
 
-2. **Flash Scenarios (3-5 scenarios):**
+2. **Flash Conflicts (3-5 scenarios):**
    - 1-2 tutorial scenarios (teach Genesis Device deployment, combat basics)
    - 2-3 tactical challenge scenarios (quick-play skirmishes)
    - Scenario selection UI
@@ -327,11 +356,11 @@ Business metrics, monetization strategy, and commercial viability will be evalua
 1. **Community Features:**
    - User-created scenario packs
    - Scenario sharing/marketplace
-   - Leaderboards (campaign victories, Flash Scenario speed runs)
+   - Leaderboards (campaign victories, Flash Conflict speed runs)
    - Player ratings and reviews for scenarios
 
 2. **Extended Content:**
-   - 10-20 additional Flash Scenarios
+   - 10-20 additional Flash Conflicts
    - 5-10 additional scenario packs (enemy factions with unique lore)
    - Campaign difficulty modes beyond current 3 levels
 
@@ -405,38 +434,38 @@ Over the next week, Alex plays 6 complete campaigns, experimenting with differen
 ### Journey 2: Jordan Rivera - Reclaiming Dead Time
 
 **Opening Scene:**
-Jordan is a 28-year-old marketing manager with a 45-minute train commute each way. They've burned through every mobile game on the App Store - most are either mindless time-wasters or "free-to-play" cash grabs that interrupt gameplay every 30 seconds with ads. While scrolling Twitter during their morning commute, they see someone share a link to Overlord with the caption: *"Finally, a real strategy game I can play during my commute - Flash Scenarios are perfect for 10-minute sessions."* Jordan bookmarks it to try during lunch.
+Jordan is a 28-year-old marketing manager with a 45-minute train commute each way. They've burned through every mobile game on the App Store - most are either mindless time-wasters or "free-to-play" cash grabs that interrupt gameplay every 30 seconds with ads. While scrolling Twitter during their morning commute, they see someone share a link to Overlord with the caption: *"Finally, a real strategy game I can play during my commute - Flash Conflicts are perfect for 10-minute sessions."* Jordan bookmarks it to try during lunch.
 
 **Rising Action:**
-During their lunch break, Jordan opens the link on their phone. The main menu shows two options: "Full Campaign" and "Flash Scenarios." Curious about the Flash Scenarios, they tap "Defend Starbase" - a 5-10 minute tactical challenge. The scenario drops them into an in-progress battle: Starbase under siege, 2 platoons defending, 5 AI Battle Cruisers incoming. No multi-turn buildup, just pure tactics.
+During their lunch break, Jordan opens the link on their phone. The main menu shows two options: "Full Campaign" and "Flash Conflicts." Curious about the Flash Conflicts, they tap "Defend Starbase" - a 5-10 minute tactical challenge. The scenario drops them into an in-progress battle: Starbase under siege, 2 platoons defending, 5 AI Battle Cruisers incoming. No multi-turn buildup, just pure tactics.
 
 Jordan sets their aggression to 60%, carefully positions their platoons, and watches the combat unfold. The first wave fails - the AI breaks through. Jordan tries again, this time using 40% aggression to minimize casualties while defending longer. Victory! The scenario completion screen shows their time: 8 minutes, 23 seconds. A small notification appears: *"Nice! Try 'Terraform Rush' next."*
 
 **Climax:**
-Over the next two weeks, Jordan completes all 5 Flash Scenarios multiple times during commutes and lunch breaks. Each scenario teaches a different tactical skill - deploying Genesis Devices, managing resources under pressure, executing planetary invasions. They never feel frustrated by running out of time mid-game because each scenario is self-contained. When Jordan's train arrives at their stop, they just close the browser tab - no save needed, the scenario completes or fails within the session.
+Over the next two weeks, Jordan completes all 5 Flash Conflicts multiple times during commutes and lunch breaks. Each scenario teaches a different tactical skill - deploying Genesis Devices, managing resources under pressure, executing planetary invasions. They never feel frustrated by running out of time mid-game because each scenario is self-contained. When Jordan's train arrives at their stop, they just close the browser tab - no save needed, the scenario completes or fails within the session.
 
-The breakthrough comes when Jordan decides to try a "Full Campaign" on Saturday morning. Thanks to the Flash Scenarios, they already understand combat mechanics, resource management, and invasion tactics. The campaign feels natural, not overwhelming. They complete their first full campaign victory in one sitting (48 minutes) and immediately want to play another.
+The breakthrough comes when Jordan decides to try a "Full Campaign" on Saturday morning. Thanks to the Flash Conflicts, they already understand combat mechanics, resource management, and invasion tactics. The campaign feels natural, not overwhelming. They complete their first full campaign victory in one sitting (48 minutes) and immediately want to play another.
 
 **Resolution:**
-Jordan now has a ritual: Flash Scenarios during commutes (quick tactical hits), full campaigns on weekend mornings (deep strategy sessions). The game respects their time - short sessions when they're on-the-go, deep sessions when they have focus time. They recommend it to their coworker with: *"It's like having a real strategy game in your pocket, but it actually respects your time."*
+Jordan now has a ritual: Flash Conflicts during commutes (quick tactical hits), full campaigns on weekend mornings (deep strategy sessions). The game respects their time - short sessions when they're on-the-go, deep sessions when they have focus time. They recommend it to their coworker with: *"It's like having a real strategy game in your pocket, but it actually respects your time."*
 
 **What This Journey Reveals:**
-- Flash Scenarios system (3-5 tactical challenges, 5-15 minutes each)
+- Flash Conflicts system (3-5 tactical challenges, 5-15 minutes each)
 - Mobile web optimization (touch controls, responsive UI)
-- Session flexibility (no penalty for closing mid-Flash Scenario)
-- Tutorial-through-gameplay (Flash Scenarios teach mechanics naturally)
+- Session flexibility (no penalty for closing mid-Flash Conflict)
+- Tutorial-through-gameplay (Flash Conflicts teach mechanics naturally)
 - Flash → Campaign progression path (skills transfer)
-- No save/load needed for Flash Scenarios (self-contained)
+- No save/load needed for Flash Conflicts (self-contained)
 
 ---
 
 ### Journey 3: Sam Taylor - From Curious to Confident
 
 **Opening Scene:**
-Sam is a 22-year-old graphic designer who's heard friends rave about 4X games like Civilization and Stellaris but feels intimidated by their complexity. They tried Civ VI once, got overwhelmed by the tutorial (which took 45 minutes and still left them confused), and gave up. While browsing gaming subreddits, they see a comment: *"If you're new to 4X games, try Overlord's Flash Scenarios - they teach you one mechanic at a time instead of dumping everything on you at once."* Intrigued, Sam clicks the link.
+Sam is a 22-year-old graphic designer who's heard friends rave about 4X games like Civilization and Stellaris but feels intimidated by their complexity. They tried Civ VI once, got overwhelmed by the tutorial (which took 45 minutes and still left them confused), and gave up. While browsing gaming subreddits, they see a comment: *"If you're new to 4X games, try Overlord's Flash Conflicts - they teach you one mechanic at a time instead of dumping everything on you at once."* Intrigued, Sam clicks the link.
 
 **Rising Action:**
-The game's main menu shows "New to 4X games? Start here: Tutorial Flash Scenarios." Sam clicks and sees three tutorial scenarios:
+The game's main menu shows "New to 4X games? Start here: Tutorial Flash Conflicts." Sam clicks and sees three tutorial scenarios:
 1. **"Genesis Device 101"** - Learn planetary terraforming (5 min)
 2. **"First Contact Combat"** - Learn basic ground combat (8 min)
 3. **"Building Your Empire"** - Learn resource management (10 min)
@@ -446,17 +475,17 @@ Sam starts with Genesis Device 101. The scenario is simple: They have one Atmosp
 Encouraged, Sam tries First Contact Combat. This time, they command 2 platoons defending against 1 AI platoon. The tutorial explains aggression settings, equipment modifiers, and casualty calculations. Sam experiments with different aggression levels and sees how it affects outcomes. By the third attempt, they win decisively. *"Oh, I get it now - aggression is risk vs reward!"*
 
 **Climax:**
-After completing all three tutorial Flash Scenarios, Sam feels confident enough to try a full campaign. They choose "Easy" difficulty and the "Defensive" AI personality (least aggressive). The first 10 turns feel manageable because they already understand the core mechanics from the tutorials. When they encounter their first real combat situation (Turn 15), they remember the lessons from First Contact Combat and execute a successful planetary invasion.
+After completing all three tutorial Flash Conflicts, Sam feels confident enough to try a full campaign. They choose "Easy" difficulty and the "Defensive" AI personality (least aggressive). The first 10 turns feel manageable because they already understand the core mechanics from the tutorials. When they encounter their first real combat situation (Turn 15), they remember the lessons from First Contact Combat and execute a successful planetary invasion.
 
 The breakthrough comes on Turn 28 when Sam achieves their first military victory. The feeling is incredible - they actually beat a 4X game! Sam immediately starts a second campaign on Normal difficulty to see if they can win again. This time, they complete it in 38 minutes (faster because they're more confident with decisions).
 
 **Resolution:**
-Two months later, Sam has completed 12 campaigns across different difficulty levels and AI personalities. They've become a vocal advocate for Overlord in their gaming Discord: *"If you've ever been curious about 4X games but thought they were too complex, try this. The Flash Scenarios teach you everything without making you feel stupid."* Sam has also introduced three friends to the game using the same tutorial path.
+Two months later, Sam has completed 12 campaigns across different difficulty levels and AI personalities. They've become a vocal advocate for Overlord in their gaming Discord: *"If you've ever been curious about 4X games but thought they were too complex, try this. The Flash Conflicts teach you everything without making you feel stupid."* Sam has also introduced three friends to the game using the same tutorial path.
 
 **What This Journey Reveals:**
-- Tutorial Flash Scenarios (3 dedicated teaching scenarios)
+- Tutorial Flash Conflicts (3 dedicated teaching scenarios)
 - Clear learning progression (one mechanic at a time)
-- Low-stakes practice environment (Flash Scenarios = safe experimentation)
+- Low-stakes practice environment (Flash Conflicts = safe experimentation)
 - Difficulty settings that respect new players (Easy mode actually helps)
 - Tutorial → Campaign confidence bridge
 - Onboarding that doesn't gate access to full game (can skip tutorials if experienced)
@@ -475,8 +504,8 @@ These three journeys reveal the following capabilities needed for the playable p
 - 45-60 minute average session length
 - Victory/defeat conditions ✓
 
-**Flash Scenario System:**
-- 5-8 Flash Scenarios total:
+**Flash Conflict System:**
+- 5-8 Flash Conflicts total:
   - 3 tutorial scenarios (Genesis Device, Combat, Empire Building)
   - 2-5 tactical challenge scenarios (Defend Starbase, Terraform Rush, Invasion Landing, etc.)
 - 5-15 minute completion time per scenario
@@ -496,18 +525,18 @@ These three journeys reveal the following capabilities needed for the playable p
 - Campaign save/load (compressed, checksummed)
 - Cross-device save sync (Alex plays on desktop, continues on laptop)
 - User profile (settings, progress tracking)
-- Flash Scenario completion history
+- Flash Conflict completion history
 
 **UI/UX Requirements:**
-- Main menu (Campaign vs Flash Scenarios)
-- Flash Scenario browser (list with difficulty indicators)
+- Main menu (Campaign vs Flash Conflicts)
+- Flash Conflict browser (list with difficulty indicators)
 - Tutorial pathway signposting ("New to 4X? Start here")
-- In-scenario instructions (for tutorial Flash Scenarios)
+- In-scenario instructions (for tutorial Flash Conflicts)
 - Campaign UI (galaxy map, planet management, combat resolution) - already designed in Unity PRD
 - Easy sharing (web URL, no friction)
 
 **Post-MVP User Types (Deferred to Post-Alpha):**
-- Flash Scenario Speedrunners (competitive leaderboards)
+- Flash Conflict Speedrunners (competitive leaderboards)
 - Scenario Pack Curators (community discovery/rating)
 - Content Moderators (flagged content review)
 - System Administrators (operational monitoring)
@@ -520,11 +549,11 @@ This project introduces three strategic innovations that differentiate it from t
 
 ---
 
-### Innovation 1: Flash Scenarios System
+### Innovation 1: Flash Conflicts System
 
 **What Makes It Novel:**
 
-Traditional 4X games present a binary choice: either commit to a 2-4 hour campaign or skip the game entirely. Overlord introduces **Flash Scenarios** - isolated, tactical mini-games that deliver complete strategic experiences in 5-15 minutes. This innovation combines three traditionally separate systems into one unified feature:
+Traditional 4X games present a binary choice: either commit to a 2-4 hour campaign or skip the game entirely. Overlord introduces **Flash Conflicts** - isolated, tactical mini-games that deliver complete strategic experiences in 5-15 minutes. This innovation combines three traditionally separate systems into one unified feature:
 
 1. **Tutorial System** - Teaching mechanics through playable scenarios instead of passive tutorials
 2. **Quick-Play Mode** - Instant-action tactical challenges for shorter sessions
@@ -542,41 +571,41 @@ No 4X strategy game has successfully adapted the "scenario puzzle" format to tur
 - 60-90 minute "guided campaigns" that still feel overwhelming
 - Simplified "baby modes" that don't transfer skills to full games
 
-Flash Scenarios bridge this gap by reusing all existing game systems (combat, resources, AI) but starting mid-game with pre-configured tactical situations.
+Flash Conflicts bridge this gap by reusing all existing game systems (combat, resources, AI) but starting mid-game with pre-configured tactical situations.
 
 **Validation Approach:**
 
 **Prototype Phase:**
-- Build 2 Flash Scenarios: 1 tutorial ("Genesis Device 101"), 1 tactical challenge ("Defend Starbase")
+- Build 2 Flash Conflicts: 1 tutorial ("Genesis Device 101"), 1 tactical challenge ("Defend Starbase")
 - Measure: Completion rate (target: >60%), replay rate (target: >2), average completion time (target: 5-15 min)
 
 **Alpha Phase:**
-- Expand to 5 Flash Scenarios (3 tutorial + 2 tactical)
+- Expand to 5 Flash Conflicts (3 tutorial + 2 tactical)
 - A/B test: Users who complete tutorials vs users who skip → measure campaign completion rate difference (hypothesis: >50% higher completion for tutorial completers)
-- Qualitative feedback: "Did Flash Scenarios help you learn the game?" (target: >70% yes)
+- Qualitative feedback: "Did Flash Conflicts help you learn the game?" (target: >70% yes)
 
 **Beta Phase:**
 - Add 3-5 more tactical challenge scenarios based on user requests
-- Leaderboards for Flash Scenario completion times (measure: speedrun engagement)
-- Cross-reference: Do Flash Scenario fans also play full campaigns, or are they separate audiences?
+- Leaderboards for Flash Conflict completion times (measure: speedrun engagement)
+- Cross-reference: Do Flash Conflict fans also play full campaigns, or are they separate audiences?
 
 **Success Metrics:**
-- **Primary:** Flash Scenario completion rate >60% (validates that format is engaging)
-- **Secondary:** Users who complete tutorial Flash Scenarios have >50% higher campaign completion rate (validates educational effectiveness)
-- **Tertiary:** Average >3 replays per tactical Flash Scenario (validates replayability)
+- **Primary:** Flash Conflict completion rate >60% (validates that format is engaging)
+- **Secondary:** Users who complete tutorial Flash Conflicts have >50% higher campaign completion rate (validates educational effectiveness)
+- **Tertiary:** Average >3 replays per tactical Flash Conflict (validates replayability)
 
 **Risk Mitigation:**
 
-**Risk 1: Flash Scenarios cannibalize full campaigns**
+**Risk 1: Flash Conflicts cannibalize full campaigns**
 - *Mitigation:* Track conversion rate (Flash → Campaign). If <30% of Flash players try campaigns, add "progression hooks" (e.g., "You mastered this scenario! Try a full campaign with this AI personality").
-- *Fallback:* Treat Flash Scenarios as standalone content (still valuable as mobile-friendly quick-play mode).
+- *Fallback:* Treat Flash Conflicts as standalone content (still valuable as mobile-friendly quick-play mode).
 
 **Risk 2: Development cost too high (each scenario = custom setup)**
 - *Mitigation:* Build scenario authoring tools early (JSON-based templates, save-state snapshots). Reuse existing game systems exclusively (no custom mechanics per scenario).
 - *Fallback:* Ship MVP with 3-5 scenarios only; community creates additional scenarios post-launch.
 
 **Risk 3: Players find scenarios too hard or too easy**
-- *Mitigation:* Difficulty settings for Flash Scenarios (Easy/Normal/Hard presets). Telemetry on completion rates per scenario.
+- *Mitigation:* Difficulty settings for Flash Conflicts (Easy/Normal/Hard presets). Telemetry on completion rates per scenario.
 - *Fallback:* Adjust scenario parameters (troop counts, resources, AI aggression) via server-side JSON updates (no client updates needed).
 
 ---
@@ -710,7 +739,7 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 - Track: Number of test failures caught by CI before merge (validates testing safety net)
 
 **Alpha Phase:**
-- Case study: Document time to implement a new Flash Scenario (target: <4 hours from idea to playable)
+- Case study: Document time to implement a new Flash Conflict (target: <4 hours from idea to playable)
 - Compare: Estimated effort in Unity vs actual effort in Phaser
 - Qualitative: "How confident do you feel making changes to core systems?" (developer survey)
 
@@ -720,7 +749,7 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 - Validate: Can other developers replicate this workflow?
 
 **Success Metrics:**
-- **Primary:** Time to implement new Flash Scenario <4 hours (validates rapid iteration)
+- **Primary:** Time to implement new Flash Conflict <4 hours (validates rapid iteration)
 - **Secondary:** Test coverage remains >70% throughout development (validates AI safety)
 - **Tertiary:** Zero "AI broke the game" incidents due to test coverage (validates architectural robustness)
 
@@ -744,7 +773,7 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 
 | Innovation | Problem Solved | Market Gap | Risk Level | MVP Priority |
 |------------|----------------|------------|------------|--------------|
-| **Flash Scenarios** | 4X tutorials are boring; quick-play modes don't teach skills | No 4X game has MTG Arena-style scenario puzzles | Medium | **HIGH** (Core MVP feature) |
+| **Flash Conflicts** | 4X tutorials are boring; quick-play modes don't teach skills | No 4X game has MTG Arena-style scenario puzzles | Medium | **HIGH** (Core MVP feature) |
 | **Data-Driven Scenario Packs** | Fixed enemy factions limit replayability; mods are fragile | JSON-based enemy/galaxy configs don't exist in 4X | Low | **MEDIUM** (Foundation in MVP, full system post-Alpha) |
 | **Developer Experience as Requirement** | Game dev tools slow AI-assisted development | No game has optimized architecture for Claude Code workflows | Low | **HIGH** (Already implemented) |
 
@@ -1023,7 +1052,7 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 
 **Content Marketing (Post-MVP):**
 - Development blog (technical posts about Phaser + Claude Code workflow)
-- YouTube devlog series (gameplay videos, Flash Scenarios tutorials)
+- YouTube devlog series (gameplay videos, Flash Conflicts tutorials)
 - Press kit (screenshots, fact sheet, contact info)
 
 ---
@@ -1035,14 +1064,14 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 **MVP Approach:** Experience MVP
 
 **Rationale:**
-Overlord's MVP focuses on delivering the **core 4X strategy experience** with the **Flash Scenarios innovation** that differentiates it from traditional strategy games. This approach:
+Overlord's MVP focuses on delivering the **core 4X strategy experience** with the **Flash Conflicts innovation** that differentiates it from traditional strategy games. This approach:
 - Validates that classic 4X gameplay translates effectively to browser-based play
-- Proves Flash Scenarios solve the tutorial/quick-play problem
+- Proves Flash Conflicts solve the tutorial/quick-play problem
 - Demonstrates Phaser + TypeScript + Claude Code development velocity
 - Delivers immediate user value (playable campaigns + tactical challenges)
 
 **Critical Success Factor:**
-The 18 core game systems are already implemented and tested (304 tests, 93.78% coverage). The MVP risk is **integration and presentation**, not game logic. Focus on proving the Phaser rendering layer and Flash Scenarios concept work.
+The 18 core game systems are already implemented and tested (304 tests, 93.78% coverage). The MVP risk is **integration and presentation**, not game logic. Focus on proving the Phaser rendering layer and Flash Conflicts concept work.
 
 **Resource Requirements:**
 - **Development:** 1 developer with Claude Code (AI-assisted development)
@@ -1064,13 +1093,13 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
    - ✅ Desktop browser (mouse + keyboard)
 
 2. **Jordan Rivera (Mobile Commuter) - Partial:**
-   - ✅ 3 Flash Scenarios (2 tutorial + 1 tactical challenge)
+   - ✅ 3 Flash Conflicts (2 tutorial + 1 tactical challenge)
    - ✅ 5-15 minute quick-play sessions
    - ⚠️ Mobile touch controls (basic, polish in Alpha)
    - ⚠️ Mobile web optimization (30 FPS target, refine in Beta)
 
 3. **Sam Taylor (Tutorial Learner):**
-   - ✅ Tutorial Flash Scenarios teach core mechanics
+   - ✅ Tutorial Flash Conflicts teach core mechanics
    - ✅ Low-stakes practice environment
    - ✅ Easy difficulty mode for first campaign
    - ✅ Progression from tutorials → full campaign
@@ -1086,7 +1115,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 - AI decision system (4 personalities, 3 difficulties, priority-based)
 - Victory/defeat conditions
 
-**2. Flash Scenarios System (3 Scenarios - Lean Validation):**
+**2. Flash Conflicts System (3 Scenarios - Lean Validation):**
 - **Architecture:** JSON-based scenario definitions (library loaded, NOT hardcoded)
 - **Scenario 1 (Tutorial):** "Genesis Device 101" - Learn planetary terraforming (5 min)
 - **Scenario 2 (Tutorial):** "First Contact Combat" - Learn ground combat mechanics (8 min)
@@ -1121,13 +1150,13 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 - User authentication (email/password, OAuth deferred to Alpha)
 - Save game storage (compressed JSON, checksummed)
 - Cross-device save sync (desktop → mobile → desktop)
-- User profile (settings, Flash Scenario completion tracking)
+- User profile (settings, Flash Conflict completion tracking)
 
 **5. Rendering (Phaser 3.85.2):**
 - Galaxy map view (2D/isometric, planets clickable)
 - Planet detail panel (resources, buildings, platoons)
 - Combat resolution UI (battle results, casualties)
-- Flash Scenario UI (tutorial instructions, completion screen)
+- Flash Conflict UI (tutorial instructions, completion screen)
 - Desktop optimized (1920×1080 primary, 1280×720 minimum)
 
 **6. Input (Desktop + Basic Mobile):**
@@ -1148,11 +1177,11 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 **Week 3-4: Core Gameplay**
 - Combat/invasion flows work end-to-end
 - Planet management UI (build, recruit, move craft)
-- First Flash Scenario playable ("Genesis Device 101")
+- First Flash Conflict playable ("Genesis Device 101")
 - Turn system integrated with rendering
 
-**Week 5-6: Flash Scenarios + Persistence**
-- 3 Flash Scenarios complete and tested
+**Week 5-6: Flash Conflicts + Persistence**
+- 3 Flash Conflicts complete and tested
 - Save/load with Supabase working
 - Scenario pack switching functional (3 packs)
 - Full campaign completable start-to-finish
@@ -1165,7 +1194,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 
 **Prototype Success Criteria:**
 - Can complete full campaign (Player vs AI, victory/defeat)
-- 3 Flash Scenarios playable and completable
+- 3 Flash Conflicts playable and completable
 - Save/load works reliably (>99% success rate)
 - 60 FPS on desktop (Chrome 90+, Firefox 88+)
 - Zero critical bugs (game-breaking issues)
@@ -1176,12 +1205,12 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 
 **Phase 2: Alpha (Post-Prototype)**
 
-**Goals:** Expand Flash Scenarios, polish mobile, add community foundation
+**Goals:** Expand Flash Conflicts, polish mobile, add community foundation
 
-**Expanded Flash Scenarios (5 additional scenarios):**
+**Expanded Flash Conflicts (5 additional scenarios):**
 - 1 additional tutorial: "Building Your Empire" (resource management)
 - 4 tactical challenges: "Terraform Rush", "Invasion Landing", "Fleet Defense", "Economic Warfare"
-- Total: 8 Flash Scenarios (3 tutorial + 5 tactical)
+- Total: 8 Flash Conflicts (3 tutorial + 5 tactical)
 
 **Mobile Web Optimization:**
 - Refined touch controls (gesture tuning, tap target sizing)
@@ -1200,7 +1229,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 - Full keyboard navigation polished
 
 **Alpha Success Criteria:**
-- 8 Flash Scenarios with >60% completion rate
+- 8 Flash Conflicts with >60% completion rate
 - Mobile web playable (30 FPS sustained)
 - Community scenario pack template published
 - Accessibility features functional
@@ -1214,11 +1243,11 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 **Community Features:**
 - User-created scenario pack upload (Supabase storage)
 - Scenario pack marketplace (browse, download, rate)
-- Leaderboards (campaign victories, Flash Scenario completion times)
+- Leaderboards (campaign victories, Flash Conflict completion times)
 - User profiles (stats, achievements, favorite scenarios)
 
 **Content Expansion:**
-- 10-15 total Flash Scenarios (community + official)
+- 10-15 total Flash Conflicts (community + official)
 - 5-8 scenario packs (varied AI personalities, galaxy configs)
 - Background music tracks (ambient space, battle themes)
 - Polished sprite art (replace placeholder assets)
@@ -1231,7 +1260,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 
 **Beta Success Criteria:**
 - Day 7 retention >40%
-- Average >3 Flash Scenario replays per user
+- Average >3 Flash Conflict replays per user
 - Community-created packs account for >30% of plays
 - No critical bugs (P0 issues)
 
@@ -1250,8 +1279,8 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 **Launch Metrics:**
 - Tutorial completion rate >60%
 - Campaign completion rate >30%
-- Flash Scenario completion rate >60%
-- Average session length: 45+ min (campaigns), 10-15 min (Flash Scenarios)
+- Flash Conflict completion rate >60%
+- Average session length: 45+ min (campaigns), 10-15 min (Flash Conflicts)
 
 ---
 
@@ -1271,7 +1300,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
    - Featured scenario packs (curated by maintainers)
 
 3. **Extended Content:**
-   - 20+ Flash Scenarios (official + community)
+   - 20+ Flash Conflicts (official + community)
    - 15+ scenario packs (diverse AI personalities, galaxy types)
    - Campaign difficulty modes (Ironman, Speedrun, Custom rules)
 
@@ -1322,17 +1351,17 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 - **Contingency:** Desktop-only MVP, mobile in Alpha (reduces scope)
 - **Status:** Medium risk (turn-based gameplay forgiving, but FPS metrics critical)
 
-**Risk 3: Flash Scenarios not engaging (completion rate <40%)**
+**Risk 3: Flash Conflicts not engaging (completion rate <40%)**
 - **Mitigation:** User testing in Prototype/Alpha, iterate on difficulty/length
-- **Contingency:** Treat Flash Scenarios as optional tutorials, not standalone feature
-- **Fallback:** Focus on full campaigns, defer Flash Scenarios to post-MVP
+- **Contingency:** Treat Flash Conflicts as optional tutorials, not standalone feature
+- **Fallback:** Focus on full campaigns, defer Flash Conflicts to post-MVP
 
 **Market Risks:**
 
-**Risk 1: Users prefer full campaigns over Flash Scenarios (cannibalization)**
+**Risk 1: Users prefer full campaigns over Flash Conflicts (cannibalization)**
 - **Validation:** Track Flash → Campaign conversion rate (target: >30%)
 - **Mitigation:** Add progression hooks ("You mastered this scenario! Try a full campaign")
-- **Fallback:** Flash Scenarios become niche feature, campaigns remain core
+- **Fallback:** Flash Conflicts become niche feature, campaigns remain core
 
 **Risk 2: Scenario pack system unused (users stick with default)**
 - **Validation:** Measure users trying >2 packs (target: >50% of players)
@@ -1358,7 +1387,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 
 **Risk 3: Solo developer bandwidth (no team support)**
 - **Mitigation:** Claude Code AI assistance (3-5× velocity multiplier)
-- **Contingency:** Reduce Flash Scenarios to 2 (1 tutorial + 1 tactical)
+- **Contingency:** Reduce Flash Conflicts to 2 (1 tutorial + 1 tactical)
 - **Status:** Medium risk (single point of failure, but AI-assisted workflow proven)
 
 ---
@@ -1398,15 +1427,15 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 - **FR23:** AI opponents can make strategic decisions (build economy, train military, launch attacks)
 - **FR24:** AI opponents can adapt behavior based on personality type and difficulty level
 
-### Flash Scenarios
+### Flash Conflicts
 
-- **FR25:** Players can access a Flash Scenarios menu separate from campaign mode
-- **FR26:** Players can select and start individual Flash Scenarios
-- **FR27:** Players can complete tutorial Flash Scenarios that teach specific game mechanics
-- **FR28:** Players can complete tactical Flash Scenarios as quick-play challenges
-- **FR29:** Players can view Flash Scenario victory conditions before starting
-- **FR30:** Players can view Flash Scenario completion results (success/failure, completion time)
-- **FR31:** System can track Flash Scenario completion history per user
+- **FR25:** Players can access a Flash Conflicts menu separate from campaign mode
+- **FR26:** Players can select and start individual Flash Conflicts
+- **FR27:** Players can complete tutorial Flash Conflicts that teach specific game mechanics
+- **FR28:** Players can complete tactical Flash Conflicts as quick-play challenges
+- **FR29:** Players can view Flash Conflict victory conditions before starting
+- **FR30:** Players can view Flash Conflict completion results (success/failure, completion time)
+- **FR31:** System can track Flash Conflict completion history per user
 
 ### Scenario Pack System
 
@@ -1423,7 +1452,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 - **FR39:** Players can load previously saved campaigns
 - **FR40:** Players can access saved games from different devices (cross-device sync)
 - **FR41:** System can persist user settings and preferences across sessions
-- **FR42:** System can track user statistics (campaigns completed, Flash Scenarios completed, playtime)
+- **FR42:** System can track user statistics (campaigns completed, Flash Conflicts completed, playtime)
 
 ### User Interface & Controls
 
@@ -1457,7 +1486,7 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 
 **NFR-P2: Load Time**
 - Initial page load to playable state must complete within 5 seconds on desktop (3G connection)
-- Flash Scenario start must complete within 2 seconds after selection
+- Flash Conflict start must complete within 2 seconds after selection
 - Campaign load from save must complete within 3 seconds
 
 **NFR-P3: Response Time**
@@ -1536,12 +1565,12 @@ The 18 core game systems are already implemented and tested (304 tests, 93.78% c
 ### Usability
 
 **NFR-U1: Learnability**
-- Tutorial Flash Scenarios must teach core mechanics within 5-10 minutes
+- Tutorial Flash Conflicts must teach core mechanics within 5-10 minutes
 - First-time users must complete "Genesis Device 101" tutorial with >60% success rate
 - Keyboard shortcuts must be discoverable via help overlay (H key)
 
 **NFR-U2: Efficiency**
-- Experienced users must complete Flash Scenarios 20-30% faster than first-time users
+- Experienced users must complete Flash Conflicts 20-30% faster than first-time users
 - Keyboard shortcuts must reduce common action time by 50% vs mouse-only
 - Turn advancement must require single action (Space key or "End Turn" button)
 

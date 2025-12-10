@@ -30,7 +30,7 @@ The project was originally developed in Unity 6000 + C# with .NET Standard 2.1 c
 
 **Epic Count:** TBD (to be created from PRD)
 **Story Count:** TBD (to be created from PRD)
-**Functional Requirements:** 55 FRs covering campaign, Flash Scenarios, persistence, UI/UX
+**Functional Requirements:** 55 FRs covering campaign, Flash Conflicts, persistence, UI/UX
 **Non-Functional Requirements:** 20+ NFRs (performance, reliability, accessibility, security)
 
 **Complexity Indicators:**
@@ -80,7 +80,7 @@ All 18 systems exist in `Overlord.Phaser/src/core/` with TypeScript implementati
 
 ### Novel Features & Strategic Innovations
 
-**1. Flash Scenarios (Dual-Purpose System):**
+**1. Flash Conflicts (Dual-Purpose System):**
 
 **Phase 1 - Onboarding (New Players):**
 - Tutorial-style scenarios teach core mechanics (Genesis Device deployment, combat basics, empire building)
@@ -121,7 +121,7 @@ All 18 systems exist in `Overlord.Phaser/src/core/` with TypeScript implementati
 - Asset streaming and lazy loading (<200 MB mobile budget)
 - Progressive quality degradation based on device memory
 
-**4. Flash Scenarios Architecture:**
+**4. Flash Conflicts Architecture:**
 - JSON-based scenario definitions (reusable system for tutorials + quick-play)
 - Pre-configured game states (mid-game tactical situations)
 - Victory condition validation and completion tracking
@@ -261,7 +261,7 @@ Overlord.Phaser/
 │   │
 │   ├── scenes/                 # Phaser presentation layer
 │   │   ├── BootScene.ts        # Preloader, asset loading
-│   │   ├── MainMenuScene.ts    # Campaign vs Flash Scenarios choice
+│   │   ├── MainMenuScene.ts    # Campaign vs Flash Conflicts choice
 │   │   ├── GalaxyMapScene.ts   # Main gameplay view
 │   │   ├── PlanetDetailScene.ts # Planet management UI
 │   │   ├── CombatScene.ts      # Combat resolution UI
@@ -302,7 +302,7 @@ Overlord.Phaser/
 | Epic | Architecture Components | Location |
 |------|------------------------|----------|
 | **Campaign System** | GameState, TurnSystem, All 18 core systems, GalaxyMapScene | `src/core/`, `src/scenes/GalaxyMapScene.ts` |
-| **Flash Scenarios** | ScenarioService, FlashScenarioScene, JSON scenario definitions | `src/services/ScenarioService.ts`, `public/assets/data/scenarios/` |
+| **Flash Conflicts** | ScenarioService, FlashScenarioScene, JSON scenario definitions | `src/services/ScenarioService.ts`, `public/assets/data/scenarios/` |
 | **Scenario Packs** | ScenarioService, JSON pack definitions, runtime loading | `public/assets/data/packs/` |
 | **Persistence** | SaveSystem (core), SaveService, SupabaseClient, AuthService | `src/core/SaveSystem.ts`, `src/services/` |
 | **Combat** | CombatSystem, SpaceCombatSystem, BombardmentSystem, InvasionSystem, CombatScene | `src/core/`, `src/scenes/CombatScene.ts` |
@@ -408,7 +408,7 @@ export class SaveSystem {
 
 ## Novel Architectural Patterns
 
-### Pattern 1: Flash Scenarios System
+### Pattern 1: Flash Conflicts System
 
 **Problem Solved:**
 Traditional 4X game tutorials are passive and boring. Players need a way to learn mechanics through interactive play AND have quick tactical challenges for shorter sessions. This pattern unifies both needs into a single system.
@@ -446,7 +446,7 @@ export class FlashScenarioScene extends Phaser.Scene {
 
 **Data Flow:**
 
-1. User selects Flash Scenario from menu
+1. User selects Flash Conflict from menu
 2. `ScenarioService` loads JSON definition from `/assets/data/scenarios/`
 3. `FlashScenarioScene` creates fresh `GameState` from scenario's `initial_state`
 4. Player interacts with pre-configured tactical situation
@@ -516,7 +516,7 @@ export class FlashScenarioScene extends Phaser.Scene {
 **Implementation Pattern for AI Agents:**
 
 ```typescript
-// When creating new Flash Scenarios, follow this pattern:
+// When creating new Flash Conflicts, follow this pattern:
 
 // 1. Create JSON definition in public/assets/data/scenarios/
 // 2. Use ScenarioService to load and validate
@@ -526,7 +526,7 @@ export class FlashScenarioScene extends Phaser.Scene {
 ```
 
 **Affects Epics:**
-- Flash Scenarios MVP (3-5 scenarios)
+- Flash Conflicts MVP (3-5 scenarios)
 - Tutorial System (onboarding new players)
 - Quick-Play Mode (tactical challenges for experienced players)
 
@@ -747,7 +747,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 - `COMBAT_*` - Combat system errors
 - `SAVE_*` - Save/load errors
 - `AUTH_*` - Authentication errors
-- `SCENARIO_*` - Flash Scenario/pack errors
+- `SCENARIO_*` - Flash Conflict/pack errors
 - `RESOURCE_*` - Resource/economy errors
 
 **Critical Rule:** NEVER let errors crash the game. All Core system methods must handle errors gracefully and provide meaningful messages.
@@ -1466,12 +1466,12 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 - ✅ Easier to swap rendering engines if needed
 - ❌ Additional abstraction layer (mitigated by event-driven communication)
 
-### ADR-005: Flash Scenarios as Dual-Purpose System
+### ADR-005: Flash Conflicts as Dual-Purpose System
 
 **Date:** 2025-12-09
 **Status:** Accepted
 **Context:** Need both tutorial system for onboarding AND quick-play mode for experienced players.
-**Decision:** Build single JSON-driven Flash Scenarios system serving both purposes.
+**Decision:** Build single JSON-driven Flash Conflicts system serving both purposes.
 **Consequences:**
 - ✅ Reduced development effort (one system, two use cases)
 - ✅ Scenarios reusable for tutorials and quick-play
@@ -1490,7 +1490,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 
 2. **AI-Assisted Development First:** Architecture explicitly optimized for Claude Code workflows with 2-second edit → refresh cycles, comprehensive TypeScript strict mode, and path aliases for clarity.
 
-3. **Novel Patterns:** Flash Scenarios system unifies tutorials and quick-play into single JSON-driven feature. Scenario Packs enable data-driven enemy faction hot-swapping without code changes.
+3. **Novel Patterns:** Flash Conflicts system unifies tutorials and quick-play into single JSON-driven feature. Scenario Packs enable data-driven enemy faction hot-swapping without code changes.
 
 4. **Event-Driven Communication:** Core systems fire callbacks, Phaser scenes subscribe. Uni-directional communication prevents coupling while enabling clean separation.
 
