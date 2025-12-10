@@ -4,7 +4,7 @@ import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
 import { TurnSystem } from '@core/TurnSystem';
 import { PhaseProcessor } from '@core/PhaseProcessor';
-import { Difficulty, FactionType } from '@core/models/Enums';
+import { Difficulty, FactionType, VictoryResult } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
@@ -123,6 +123,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
     this.turnHUD.setScrollFactor(0);
     this.turnHUD.setDepth(500);
+
+    // Wire up victory/defeat detection (Story 2-4, 2-5)
+    this.setupVictoryDetection();
 
     // Render all planets
     this.renderPlanets();
@@ -564,6 +567,35 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.updateSelectionVisuals();
       console.log(`Auto-selected home planet: ${homePlanet.name}`);
     }
+  }
+
+  /**
+   * Sets up victory/defeat detection callbacks.
+   * Story 2-4: Victory detection when all AI planets captured
+   * Story 2-5: Defeat detection when all player planets lost
+   */
+  private setupVictoryDetection(): void {
+    // Store original callback for cleanup
+    const originalOnVictoryAchieved = this.turnSystem.onVictoryAchieved;
+
+    this.turnSystem.onVictoryAchieved = (result: VictoryResult) => {
+      // Chain with original callback
+      originalOnVictoryAchieved?.(result);
+
+      // Measure detection time for AC-1 compliance (< 1 second)
+      const startTime = performance.now();
+
+      if (result === VictoryResult.PlayerVictory) {
+        console.log('Victory achieved! Transitioning to Victory Scene...');
+        this.scene.start('VictoryScene');
+      } else if (result === VictoryResult.AIVictory) {
+        console.log('Defeat! Transitioning to Defeat Scene...');
+        this.scene.start('DefeatScene');
+      }
+
+      const detectionTime = performance.now() - startTime;
+      console.log(`Victory/defeat detection completed in ${detectionTime.toFixed(2)}ms`);
+    };
   }
 
   public shutdown(): void {
