@@ -45,6 +45,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private resourceTexts: Phaser.GameObjects.Text[] = [];
   private actionButtons: Phaser.GameObjects.Container[] = [];
 
+  // Action callbacks (Story 4-2)
+  public onBuildClick?: (planet: PlanetEntity) => void;
+
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
     scene.add.existing(this);
@@ -224,15 +227,23 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     });
     this.contentContainer.add(actionsLabel);
 
-    // Create placeholder buttons (will be updated based on planet owner)
+    // Create placeholder buttons (will be updated based on planet owner in show())
+    // Actual enabled/disabled state is set when the panel is shown
     const buttonY = startY + 25;
-    this.createButton('Build', 0, buttonY, true, 'Coming in Epic 4');
+    this.createButton('Build', 0, buttonY, true, 'Open building construction menu');
     this.createButton('Manage', 125, buttonY, true, 'Coming soon');
     this.createButton('Scout', 0, buttonY + 42, true, 'Coming in Epic 5');
     this.createButton('Invade', 125, buttonY + 42, true, 'Coming in Epic 6');
   }
 
-  private createButton(label: string, x: number, y: number, disabled: boolean, tooltip: string): void {
+  private createButton(
+    label: string,
+    x: number,
+    y: number,
+    disabled: boolean,
+    tooltip: string,
+    onClick?: () => void
+  ): void {
     const buttonWidth = 115;
     const buttonContainer = this.scene.add.container(x, y);
 
@@ -251,14 +262,30 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     text.setOrigin(0.5);
     buttonContainer.add(text);
 
-    // Interactive zone (if not disabled, for future use)
+    // Interactive zone
     const zone = this.scene.add.zone(buttonWidth / 2, BUTTON_HEIGHT / 2, buttonWidth, BUTTON_HEIGHT);
     zone.setInteractive({ useHandCursor: !disabled });
     buttonContainer.add(zone);
 
+    // Add click handler if provided and not disabled
+    if (!disabled && onClick) {
+      zone.on('pointerdown', onClick);
+      zone.on('pointerover', () => {
+        bg.clear();
+        bg.fillStyle(0x5a5a7a, 1);
+        bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      });
+      zone.on('pointerout', () => {
+        bg.clear();
+        bg.fillStyle(0x4a4a6a, 1);
+        bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      });
+    }
+
     // Store tooltip for future use
     buttonContainer.setData('tooltip', tooltip);
     buttonContainer.setData('disabled', disabled);
+    buttonContainer.setData('label', label);
 
     this.contentContainer.add(buttonContainer);
     this.actionButtons.push(buttonContainer);
@@ -361,12 +388,64 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     // Buttons 0-1 are for player (Build, Manage)
     // Buttons 2-3 are for AI/Neutral (Scout, Invade)
     this.actionButtons.forEach((button, i) => {
+      const label = button.getData('label');
+
       if (isPlayerOwned) {
         button.setVisible(i < 2); // Show Build, Manage
+
+        // Enable Build button for player-owned planets (Story 4-2)
+        if (label === 'Build') {
+          this.enableButton(button, () => {
+            if (this.planet && this.onBuildClick) {
+              this.onBuildClick(this.planet);
+            }
+          });
+        }
       } else {
         button.setVisible(i >= 2); // Show Scout, Invade
       }
     });
+  }
+
+  /**
+   * Enables a button and sets up its click handler
+   */
+  private enableButton(buttonContainer: Phaser.GameObjects.Container, onClick: () => void): void {
+    const buttonWidth = 115;
+    const children = buttonContainer.getAll();
+
+    // Find the background graphics
+    const bg = children.find(c => c instanceof Phaser.GameObjects.Graphics) as Phaser.GameObjects.Graphics | undefined;
+    // Find the text
+    const text = children.find(c => c instanceof Phaser.GameObjects.Text) as Phaser.GameObjects.Text | undefined;
+    // Find the zone
+    const zone = children.find(c => c instanceof Phaser.GameObjects.Zone) as Phaser.GameObjects.Zone | undefined;
+
+    if (!bg || !text || !zone) return;
+
+    // Update appearance to enabled state
+    bg.clear();
+    bg.fillStyle(0x4a4a6a, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    text.setColor(TEXT_COLOR);
+
+    // Remove old listeners and add new ones
+    zone.removeAllListeners();
+    zone.setInteractive({ useHandCursor: true });
+
+    zone.on('pointerdown', onClick);
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x5a5a7a, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.fillStyle(0x4a4a6a, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    });
+
+    buttonContainer.setData('disabled', false);
   }
 
   private getOwnerColorHex(owner: FactionType): string {

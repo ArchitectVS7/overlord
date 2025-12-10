@@ -13,6 +13,7 @@ import { StarFieldRenderer } from './renderers/StarFieldRenderer';
 import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 import { TurnHUD } from './ui/TurnHUD';
 import { ResourceHUD } from './ui/ResourceHUD';
+import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -27,6 +28,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private planetInfoPanel!: PlanetInfoPanel;
   private turnHUD!: TurnHUD;
   private resourceHUD!: ResourceHUD;
+  private buildingMenuPanel!: BuildingMenuPanel;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -136,6 +138,24 @@ export class GalaxyMapScene extends Phaser.Scene {
     );
     this.resourceHUD.setScrollFactor(0);
     this.resourceHUD.setDepth(500);
+
+    // Create Building Menu Panel - Story 4-2
+    this.buildingMenuPanel = new BuildingMenuPanel(
+      this,
+      this.gameState,
+      this.phaseProcessor.getBuildingSystem()
+    );
+
+    // Wire up PlanetInfoPanel Build button to BuildingMenuPanel
+    this.planetInfoPanel.onBuildClick = (planet) => {
+      this.planetInfoPanel.hide();
+      this.buildingMenuPanel.show(planet);
+    };
+
+    // Wire up building completion to refresh ResourceHUD
+    this.buildingMenuPanel.onBuildingSelected = () => {
+      this.resourceHUD.updateDisplay();
+    };
 
     // Wire up victory/defeat detection (Story 2-4, 2-5)
     this.setupVictoryDetection();
@@ -629,6 +649,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.resourceHUD) {
       this.resourceHUD.destroy();
+    }
+    if (this.buildingMenuPanel) {
+      this.buildingMenuPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
