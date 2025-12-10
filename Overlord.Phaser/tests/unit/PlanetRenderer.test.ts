@@ -84,41 +84,51 @@ describe('PlanetRenderer Mapping Logic', () => {
 
   describe('Hit Area Size Calculation', () => {
     // Test the calculation logic without Phaser dependency
+    // Updated to match PlanetRenderer's minimum 44px for accessibility
     function getHitAreaSize(planetType: PlanetType): number {
       const typeKey = PLANET_TYPE_MAP[planetType] || 'Terran';
       const visualConfig = PLANET_VISUALS[typeKey] || PLANET_VISUALS.Terran;
-      return visualConfig.size + 10; // 10px padding for easier clicking
+      const baseSize = visualConfig.size + 10; // 10px padding for easier clicking
+      return Math.max(baseSize, 44); // Minimum 44px for touch accessibility (NFR-A2)
     }
 
-    test('Desert planet hit area includes padding', () => {
+    test('Desert planet hit area meets minimum touch target', () => {
       const size = getHitAreaSize(PlanetType.Desert);
-      expect(size).toBe(PLANET_VISUALS.Desert.size + 10);
-      expect(size).toBe(40); // 30 + 10
+      // 30 + 10 = 40, but min is 44
+      expect(size).toBe(44);
     });
 
     test('Volcanic planet hit area includes padding', () => {
       const size = getHitAreaSize(PlanetType.Volcanic);
-      expect(size).toBe(PLANET_VISUALS.Volcanic.size + 10);
-      expect(size).toBe(44); // 34 + 10
+      // 34 + 10 = 44, meets minimum exactly
+      expect(size).toBe(44);
     });
 
-    test('Tropical planet hit area uses Terran config', () => {
+    test('Tropical planet hit area meets minimum touch target', () => {
       const size = getHitAreaSize(PlanetType.Tropical);
-      expect(size).toBe(PLANET_VISUALS.Terran.size + 10);
-      expect(size).toBe(42); // 32 + 10
+      // 32 + 10 = 42, but min is 44
+      expect(size).toBe(44);
     });
 
     test('Metropolis planet hit area uses GasGiant config (largest)', () => {
       const size = getHitAreaSize(PlanetType.Metropolis);
-      expect(size).toBe(PLANET_VISUALS.GasGiant.size + 10);
-      expect(size).toBe(58); // 48 + 10
+      // 48 + 10 = 58, exceeds minimum
+      expect(size).toBe(58);
+    });
+
+    test('all hit areas meet minimum 44px touch target (NFR-A2)', () => {
+      Object.values(PlanetType).forEach(planetType => {
+        const size = getHitAreaSize(planetType);
+        expect(size).toBeGreaterThanOrEqual(44); // Accessibility requirement
+        expect(size).toBeLessThan(100); // Reasonable upper bound
+      });
     });
 
     test('all hit areas are positive and reasonable', () => {
       Object.values(PlanetType).forEach(planetType => {
         const size = getHitAreaSize(planetType);
         expect(size).toBeGreaterThan(0);
-        expect(size).toBeLessThan(100); // Reasonable upper bound
+        expect(size).toBeLessThan(100);
       });
     });
   });

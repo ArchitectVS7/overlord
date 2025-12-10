@@ -98,12 +98,18 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Setup input callbacks
     this.setupInputCallbacks();
 
+    // Setup arrow key navigation
+    this.setupArrowKeyNavigation();
+
     // Add Reset View button
     this.addResetViewButton();
 
     // Add debug info and controls help
     this.addDebugInfo();
     this.addControlsHelp();
+
+    // Auto-select player's home planet (AC5: Default Selection)
+    this.autoSelectHomePlanet();
   }
 
   private calculateGalaxyBounds(): { minX: number; maxX: number; minY: number; maxY: number } {
@@ -274,23 +280,36 @@ export class GalaxyMapScene extends Phaser.Scene {
   private updateSelectionVisuals(): void {
     this.selectionGraphics.clear();
 
+    // Draw selection indicator (cyan solid ring) for selected planet
+    if (this.selectedPlanetId) {
+      const selectedContainer = this.planetContainers.get(this.selectedPlanetId);
+      if (selectedContainer) {
+        const selectedPlanet = selectedContainer.getData('planet') as PlanetEntity | null;
+        const selectedHitSize = selectedPlanet
+          ? this.planetRenderer.getHitAreaSize(selectedPlanet.type)
+          : 44;
+        const selectedRadius = selectedHitSize / 2 + 8;
+
+        // Cyan selection ring (3px thick, per WCAG)
+        this.selectionGraphics.lineStyle(3, 0x00ffff, 1);
+        this.selectionGraphics.strokeCircle(selectedContainer.x, selectedContainer.y, selectedRadius);
+      }
+    }
+
+    // Draw focus indicator (yellow dashed ring) for focused planet
     const focusedId = this.inputSystem.getFocusedElementId();
-    if (!focusedId) {
-      return;
+    if (focusedId && focusedId !== this.selectedPlanetId) {
+      const container = this.planetContainers.get(focusedId);
+      if (container) {
+        const planet = container.getData('planet') as PlanetEntity | null;
+        const hitSize = planet ? this.planetRenderer.getHitAreaSize(planet.type) : 44;
+        const radius = hitSize / 2 + 5;
+
+        // Yellow focus ring (3px thick, per WCAG)
+        this.selectionGraphics.lineStyle(3, 0xffff00, 1);
+        this.selectionGraphics.strokeCircle(container.x, container.y, radius);
+      }
     }
-
-    const container = this.planetContainers.get(focusedId);
-    if (!container) {
-      return;
-    }
-
-    // Draw focus indicator (yellow circle around planet)
-    const planet = container.getData('planet') as PlanetEntity | null;
-    const hitSize = planet ? this.planetRenderer.getHitAreaSize(planet.type) : 42;
-    const radius = hitSize / 2 + 5;
-
-    this.selectionGraphics.lineStyle(3, 0xffff00, 1);
-    this.selectionGraphics.strokeCircle(container.x, container.y, radius);
   }
 
   private addDebugInfo(): void {
@@ -347,6 +366,7 @@ export class GalaxyMapScene extends Phaser.Scene {
         'Mouse Wheel: Zoom',
         'Tab: Cycle focus',
         'Shift+Tab: Cycle back',
+        'Arrows: Navigate planets',
         'Enter/Space: Select focused',
         '',
         'Shortcuts:',
@@ -419,6 +439,88 @@ export class GalaxyMapScene extends Phaser.Scene {
         this.cameraController.resetView(true);
       }
     });
+  }
+
+  /**
+   * Sets up arrow key navigation for planet selection.
+   * Arrow keys move focus to the nearest planet in that direction.
+   */
+  private setupArrowKeyNavigation(): void {
+    this.input.keyboard?.on('keydown-UP', () => this.navigateToNearest('up'));
+    this.input.keyboard?.on('keydown-DOWN', () => this.navigateToNearest('down'));
+    this.input.keyboard?.on('keydown-LEFT', () => this.navigateToNearest('left'));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.navigateToNearest('right'));
+  }
+
+  /**
+   * Navigates to the nearest planet in the specified direction from the current focus.
+   */
+  private navigateToNearest(direction: 'up' | 'down' | 'left' | 'right'): void {
+    const currentId = this.inputSystem.getFocusedElementId();
+    if (!currentId) {
+      // If no focus, focus first planet
+      if (this.galaxy.planets.length > 0) {
+        this.inputSystem.setFocus(String(this.galaxy.planets[0].id));
+      }
+      return;
+    }
+
+    const currentPlanetId = parseInt(currentId, 10);
+    const currentPlanet = this.galaxy.planets.find(p => p.id === currentPlanetId);
+    if (!currentPlanet) return;
+
+    const cx = currentPlanet.position.x;
+    const cy = currentPlanet.position.z;
+
+    let bestPlanet: PlanetEntity | null = null;
+    let bestDistance = Infinity;
+
+    for (const planet of this.galaxy.planets) {
+      if (planet.id === currentPlanetId) continue;
+
+      const px = planet.position.x;
+      const py = planet.position.z;
+      const dx = px - cx;
+      const dy = py - cy;
+
+      // Check if planet is in the correct direction
+      let isInDirection = false;
+      switch (direction) {
+        case 'up': isInDirection = dy < -10; break;
+        case 'down': isInDirection = dy > 10; break;
+        case 'left': isInDirection = dx < -10; break;
+        case 'right': isInDirection = dx > 10; break;
+      }
+
+      if (isInDirection) {
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestPlanet = planet;
+        }
+      }
+    }
+
+    if (bestPlanet) {
+      this.inputSystem.setFocus(String(bestPlanet.id));
+      this.updateSelectionVisuals();
+    }
+  }
+
+  /**
+   * Auto-selects the player's home planet on scene load.
+   * Implements AC5: Default Selection requirement.
+   */
+  private autoSelectHomePlanet(): void {
+    const homePlanet = this.galaxy.planets.find(p => p.owner === FactionType.Player);
+    if (homePlanet) {
+      const planetId = String(homePlanet.id);
+      // Set both focus and selection
+      this.inputSystem.setFocus(planetId);
+      this.selectedPlanetId = planetId;
+      this.updateSelectionVisuals();
+      console.log(`Auto-selected home planet: ${homePlanet.name}`);
+    }
   }
 
   public shutdown(): void {

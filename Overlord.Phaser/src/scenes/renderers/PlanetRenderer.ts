@@ -84,11 +84,13 @@ export class PlanetRenderer {
   }
 
   /**
-   * Gets the interactive hit area size for a planet
+   * Gets the interactive hit area size for a planet.
+   * Ensures minimum 44×44px for accessibility (NFR-A2 touch targets).
    */
   public getHitAreaSize(planetType: PlanetType): number {
     const typeKey = PLANET_TYPE_MAP[planetType] || 'Terran';
     const visualConfig = PLANET_VISUALS[typeKey] || PLANET_VISUALS.Terran;
-    return visualConfig.size + 10; // Add padding for easier clicking
+    const baseSize = visualConfig.size + 10; // Add padding for easier clicking
+    return Math.max(baseSize, 44); // Minimum 44px for touch accessibility
   }
 }
