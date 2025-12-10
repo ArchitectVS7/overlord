@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GameState } from '@core/GameState';
 import { TurnSystem } from '@core/TurnSystem';
 import { PhaseProcessor } from '@core/PhaseProcessor';
+import { SaveSystem } from '@core/SaveSystem';
 import { TurnPhase } from '@core/models/Enums';
 import { ResourceDelta } from '@core/models/ResourceModels';
 
@@ -11,7 +12,7 @@ import { ResourceDelta } from '@core/models/ResourceModels';
 export interface TurnHUDConfig {
   /** Delay in ms before auto-advancing Combat/End phases (default: 1500) */
   autoAdvanceDelayMs?: number;
-  /** Duration in ms for notification visibility (default: 500) */
+  /** Duration in ms for notification visibility (default: 1000 per design spec) */
   notificationDurationMs?: number;
   /** Minimum population growth to show notification (default: 10) */
   populationGrowthThreshold?: number;
@@ -33,8 +34,14 @@ export class TurnHUD extends Phaser.GameObjects.Container {
   private phaseProcessor: PhaseProcessor;
   private notificationTween?: Phaser.Tweens.Tween;
 
+  // Stacked notification support (C4.3-1: design spec requires stacked notifications)
+  private notificationStack: Phaser.GameObjects.Text[] = [];
+  private readonly maxStackedNotifications = 5;
+  private readonly notificationStackSpacing = 60;
+
   // Keyboard handler references for cleanup (CRITICAL-1 fix)
-  private tKeyHandler?: () => void;
+  private spaceKeyHandler?: () => void;
+  private enterKeyHandler?: () => void;
 
   // Original TurnSystem callbacks for chaining (CRITICAL-2 fix)
   private originalOnPhaseChanged?: (phase: TurnPhase) => void;
@@ -66,7 +73,7 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     this.turnSystem = turnSystem;
     this.phaseProcessor = phaseProcessor;
     this.autoAdvanceDelayMs = config?.autoAdvanceDelayMs ?? 1500;
-    this.notificationDurationMs = config?.notificationDurationMs ?? 500;
+    this.notificationDurationMs = config?.notificationDurationMs ?? 1000; // C2.2-2: Changed from 500 to 1000 per design spec
     this.populationGrowthThreshold = config?.populationGrowthThreshold ?? 10;
 
     // Wire up phase processor events for notifications
@@ -95,7 +102,7 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     this.add(this.phaseText);
 
     // End Turn button (only visible in Action phase)
-    this.endTurnButton = scene.add.text(0, 30, 'END TURN [T]', {
+    this.endTurnButton = scene.add.text(0, 30, 'END TURN [Space]', {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -149,15 +156,23 @@ export class TurnHUD extends Phaser.GameObjects.Container {
   }
 
   private setupKeyboardShortcuts(): void {
-    // T key to end turn (only in Action phase)
-    // Using T instead of Space/Enter to avoid conflicts with planet selection (MAJOR-2 fix)
-    this.tKeyHandler = () => {
-      if (this.gameState.currentPhase === TurnPhase.Action) {
+    // C2.2-1: Space/Enter to end turn (only in Action phase)
+    // Design spec: "spacebar as universal and context sensitive select/continue"
+    // When End Turn button is visible (Action phase), Space/Enter triggers it
+    this.spaceKeyHandler = () => {
+      if (this.gameState.currentPhase === TurnPhase.Action && this.endTurnButton.visible) {
         this.onEndTurnClicked();
       }
     };
 
-    this.scene.input.keyboard?.on('keydown-T', this.tKeyHandler);
+    this.enterKeyHandler = () => {
+      if (this.gameState.currentPhase === TurnPhase.Action && this.endTurnButton.visible) {
+        this.onEndTurnClicked();
+      }
+    };
+
+    this.scene.input.keyboard?.on('keydown-SPACE', this.spaceKeyHandler);
+    this.scene.input.keyboard?.on('keydown-ENTER', this.enterKeyHandler);
   }
 
   private setupTurnSystemEvents(): void {
@@ -219,11 +234,21 @@ export class TurnHUD extends Phaser.GameObjects.Container {
       }
     };
 
-    // Error handling (Story 2-3: AC-6)
+    // Error handling (Story 2-3: AC-6) with auto-save (C2.3-2)
     this.phaseProcessor.onPhaseProcessingError = (phase: TurnPhase, error: string) => {
       this.originalOnPhaseProcessingError?.(phase, error);
       console.error(`Phase processing error in ${this.getPhaseDisplayName(phase)}:`, error);
-      this.showNotification(`Error: ${error}`);
+
+      // C2.3-2: Auto-save on phase error before showing notification
+      try {
+        const saveSystem = new SaveSystem(this.gameState);
+        saveSystem.saveToLocalStorage('autosave_error', '0.4.0-economy', 0, `Error Recovery - Turn ${this.gameState.currentTurn}`);
+        console.log('Auto-save completed due to phase error');
+        this.showNotification(`Error: ${error} (auto-saved)`);
+      } catch (saveError) {
+        console.error('Auto-save failed:', saveError);
+        this.showNotification(`Error: ${error}`);
+      }
     };
   }
 
@@ -257,18 +282,42 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     }
   }
 
+  /**
+   * Shows a stacked notification (C4.3-1: design spec requires stacked notifications)
+   * Multiple notifications appear in a vertical stack instead of replacing each other.
+   */
   private showNotification(message: string): void {
     const startTime = performance.now();
+    const { width, height } = this.scene.cameras.main;
 
-    // Cancel any existing notification tween
-    if (this.notificationTween) {
-      this.notificationTween.stop();
-      this.notificationTween.remove();
-    }
+    // Calculate position based on current stack size
+    const stackIndex = this.notificationStack.length;
+    const baseY = height / 2 - (this.maxStackedNotifications * this.notificationStackSpacing) / 2;
+    const notificationY = baseY + stackIndex * this.notificationStackSpacing;
 
-    // Show notification immediately (NFR-P3: feedback within 100ms)
-    this.notificationText.setText(message);
-    this.notificationText.setAlpha(1);
+    // Create new notification text
+    const notification = this.scene.add.text(width / 2, notificationY, message, {
+      fontSize: '32px',
+      color: '#ffffff',
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: { x: 20, y: 10 },
+    })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setDepth(1000 + stackIndex);
+
+    // Add to stack
+    this.notificationStack.push(notification);
+
+    // Fade in immediately (NFR-P3: feedback within 100ms)
+    this.scene.tweens.add({
+      targets: notification,
+      alpha: 1,
+      duration: 50,
+      ease: 'Power2',
+    });
 
     // Verify notification timing (CRITICAL-2 fix: AC-5 instrumentation)
     const displayTime = performance.now() - startTime;
@@ -276,13 +325,52 @@ export class TurnHUD extends Phaser.GameObjects.Container {
       console.warn(`Notification exceeded 100ms target: ${displayTime.toFixed(2)}ms`);
     }
 
-    // Fade out after configured duration (MAJOR-1 fix: configurable timing)
-    this.notificationTween = this.scene.tweens.add({
-      targets: this.notificationText,
+    // Fade out and remove after configured duration
+    this.scene.tweens.add({
+      targets: notification,
       alpha: 0,
-      duration: 100, // 100ms fade animation
-      delay: this.notificationDurationMs, // Configurable visibility duration
+      duration: 100,
+      delay: this.notificationDurationMs,
       ease: 'Power2',
+      onComplete: () => {
+        // Remove from stack
+        const index = this.notificationStack.indexOf(notification);
+        if (index > -1) {
+          this.notificationStack.splice(index, 1);
+        }
+        notification.destroy();
+
+        // Reposition remaining notifications to fill gap
+        this.repositionNotificationStack();
+      },
+    });
+
+    // If stack exceeds max, remove oldest notification early
+    if (this.notificationStack.length > this.maxStackedNotifications) {
+      const oldest = this.notificationStack.shift();
+      if (oldest) {
+        this.scene.tweens.killTweensOf(oldest);
+        oldest.destroy();
+        this.repositionNotificationStack();
+      }
+    }
+  }
+
+  /**
+   * Repositions the notification stack after removal (C4.3-1)
+   */
+  private repositionNotificationStack(): void {
+    const { height } = this.scene.cameras.main;
+    const baseY = height / 2 - (this.maxStackedNotifications * this.notificationStackSpacing) / 2;
+
+    this.notificationStack.forEach((notification, index) => {
+      const targetY = baseY + index * this.notificationStackSpacing;
+      this.scene.tweens.add({
+        targets: notification,
+        y: targetY,
+        duration: 150,
+        ease: 'Power2',
+      });
     });
   }
 
@@ -340,8 +428,11 @@ export class TurnHUD extends Phaser.GameObjects.Container {
 
   public destroy(): void {
     // Clean up keyboard listeners (CRITICAL-1 fix)
-    if (this.tKeyHandler) {
-      this.scene.input.keyboard?.off('keydown-T', this.tKeyHandler);
+    if (this.spaceKeyHandler) {
+      this.scene.input.keyboard?.off('keydown-SPACE', this.spaceKeyHandler);
+    }
+    if (this.enterKeyHandler) {
+      this.scene.input.keyboard?.off('keydown-ENTER', this.enterKeyHandler);
     }
 
     // Restore original TurnSystem callbacks (CRITICAL-2 fix)
@@ -369,11 +460,18 @@ export class TurnHUD extends Phaser.GameObjects.Container {
       this.phaseProcessor.onPhaseProcessingError = this.originalOnPhaseProcessingError;
     }
 
-    // Clean up notification tween
+    // Clean up notification tween (legacy)
     if (this.notificationTween) {
       this.notificationTween.stop();
       this.notificationTween.remove();
     }
+
+    // Clean up stacked notifications (C4.3-1)
+    for (const notification of this.notificationStack) {
+      this.scene.tweens.killTweensOf(notification);
+      notification.destroy();
+    }
+    this.notificationStack = [];
 
     // Remove notificationText from scene before destroying (MAJOR-3 fix)
     if (this.notificationText.scene) {

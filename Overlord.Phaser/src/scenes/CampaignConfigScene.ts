@@ -13,6 +13,14 @@ import {
  * AC-4: Start campaign within 3 seconds
  * AC-6: Default values (Normal, Balanced)
  */
+/**
+ * Data passed to CampaignConfigScene (C2.5-1: retry with same settings)
+ */
+interface CampaignConfigSceneData {
+  previousDifficulty?: Difficulty;
+  previousPersonality?: AIPersonality;
+}
+
 export class CampaignConfigScene extends Phaser.Scene {
   private selectedDifficulty: Difficulty = Difficulty.Normal; // AC-6: Default
   private selectedPersonality: AIPersonality = AIPersonality.Balanced; // AC-6: Default
@@ -22,6 +30,24 @@ export class CampaignConfigScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'CampaignConfigScene' });
+  }
+
+  /**
+   * Receives scene data for retry with same settings (C2.5-1)
+   */
+  public init(data: CampaignConfigSceneData): void {
+    // Apply previous settings if passed (from DefeatScene retry)
+    if (data.previousDifficulty !== undefined) {
+      this.selectedDifficulty = data.previousDifficulty;
+    } else {
+      this.selectedDifficulty = Difficulty.Normal; // AC-6: Default
+    }
+
+    if (data.previousPersonality !== undefined) {
+      this.selectedPersonality = data.previousPersonality;
+    } else {
+      this.selectedPersonality = AIPersonality.Balanced; // AC-6: Default
+    }
   }
 
   public create(): void {
