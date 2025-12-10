@@ -2,10 +2,13 @@ import Phaser from 'phaser';
 import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
-import { Difficulty } from '@core/models/Enums';
-import { PlanetEntity, getPlanetColor } from '@core/models/PlanetEntity';
+import { Difficulty, FactionType } from '@core/models/Enums';
+import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
+import { PlanetRenderer } from './renderers/PlanetRenderer';
+import { StarFieldRenderer } from './renderers/StarFieldRenderer';
+import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -13,8 +16,10 @@ export class GalaxyMapScene extends Phaser.Scene {
   private inputSystem!: InputSystem;
   private inputManager!: InputManager;
   private cameraController!: CameraController;
-  private planetGraphics!: Phaser.GameObjects.Graphics;
-  private planetLabels: Phaser.GameObjects.Text[] = [];
+  private planetRenderer!: PlanetRenderer;
+  private starFieldRenderer!: StarFieldRenderer;
+  private planetInfoPanel!: PlanetInfoPanel;
+  private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
   private selectionGraphics!: Phaser.GameObjects.Graphics;
@@ -63,7 +68,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.cameraController = new CameraController(this, galaxyBounds);
 
     // Find home planet (first player-owned or first planet) for camera home
-    const homePlanet = this.galaxy.planets.find(p => p.owner === 'Player') || this.galaxy.planets[0];
+    const homePlanet = this.galaxy.planets.find(p => p.owner === FactionType.Player) || this.galaxy.planets[0];
     if (homePlanet) {
       this.cameraController.setHomePosition(homePlanet.position.x, homePlanet.position.z, 1.0);
       this.cameraController.centerOn(homePlanet.position.x, homePlanet.position.z, false);
@@ -73,9 +78,21 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.cameraController.enableDragPan();
     this.cameraController.enableWheelZoom();
 
-    // Create graphics objects
-    this.planetGraphics = this.add.graphics();
+    // Initialize renderers
+    this.planetRenderer = new PlanetRenderer(this);
+    this.starFieldRenderer = new StarFieldRenderer(this);
+
+    // Create star field background (based on galaxy bounds)
+    const starFieldWidth = galaxyBounds.maxX - galaxyBounds.minX + 400;
+    const starFieldHeight = galaxyBounds.maxY - galaxyBounds.minY + 400;
+    this.starFieldRenderer.createStarField(starFieldWidth, starFieldHeight);
+
+    // Create selection graphics (on top of planets)
     this.selectionGraphics = this.add.graphics();
+    this.selectionGraphics.setDepth(100);
+
+    // Create planet info panel (fixed to camera, above everything)
+    this.planetInfoPanel = new PlanetInfoPanel(this);
 
     // Render all planets
     this.renderPlanets();
@@ -86,12 +103,18 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Setup input callbacks
     this.setupInputCallbacks();
 
+    // Setup arrow key navigation
+    this.setupArrowKeyNavigation();
+
     // Add Reset View button
     this.addResetViewButton();
 
     // Add debug info and controls help
     this.addDebugInfo();
     this.addControlsHelp();
+
+    // Auto-select player's home planet (AC5: Default Selection)
+    this.autoSelectHomePlanet();
   }
 
   private calculateGalaxyBounds(): { minX: number; maxX: number; minY: number; maxY: number } {
@@ -172,8 +195,13 @@ export class GalaxyMapScene extends Phaser.Scene {
   private handleShortcut(action: string): void {
     switch (action) {
       case 'pause':
-        console.log('Pause menu (Esc pressed)');
-        // TODO: Show pause menu
+        // Close planet info panel if open, otherwise show pause menu
+        if (this.planetInfoPanel && this.planetInfoPanel.getIsVisible()) {
+          this.planetInfoPanel.hide();
+        } else {
+          console.log('Pause menu (Esc pressed)');
+          // TODO: Show pause menu
+        }
         break;
       case 'help':
         console.log('Help overlay (H pressed)');
@@ -218,51 +246,20 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   private renderPlanet(planet: PlanetEntity, focusOrder: number): void {
-    // 3D → 2D projection (orthographic: X/Z → screen coordinates)
-    const screenX = planet.position.x;
-    const screenZ = planet.position.z;
+    // Use PlanetRenderer to create the planet visual
+    const container = this.planetRenderer.renderPlanet(planet);
+    container.setDepth(10); // Above star field, below selection
 
-    // Get color based on owner
-    const color = getPlanetColor(planet.owner);
+    // Store container reference
+    const planetIdStr = String(planet.id);
+    this.planetContainers.set(planetIdStr, container);
 
-    // Draw rectangle (40x30 pixels)
-    const rectWidth = 40;
-    const rectHeight = 30;
-    this.planetGraphics.fillStyle(color, 1.0);
-    this.planetGraphics.fillRect(
-      screenX - rectWidth / 2,
-      screenZ - rectHeight / 2,
-      rectWidth,
-      rectHeight
-    );
-
-    // Add border
-    this.planetGraphics.lineStyle(2, 0xffffff, 0.5);
-    this.planetGraphics.strokeRect(
-      screenX - rectWidth / 2,
-      screenZ - rectHeight / 2,
-      rectWidth,
-      rectHeight
-    );
-
-    // Add label below rectangle
-    const label = this.add.text(
-      screenX,
-      screenZ + rectHeight / 2 + 10,
-      planet.name,
-      {
-        fontSize: '14px',
-        color: '#ffffff',
-        fontFamily: 'Arial'
-      }
-    );
-    label.setOrigin(0.5, 0);
-    this.planetLabels.push(label);
+    // Get hit area size for this planet type
+    const hitSize = this.planetRenderer.getHitAreaSize(planet.type);
 
     // Create interactive zone for this planet
-    const zone = this.add.zone(screenX, screenZ, rectWidth, rectHeight);
-    zone.setRectangleDropZone(rectWidth, rectHeight);
-    const planetIdStr = String(planet.id);
+    const zone = this.add.zone(planet.position.x, planet.position.z, hitSize, hitSize);
+    zone.setRectangleDropZone(hitSize, hitSize);
     this.planetZones.set(planetIdStr, zone);
 
     // Register with InputManager
@@ -286,31 +283,45 @@ export class GalaxyMapScene extends Phaser.Scene {
       // Auto-pan to planet if not visible
       this.cameraController.panToIfNotVisible(planet.position.x, planet.position.z, 100);
 
-      // TODO: Show planet details panel
+      // Show planet info panel
+      this.planetInfoPanel.setPlanet(planet);
+      this.planetInfoPanel.show();
     }
   }
 
   private updateSelectionVisuals(): void {
     this.selectionGraphics.clear();
 
+    // Draw selection indicator (cyan solid ring) for selected planet
+    if (this.selectedPlanetId) {
+      const selectedContainer = this.planetContainers.get(this.selectedPlanetId);
+      if (selectedContainer) {
+        const selectedPlanet = selectedContainer.getData('planet') as PlanetEntity | null;
+        const selectedHitSize = selectedPlanet
+          ? this.planetRenderer.getHitAreaSize(selectedPlanet.type)
+          : 44;
+        const selectedRadius = selectedHitSize / 2 + 8;
+
+        // Cyan selection ring (3px thick, per WCAG)
+        this.selectionGraphics.lineStyle(3, 0x00ffff, 1);
+        this.selectionGraphics.strokeCircle(selectedContainer.x, selectedContainer.y, selectedRadius);
+      }
+    }
+
+    // Draw focus indicator (yellow dashed ring) for focused planet
     const focusedId = this.inputSystem.getFocusedElementId();
-    if (!focusedId) {
-      return;
-    }
+    if (focusedId && focusedId !== this.selectedPlanetId) {
+      const container = this.planetContainers.get(focusedId);
+      if (container) {
+        const planet = container.getData('planet') as PlanetEntity | null;
+        const hitSize = planet ? this.planetRenderer.getHitAreaSize(planet.type) : 44;
+        const radius = hitSize / 2 + 5;
 
-    const zone = this.planetZones.get(focusedId);
-    if (!zone) {
-      return;
+        // Yellow focus ring (3px thick, per WCAG)
+        this.selectionGraphics.lineStyle(3, 0xffff00, 1);
+        this.selectionGraphics.strokeCircle(container.x, container.y, radius);
+      }
     }
-
-    // Draw focus indicator (yellow border)
-    this.selectionGraphics.lineStyle(3, 0xffff00, 1);
-    this.selectionGraphics.strokeRect(
-      zone.x - zone.width / 2 - 3,
-      zone.y - zone.height / 2 - 3,
-      zone.width + 6,
-      zone.height + 6
-    );
   }
 
   private addDebugInfo(): void {
@@ -367,6 +378,7 @@ export class GalaxyMapScene extends Phaser.Scene {
         'Mouse Wheel: Zoom',
         'Tab: Cycle focus',
         'Shift+Tab: Cycle back',
+        'Arrows: Navigate planets',
         'Enter/Space: Select focused',
         '',
         'Shortcuts:',
@@ -441,6 +453,88 @@ export class GalaxyMapScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Sets up arrow key navigation for planet selection.
+   * Arrow keys move focus to the nearest planet in that direction.
+   */
+  private setupArrowKeyNavigation(): void {
+    this.input.keyboard?.on('keydown-UP', () => this.navigateToNearest('up'));
+    this.input.keyboard?.on('keydown-DOWN', () => this.navigateToNearest('down'));
+    this.input.keyboard?.on('keydown-LEFT', () => this.navigateToNearest('left'));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.navigateToNearest('right'));
+  }
+
+  /**
+   * Navigates to the nearest planet in the specified direction from the current focus.
+   */
+  private navigateToNearest(direction: 'up' | 'down' | 'left' | 'right'): void {
+    const currentId = this.inputSystem.getFocusedElementId();
+    if (!currentId) {
+      // If no focus, focus first planet
+      if (this.galaxy.planets.length > 0) {
+        this.inputSystem.setFocus(String(this.galaxy.planets[0].id));
+      }
+      return;
+    }
+
+    const currentPlanetId = parseInt(currentId, 10);
+    const currentPlanet = this.galaxy.planets.find(p => p.id === currentPlanetId);
+    if (!currentPlanet) return;
+
+    const cx = currentPlanet.position.x;
+    const cy = currentPlanet.position.z;
+
+    let bestPlanet: PlanetEntity | null = null;
+    let bestDistance = Infinity;
+
+    for (const planet of this.galaxy.planets) {
+      if (planet.id === currentPlanetId) continue;
+
+      const px = planet.position.x;
+      const py = planet.position.z;
+      const dx = px - cx;
+      const dy = py - cy;
+
+      // Check if planet is in the correct direction
+      let isInDirection = false;
+      switch (direction) {
+        case 'up': isInDirection = dy < -10; break;
+        case 'down': isInDirection = dy > 10; break;
+        case 'left': isInDirection = dx < -10; break;
+        case 'right': isInDirection = dx > 10; break;
+      }
+
+      if (isInDirection) {
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestPlanet = planet;
+        }
+      }
+    }
+
+    if (bestPlanet) {
+      this.inputSystem.setFocus(String(bestPlanet.id));
+      this.updateSelectionVisuals();
+    }
+  }
+
+  /**
+   * Auto-selects the player's home planet on scene load.
+   * Implements AC5: Default Selection requirement.
+   */
+  private autoSelectHomePlanet(): void {
+    const homePlanet = this.galaxy.planets.find(p => p.owner === FactionType.Player);
+    if (homePlanet) {
+      const planetId = String(homePlanet.id);
+      // Set both focus and selection
+      this.inputSystem.setFocus(planetId);
+      this.selectedPlanetId = planetId;
+      this.updateSelectionVisuals();
+      console.log(`Auto-selected home planet: ${homePlanet.name}`);
+    }
+  }
+
   public shutdown(): void {
     if (this.cameraController) {
       this.cameraController.destroy();
@@ -448,7 +542,13 @@ export class GalaxyMapScene extends Phaser.Scene {
     if (this.inputManager) {
       this.inputManager.destroy();
     }
+    if (this.starFieldRenderer) {
+      this.starFieldRenderer.destroy();
+    }
+    if (this.planetInfoPanel) {
+      this.planetInfoPanel.destroy();
+    }
+    this.planetContainers.clear();
     this.planetZones.clear();
-    this.planetLabels = [];
   }
 }
