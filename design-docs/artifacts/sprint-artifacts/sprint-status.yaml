@@ -71,34 +71,37 @@ development_status:
   # =============================================================================
   # EPIC 3: Galaxy Exploration & Planet Discovery
   # Priority: HIGH - Enables core gameplay interaction
+  # COMPLETE: v0.2.0-planets (2025-12-10)
   # =============================================================================
-  epic-3: in-progress
-  3-1-galaxy-generation-and-visualization: review         # [CORE-PARTIAL] Visual rendering implemented, ready for review
-  3-2-planet-selection-and-highlighting: backlog          # [GREENFIELD] Click handling + selection state
-  3-3-planet-information-panel: backlog                   # [CORE-PARTIAL] Data exists, needs panel UI
+  epic-3: done
+  3-1-galaxy-generation-and-visualization: done           # [CORE-PARTIAL] Commit d46d1e4, code review 0817c5c
+  3-2-planet-selection-and-highlighting: done             # [GREENFIELD] Commit bd21212
+  3-3-planet-information-panel: done                      # [CORE-PARTIAL] Commit 34b8677, code review e232a63
   epic-3-retrospective: optional
 
   # =============================================================================
   # EPIC 2: Campaign Setup & Core Loop
   # Priority: HIGH - Game flow foundation
+  # COMPLETE: v0.3.0-campaign (2025-12-10)
   # =============================================================================
-  epic-2: backlog
-  2-1-campaign-creation-and-configuration: backlog        # [CORE-PARTIAL] Logic done, needs new game UI
-  2-2-turn-system-and-phase-management: backlog           # [CORE-DONE] TurnSystem complete, needs phase UI
-  2-3-turn-phase-processing: backlog                      # [CORE-PARTIAL] Systems exist, need integration
-  2-4-victory-condition-detection: backlog                # [CORE-DONE] Victory check works, needs screen UI
-  2-5-defeat-condition-detection: backlog                 # [CORE-DONE] Same as 2-4
+  epic-2: done
+  2-1-campaign-creation-and-configuration: done           # [CORE-PARTIAL] Commit 9b61ad0 (36 tests)
+  2-2-turn-system-and-phase-management: done              # [CORE-DONE] Commit edd8cb3 (24 tests)
+  2-3-turn-phase-processing: done                         # [CORE-PARTIAL] Commit 4299a70 (17 tests)
+  2-4-victory-condition-detection: done                   # [CORE-DONE] Commit 3bf787c (11 tests)
+  2-5-defeat-condition-detection: done                    # [CORE-DONE] Commit 159fe93 (12 tests)
   epic-2-retrospective: optional
 
   # =============================================================================
   # EPIC 4: Planetary Economy & Infrastructure
   # Priority: MEDIUM - Core gameplay mechanics
+  # COMPLETE: v0.4.0-economy (2025-12-10)
   # =============================================================================
-  epic-4: backlog
-  4-1-resource-display-and-management: backlog            # [CORE-DONE] ResourceSystem complete, needs HUD
-  4-2-building-construction-queue: backlog                # [CORE-PARTIAL] BuildingSystem done, needs menu UI
-  4-3-building-construction-progress-tracking: backlog    # [CORE-DONE] Progress tracking works, needs UI
-  4-4-automated-resource-income-processing: backlog       # [CORE-DONE] IncomeSystem complete, needs report UI
+  epic-4: done
+  4-1-resource-display-and-management: done               # [CORE-DONE] Commit 208a602 (43 tests)
+  4-2-building-construction-queue: done                   # [CORE-PARTIAL] Commit ae2e8cb (24 tests)
+  4-3-building-construction-progress-tracking: done       # [CORE-DONE] Commit 928c667 (6 tests)
+  4-4-automated-resource-income-processing: done          # [CORE-DONE] Commit f4b8f5e (29 tests)
   epic-4-retrospective: optional
 
   # =============================================================================
