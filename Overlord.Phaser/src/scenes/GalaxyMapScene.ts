@@ -3,9 +3,11 @@ import { GalaxyGenerator, Galaxy } from '@core/GalaxyGenerator';
 import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
 import { Difficulty } from '@core/models/Enums';
-import { PlanetEntity, getPlanetColor } from '@core/models/PlanetEntity';
+import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
+import { PlanetRenderer } from './renderers/PlanetRenderer';
+import { StarFieldRenderer } from './renderers/StarFieldRenderer';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -13,8 +15,9 @@ export class GalaxyMapScene extends Phaser.Scene {
   private inputSystem!: InputSystem;
   private inputManager!: InputManager;
   private cameraController!: CameraController;
-  private planetGraphics!: Phaser.GameObjects.Graphics;
-  private planetLabels: Phaser.GameObjects.Text[] = [];
+  private planetRenderer!: PlanetRenderer;
+  private starFieldRenderer!: StarFieldRenderer;
+  private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
   private selectionGraphics!: Phaser.GameObjects.Graphics;
@@ -73,9 +76,18 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.cameraController.enableDragPan();
     this.cameraController.enableWheelZoom();
 
-    // Create graphics objects
-    this.planetGraphics = this.add.graphics();
+    // Initialize renderers
+    this.planetRenderer = new PlanetRenderer(this);
+    this.starFieldRenderer = new StarFieldRenderer(this);
+
+    // Create star field background (based on galaxy bounds)
+    const starFieldWidth = galaxyBounds.maxX - galaxyBounds.minX + 400;
+    const starFieldHeight = galaxyBounds.maxY - galaxyBounds.minY + 400;
+    this.starFieldRenderer.createStarField(starFieldWidth, starFieldHeight);
+
+    // Create selection graphics (on top of planets)
     this.selectionGraphics = this.add.graphics();
+    this.selectionGraphics.setDepth(100);
 
     // Render all planets
     this.renderPlanets();
@@ -218,51 +230,20 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   private renderPlanet(planet: PlanetEntity, focusOrder: number): void {
-    // 3D → 2D projection (orthographic: X/Z → screen coordinates)
-    const screenX = planet.position.x;
-    const screenZ = planet.position.z;
+    // Use PlanetRenderer to create the planet visual
+    const container = this.planetRenderer.renderPlanet(planet);
+    container.setDepth(10); // Above star field, below selection
 
-    // Get color based on owner
-    const color = getPlanetColor(planet.owner);
+    // Store container reference
+    const planetIdStr = String(planet.id);
+    this.planetContainers.set(planetIdStr, container);
 
-    // Draw rectangle (40x30 pixels)
-    const rectWidth = 40;
-    const rectHeight = 30;
-    this.planetGraphics.fillStyle(color, 1.0);
-    this.planetGraphics.fillRect(
-      screenX - rectWidth / 2,
-      screenZ - rectHeight / 2,
-      rectWidth,
-      rectHeight
-    );
-
-    // Add border
-    this.planetGraphics.lineStyle(2, 0xffffff, 0.5);
-    this.planetGraphics.strokeRect(
-      screenX - rectWidth / 2,
-      screenZ - rectHeight / 2,
-      rectWidth,
-      rectHeight
-    );
-
-    // Add label below rectangle
-    const label = this.add.text(
-      screenX,
-      screenZ + rectHeight / 2 + 10,
-      planet.name,
-      {
-        fontSize: '14px',
-        color: '#ffffff',
-        fontFamily: 'Arial'
-      }
-    );
-    label.setOrigin(0.5, 0);
-    this.planetLabels.push(label);
+    // Get hit area size for this planet type
+    const hitSize = this.planetRenderer.getHitAreaSize(planet.type);
 
     // Create interactive zone for this planet
-    const zone = this.add.zone(screenX, screenZ, rectWidth, rectHeight);
-    zone.setRectangleDropZone(rectWidth, rectHeight);
-    const planetIdStr = String(planet.id);
+    const zone = this.add.zone(planet.position.x, planet.position.z, hitSize, hitSize);
+    zone.setRectangleDropZone(hitSize, hitSize);
     this.planetZones.set(planetIdStr, zone);
 
     // Register with InputManager
@@ -298,19 +279,18 @@ export class GalaxyMapScene extends Phaser.Scene {
       return;
     }
 
-    const zone = this.planetZones.get(focusedId);
-    if (!zone) {
+    const container = this.planetContainers.get(focusedId);
+    if (!container) {
       return;
     }
 
-    // Draw focus indicator (yellow border)
+    // Draw focus indicator (yellow circle around planet)
+    const planet = container.getData('planet') as PlanetEntity | null;
+    const hitSize = planet ? this.planetRenderer.getHitAreaSize(planet.type) : 42;
+    const radius = hitSize / 2 + 5;
+
     this.selectionGraphics.lineStyle(3, 0xffff00, 1);
-    this.selectionGraphics.strokeRect(
-      zone.x - zone.width / 2 - 3,
-      zone.y - zone.height / 2 - 3,
-      zone.width + 6,
-      zone.height + 6
-    );
+    this.selectionGraphics.strokeCircle(container.x, container.y, radius);
   }
 
   private addDebugInfo(): void {
@@ -448,7 +428,10 @@ export class GalaxyMapScene extends Phaser.Scene {
     if (this.inputManager) {
       this.inputManager.destroy();
     }
+    if (this.starFieldRenderer) {
+      this.starFieldRenderer.destroy();
+    }
+    this.planetContainers.clear();
     this.planetZones.clear();
-    this.planetLabels = [];
   }
 }

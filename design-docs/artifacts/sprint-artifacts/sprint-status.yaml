@@ -55,8 +55,9 @@ development_status:
   # =============================================================================
   # EPIC 11: Accessible User Interface (RECOMMENDED START - Input Foundation)
   # Priority: CRITICAL - Nothing works without input handling
+  # Phase A: Stories 11-1 and 11-3 COMPLETE (v0.1.0-input)
   # =============================================================================
-  epic-11: backlog
+  epic-11: in-progress
   11-1-mouse-and-keyboard-input-support: done              # [GREENFIELD] InputSystem implemented
   11-2-touch-gesture-support-for-mobile: backlog          # [GREENFIELD] Touch handling
   11-3-galaxy-map-pan-and-zoom-controls: done             # [CORE-PARTIAL] CameraController implemented
@@ -71,8 +72,8 @@ development_status:
   # EPIC 3: Galaxy Exploration & Planet Discovery
   # Priority: HIGH - Enables core gameplay interaction
   # =============================================================================
-  epic-3: backlog
-  3-1-galaxy-generation-and-visualization: backlog        # [CORE-PARTIAL] GalaxyGenerator done, needs better visuals
+  epic-3: in-progress
+  3-1-galaxy-generation-and-visualization: review         # [CORE-PARTIAL] Visual rendering implemented, ready for review
   3-2-planet-selection-and-highlighting: backlog          # [GREENFIELD] Click handling + selection state
   3-3-planet-information-panel: backlog                   # [CORE-PARTIAL] Data exists, needs panel UI
   epic-3-retrospective: optional
