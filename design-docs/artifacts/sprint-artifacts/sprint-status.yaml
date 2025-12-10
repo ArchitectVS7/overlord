@@ -57,9 +57,9 @@ development_status:
   # Priority: CRITICAL - Nothing works without input handling
   # =============================================================================
   epic-11: backlog
-  11-1-mouse-and-keyboard-input-support: backlog          # [GREENFIELD] InputSystem needed
+  11-1-mouse-and-keyboard-input-support: done              # [GREENFIELD] InputSystem implemented
   11-2-touch-gesture-support-for-mobile: backlog          # [GREENFIELD] Touch handling
-  11-3-galaxy-map-pan-and-zoom-controls: backlog          # [CORE-PARTIAL] Camera exists, needs input binding
+  11-3-galaxy-map-pan-and-zoom-controls: done             # [CORE-PARTIAL] CameraController implemented
   11-4-keyboard-shortcuts-system: backlog                 # [GREENFIELD] Keybinding system
   11-5-ui-scale-customization: backlog                    # [GREENFIELD] Scale system
   11-6-high-contrast-mode-for-accessibility: backlog      # [GREENFIELD] Theme system

@@ -3,7 +3,7 @@ import { FactionType, BuildingType, BuildingStatus, CraftType } from './models/E
 import { BombardmentResult } from './models/CombatModels';
 import { PlanetEntity } from './models/PlanetEntity';
 import { CraftEntity } from './models/CraftEntity';
-import { Structure } from './models/BuildingModels';
+// Note: Structure type is inferred from planet.structures array
 
 /**
  * Platform-agnostic bombardment system.
