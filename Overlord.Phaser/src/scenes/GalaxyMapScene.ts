@@ -176,6 +176,27 @@ export class GalaxyMapScene extends Phaser.Scene {
       }
     };
 
+    // Wire up income system notifications (Story 4-4: AC3, AC4)
+    const incomeSystem = this.phaseProcessor.getIncomeSystem();
+
+    // Story 4-4 AC3: Low morale income penalty warning
+    incomeSystem.onLowMoraleIncomePenalty = (_planetID, planetName, penaltyPercent) => {
+      this.showIncomeWarningNotification(
+        `⚠️ Low morale on ${planetName} reducing income by ${penaltyPercent}%`,
+        'warning'
+      );
+    };
+
+    // Story 4-4 AC4: No planets owned warning
+    incomeSystem.onNoPlanetsOwned = (faction) => {
+      if (faction === FactionType.Player) {
+        this.showIncomeWarningNotification(
+          '⚠️ No planets owned - no income generated!',
+          'critical'
+        );
+      }
+    };
+
     // Wire up victory/defeat detection (Story 2-4, 2-5)
     this.setupVictoryDetection();
 
@@ -715,6 +736,52 @@ export class GalaxyMapScene extends Phaser.Scene {
       alpha: 0,
       duration: 500,
       delay: 3000,
+      onComplete: () => notification.destroy()
+    });
+
+    // Make notification dismissible by click
+    notification.setInteractive({ useHandCursor: true });
+    notification.on('pointerdown', () => {
+      this.tweens.killTweensOf(notification);
+      notification.destroy();
+    });
+  }
+
+  /**
+   * Shows income warning notification (Story 4-4: AC3, AC4)
+   * @param message Warning message to display
+   * @param severity 'warning' for yellow, 'critical' for red
+   */
+  private showIncomeWarningNotification(
+    message: string,
+    severity: 'warning' | 'critical'
+  ): void {
+    const color = severity === 'critical' ? '#ff4444' : '#ffcc00';
+    const bgColor = severity === 'critical' ? 'rgba(80, 0, 0, 0.9)' : 'rgba(80, 60, 0, 0.9)';
+
+    // Create notification at bottom center (stacked above building notifications)
+    const notification = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height - 140,
+      message,
+      {
+        fontSize: '14px',
+        color: color,
+        fontFamily: 'monospace',
+        backgroundColor: bgColor,
+        padding: { x: 15, y: 8 }
+      }
+    );
+    notification.setOrigin(0.5);
+    notification.setScrollFactor(0);
+    notification.setDepth(1200);
+
+    // Fade out after 4 seconds (longer for warnings)
+    this.tweens.add({
+      targets: notification,
+      alpha: 0,
+      duration: 500,
+      delay: 4000,
       onComplete: () => notification.destroy()
     });
 
