@@ -12,6 +12,7 @@ import { PlanetRenderer } from './renderers/PlanetRenderer';
 import { StarFieldRenderer } from './renderers/StarFieldRenderer';
 import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 import { TurnHUD } from './ui/TurnHUD';
+import { ResourceHUD } from './ui/ResourceHUD';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -25,6 +26,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private starFieldRenderer!: StarFieldRenderer;
   private planetInfoPanel!: PlanetInfoPanel;
   private turnHUD!: TurnHUD;
+  private resourceHUD!: ResourceHUD;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -123,6 +125,17 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
     this.turnHUD.setScrollFactor(0);
     this.turnHUD.setDepth(500);
+
+    // Create Resource HUD (top-right corner, fixed to camera) - Story 4-1
+    this.resourceHUD = new ResourceHUD(
+      this,
+      this.cameras.main.width - 120,
+      95,
+      this.gameState,
+      this.phaseProcessor
+    );
+    this.resourceHUD.setScrollFactor(0);
+    this.resourceHUD.setDepth(500);
 
     // Wire up victory/defeat detection (Story 2-4, 2-5)
     this.setupVictoryDetection();
@@ -613,6 +626,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.turnHUD) {
       this.turnHUD.destroy();
+    }
+    if (this.resourceHUD) {
+      this.resourceHUD.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
