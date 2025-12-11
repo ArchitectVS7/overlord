@@ -154,6 +154,7 @@ import { PlatoonCommissionPanel } from '../../src/scenes/ui/PlatoonCommissionPan
 import { PlanetEntity } from '../../src/core/models/PlanetEntity';
 import { FactionType, EquipmentLevel, WeaponLevel, PlanetType } from '../../src/core/models/Enums';
 import { ResourceCollection } from '../../src/core/models/ResourceModels';
+import { PlatoonSystem } from '../../src/core/PlatoonSystem';
 
 // Create mock scene
 function createMockScene(): Phaser.Scene {
@@ -580,6 +581,110 @@ describe('PlatoonCommissionPanel', () => {
       const planet = createMockPlanet();
       panel.show(planet, undefined, 10);
       expect(panel.isAtCapacity()).toBe(false);
+    });
+  });
+
+  describe('Core system integration (Chunk 5-1-C)', () => {
+    it('should accept optional PlatoonSystem in constructor', () => {
+      const mockPlatoonSystem = {
+        commissionPlatoon: jest.fn().mockReturnValue(1),
+        onPlatoonCommissioned: undefined as ((id: number) => void) | undefined
+      };
+      const panelWithSystem = new PlatoonCommissionPanel(scene, mockPlatoonSystem as unknown);
+
+      expect(panelWithSystem).toBeDefined();
+      panelWithSystem.destroy();
+    });
+
+    it('should call platoonSystem.commissionPlatoon when confirming with system', () => {
+      const mockPlatoonSystem = {
+        commissionPlatoon: jest.fn().mockReturnValue(1),
+        onPlatoonCommissioned: undefined as ((id: number) => void) | undefined
+      };
+      const panelWithSystem = new PlatoonCommissionPanel(scene, mockPlatoonSystem as unknown);
+
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000;
+      planet.population = 500;
+      panelWithSystem.show(planet);
+      panelWithSystem.setTroopCount(150);
+      panelWithSystem.setEquipmentLevel(EquipmentLevel.Standard);
+      panelWithSystem.setWeaponLevel(WeaponLevel.AssaultRifle);
+
+      panelWithSystem.confirmCommission();
+
+      expect(mockPlatoonSystem.commissionPlatoon).toHaveBeenCalledWith(
+        planet.id,
+        FactionType.Player,
+        150,
+        EquipmentLevel.Standard,
+        WeaponLevel.AssaultRifle
+      );
+      panelWithSystem.destroy();
+    });
+
+    it('should NOT call platoonSystem when commission fails (returns -1)', () => {
+      const mockPlatoonSystem = {
+        commissionPlatoon: jest.fn().mockReturnValue(-1),
+        onPlatoonCommissioned: undefined as ((id: number) => void) | undefined
+      };
+      const panelWithSystem = new PlatoonCommissionPanel(scene, mockPlatoonSystem as unknown);
+
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000;
+      panelWithSystem.show(planet);
+
+      panelWithSystem.confirmCommission();
+
+      // Panel should remain visible because commission failed
+      expect(panelWithSystem.getIsVisible()).toBe(true);
+      panelWithSystem.destroy();
+    });
+
+    it('should close panel after successful commission via PlatoonSystem', () => {
+      const mockPlatoonSystem = {
+        commissionPlatoon: jest.fn().mockReturnValue(1),
+        onPlatoonCommissioned: undefined as ((id: number) => void) | undefined
+      };
+      const panelWithSystem = new PlatoonCommissionPanel(scene, mockPlatoonSystem as unknown);
+
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000;
+      panelWithSystem.show(planet);
+
+      panelWithSystem.confirmCommission();
+
+      expect(panelWithSystem.getIsVisible()).toBe(false);
+      panelWithSystem.destroy();
+    });
+
+    it('should still fire legacy onCommission callback when no PlatoonSystem', () => {
+      const onCommission = jest.fn();
+      panel.onCommission = onCommission;
+
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000;
+      panel.show(planet);
+
+      panel.confirmCommission();
+
+      expect(onCommission).toHaveBeenCalled();
+    });
+
+    it('should return last commission result', () => {
+      const mockPlatoonSystem = {
+        commissionPlatoon: jest.fn().mockReturnValue(42),
+        onPlatoonCommissioned: undefined as ((id: number) => void) | undefined
+      };
+      const panelWithSystem = new PlatoonCommissionPanel(scene, mockPlatoonSystem as unknown);
+
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000;
+      panelWithSystem.show(planet);
+      panelWithSystem.confirmCommission();
+
+      expect(panelWithSystem.getLastCommissionResult()).toBe(42);
+      panelWithSystem.destroy();
     });
   });
 });

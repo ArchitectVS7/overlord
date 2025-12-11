@@ -13,8 +13,9 @@
 
 import Phaser from 'phaser';
 import { PlanetEntity } from '@core/models/PlanetEntity';
-import { EquipmentLevel, WeaponLevel } from '@core/models/Enums';
+import { EquipmentLevel, WeaponLevel, FactionType } from '@core/models/Enums';
 import { PlatoonCosts, PlatoonModifiers } from '@core/models/PlatoonModels';
+import { PlatoonSystem } from '@core/PlatoonSystem';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 480;
@@ -45,6 +46,8 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   private platoonCount: number = 0;
   private isVisible: boolean = false;
   private closeCallback: (() => void) | null = null;
+  private platoonSystem: PlatoonSystem | null = null;
+  private lastCommissionResult: number = -1;
 
   // UI elements
   private planetInfoText!: Phaser.GameObjects.Text;
@@ -61,9 +64,14 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     weapon: WeaponLevel
   ) => void;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, platoonSystem?: PlatoonSystem | unknown) {
     super(scene, 0, 0);
     scene.add.existing(this);
+
+    // Accept PlatoonSystem for Core integration (optional for backwards compatibility)
+    if (platoonSystem && typeof (platoonSystem as PlatoonSystem).commissionPlatoon === 'function') {
+      this.platoonSystem = platoonSystem as PlatoonSystem;
+    }
 
     this.createBackdrop();
     this.createPanel();
@@ -522,11 +530,34 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   public confirmCommission(): void {
     if (!this.planet || !this.isCommissionEnabled()) return;
 
+    // If PlatoonSystem is provided, use it directly
+    if (this.platoonSystem) {
+      const result = this.platoonSystem.commissionPlatoon(
+        this.planet.id,
+        FactionType.Player,
+        this.troopCount,
+        this.equipmentLevel,
+        this.weaponLevel
+      );
+      this.lastCommissionResult = result;
+
+      // Only close if commission succeeded
+      if (result >= 0) {
+        this.hide();
+      }
+      return;
+    }
+
+    // Legacy callback pattern (backwards compatibility)
     if (this.onCommission) {
       this.onCommission(this.planet, this.troopCount, this.equipmentLevel, this.weaponLevel);
     }
 
     this.hide();
+  }
+
+  public getLastCommissionResult(): number {
+    return this.lastCommissionResult;
   }
 
   private updateUI(): void {
