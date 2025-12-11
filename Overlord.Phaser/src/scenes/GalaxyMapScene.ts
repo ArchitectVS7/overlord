@@ -19,6 +19,8 @@ import { PlatoonDetailsPanel } from './ui/PlatoonDetailsPanel';
 import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
 import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
 import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
+import { InvasionPanel } from './ui/InvasionPanel';
+import { BattleResultsPanel } from './ui/BattleResultsPanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
@@ -44,6 +46,8 @@ export class GalaxyMapScene extends Phaser.Scene {
   private spacecraftPurchasePanel!: SpacecraftPurchasePanel;
   private platoonLoadingPanel!: PlatoonLoadingPanel;
   private spacecraftNavigationPanel!: SpacecraftNavigationPanel;
+  private invasionPanel!: InvasionPanel;
+  private battleResultsPanel!: BattleResultsPanel;
   private platoonSystem!: PlatoonSystem;
   private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
@@ -294,6 +298,73 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up navigation callback to refresh UI
     this.spacecraftNavigationPanel.onNavigate = () => {
       this.resourceHUD.updateDisplay();
+    };
+
+    // Create InvasionPanel - Story 6-1
+    this.invasionPanel = new InvasionPanel(this);
+
+    // Create BattleResultsPanel - Story 6-3
+    this.battleResultsPanel = new BattleResultsPanel(this);
+
+    // Wire up PlanetInfoPanel Invade button to InvasionPanel
+    this.planetInfoPanel.onInvadeClick = (planet) => {
+      // Only allow invading AI-owned planets
+      if (planet.owner !== FactionType.AI) return;
+
+      // Get player cruisers with loaded platoons at this planet (nearby for invasion)
+      const playerCraft = Array.from(this.gameState.craftLookup.values())
+        .filter(c => c.owner === FactionType.Player && c.carriedPlatoonIDs.length > 0);
+
+      // Get all player platoons for lookup
+      const allPlatoons = Array.from(this.gameState.platoonLookup.values());
+
+      this.planetInfoPanel.hide();
+      this.invasionPanel.show(planet, playerCraft, allPlatoons, () => {
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up invasion callback to trigger combat - Story 6-3
+    this.invasionPanel.onInvade = (planet, aggression) => {
+      // Simulate battle outcome (full combat integration in future story)
+      const attackerStrength = this.invasionPanel.getTotalStrength();
+      const defenderStrength = planet.population * 10; // Rough defender strength
+
+      // Higher aggression = more risk but higher damage
+      const aggressionBonus = (aggression - 50) / 100; // -0.5 to +0.5
+      const attackerEffective = attackerStrength * (1 + aggressionBonus);
+
+      const victory = attackerEffective > defenderStrength;
+
+      // Calculate casualties based on aggression and outcome
+      const baseCasualties = this.invasionPanel.getTotalTroopCount();
+      const attackerLossRate = victory ? (aggression / 200) : (aggression / 100); // 0-50% or 0-100%
+      const defenderLossRate = victory ? 0.8 : 0.3;
+
+      const attackerCasualties = Math.floor(baseCasualties * attackerLossRate);
+      const defenderCasualties = Math.floor(planet.population * defenderLossRate);
+
+      // Show battle results
+      this.battleResultsPanel.show({
+        victory,
+        planetName: planet.name,
+        attackerCasualties,
+        defenderCasualties,
+        resourcesCaptured: victory ? {
+          credits: Math.floor(planet.population * 10),
+          minerals: Math.floor(planet.population * 5),
+          fuel: Math.floor(planet.population * 2)
+        } : undefined,
+        defeatReason: victory ? undefined : 'Superior enemy defenses overwhelmed your forces'
+      }, () => {
+        // On close callback
+        if (victory) {
+          // Transfer planet ownership
+          planet.owner = FactionType.Player;
+          // Planet display will update automatically on next render
+        }
+        this.resourceHUD.updateDisplay();
+      });
     };
 
     // Wire up building completion notifications (Story 4-3: AC3)
@@ -967,6 +1038,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.spacecraftNavigationPanel) {
       this.spacecraftNavigationPanel.destroy();
+    }
+    if (this.invasionPanel) {
+      this.invasionPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();

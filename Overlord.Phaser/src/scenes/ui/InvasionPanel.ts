@@ -183,46 +183,67 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
   }
 
   private createAggressionButtons(y: number): void {
-    const levels = [
-      { value: 25, label: 'Cautious' },
+    // Slider track
+    const sliderWidth = PANEL_WIDTH - PADDING * 2 - 100;
+    const sliderX = PADDING + 50;
+    const track = this.scene.add.graphics();
+    track.fillStyle(0x2a3a4a, 1);
+    track.fillRoundedRect(sliderX, y, sliderWidth, 8, 4);
+    track.lineStyle(1, 0x4a5a6a, 1);
+    track.strokeRoundedRect(sliderX, y, sliderWidth, 8, 4);
+    this.contentContainer.add(track);
+
+    // Tick marks and labels at key positions
+    const ticks = [
+      { value: 0, label: 'Very\nConservative' },
+      { value: 25, label: 'Defensive' },
       { value: 50, label: 'Balanced' },
       { value: 75, label: 'Aggressive' },
-      { value: 100, label: 'All-Out' }
+      { value: 100, label: 'All-Out\nAssault' }
     ];
 
-    const buttonWidth = (PANEL_WIDTH - PADDING * 2 - 30) / 4;
+    ticks.forEach(tick => {
+      const tickX = sliderX + (tick.value / 100) * sliderWidth;
+      const tickMark = this.scene.add.graphics();
+      tickMark.fillStyle(0x6a7a8a, 1);
+      tickMark.fillRect(tickX - 1, y - 4, 2, 16);
+      this.contentContainer.add(tickMark);
 
-    levels.forEach((level, index) => {
-      const x = PADDING + index * (buttonWidth + 10);
-      const container = this.scene.add.container(x, y);
-
-      const bg = this.scene.add.graphics();
-      bg.fillStyle(0x3a4a5a, 1);
-      bg.fillRoundedRect(0, 0, buttonWidth, 30, 4);
-      container.add(bg);
-      container.setData('bg', bg);
-      container.setData('value', level.value);
-
-      const text = this.scene.add.text(buttonWidth / 2, 15, level.label, {
-        fontSize: '11px',
+      const label = this.scene.add.text(tickX, y + 20, tick.label, {
+        fontSize: '9px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
+        align: 'center'
       });
-      text.setOrigin(0.5);
-      container.add(text);
-      container.setData('text', text);
-
-      const zone = this.scene.add.zone(buttonWidth / 2, 15, buttonWidth, 30);
-      zone.setInteractive({ useHandCursor: true });
-      zone.on('pointerdown', () => {
-        this.setAggression(level.value);
-        this.updateUI();
-      });
-      container.add(zone);
-
-      container.setData('width', buttonWidth);
-      this.contentContainer.add(container);
+      label.setOrigin(0.5, 0);
+      this.contentContainer.add(label);
     });
+
+    // Slider thumb (draggable)
+    const thumb = this.scene.add.graphics();
+    thumb.fillStyle(0xffaa00, 1);
+    thumb.fillCircle(0, 0, 10);
+    thumb.lineStyle(2, 0xffffff, 1);
+    thumb.strokeCircle(0, 0, 10);
+
+    const updateThumbPosition = () => {
+      const thumbX = sliderX + (this.aggression / 100) * sliderWidth;
+      thumb.setPosition(thumbX, y + 4);
+    };
+    updateThumbPosition();
+
+    thumb.setInteractive(new Phaser.Geom.Circle(0, 0, 12), Phaser.Geom.Circle.Contains);
+    this.scene.input.setDraggable(thumb);
+
+    thumb.on('drag', (pointer: Phaser.Input.Pointer) => {
+      const relativeX = pointer.x - this.x - PADDING - sliderX;
+      const newValue = Math.round((relativeX / sliderWidth) * 100);
+      this.setAggression(newValue);
+      updateThumbPosition();
+      this.updateUI();
+    });
+
+    this.contentContainer.add(thumb);
   }
 
   private createInvadeButton(): void {
