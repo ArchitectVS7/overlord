@@ -425,5 +425,41 @@ describe('PlatoonDetailsPanel', () => {
 
       expect(panel.getSelectedPlatoonTroopCount()).toBeNull();
     });
+
+    it('should calculate casualties when troops are lost (AC6)', () => {
+      const planet = createMockPlanet();
+      const platoon = createMockPlatoon(1, 'Alpha Squad', planet.id);
+      platoon.maxTroopCount = 100;
+      platoon.troopCount = 75; // 25 casualties
+
+      panel.show(planet, [platoon]);
+      panel.selectPlatoon(1);
+
+      expect(panel.getSelectedPlatoonCasualties()).toBe(25);
+    });
+
+    it('should return zero casualties when no troops lost (AC6)', () => {
+      const planet = createMockPlanet();
+      const platoon = createMockPlatoon(1, 'Alpha Squad', planet.id);
+      platoon.maxTroopCount = 100;
+      platoon.troopCount = 100;
+
+      panel.show(planet, [platoon]);
+      panel.selectPlatoon(1);
+
+      expect(panel.getSelectedPlatoonCasualties()).toBe(0);
+    });
+
+    it('should handle platoons without maxTroopCount (AC6)', () => {
+      const planet = createMockPlanet();
+      const platoon = createMockPlatoon(1, 'Alpha Squad', planet.id);
+      // maxTroopCount not set, should default to troopCount
+      platoon.troopCount = 80;
+
+      panel.show(planet, [platoon]);
+      panel.selectPlatoon(1);
+
+      expect(panel.getSelectedPlatoonCasualties()).toBe(0);
+    });
   });
 });

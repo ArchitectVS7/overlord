@@ -288,6 +288,19 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     return platoon.strength;
   }
 
+  /**
+   * Gets the casualty count for the selected platoon (AC6)
+   * Casualties = maxTroopCount - troopCount
+   * Note: maxTroopCount is tracked separately when casualties occur in combat
+   */
+  public getSelectedPlatoonCasualties(): number | null {
+    const platoon = this.getSelectedPlatoon();
+    if (!platoon) return null;
+    // Use type assertion for maxTroopCount which may be added by combat system
+    const maxTroops = (platoon as PlatoonEntity & { maxTroopCount?: number }).maxTroopCount || platoon.troopCount;
+    return maxTroops - platoon.troopCount;
+  }
+
   public handleDisband(): void {
     if (this.selectedPlatoonId === null) return;
 
@@ -353,18 +366,33 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       });
       this.platoonListContainer.add(nameText);
 
-      // Troop count
-      const troopText = this.scene.add.text(180, y + 6, `${platoon.troopCount} troops`, {
+      // Troop count with casualty info (AC6)
+      // Use type assertion for maxTroopCount which may be added by combat system
+      const maxTroops = (platoon as PlatoonEntity & { maxTroopCount?: number }).maxTroopCount || platoon.troopCount;
+      const casualties = maxTroops - platoon.troopCount;
+      const troopDisplay = casualties > 0
+        ? `${platoon.troopCount}/${maxTroops} (-${casualties})`
+        : `${platoon.troopCount} troops`;
+      const troopText = this.scene.add.text(140, y + 6, troopDisplay, {
         fontSize: '12px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: casualties > 0 ? WARNING_COLOR : LABEL_COLOR
       });
       this.platoonListContainer.add(troopText);
 
-      // Training indicator
+      // Equipment/Weapon summary (AC2)
+      const equipWeapon = `${platoon.equipment}/${platoon.weapon}`;
+      const equipText = this.scene.add.text(250, y + 6, equipWeapon, {
+        fontSize: '10px',
+        fontFamily: 'Arial',
+        color: LABEL_COLOR
+      });
+      this.platoonListContainer.add(equipText);
+
+      // Training indicator (show on second line if training)
       if (platoon.isTraining) {
-        const trainingText = this.scene.add.text(280, y + 6, `Training ${platoon.trainingLevel}%`, {
-          fontSize: '11px',
+        const trainingText = this.scene.add.text(10, y + 18, `⏳ Training ${platoon.trainingLevel}%`, {
+          fontSize: '10px',
           fontFamily: 'Arial',
           color: WARNING_COLOR
         });
@@ -409,11 +437,18 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     });
     this.detailsContainer.add(headerText);
 
-    // Platoon info
+    // Platoon info with casualty display (AC6)
     y += 28;
+    // Use type assertion for maxTroopCount which may be added by combat system
+    const maxTroops = (platoon as PlatoonEntity & { maxTroopCount?: number }).maxTroopCount || platoon.troopCount;
+    const casualties = maxTroops - platoon.troopCount;
+    const troopDisplay = casualties > 0
+      ? `Troops: ${platoon.troopCount}/${maxTroops} (${casualties} casualties)`
+      : `Troops: ${platoon.troopCount}`;
+
     const details = [
       `Name: ${platoon.name || `Platoon ${platoon.id}`}`,
-      `Troops: ${platoon.troopCount}`,
+      troopDisplay,
       `Equipment: ${platoon.equipment}`,
       `Weapon: ${platoon.weapon}`,
       `Training: ${platoon.trainingLevel}%`,
