@@ -9,6 +9,19 @@
 jest.mock('phaser', () => ({
   __esModule: true,
   default: {
+    Geom: {
+      Circle: class MockCircle {
+        x = 0;
+        y = 0;
+        radius = 0;
+        constructor(x: number, y: number, radius: number) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+        }
+        static Contains = jest.fn(() => true);
+      }
+    },
     GameObjects: {
       Container: class MockContainer {
         scene: unknown;
@@ -45,14 +58,32 @@ jest.mock('phaser', () => ({
         destroy(): void { this.list = []; this.dataStore.clear(); }
       },
       Graphics: class MockGraphics {
+        x = 0;
+        y = 0;
+        listeners: Map<string, ((...args: unknown[]) => void)[]> = new Map();
         fillStyle(): this { return this; }
         fillRoundedRect(): this { return this; }
         fillRect(): this { return this; }
+        fillCircle(): this { return this; }
+        strokeCircle(): this { return this; }
         lineStyle(): this { return this; }
         strokeRoundedRect(): this { return this; }
         lineBetween(): this { return this; }
         clear(): this { return this; }
-        destroy(): void {}
+        setPosition(x: number, y: number): this { this.x = x; this.y = y; return this; }
+        setInteractive(): this { return this; }
+        on(event: string, callback: (...args: unknown[]) => void): this {
+          if (!this.listeners.has(event)) {
+            this.listeners.set(event, []);
+          }
+          this.listeners.get(event)!.push(callback);
+          return this;
+        }
+        emit(event: string, ...args: unknown[]): void {
+          const handlers = this.listeners.get(event);
+          if (handlers) handlers.forEach(h => h(...args));
+        }
+        destroy(): void { this.listeners.clear(); }
       },
       Text: class MockText {
         x = 0;
@@ -187,6 +218,9 @@ function createMockScene(): Phaser.Scene {
         return { stop: jest.fn() };
       }),
       killTweensOf: jest.fn()
+    },
+    input: {
+      setDraggable: jest.fn()
     }
   } as unknown as Phaser.Scene;
 }

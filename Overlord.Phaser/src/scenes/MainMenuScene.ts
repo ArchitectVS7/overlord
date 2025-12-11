@@ -44,12 +44,14 @@ export class MainMenuScene extends Phaser.Scene {
     // Load Campaign button (disabled placeholder)
     this.createMenuButton(centerX, buttonY + buttonSpacing, 'LOAD CAMPAIGN', false);
 
-    // Flash Scenarios button (disabled placeholder)
-    this.createMenuButton(centerX, buttonY + buttonSpacing * 2, 'FLASH SCENARIOS', false);
+    // Flash Conflicts button (Story 1-1)
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 2, 'FLASH CONFLICTS', true, () => {
+      this.scene.start('FlashConflictsScene');
+    });
 
     // Coming soon notice
     this.add
-      .text(centerX, height * 0.85, 'Load Campaign and Flash Scenarios coming soon...', {
+      .text(centerX, height * 0.85, 'Load Campaign coming soon...', {
         fontSize: '14px',
         color: '#666666',
         fontFamily: 'monospace',

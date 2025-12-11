@@ -24,9 +24,11 @@ This is an archive and remake repository for the classic game "Overlord" (also k
 
 - **Overlord.Phaser/** - **PRIMARY ACTIVE CODEBASE** (Phaser 3 + TypeScript)
   - `src/core/` - Platform-agnostic game logic (all 18 systems)
-  - `src/scenes/` - Phaser-specific rendering (BootScene, GalaxyMapScene)
+  - `src/scenes/` - Phaser-specific rendering (BootScene, GalaxyMapScene, FlashConflictsScene)
+  - `src/scenes/ui/` - Reusable UI components (panels, HUDs, dialogs)
   - `src/config/` - Phaser configuration
-  - `tests/` - Jest test suite (304 tests, 93.78% coverage)
+  - `tests/` - Jest test suite (835 tests, 93%+ coverage)
+  - `design-docs/artifacts/sprint-artifacts/` - Story files and sprint status tracking
 
 - **Overlord.Core/** - Legacy C# .NET Standard 2.1 library (no longer primary)
   - Contains 18 game systems ported to TypeScript in Overlord.Phaser
@@ -99,6 +101,7 @@ npm run build
 
 **Testing:**
 - `npm test` - Run all Jest tests once
+- `npm test -- ComponentName` - Run specific test file (e.g., `npm test -- InvasionPanel`)
 - `npm run test:watch` - Run tests in watch mode (recommended during development)
 - `npm run test:coverage` - Generate coverage report (target: >70%)
 
@@ -231,8 +234,9 @@ Configured in both `tsconfig.json` and `webpack.config.js`.
 
 **Jest Configuration:**
 - Test files: `tests/unit/*.test.ts`, `tests/integration/*.test.ts`
-- Coverage threshold: 70% minimum (currently 93.78%)
+- Coverage threshold: 70% minimum (currently 93%+)
 - Watch mode recommended during development
+- **Mock Phaser components** when testing UI panels - use existing test patterns in `InvasionPanel.test.ts` as reference
 
 **Test Structure:**
 ```typescript
@@ -271,6 +275,15 @@ Run `npm run test:coverage` to generate HTML coverage report in `coverage/` dire
 3. Subscribe to Core system events in `create()`
 4. Update rendering in response to events
 5. Register scene in `src/config/PhaserConfig.ts`
+
+**Creating UI Components:**
+- All reusable UI components go in `src/scenes/ui/`
+- Extend `Phaser.GameObjects.Container` for composite components
+- Use consistent patterns: see `InvasionPanel.ts`, `BattleResultsPanel.ts`, `NotificationToast.ts`
+- Set `setDepth()` and `setScrollFactor(0)` for HUD elements
+- Use `scene.add.existing(this)` in constructor
+- Provide public getters/setters for component state
+- Include comprehensive JSDoc comments with story references
 
 **Debugging:**
 - Source maps enabled in development mode (`eval-source-map`)
@@ -311,9 +324,38 @@ Current design docs reflect the **Phaser + TypeScript implementation**:
 - `design-docs/v1.0/` directory contains original Unity-focused documentation
 - These are reference only; Phaser PRD is canonical
 
+## Git Pre-Commit Hooks
+
+**Automated Quality Checks:**
+The repository uses Git pre-commit hooks that automatically run on every commit:
+
+1. **Build C# Core** - Ensures legacy code compiles (reference check)
+2. **Run C# Tests** - Validates 328 C# tests pass
+3. **Code Formatting** - Checks code style compliance
+
+These hooks run automatically via `.git/hooks/pre-commit`. You'll see output like:
+```
+========================================
+Running pre-commit quality checks...
+========================================
+[1/3] Building Overlord.Core...
+✅ Build succeeded
+[2/3] Running tests...
+✅ Tests passed
+[3/3] Checking code formatting...
+✅ All critical pre-commit checks passed!
+```
+
+**Important:** Commits will be blocked if any check fails. Fix issues before committing.
+
 ## Development Workflow Tools
 
-The repository includes BMAD (Business Modeling and Development) workflow system in `.bmad/` for project management and design workflows. These are optional tools and can be ignored if not needed.
+The repository includes BMAD (Business Modeling and Development) workflow system in `.claude/` for project management and design workflows:
+- **Sprint orchestration** - Multi-agent autonomous development workflow
+- **Story tracking** - `sprint-status.yaml` tracks all epics and stories
+- **Agent directives** - See `.claude/CLAUDE.md` for autonomous operation rules
+
+These tools enable AI-assisted sprint execution. For manual development, you can ignore them.
 
 ## Migration Notes (Unity → Phaser)
 
@@ -325,9 +367,10 @@ The repository includes BMAD (Business Modeling and Development) workflow system
 
 **What Changed:**
 - ✅ All 18 Core systems ported from C# to TypeScript (functional parity)
-- ✅ 304 tests with 93.78% coverage (matching/exceeding C# test coverage)
+- ✅ 835 tests with 93%+ coverage (exceeding C# test coverage)
 - ✅ Web-first deployment (browser-based, no native builds required)
 - ✅ Deterministic seeded RNG for galaxy generation (matches C# behavior)
+- ✅ Comprehensive UI component library in `src/scenes/ui/`
 
 **What Stayed the Same:**
 - Core game architecture (platform-agnostic logic layer)
@@ -342,21 +385,29 @@ The repository includes BMAD (Business Modeling and Development) workflow system
 
 ## Current Development Status
 
-**Working (as of commit 56bdfcb):**
+**Completed (as of Dec 2025):**
 - ✅ All 18 core systems ported to TypeScript
-- ✅ 304 tests passing with 93.78% code coverage
+- ✅ 835 tests passing with 93%+ code coverage
 - ✅ Galaxy generation with deterministic seeded RNG
-- ✅ Basic Phaser rendering (planets, galaxy map)
+- ✅ Full galaxy map rendering with camera controls
+- ✅ **Epic 2:** Campaign setup & turn system
+- ✅ **Epic 3:** Galaxy exploration & planet selection
+- ✅ **Epic 4:** Planetary economy & infrastructure
+- ✅ **Epic 5:** Military forces & spacecraft movement
+- ✅ **Epic 6:** Combat system & planetary invasion UI
+- ✅ **Epic 7:** AI opponent with notifications & info display
+- ✅ **Epic 11:** Input system (mouse, keyboard, touch, accessibility)
 - ✅ Development server running at http://localhost:8080
 
-**In Progress:**
-- UI/UX implementation (galaxy map navigation, planet details)
-- Phaser scene integration with Core systems
-- Combat resolution UI
-- Save/load integration with Supabase (cloud backend)
+**Sprint Workflow:**
+- Active sprint tracking in `design-docs/artifacts/sprint-artifacts/sprint-status.yaml`
+- Story files define implementation requirements
+- Three-agent workflow: tech-writer → game-dev → code-reviewer
+- See `.claude/CLAUDE.md` for autonomous sprint execution directives
 
-**Planned:**
-- Flash Scenarios system (quick-play tactical challenges)
-- Scenario Pack system (data-driven AI configurations)
-- Mobile web optimization (touch controls, responsive UI)
-- Audio system (sound effects, background music)
+**Remaining Work:**
+- **Epic 1:** Tutorial system (requires scenario JSON content from human)
+- **Epic 8:** Tactical scenarios (requires scenario content)
+- **Epic 9:** Scenario pack system (requires pack JSON files)
+- **Epic 10:** User accounts & Supabase integration (requires cloud setup)
+- **Epic 12:** Audio system (requires sound/music files)
