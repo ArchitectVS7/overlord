@@ -14,7 +14,6 @@
 # Story Status:
 #   - backlog: Story only exists in epic file
 #   - drafted: Story file created in stories folder
-#   - ready-for-dev: Draft approved and story context created
 #   - in-progress: Developer actively working on implementation
 #   - review: Ready for code review
 #   - done: Story completed
