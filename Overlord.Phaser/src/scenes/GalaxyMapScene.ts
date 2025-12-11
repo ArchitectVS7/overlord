@@ -14,6 +14,16 @@ import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 import { TurnHUD } from './ui/TurnHUD';
 import { ResourceHUD } from './ui/ResourceHUD';
 import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
+import { PlatoonCommissionPanel } from './ui/PlatoonCommissionPanel';
+import { PlatoonDetailsPanel } from './ui/PlatoonDetailsPanel';
+import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
+import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
+import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
+import { PlatoonSystem } from '@core/PlatoonSystem';
+import { CraftSystem } from '@core/CraftSystem';
+import { EntitySystem } from '@core/EntitySystem';
+import { NavigationSystem } from '@core/NavigationSystem';
+import { CombatSystem } from '@core/CombatSystem';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -29,6 +39,16 @@ export class GalaxyMapScene extends Phaser.Scene {
   private turnHUD!: TurnHUD;
   private resourceHUD!: ResourceHUD;
   private buildingMenuPanel!: BuildingMenuPanel;
+  private platoonCommissionPanel!: PlatoonCommissionPanel;
+  private platoonDetailsPanel!: PlatoonDetailsPanel;
+  private spacecraftPurchasePanel!: SpacecraftPurchasePanel;
+  private platoonLoadingPanel!: PlatoonLoadingPanel;
+  private spacecraftNavigationPanel!: SpacecraftNavigationPanel;
+  private platoonSystem!: PlatoonSystem;
+  private craftSystem!: CraftSystem;
+  private entitySystem!: EntitySystem;
+  private navigationSystem!: NavigationSystem;
+  private combatSystem!: CombatSystem;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -155,6 +175,124 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up building completion to refresh ResourceHUD
     this.buildingMenuPanel.onBuildingSelected = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create PlatoonSystem and EntitySystem for military features (Story 5-1)
+    this.entitySystem = new EntitySystem(this.gameState);
+    this.platoonSystem = new PlatoonSystem(this.gameState, this.entitySystem);
+
+    // Create Platoon Commission Panel - Story 5-1
+    this.platoonCommissionPanel = new PlatoonCommissionPanel(this, this.platoonSystem);
+
+    // Wire up PlanetInfoPanel Commission button to PlatoonCommissionPanel
+    this.planetInfoPanel.onCommissionClick = (planet) => {
+      this.planetInfoPanel.hide();
+      const platoonCount = this.entitySystem.getPlatoonsAtPlanet(planet.id).length;
+      this.platoonCommissionPanel.show(planet, () => {
+        // Refresh UI after panel closes
+        this.resourceHUD.updateDisplay();
+      }, platoonCount);
+    };
+
+    // Create Platoon Details Panel - Story 5-2
+    this.platoonDetailsPanel = new PlatoonDetailsPanel(this, this.platoonSystem);
+
+    // Wire up PlanetInfoPanel Platoons button to PlatoonDetailsPanel
+    this.planetInfoPanel.onPlatoonsClick = (planet) => {
+      this.planetInfoPanel.hide();
+      const platoons = this.entitySystem.getPlatoonsAtPlanet(planet.id);
+      this.platoonDetailsPanel.show(planet, platoons, () => {
+        // Refresh UI after panel closes
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up disband callback to refresh UI
+    this.platoonDetailsPanel.onDisband = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create CraftSystem and SpacecraftPurchasePanel - Story 5-3
+    this.craftSystem = new CraftSystem(this.gameState, this.entitySystem);
+    this.spacecraftPurchasePanel = new SpacecraftPurchasePanel(this, this.craftSystem);
+
+    // Wire up PlanetInfoPanel Spacecraft button to SpacecraftPurchasePanel
+    this.planetInfoPanel.onSpacecraftClick = (planet) => {
+      this.planetInfoPanel.hide();
+      const fleetCount = this.entitySystem.getCraftAtPlanet(planet.id).length;
+      this.spacecraftPurchasePanel.show(planet, () => {
+        // Refresh UI after panel closes
+        this.resourceHUD.updateDisplay();
+      }, fleetCount);
+    };
+
+    // Wire up purchase callback to refresh UI
+    this.spacecraftPurchasePanel.onPurchase = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create PlatoonLoadingPanel - Story 5-4
+    this.platoonLoadingPanel = new PlatoonLoadingPanel(this, this.craftSystem);
+
+    // Wire up PlatoonDetailsPanel Load onto Cruiser button to PlatoonLoadingPanel
+    this.platoonDetailsPanel.onLoadRequest = (platoonID) => {
+      // Get the planet where this platoon is located
+      const platoon = this.gameState.platoonLookup.get(platoonID);
+      if (!platoon || platoon.planetID < 0) return;
+
+      const planet = this.gameState.planetLookup.get(platoon.planetID);
+      if (!planet) return;
+
+      // Find Battle Cruisers at this planet
+      const cruisers = this.entitySystem.getCraftAtPlanet(planet.id).filter(c => c.type === 'BattleCruiser');
+      if (cruisers.length === 0) {
+        // No cruisers available - could show notification
+        return;
+      }
+
+      // Use the first available cruiser for simplicity
+      const cruiser = cruisers[0];
+      const platoons = this.entitySystem.getPlatoonsAtPlanet(planet.id);
+
+      this.platoonDetailsPanel.hide();
+      this.platoonLoadingPanel.show(cruiser, planet, platoons, () => {
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up load/unload callbacks to refresh UI
+    this.platoonLoadingPanel.onLoad = () => {
+      this.resourceHUD.updateDisplay();
+    };
+    this.platoonLoadingPanel.onUnload = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create CombatSystem and NavigationSystem for Story 5-5
+    this.combatSystem = new CombatSystem(this.gameState, this.platoonSystem);
+    const resourceSystem = this.phaseProcessor.getResourceSystem();
+    this.navigationSystem = new NavigationSystem(this.gameState, resourceSystem, this.combatSystem);
+    this.spacecraftNavigationPanel = new SpacecraftNavigationPanel(this, this.navigationSystem);
+
+    // Wire up PlanetInfoPanel Navigate button to SpacecraftNavigationPanel
+    this.planetInfoPanel.onNavigateClick = (planet) => {
+      // Get spacecraft at this planet
+      const craft = this.entitySystem.getCraftAtPlanet(planet.id);
+      if (craft.length === 0) return;
+
+      // For prototype, navigate first available craft
+      const firstCraft = craft[0];
+      if (firstCraft.inTransit) return;
+
+      this.planetInfoPanel.hide();
+      this.spacecraftNavigationPanel.show(firstCraft, this.galaxy.planets, () => {
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up navigation callback to refresh UI
+    this.spacecraftNavigationPanel.onNavigate = () => {
       this.resourceHUD.updateDisplay();
     };
 
@@ -814,6 +952,21 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.buildingMenuPanel) {
       this.buildingMenuPanel.destroy();
+    }
+    if (this.platoonCommissionPanel) {
+      this.platoonCommissionPanel.destroy();
+    }
+    if (this.platoonDetailsPanel) {
+      this.platoonDetailsPanel.destroy();
+    }
+    if (this.spacecraftPurchasePanel) {
+      this.spacecraftPurchasePanel.destroy();
+    }
+    if (this.platoonLoadingPanel) {
+      this.platoonLoadingPanel.destroy();
+    }
+    if (this.spacecraftNavigationPanel) {
+      this.spacecraftNavigationPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
