@@ -29,7 +29,6 @@ const TEXT_COLOR = '#ffffff';
 const LABEL_COLOR = '#aaaaaa';
 const SUCCESS_COLOR = '#44aa44';
 const WARNING_COLOR = '#ff9900';
-const DISABLED_COLOR = '#666666';
 
 export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;
@@ -292,12 +291,15 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
   public handleDisband(): void {
     if (this.selectedPlatoonId === null) return;
 
+    // Save the ID before potentially clearing it
+    const platoonIdToDisband = this.selectedPlatoonId;
+
     // If PlatoonSystem is provided, call it directly
     if (this.platoonSystem) {
-      const result = this.platoonSystem.decommissionPlatoon(this.selectedPlatoonId);
+      const result = this.platoonSystem.decommissionPlatoon(platoonIdToDisband);
       if (result) {
         // Remove from local list
-        this.platoons = this.platoons.filter(p => p.id !== this.selectedPlatoonId);
+        this.platoons = this.platoons.filter(p => p.id !== platoonIdToDisband);
         this.selectedPlatoonId = null;
         this.updateUI();
       }
@@ -305,7 +307,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
 
     // Fire callback for external handling
     if (this.onDisband) {
-      this.onDisband(this.selectedPlatoonId);
+      this.onDisband(platoonIdToDisband);
     }
   }
 

@@ -17,7 +17,7 @@ import { OWNER_COLORS } from '../../config/VisualConfig';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 280;
-const PANEL_HEIGHT = 460; // Increased for construction section
+const PANEL_HEIGHT = 500; // Increased for construction section + platoons button
 const PADDING = 15;
 const HEADER_HEIGHT = 60;
 const BUTTON_HEIGHT = 36;
@@ -54,9 +54,10 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private constructionTurnsText!: Phaser.GameObjects.Text;
   private buildingSystem?: BuildingSystem;
 
-  // Action callbacks (Story 4-2, Story 5-1)
+  // Action callbacks (Story 4-2, Story 5-1, Story 5-2)
   public onBuildClick?: (planet: PlanetEntity) => void;
   public onCommissionClick?: (planet: PlanetEntity) => void;
+  public onPlatoonsClick?: (planet: PlanetEntity) => void;
 
   constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem) {
     super(scene, 0, 0);
@@ -309,8 +310,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     const buttonY = startY + 25;
     this.createButton('Build', 0, buttonY, true, 'Open building construction menu');
     this.createButton('Commission', 125, buttonY, true, 'Commission platoon (Story 5-1)');
-    this.createButton('Scout', 0, buttonY + 42, true, 'Coming in Epic 5');
-    this.createButton('Invade', 125, buttonY + 42, true, 'Coming in Epic 6');
+    this.createButton('Platoons', 0, buttonY + 42, true, 'View garrisoned platoons (Story 5-2)');
+    this.createButton('Scout', 0, buttonY + 84, true, 'Coming in Epic 5');
+    this.createButton('Invade', 125, buttonY + 84, true, 'Coming in Epic 6');
   }
 
   private createButton(
@@ -536,13 +538,13 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   private updateButtonStates(isPlayerOwned: boolean): void {
-    // Buttons 0-1 are for player (Build, Commission)
-    // Buttons 2-3 are for AI/Neutral (Scout, Invade)
+    // Buttons 0-2 are for player (Build, Commission, Platoons)
+    // Buttons 3-4 are for AI/Neutral (Scout, Invade)
     this.actionButtons.forEach((button, i) => {
       const label = button.getData('label');
 
       if (isPlayerOwned) {
-        button.setVisible(i < 2); // Show Build, Commission
+        button.setVisible(i < 3); // Show Build, Commission, Platoons
 
         // Enable Build button for player-owned planets (Story 4-2)
         if (label === 'Build') {
@@ -561,8 +563,17 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
             }
           });
         }
+
+        // Enable Platoons button for player-owned planets (Story 5-2)
+        if (label === 'Platoons') {
+          this.enableButton(button, () => {
+            if (this.planet && this.onPlatoonsClick) {
+              this.onPlatoonsClick(this.planet);
+            }
+          });
+        }
       } else {
-        button.setVisible(i >= 2); // Show Scout, Invade
+        button.setVisible(i >= 3); // Show Scout, Invade
       }
     });
   }

@@ -15,6 +15,7 @@ import { TurnHUD } from './ui/TurnHUD';
 import { ResourceHUD } from './ui/ResourceHUD';
 import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
 import { PlatoonCommissionPanel } from './ui/PlatoonCommissionPanel';
+import { PlatoonDetailsPanel } from './ui/PlatoonDetailsPanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { EntitySystem } from '@core/EntitySystem';
 
@@ -33,6 +34,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private resourceHUD!: ResourceHUD;
   private buildingMenuPanel!: BuildingMenuPanel;
   private platoonCommissionPanel!: PlatoonCommissionPanel;
+  private platoonDetailsPanel!: PlatoonDetailsPanel;
   private platoonSystem!: PlatoonSystem;
   private entitySystem!: EntitySystem;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
@@ -179,6 +181,24 @@ export class GalaxyMapScene extends Phaser.Scene {
         // Refresh UI after panel closes
         this.resourceHUD.updateDisplay();
       }, platoonCount);
+    };
+
+    // Create Platoon Details Panel - Story 5-2
+    this.platoonDetailsPanel = new PlatoonDetailsPanel(this, this.platoonSystem);
+
+    // Wire up PlanetInfoPanel Platoons button to PlatoonDetailsPanel
+    this.planetInfoPanel.onPlatoonsClick = (planet) => {
+      this.planetInfoPanel.hide();
+      const platoons = this.entitySystem.getPlatoonsAtPlanet(planet.id);
+      this.platoonDetailsPanel.show(planet, platoons, () => {
+        // Refresh UI after panel closes
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up disband callback to refresh UI
+    this.platoonDetailsPanel.onDisband = () => {
+      this.resourceHUD.updateDisplay();
     };
 
     // Wire up building completion notifications (Story 4-3: AC3)
@@ -837,6 +857,12 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.buildingMenuPanel) {
       this.buildingMenuPanel.destroy();
+    }
+    if (this.platoonCommissionPanel) {
+      this.platoonCommissionPanel.destroy();
+    }
+    if (this.platoonDetailsPanel) {
+      this.platoonDetailsPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
