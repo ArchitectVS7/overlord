@@ -54,12 +54,13 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private constructionTurnsText!: Phaser.GameObjects.Text;
   private buildingSystem?: BuildingSystem;
 
-  // Action callbacks (Story 4-2, Story 5-1, Story 5-2, Story 5-3, Story 5-5)
+  // Action callbacks (Story 4-2, Story 5-1, Story 5-2, Story 5-3, Story 5-5, Story 6-1)
   public onBuildClick?: (planet: PlanetEntity) => void;
   public onCommissionClick?: (planet: PlanetEntity) => void;
   public onPlatoonsClick?: (planet: PlanetEntity) => void;
   public onSpacecraftClick?: (planet: PlanetEntity) => void;
   public onNavigateClick?: (planet: PlanetEntity) => void;
+  public onInvadeClick?: (planet: PlanetEntity) => void;
 
   constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem) {
     super(scene, 0, 0);
@@ -594,7 +595,16 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
           });
         }
       } else {
-        button.setVisible(i >= 5); // Show Invade only
+        // Show and enable Invade button for AI-owned planets (Story 6-1)
+        button.setVisible(i >= 5);
+
+        if (label === 'Invade') {
+          this.enableButton(button, () => {
+            if (this.planet && this.onInvadeClick) {
+              this.onInvadeClick(this.planet);
+            }
+          });
+        }
       }
     });
   }

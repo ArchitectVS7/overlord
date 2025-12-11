@@ -19,6 +19,7 @@ import { PlatoonDetailsPanel } from './ui/PlatoonDetailsPanel';
 import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
 import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
 import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
+import { InvasionPanel } from './ui/InvasionPanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
@@ -44,6 +45,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private spacecraftPurchasePanel!: SpacecraftPurchasePanel;
   private platoonLoadingPanel!: PlatoonLoadingPanel;
   private spacecraftNavigationPanel!: SpacecraftNavigationPanel;
+  private invasionPanel!: InvasionPanel;
   private platoonSystem!: PlatoonSystem;
   private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
@@ -293,6 +295,34 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up navigation callback to refresh UI
     this.spacecraftNavigationPanel.onNavigate = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create InvasionPanel - Story 6-1
+    this.invasionPanel = new InvasionPanel(this);
+
+    // Wire up PlanetInfoPanel Invade button to InvasionPanel
+    this.planetInfoPanel.onInvadeClick = (planet) => {
+      // Only allow invading AI-owned planets
+      if (planet.owner !== FactionType.AI) return;
+
+      // Get player cruisers with loaded platoons at this planet (nearby for invasion)
+      const playerCraft = Array.from(this.gameState.craftLookup.values())
+        .filter(c => c.owner === FactionType.Player && c.carriedPlatoonIDs.length > 0);
+
+      // Get all player platoons for lookup
+      const allPlatoons = Array.from(this.gameState.platoonLookup.values());
+
+      this.planetInfoPanel.hide();
+      this.invasionPanel.show(planet, playerCraft, allPlatoons, () => {
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up invasion callback to trigger combat
+    this.invasionPanel.onInvade = (planet, aggression) => {
+      console.log(`Invasion launched against ${planet.name} with ${aggression}% aggression`);
+      // TODO: Call InvasionSystem in Story 6-3
       this.resourceHUD.updateDisplay();
     };
 
@@ -967,6 +997,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.spacecraftNavigationPanel) {
       this.spacecraftNavigationPanel.destroy();
+    }
+    if (this.invasionPanel) {
+      this.invasionPanel.destroy();
     }
     this.planetContainers.clear();
     this.planetZones.clear();
