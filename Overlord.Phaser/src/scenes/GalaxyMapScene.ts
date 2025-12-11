@@ -17,6 +17,7 @@ import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
 import { PlatoonCommissionPanel } from './ui/PlatoonCommissionPanel';
 import { PlatoonDetailsPanel } from './ui/PlatoonDetailsPanel';
 import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
+import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
@@ -38,6 +39,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private platoonCommissionPanel!: PlatoonCommissionPanel;
   private platoonDetailsPanel!: PlatoonDetailsPanel;
   private spacecraftPurchasePanel!: SpacecraftPurchasePanel;
+  private platoonLoadingPanel!: PlatoonLoadingPanel;
   private platoonSystem!: PlatoonSystem;
   private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
@@ -221,6 +223,43 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up purchase callback to refresh UI
     this.spacecraftPurchasePanel.onPurchase = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create PlatoonLoadingPanel - Story 5-4
+    this.platoonLoadingPanel = new PlatoonLoadingPanel(this, this.craftSystem);
+
+    // Wire up PlatoonDetailsPanel Load onto Cruiser button to PlatoonLoadingPanel
+    this.platoonDetailsPanel.onLoadRequest = (platoonID) => {
+      // Get the planet where this platoon is located
+      const platoon = this.gameState.platoonLookup.get(platoonID);
+      if (!platoon || platoon.planetID < 0) return;
+
+      const planet = this.gameState.planetLookup.get(platoon.planetID);
+      if (!planet) return;
+
+      // Find Battle Cruisers at this planet
+      const cruisers = this.entitySystem.getCraftAtPlanet(planet.id).filter(c => c.type === 'BattleCruiser');
+      if (cruisers.length === 0) {
+        // No cruisers available - could show notification
+        return;
+      }
+
+      // Use the first available cruiser for simplicity
+      const cruiser = cruisers[0];
+      const platoons = this.entitySystem.getPlatoonsAtPlanet(planet.id);
+
+      this.platoonDetailsPanel.hide();
+      this.platoonLoadingPanel.show(cruiser, planet, platoons, () => {
+        this.resourceHUD.updateDisplay();
+      });
+    };
+
+    // Wire up load/unload callbacks to refresh UI
+    this.platoonLoadingPanel.onLoad = () => {
+      this.resourceHUD.updateDisplay();
+    };
+    this.platoonLoadingPanel.onUnload = () => {
       this.resourceHUD.updateDisplay();
     };
 
