@@ -142,7 +142,7 @@ development_status:
   # Priority: MEDIUM - Combat preparation
   # =============================================================================
   epic-5: in-progress
-  5-1-platoon-commissioning-with-equipment-configuration: review  # PlatoonCommissionPanel + 28 tests - needs code review
+  5-1-platoon-commissioning-with-equipment-configuration: in-progress  # Code review found 9 issues - fixing
   5-2-platoon-details-and-management: drafted             # [CORE-PARTIAL] Data exists, needs panel
   5-3-spacecraft-purchase-and-types: drafted              # [CORE-DONE] CraftSystem complete, needs UI panel
   5-4-loading-platoons-onto-battle-cruisers: drafted      # [CORE-DONE] Embark/disembark works, needs UI panel
