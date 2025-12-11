@@ -102,6 +102,67 @@ LOOP START:
   │        If issues → return to step B (re-spawn developer with issues list)
   │        If approved → update status: {{current_story_key}}: review → done
   │
+  ├─► 4.5. HUMAN INTERVENTION DETECTION
+  │     Before proceeding to next story, check if it requires human input:
+  │
+  │     Read story file: sprint-artifacts/story-{{story_id}}.md
+  │     Search for: "Human Intervention: YES" OR "HUMAN INPUT"
+  │
+  │     If human intervention required:
+  │       - Identify remaining autonomous stories in current epic
+  │       - Count stories where human_intervention != YES
+  │
+  │       If no autonomous stories remain in this epic:
+  │         - GENERATE_HUMAN_TASK_REPORT()
+  │         - Commit all progress on epic branch
+  │         - Log: "Epic {{current_epic}} paused - awaiting human content"
+  │         - EXIT_WITH_STATUS("AWAITING_HUMAN_INPUT")
+  │
+  │       Else (autonomous stories remain):
+  │         - ADD_TO_BLOCKED_QUEUE(current_story)
+  │         - Log: "Story {{story_id}} blocked - moving to next autonomous story"
+  │         - CONTINUE_WITH_NEXT_AUTONOMOUS()
+  │
+  │     Human Task Report Template:
+  │
+  │     File: design-docs/artifacts/sprint-artifacts/human-tasks-epic-{{epic}}.md
+  │
+  │     Content:
+  │     ```markdown
+  │     # Human Input Required - Sprint Paused
+  │
+  │     **Date:** {{timestamp}}
+  │     **Epic:** {{current_epic}} - {{epic_name}}
+  │     **Autonomous Progress:** {{completed}}/{{total}} stories in epic
+  │
+  │     ## Stories Awaiting Human Content
+  │
+  │     {{for each blocked_story:}}
+  │     ### Story {{id}}: {{name}}
+  │     - **Complexity:** {{complexity}}
+  │     - **Blocker Type:** {{blocker_type}}
+  │     - **Required Deliverables:**
+  │       {{list from story file}}
+  │     - **Time Estimate:** {{estimate}}
+  │     - **Dependencies:** {{dependencies}}
+  │     - **Files to Create:** {{file_paths}}
+  │
+  │     ## Autonomous Stories Completed This Session
+  │
+  │     {{list stories with metrics}}
+  │
+  │     ## Resume Instructions
+  │
+  │     After creating human content:
+  │     1. Commit content files to epic branch: epic/{{epic}}-{{name}}
+  │     2. Update story status in sprint-status.yaml if needed
+  │     3. Run: `/sprint` (will auto-resume from next story)
+  │
+  │     ## Current Branch: {{git_branch}}
+  │     ## Tests Passing: {{test_count}}
+  │     ## Build Status: {{build_status}}
+  │     ```
+  │
   ├─► 5. POST-STORY VALIDATION
   │     Run: npm test
   │     Verify: All tests pass (no regressions)

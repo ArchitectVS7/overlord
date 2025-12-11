@@ -25,6 +25,40 @@ Your job:
 
 ## Review Methodology
 
+### Pre-Review Validation: Human Content Check
+
+Before starting code review, verify human-dependent content exists:
+
+```python
+# Check story for human intervention requirements
+if "Human Intervention: YES" in story_file:
+    required_files = EXTRACT_REQUIRED_FILES_FROM_STORY()
+
+    for file_path in required_files:
+        if not file_exists(file_path):
+            REJECT_IMMEDIATELY(
+                reason="MISSING_HUMAN_CONTENT",
+                details=f"Required file not found: {file_path}",
+                action="Story cannot be reviewed until human content is committed"
+            )
+            UPDATE_STATUS("in-progress")  # Back to dev
+            EXIT_REVIEW()
+```
+
+**Common Human Content Types:**
+- JSON files: `src/data/scenarios/*.json`
+- Audio files: `public/assets/audio/*.mp3`
+- Config files: `src/config/supabase.ts`
+- Content files: Tutorial step text, scenario descriptions
+
+**Validation Process:**
+1. Read story file completely
+2. Look for "Human Intervention: YES" or "HUMAN INPUT" markers
+3. Extract list of required files from story documentation
+4. Verify each file exists in the repository
+5. If ANY file missing → immediate rejection with clear blocker message
+6. If all files present → proceed to Phase 1
+
 ### Phase 1: Acceptance Criteria Verification (MANDATORY)
 For each acceptance criterion in the story file:
 - [ ] Read the criterion

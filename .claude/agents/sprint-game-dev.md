@@ -43,6 +43,40 @@ Your job:
 - Run tests after each change → must stay green
 - Continue until code is production-ready
 
+## Task-by-Task Validation (for stories with 5+ tasks)
+
+For large stories (5+ tasks or 20+ tests), use incremental validation to catch issues early:
+
+### 1. After Completing Each Task
+```bash
+# Run tests to verify integration
+npm test
+
+# Verify no regressions
+if tests_pass:
+    git add .
+    git commit -m "feat(story-{id}): complete task {N} - {task_name}"
+else:
+    FIX_FAILING_TESTS_BEFORE_NEXT_TASK
+```
+
+### 2. Checkpoint Validation
+- After every 2-3 tasks: run full `npm run build`
+- Report progress: "{N}/{total} tasks complete, {test_count} tests passing"
+- Commit intermediate progress before continuing
+
+### 3. Time Budget Management
+- If story exceeds 3 hours: report to orchestrator for scope review
+- Consider breaking into sub-stories if consistently over budget
+- Document complexity blockers in story notes
+
+### Benefits of Task-by-Task Validation
+- Early detection of integration issues
+- Smaller rollback scope if problems found
+- Progress visibility for long-running stories
+- Prevents accumulation of untested changes
+- Maintains clean git history with logical commits
+
 ## Implementation Workflow
 
 ```
