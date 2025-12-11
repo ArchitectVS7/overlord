@@ -20,6 +20,7 @@ import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
 import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
 import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
 import { InvasionPanel } from './ui/InvasionPanel';
+import { BattleResultsPanel } from './ui/BattleResultsPanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
@@ -46,6 +47,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private platoonLoadingPanel!: PlatoonLoadingPanel;
   private spacecraftNavigationPanel!: SpacecraftNavigationPanel;
   private invasionPanel!: InvasionPanel;
+  private battleResultsPanel!: BattleResultsPanel;
   private platoonSystem!: PlatoonSystem;
   private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
@@ -301,6 +303,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Create InvasionPanel - Story 6-1
     this.invasionPanel = new InvasionPanel(this);
 
+    // Create BattleResultsPanel - Story 6-3
+    this.battleResultsPanel = new BattleResultsPanel(this);
+
     // Wire up PlanetInfoPanel Invade button to InvasionPanel
     this.planetInfoPanel.onInvadeClick = (planet) => {
       // Only allow invading AI-owned planets
@@ -319,11 +324,47 @@ export class GalaxyMapScene extends Phaser.Scene {
       });
     };
 
-    // Wire up invasion callback to trigger combat
+    // Wire up invasion callback to trigger combat - Story 6-3
     this.invasionPanel.onInvade = (planet, aggression) => {
-      console.log(`Invasion launched against ${planet.name} with ${aggression}% aggression`);
-      // TODO: Call InvasionSystem in Story 6-3
-      this.resourceHUD.updateDisplay();
+      // Simulate battle outcome (full combat integration in future story)
+      const attackerStrength = this.invasionPanel.getTotalStrength();
+      const defenderStrength = planet.population * 10; // Rough defender strength
+
+      // Higher aggression = more risk but higher damage
+      const aggressionBonus = (aggression - 50) / 100; // -0.5 to +0.5
+      const attackerEffective = attackerStrength * (1 + aggressionBonus);
+
+      const victory = attackerEffective > defenderStrength;
+
+      // Calculate casualties based on aggression and outcome
+      const baseCasualties = this.invasionPanel.getTotalTroopCount();
+      const attackerLossRate = victory ? (aggression / 200) : (aggression / 100); // 0-50% or 0-100%
+      const defenderLossRate = victory ? 0.8 : 0.3;
+
+      const attackerCasualties = Math.floor(baseCasualties * attackerLossRate);
+      const defenderCasualties = Math.floor(planet.population * defenderLossRate);
+
+      // Show battle results
+      this.battleResultsPanel.show({
+        victory,
+        planetName: planet.name,
+        attackerCasualties,
+        defenderCasualties,
+        resourcesCaptured: victory ? {
+          credits: Math.floor(planet.population * 10),
+          minerals: Math.floor(planet.population * 5),
+          fuel: Math.floor(planet.population * 2)
+        } : undefined,
+        defeatReason: victory ? undefined : 'Superior enemy defenses overwhelmed your forces'
+      }, () => {
+        // On close callback
+        if (victory) {
+          // Transfer planet ownership
+          planet.owner = FactionType.Player;
+          // Planet display will update automatically on next render
+        }
+        this.resourceHUD.updateDisplay();
+      });
     };
 
     // Wire up building completion notifications (Story 4-3: AC3)

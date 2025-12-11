@@ -156,7 +156,7 @@ development_status:
   # =============================================================================
   epic-6: in-progress
   6-1-initiate-planetary-invasion: done                   # InvasionPanel + 24 tests, integrated with GalaxyMapScene
-  6-2-combat-aggression-configuration: drafted            # [CORE-DONE] Aggression works, needs slider UI
+  6-2-combat-aggression-configuration: done               # Draggable slider (0-100%) with tick marks and labels
   6-3-combat-resolution-and-battle-results: drafted       # [CORE-DONE] CombatSystem complete, needs results UI
   epic-6-retrospective: optional
 
