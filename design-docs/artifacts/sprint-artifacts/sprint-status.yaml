@@ -156,8 +156,8 @@ development_status:
   # =============================================================================
   epic-6: in-progress
   6-1-initiate-planetary-invasion: done                   # InvasionPanel + 24 tests, integrated with GalaxyMapScene
-  6-2-combat-aggression-configuration: backlog            # [CORE-DONE] Aggression works, needs slider UI
-  6-3-combat-resolution-and-battle-results: backlog       # [CORE-DONE] CombatSystem complete, needs results UI
+  6-2-combat-aggression-configuration: drafted            # [CORE-DONE] Aggression works, needs slider UI
+  6-3-combat-resolution-and-battle-results: drafted       # [CORE-DONE] CombatSystem complete, needs results UI
   epic-6-retrospective: optional
 
   # =============================================================================
@@ -165,8 +165,8 @@ development_status:
   # Priority: MEDIUM - Already implemented, just needs visibility
   # =============================================================================
   epic-7: backlog
-  7-1-ai-strategic-decision-making: backlog               # [CORE-DONE] AIDecisionSystem complete, needs notifications
-  7-2-ai-personality-and-difficulty-adaptation: backlog   # [CORE-DONE] 4 personalities + 3 difficulties work
+  7-1-ai-strategic-decision-making: drafted               # [CORE-DONE] AIDecisionSystem complete, needs notifications
+  7-2-ai-personality-and-difficulty-adaptation: drafted   # [CORE-DONE] 4 personalities + 3 difficulties work
   epic-7-retrospective: optional
 
   # =============================================================================
@@ -174,12 +174,12 @@ development_status:
   # Priority: HIGH (Phase B) - Critical for new players
   # =============================================================================
   epic-1: backlog
-  1-1-flash-conflicts-menu-access: backlog                # [GREENFIELD] New FlashConflict system
-  1-2-scenario-selection-interface: backlog               # [GREENFIELD] Depends on 1-1
-  1-3-scenario-initialization-and-victory-conditions: backlog  # [CORE-PARTIAL] Victory logic exists
-  1-4-tutorial-step-guidance-system: backlog              # [GREENFIELD] Tutorial engine
-  1-5-scenario-completion-and-results-display: backlog    # [CORE-PARTIAL] Events exist, needs UI
-  1-6-scenario-completion-history-tracking: backlog       # [CORE-PARTIAL] Save logic exists
+  1-1-flash-conflicts-menu-access: drafted                # [GREENFIELD] New FlashConflict system
+  1-2-scenario-selection-interface: drafted               # [GREENFIELD] Depends on 1-1
+  1-3-scenario-initialization-and-victory-conditions: drafted  # [CORE-PARTIAL] Victory logic exists
+  1-4-tutorial-step-guidance-system: drafted              # [GREENFIELD] Tutorial engine - COMPLEX
+  1-5-scenario-completion-and-results-display: drafted    # [CORE-PARTIAL] Events exist, needs UI
+  1-6-scenario-completion-history-tracking: drafted       # [CORE-PARTIAL] Save logic exists
   epic-1-retrospective: optional
 
   # =============================================================================
@@ -187,7 +187,7 @@ development_status:
   # Priority: MEDIUM (Phase B) - Content variety
   # =============================================================================
   epic-8: backlog
-  8-1-tactical-scenario-content-and-variety: backlog      # [GREENFIELD] Scenario definitions
+  8-1-tactical-scenario-content-and-variety: drafted      # [GREENFIELD] Scenario definitions - HUMAN INPUT
   epic-8-retrospective: optional
 
   # =============================================================================
@@ -195,9 +195,9 @@ development_status:
   # Priority: LOW (Phase B) - Content extensibility
   # =============================================================================
   epic-9: backlog
-  9-1-scenario-pack-browsing-and-selection: backlog       # [GREENFIELD] Pack system + UI
-  9-2-scenario-pack-switching-and-configuration-loading: backlog  # [CORE-PARTIAL] Config support exists
-  9-3-scenario-pack-metadata-display: backlog             # [CORE-PARTIAL] Enums exist, needs wrapper
+  9-1-scenario-pack-browsing-and-selection: drafted       # [GREENFIELD] Pack system + UI
+  9-2-scenario-pack-switching-and-configuration-loading: drafted  # [CORE-PARTIAL] Config support exists
+  9-3-scenario-pack-metadata-display: drafted             # [CORE-PARTIAL] Enums exist, needs wrapper
   epic-9-retrospective: optional
 
   # =============================================================================
@@ -205,13 +205,13 @@ development_status:
   # Priority: LOW (Phase C) - Polish feature
   # =============================================================================
   epic-10: backlog
-  10-1-user-account-creation: backlog                     # [GREENFIELD] Auth + Supabase
-  10-2-user-login: backlog                                # [GREENFIELD] Auth + Supabase
-  10-3-save-campaign-progress: backlog                    # [CORE-DONE] SaveSystem works, needs UI + cloud
-  10-4-load-previously-saved-campaigns: backlog           # [CORE-DONE] LoadSystem works, needs UI + cloud
-  10-5-cross-device-save-synchronization: backlog         # [GREENFIELD] Supabase integration
-  10-6-user-settings-persistence: backlog                 # [GREENFIELD] Settings system
-  10-7-user-statistics-tracking: backlog                  # [GREENFIELD] Stats aggregation
+  10-1-user-account-creation: drafted                     # [GREENFIELD] Auth + Supabase - HUMAN INPUT
+  10-2-user-login: drafted                                # [GREENFIELD] Auth + Supabase
+  10-3-save-campaign-progress: drafted                    # [CORE-DONE] SaveSystem works, needs UI + cloud
+  10-4-load-previously-saved-campaigns: drafted           # [CORE-DONE] LoadSystem works, needs UI + cloud
+  10-5-cross-device-save-synchronization: drafted         # [GREENFIELD] Supabase integration
+  10-6-user-settings-persistence: drafted                 # [GREENFIELD] Settings system
+  10-7-user-statistics-tracking: drafted                  # [GREENFIELD] Stats aggregation
   epic-10-retrospective: optional
 
   # =============================================================================
@@ -219,9 +219,9 @@ development_status:
   # Priority: LOW (Phase C) - Polish feature
   # =============================================================================
   epic-12: backlog
-  12-1-sound-effects-for-game-actions: backlog            # [GREENFIELD] AudioSystem
-  12-2-background-music-during-gameplay: backlog          # [GREENFIELD] Music playback
-  12-3-independent-volume-controls: backlog               # [GREENFIELD] Mixer + UI
-  12-4-mute-audio-toggle: backlog                         # [GREENFIELD] Mute logic
-  12-5-user-activation-for-browser-audio-compliance: backlog  # [GREENFIELD] Browser policy
+  12-1-sound-effects-for-game-actions: drafted            # [GREENFIELD] AudioSystem - HUMAN INPUT
+  12-2-background-music-during-gameplay: drafted          # [GREENFIELD] Music playback - HUMAN INPUT
+  12-3-independent-volume-controls: drafted               # [GREENFIELD] Mixer + UI
+  12-4-mute-audio-toggle: drafted                         # [GREENFIELD] Mute logic
+  12-5-user-activation-for-browser-audio-compliance: drafted  # [GREENFIELD] Browser policy
   epic-12-retrospective: optional
