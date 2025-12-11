@@ -4,6 +4,39 @@
 # tracking_system: file-system
 # story_location: C:\dev\GIT\Overlord\design-docs\artifacts\sprint-artifacts
 
+# ORCHESTRATOR METADATA
+# ======================
+epic_order: [11, 5, 6, 7, 1, 8, 9, 10, 12]
+
+epic_metadata:
+  11:
+    name: "input"
+    description: "Input System Foundation"
+  5:
+    name: "military"
+    description: "Military Forces & Movement"
+  6:
+    name: "combat"
+    description: "Combat & Planetary Invasion"
+  7:
+    name: "ai"
+    description: "AI Opponent System"
+  1:
+    name: "tutorials"
+    description: "Player Onboarding & Tutorials"
+  8:
+    name: "scenarios"
+    description: "Quick-Play Tactical Scenarios"
+  9:
+    name: "packs"
+    description: "Scenario Pack System"
+  10:
+    name: "accounts"
+    description: "User Accounts & Cross-Device Persistence"
+  12:
+    name: "audio"
+    description: "Audio & Atmospheric Immersion"
+
 # STATUS DEFINITIONS:
 # ==================
 # Epic Status:
@@ -55,16 +88,17 @@ development_status:
   # EPIC 11: Accessible User Interface (RECOMMENDED START - Input Foundation)
   # Priority: CRITICAL - Nothing works without input handling
   # Phase A: Stories 11-1 and 11-3 COMPLETE (v0.1.0-input)
+  # COMPLETE: All 8 stories done
   # =============================================================================
-  epic-11: in-progress
+  epic-11: done
   11-1-mouse-and-keyboard-input-support: done              # [GREENFIELD] InputSystem implemented
-  11-2-touch-gesture-support-for-mobile: backlog          # [GREENFIELD] Touch handling
+  11-2-touch-gesture-support-for-mobile: done          # [GREENFIELD] Touch handling - Commit c1ecb71
   11-3-galaxy-map-pan-and-zoom-controls: done             # [CORE-PARTIAL] CameraController implemented
-  11-4-keyboard-shortcuts-system: backlog                 # [GREENFIELD] Keybinding system
-  11-5-ui-scale-customization: backlog                    # [GREENFIELD] Scale system
-  11-6-high-contrast-mode-for-accessibility: backlog      # [GREENFIELD] Theme system
-  11-7-keyboard-only-navigation-compliance: backlog       # [GREENFIELD] Focus management
-  11-8-help-overlays-and-tutorials: backlog               # [GREENFIELD] Tutorial system
+  11-4-keyboard-shortcuts-system: done                        # [GREENFIELD] Commit 93c54b6 (21 tests)
+  11-5-ui-scale-customization: done                       # [GREENFIELD] Commit dd3085b (33 tests)
+  11-6-high-contrast-mode-for-accessibility: done         # [GREENFIELD] AccessibilitySettings + SettingsPanel toggle (34 tests)
+  11-7-keyboard-only-navigation-compliance: done          # [GREENFIELD] FocusTrapManager + InputSystem focus trap (39 tests)
+  11-8-help-overlays-and-tutorials: done                  # [CORE-DONE] HelpOverlay already implemented (11 tests)
   epic-11-retrospective: optional
 
   # =============================================================================
@@ -107,20 +141,20 @@ development_status:
   # EPIC 5: Military Forces & Movement
   # Priority: MEDIUM - Combat preparation
   # =============================================================================
-  epic-5: backlog
-  5-1-platoon-commissioning-with-equipment-configuration: backlog  # [CORE-DONE] PlatoonSystem complete
-  5-2-platoon-details-and-management: backlog             # [CORE-PARTIAL] Data exists, needs panel
-  5-3-spacecraft-purchase-and-types: backlog              # [CORE-DONE] CraftSystem complete
-  5-4-loading-platoons-onto-battle-cruisers: backlog      # [CORE-DONE] Embark/disembark works
-  5-5-spacecraft-navigation-between-planets: backlog      # [CORE-DONE] NavigationSystem complete
+  epic-5: done
+  5-1-platoon-commissioning-with-equipment-configuration: done     # PlatoonCommissionPanel + 36 tests
+  5-2-platoon-details-and-management: done                 # PlatoonDetailsPanel + 29 tests
+  5-3-spacecraft-purchase-and-types: done                 # SpacecraftPurchasePanel + 38 tests
+  5-4-loading-platoons-onto-battle-cruisers: done         # PlatoonLoadingPanel + 33 tests
+  5-5-spacecraft-navigation-between-planets: done         # SpacecraftNavigationPanel + 30 tests
   epic-5-retrospective: optional
 
   # =============================================================================
   # EPIC 6: Combat & Planetary Invasion
   # Priority: MEDIUM - Core combat mechanics
   # =============================================================================
-  epic-6: backlog
-  6-1-initiate-planetary-invasion: backlog                # [CORE-DONE] InvasionSystem complete, needs UI + tests
+  epic-6: in-progress
+  6-1-initiate-planetary-invasion: done                   # InvasionPanel + 24 tests
   6-2-combat-aggression-configuration: backlog            # [CORE-DONE] Aggression works, needs slider UI
   6-3-combat-resolution-and-battle-results: backlog       # [CORE-DONE] CombatSystem complete, needs results UI
   epic-6-retrospective: optional
