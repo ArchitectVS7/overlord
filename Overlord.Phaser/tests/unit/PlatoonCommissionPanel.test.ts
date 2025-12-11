@@ -489,5 +489,97 @@ describe('PlatoonCommissionPanel', () => {
 
       expect(panel.getPlatoonCount()).toBe(0);
     });
+
+    it('should return max platoon capacity', () => {
+      expect(panel.getMaxPlatoonCapacity()).toBe(24);
+    });
+  });
+
+  describe('Pistol weapon level (Chunk 5-1-A)', () => {
+    it('should allow setting Pistol weapon level', () => {
+      panel.setWeaponLevel(WeaponLevel.Pistol);
+      expect(panel.getWeaponLevel()).toBe(WeaponLevel.Pistol);
+    });
+
+    it('should calculate cost for Pistol weapon', () => {
+      panel.setEquipmentLevel(EquipmentLevel.Basic);
+      panel.setWeaponLevel(WeaponLevel.Pistol);
+
+      // From PlatoonCosts: Basic (35000) + Pistol (5000) = 40000
+      expect(panel.getTotalCost()).toBe(40000);
+    });
+
+    it('should calculate strength for Pistol weapon', () => {
+      panel.setTroopCount(100);
+      panel.setEquipmentLevel(EquipmentLevel.Basic);
+
+      panel.setWeaponLevel(WeaponLevel.Pistol);
+      const pistolStrength = panel.getEstimatedStrength();
+
+      panel.setWeaponLevel(WeaponLevel.Rifle);
+      const rifleStrength = panel.getEstimatedStrength();
+
+      // Pistol (0.8x) should be less than Rifle (1.0x)
+      expect(pistolStrength).toBeLessThan(rifleStrength);
+    });
+  });
+
+  describe('population deduction preview (Chunk 5-1-A)', () => {
+    it('should show population after commission preview', () => {
+      const planet = createMockPlanet();
+      planet.population = 500;
+      panel.show(planet);
+      panel.setTroopCount(150);
+
+      expect(panel.getPopulationAfterCommission()).toBe(350); // 500 - 150
+    });
+
+    it('should update population preview when troop count changes', () => {
+      const planet = createMockPlanet();
+      planet.population = 500;
+      panel.show(planet);
+
+      panel.setTroopCount(100);
+      expect(panel.getPopulationAfterCommission()).toBe(400);
+
+      panel.setTroopCount(200);
+      expect(panel.getPopulationAfterCommission()).toBe(300);
+    });
+
+    it('should return 0 when no planet selected', () => {
+      expect(panel.getPopulationAfterCommission()).toBe(0);
+    });
+  });
+
+  describe('platoon limit validation (Chunk 5-1-B)', () => {
+    it('should disable commission when at platoon capacity', () => {
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000; // Plenty of credits
+      planet.population = 500; // Plenty of population
+      panel.show(planet, undefined, 24); // At max capacity
+
+      expect(panel.isCommissionEnabled()).toBe(false);
+    });
+
+    it('should enable commission when below platoon capacity', () => {
+      const planet = createMockPlanet();
+      planet.resources.credits = 100000;
+      planet.population = 500;
+      panel.show(planet, undefined, 23); // One slot available
+
+      expect(panel.isCommissionEnabled()).toBe(true);
+    });
+
+    it('should return true for isAtCapacity when platoon count is 24', () => {
+      const planet = createMockPlanet();
+      panel.show(planet, undefined, 24);
+      expect(panel.isAtCapacity()).toBe(true);
+    });
+
+    it('should return false for isAtCapacity when platoon count is below 24', () => {
+      const planet = createMockPlanet();
+      panel.show(planet, undefined, 10);
+      expect(panel.isAtCapacity()).toBe(false);
+    });
   });
 });

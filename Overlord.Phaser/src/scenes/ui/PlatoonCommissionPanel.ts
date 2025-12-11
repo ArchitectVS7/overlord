@@ -18,9 +18,10 @@ import { PlatoonCosts, PlatoonModifiers } from '@core/models/PlatoonModels';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 480;
-const PANEL_HEIGHT = 520;
+const PANEL_HEIGHT = 560;
 const PADDING = 20;
 const BUTTON_HEIGHT = 36;
+const MAX_PLATOONS_PER_PLANET = 24;
 
 // Colors
 const BG_COLOR = 0x1a1a2e;
@@ -262,11 +263,12 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
 
   private createWeaponButtons(y: number): void {
     const levels = [
+      { level: WeaponLevel.Pistol, label: 'Pistol' },
       { level: WeaponLevel.Rifle, label: 'Rifle' },
       { level: WeaponLevel.AssaultRifle, label: 'Assault' },
       { level: WeaponLevel.Plasma, label: 'Plasma' }
     ];
-    const buttonWidth = (PANEL_WIDTH - PADDING * 2 - 20) / 3;
+    const buttonWidth = (PANEL_WIDTH - PADDING * 2 - 30) / 4;
 
     levels.forEach((item, index) => {
       const x = PADDING + index * (buttonWidth + 10);
@@ -493,8 +495,22 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     return this.platoonCount;
   }
 
+  public getMaxPlatoonCapacity(): number {
+    return MAX_PLATOONS_PER_PLANET;
+  }
+
+  public getPopulationAfterCommission(): number {
+    if (!this.planet) return 0;
+    return this.planet.population - this.troopCount;
+  }
+
+  public isAtCapacity(): boolean {
+    return this.platoonCount >= MAX_PLATOONS_PER_PLANET;
+  }
+
   public isCommissionEnabled(): boolean {
     if (!this.planet) return false;
+    if (this.isAtCapacity()) return false;
 
     const cost = this.getTotalCost();
     const hasCredits = this.planet.resources.credits >= cost;
@@ -524,10 +540,11 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   private updatePlanetInfo(): void {
     if (!this.planet) return;
 
+    const popAfter = this.getPopulationAfterCommission();
     this.planetInfoText.setText(
       `${this.planet.name}\n` +
-      `Platoons: ${this.platoonCount}\n` +
-      `Population: ${this.planet.population.toLocaleString()}`
+      `Platoons: ${this.platoonCount}/${MAX_PLATOONS_PER_PLANET}\n` +
+      `Population: ${this.planet.population.toLocaleString()} → ${popAfter.toLocaleString()}`
     );
   }
 
