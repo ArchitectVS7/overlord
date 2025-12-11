@@ -21,11 +21,13 @@ import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
 import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
 import { InvasionPanel } from './ui/InvasionPanel';
 import { BattleResultsPanel } from './ui/BattleResultsPanel';
+import { NotificationManager } from './ui/NotificationToast';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
 import { NavigationSystem } from '@core/NavigationSystem';
 import { CombatSystem } from '@core/CombatSystem';
+import { AIDecisionSystem } from '@core/AIDecisionSystem';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -48,11 +50,13 @@ export class GalaxyMapScene extends Phaser.Scene {
   private spacecraftNavigationPanel!: SpacecraftNavigationPanel;
   private invasionPanel!: InvasionPanel;
   private battleResultsPanel!: BattleResultsPanel;
+  private notificationManager!: NotificationManager;
   private platoonSystem!: PlatoonSystem;
   private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
   private navigationSystem!: NavigationSystem;
   private combatSystem!: CombatSystem;
+  private aiDecisionSystem!: AIDecisionSystem;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -305,6 +309,51 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Create BattleResultsPanel - Story 6-3
     this.battleResultsPanel = new BattleResultsPanel(this);
+
+    // Create NotificationManager - Story 7-1
+    this.notificationManager = new NotificationManager(this);
+
+    // Create AIDecisionSystem - Story 7-1
+    const aiIncomeSystem = this.phaseProcessor.getIncomeSystem();
+    const aiBuildingSystem = this.phaseProcessor.getBuildingSystem();
+    const aiResourceSystem = this.phaseProcessor.getResourceSystem();
+    this.aiDecisionSystem = new AIDecisionSystem(
+      this.gameState,
+      aiIncomeSystem,
+      aiResourceSystem,
+      aiBuildingSystem,
+      this.craftSystem,
+      this.platoonSystem
+    );
+
+    // Wire up AI event notifications - Story 7-1
+    this.aiDecisionSystem.onAITurnStarted = () => {
+      this.notificationManager.showNotification('AI opponent is taking their turn...', 'info');
+    };
+
+    this.aiDecisionSystem.onAITurnCompleted = () => {
+      this.notificationManager.showNotification('AI turn completed', 'info');
+    };
+
+    this.aiDecisionSystem.onAIBuilding = (planetID, buildingType) => {
+      const planet = this.gameState.planetLookup.get(planetID);
+      if (planet) {
+        this.notificationManager.showNotification(
+          `AI constructed ${buildingType} on ${planet.name}`,
+          'warning'
+        );
+      }
+    };
+
+    this.aiDecisionSystem.onAIAttacking = (targetPlanetID) => {
+      const planet = this.gameState.planetLookup.get(targetPlanetID);
+      if (planet) {
+        this.notificationManager.showNotification(
+          `Enemy fleet detected near ${planet.name}!`,
+          'danger'
+        );
+      }
+    };
 
     // Wire up PlanetInfoPanel Invade button to InvasionPanel
     this.planetInfoPanel.onInvadeClick = (planet) => {
