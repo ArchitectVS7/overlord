@@ -145,7 +145,7 @@ development_status:
   5-1-platoon-commissioning-with-equipment-configuration: done  # Chunks A-D complete, 45 tests, all 9 issues fixed
   5-2-platoon-details-and-management: done                # 21 tests, all 8 AC done, code review fixes applied
   5-3-spacecraft-purchase-and-types: done                  # [CORE-DONE] SpacecraftPurchasePanel + 18 tests
-  5-4-loading-platoons-onto-battle-cruisers: drafted      # [CORE-DONE] Embark/disembark works, needs UI panel
+  5-4-loading-platoons-onto-battle-cruisers: done         # [CORE-DONE] PlatoonLoadingPanel + 21 tests
   5-5-spacecraft-navigation-between-planets: drafted      # [CORE-DONE] NavigationSystem complete, needs UI panel
   epic-5-retrospective: optional
 
