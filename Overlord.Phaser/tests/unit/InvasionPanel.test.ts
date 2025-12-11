@@ -204,10 +204,14 @@ function createMockEnemyPlanet(id = 1, name = 'Enemy World'): PlanetEntity {
 
 // Create mock platoon
 function createMockPlatoon(id: number, owner = FactionType.Player): PlatoonEntity {
-  const platoon = new PlatoonEntity(id, -1, owner, 100);
+  const platoon = new PlatoonEntity();
+  platoon.id = id;
+  platoon.planetID = -1;
+  platoon.owner = owner;
   platoon.troopCount = 100;
   platoon.equipment = EquipmentLevel.Basic;
   platoon.weapon = WeaponLevel.Rifle;
+  platoon.strength = 100;
   return platoon;
 }
 
