@@ -22,6 +22,7 @@ import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
 import { InvasionPanel } from './ui/InvasionPanel';
 import { BattleResultsPanel } from './ui/BattleResultsPanel';
 import { NotificationManager } from './ui/NotificationToast';
+import { OpponentInfoPanel } from './ui/OpponentInfoPanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
 import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
@@ -51,6 +52,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private invasionPanel!: InvasionPanel;
   private battleResultsPanel!: BattleResultsPanel;
   private notificationManager!: NotificationManager;
+  private opponentInfoPanel!: OpponentInfoPanel;
   private platoonSystem!: PlatoonSystem;
   private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
@@ -313,6 +315,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Create NotificationManager - Story 7-1
     this.notificationManager = new NotificationManager(this);
 
+    // Create OpponentInfoPanel - Story 7-2
+    this.opponentInfoPanel = new OpponentInfoPanel(this, 20, 140);
+
     // Create AIDecisionSystem - Story 7-1
     const aiIncomeSystem = this.phaseProcessor.getIncomeSystem();
     const aiBuildingSystem = this.phaseProcessor.getBuildingSystem();
@@ -325,6 +330,11 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.craftSystem,
       this.platoonSystem
     );
+
+    // Set opponent info panel - Story 7-2
+    const personalityName = this.aiDecisionSystem.getPersonalityName();
+    const difficultyName = this.aiDecisionSystem.getDifficulty(); // Already a string enum value
+    this.opponentInfoPanel.setOpponentInfo('AI Commander', personalityName, difficultyName);
 
     // Wire up AI event notifications - Story 7-1
     this.aiDecisionSystem.onAITurnStarted = () => {
