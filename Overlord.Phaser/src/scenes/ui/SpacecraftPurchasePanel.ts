@@ -63,6 +63,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
 
   // Callbacks
   public onPurchase?: (craftType: CraftType) => void;
+  public onNavigateRequest?: (craftID: number) => void;
 
   constructor(scene: Phaser.Scene, craftSystem?: CraftSystem) {
     super(scene, 0, 0);
