@@ -14,6 +14,9 @@ import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
 import { TurnHUD } from './ui/TurnHUD';
 import { ResourceHUD } from './ui/ResourceHUD';
 import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
+import { PlatoonCommissionPanel } from './ui/PlatoonCommissionPanel';
+import { PlatoonSystem } from '@core/PlatoonSystem';
+import { EntitySystem } from '@core/EntitySystem';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -29,6 +32,9 @@ export class GalaxyMapScene extends Phaser.Scene {
   private turnHUD!: TurnHUD;
   private resourceHUD!: ResourceHUD;
   private buildingMenuPanel!: BuildingMenuPanel;
+  private platoonCommissionPanel!: PlatoonCommissionPanel;
+  private platoonSystem!: PlatoonSystem;
+  private entitySystem!: EntitySystem;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -156,6 +162,23 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up building completion to refresh ResourceHUD
     this.buildingMenuPanel.onBuildingSelected = () => {
       this.resourceHUD.updateDisplay();
+    };
+
+    // Create PlatoonSystem and EntitySystem for military features (Story 5-1)
+    this.entitySystem = new EntitySystem(this.gameState);
+    this.platoonSystem = new PlatoonSystem(this.gameState, this.entitySystem);
+
+    // Create Platoon Commission Panel - Story 5-1
+    this.platoonCommissionPanel = new PlatoonCommissionPanel(this, this.platoonSystem);
+
+    // Wire up PlanetInfoPanel Commission button to PlatoonCommissionPanel
+    this.planetInfoPanel.onCommissionClick = (planet) => {
+      this.planetInfoPanel.hide();
+      const platoonCount = this.entitySystem.getPlatoonsAtPlanet(planet.id).length;
+      this.platoonCommissionPanel.show(planet, () => {
+        // Refresh UI after panel closes
+        this.resourceHUD.updateDisplay();
+      }, platoonCount);
     };
 
     // Wire up building completion notifications (Story 4-3: AC3)

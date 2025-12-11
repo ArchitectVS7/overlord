@@ -54,8 +54,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private constructionTurnsText!: Phaser.GameObjects.Text;
   private buildingSystem?: BuildingSystem;
 
-  // Action callbacks (Story 4-2)
+  // Action callbacks (Story 4-2, Story 5-1)
   public onBuildClick?: (planet: PlanetEntity) => void;
+  public onCommissionClick?: (planet: PlanetEntity) => void;
 
   constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem) {
     super(scene, 0, 0);
@@ -307,7 +308,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     // Actual enabled/disabled state is set when the panel is shown
     const buttonY = startY + 25;
     this.createButton('Build', 0, buttonY, true, 'Open building construction menu');
-    this.createButton('Manage', 125, buttonY, true, 'Coming soon');
+    this.createButton('Commission', 125, buttonY, true, 'Commission platoon (Story 5-1)');
     this.createButton('Scout', 0, buttonY + 42, true, 'Coming in Epic 5');
     this.createButton('Invade', 125, buttonY + 42, true, 'Coming in Epic 6');
   }
@@ -535,19 +536,28 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   private updateButtonStates(isPlayerOwned: boolean): void {
-    // Buttons 0-1 are for player (Build, Manage)
+    // Buttons 0-1 are for player (Build, Commission)
     // Buttons 2-3 are for AI/Neutral (Scout, Invade)
     this.actionButtons.forEach((button, i) => {
       const label = button.getData('label');
 
       if (isPlayerOwned) {
-        button.setVisible(i < 2); // Show Build, Manage
+        button.setVisible(i < 2); // Show Build, Commission
 
         // Enable Build button for player-owned planets (Story 4-2)
         if (label === 'Build') {
           this.enableButton(button, () => {
             if (this.planet && this.onBuildClick) {
               this.onBuildClick(this.planet);
+            }
+          });
+        }
+
+        // Enable Commission button for player-owned planets (Story 5-1)
+        if (label === 'Commission') {
+          this.enableButton(button, () => {
+            if (this.planet && this.onCommissionClick) {
+              this.onCommissionClick(this.planet);
             }
           });
         }
