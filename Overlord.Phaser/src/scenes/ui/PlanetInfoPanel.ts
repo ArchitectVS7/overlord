@@ -54,10 +54,11 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private constructionTurnsText!: Phaser.GameObjects.Text;
   private buildingSystem?: BuildingSystem;
 
-  // Action callbacks (Story 4-2, Story 5-1, Story 5-2)
+  // Action callbacks (Story 4-2, Story 5-1, Story 5-2, Story 5-3)
   public onBuildClick?: (planet: PlanetEntity) => void;
   public onCommissionClick?: (planet: PlanetEntity) => void;
   public onPlatoonsClick?: (planet: PlanetEntity) => void;
+  public onSpacecraftClick?: (planet: PlanetEntity) => void;
 
   constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem) {
     super(scene, 0, 0);
@@ -311,6 +312,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.createButton('Build', 0, buttonY, true, 'Open building construction menu');
     this.createButton('Commission', 125, buttonY, true, 'Commission platoon (Story 5-1)');
     this.createButton('Platoons', 0, buttonY + 42, true, 'View garrisoned platoons (Story 5-2)');
+    this.createButton('Spacecraft', 125, buttonY + 42, true, 'Purchase spacecraft (Story 5-3)');
     this.createButton('Scout', 0, buttonY + 84, true, 'Coming in Epic 5');
     this.createButton('Invade', 125, buttonY + 84, true, 'Coming in Epic 6');
   }
@@ -538,13 +540,13 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   private updateButtonStates(isPlayerOwned: boolean): void {
-    // Buttons 0-2 are for player (Build, Commission, Platoons)
-    // Buttons 3-4 are for AI/Neutral (Scout, Invade)
+    // Buttons 0-3 are for player (Build, Commission, Platoons, Spacecraft)
+    // Buttons 4-5 are for AI/Neutral (Scout, Invade)
     this.actionButtons.forEach((button, i) => {
       const label = button.getData('label');
 
       if (isPlayerOwned) {
-        button.setVisible(i < 3); // Show Build, Commission, Platoons
+        button.setVisible(i < 4); // Show Build, Commission, Platoons, Spacecraft
 
         // Enable Build button for player-owned planets (Story 4-2)
         if (label === 'Build') {
@@ -572,8 +574,17 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
             }
           });
         }
+
+        // Enable Spacecraft button for player-owned planets (Story 5-3)
+        if (label === 'Spacecraft') {
+          this.enableButton(button, () => {
+            if (this.planet && this.onSpacecraftClick) {
+              this.onSpacecraftClick(this.planet);
+            }
+          });
+        }
       } else {
-        button.setVisible(i >= 3); // Show Scout, Invade
+        button.setVisible(i >= 4); // Show Scout, Invade
       }
     });
   }

@@ -16,7 +16,9 @@ import { ResourceHUD } from './ui/ResourceHUD';
 import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
 import { PlatoonCommissionPanel } from './ui/PlatoonCommissionPanel';
 import { PlatoonDetailsPanel } from './ui/PlatoonDetailsPanel';
+import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
 import { PlatoonSystem } from '@core/PlatoonSystem';
+import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
 
 export class GalaxyMapScene extends Phaser.Scene {
@@ -35,7 +37,9 @@ export class GalaxyMapScene extends Phaser.Scene {
   private buildingMenuPanel!: BuildingMenuPanel;
   private platoonCommissionPanel!: PlatoonCommissionPanel;
   private platoonDetailsPanel!: PlatoonDetailsPanel;
+  private spacecraftPurchasePanel!: SpacecraftPurchasePanel;
   private platoonSystem!: PlatoonSystem;
+  private craftSystem!: CraftSystem;
   private entitySystem!: EntitySystem;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
@@ -198,6 +202,25 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up disband callback to refresh UI
     this.platoonDetailsPanel.onDisband = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create CraftSystem and SpacecraftPurchasePanel - Story 5-3
+    this.craftSystem = new CraftSystem(this.gameState, this.entitySystem);
+    this.spacecraftPurchasePanel = new SpacecraftPurchasePanel(this, this.craftSystem);
+
+    // Wire up PlanetInfoPanel Spacecraft button to SpacecraftPurchasePanel
+    this.planetInfoPanel.onSpacecraftClick = (planet) => {
+      this.planetInfoPanel.hide();
+      const fleetCount = this.entitySystem.getCraftAtPlanet(planet.id).length;
+      this.spacecraftPurchasePanel.show(planet, () => {
+        // Refresh UI after panel closes
+        this.resourceHUD.updateDisplay();
+      }, fleetCount);
+    };
+
+    // Wire up purchase callback to refresh UI
+    this.spacecraftPurchasePanel.onPurchase = () => {
       this.resourceHUD.updateDisplay();
     };
 
