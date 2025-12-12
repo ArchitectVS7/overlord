@@ -203,7 +203,7 @@ development_status:
   # =============================================================================
   epic-9: in-progress
   9-1-scenario-pack-browsing-and-selection: done          # ScenarioPackManager, PackListPanel, PackDetailPanel, ScenarioPackScene - 52 tests
-  9-2-scenario-pack-switching-and-configuration-loading: drafted  # [CORE-PARTIAL] Config support exists
+  9-2-scenario-pack-switching-and-configuration-loading: done      # PackConfigLoader, PackSwitchDialog - 23 tests
   9-3-scenario-pack-metadata-display: drafted             # [CORE-PARTIAL] Enums exist, needs wrapper
   epic-9-retrospective: optional
 
