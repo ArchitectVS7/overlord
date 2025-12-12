@@ -183,7 +183,7 @@ development_status:
   epic-1: in-progress
   1-1-flash-conflicts-menu-access: done                   # FlashConflictsScene minimal impl for 1-2 integration
   1-2-scenario-selection-interface: done                  # Code review: 19 tests passing, mock issue noted for followup
-  1-3-scenario-initialization-and-victory-conditions: drafted  # [CORE-PARTIAL] Victory logic exists
+  1-3-scenario-initialization-and-victory-conditions: done      # ScenarioInitializer, VictoryConditionSystem, ObjectivesPanel - 44 tests
   1-4-tutorial-step-guidance-system: drafted              # [GREENFIELD] Tutorial engine - COMPLEX
   1-5-scenario-completion-and-results-display: drafted    # [CORE-PARTIAL] Events exist, needs UI
   1-6-scenario-completion-history-tracking: drafted       # [CORE-PARTIAL] Save logic exists

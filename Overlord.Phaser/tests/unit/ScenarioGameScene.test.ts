@@ -90,7 +90,7 @@ import { ScenarioGameScene } from '../../src/scenes/ScenarioGameScene';
 import { Scenario } from '@core/models/ScenarioModels';
 import { AIPersonality, AIDifficulty } from '@core/models/Enums';
 
-// Create mock scene context
+// Create mock scene context with comprehensive Phaser mocks
 function createMockSceneContext() {
   const addedObjects: unknown[] = [];
   const keyboardHandlers: Map<string, Function> = new Map();
@@ -99,15 +99,21 @@ function createMockSceneContext() {
     scene: {
       isActive: jest.fn().mockReturnValue(true),
       add: {
-        text: jest.fn((x: number, y: number, text: string, style?: unknown) => {
+        text: jest.fn((x: number, y: number, text: string, _style?: unknown) => {
           const textObj = {
-            x, y, text, style,
+            x, y, text,
+            visible: true,
+            alpha: 1,
             setOrigin: jest.fn().mockReturnThis(),
             setInteractive: jest.fn().mockReturnThis(),
             setScrollFactor: jest.fn().mockReturnThis(),
             setColor: jest.fn().mockReturnThis(),
             setText: jest.fn((t: string) => { textObj.text = t; return textObj; }),
+            setVisible: jest.fn((v: boolean) => { textObj.visible = v; return textObj; }),
+            setAlpha: jest.fn((a: number) => { textObj.alpha = a; return textObj; }),
+            setWordWrapWidth: jest.fn().mockReturnThis(),
             on: jest.fn().mockReturnThis(),
+            off: jest.fn().mockReturnThis(),
             destroy: jest.fn()
           };
           addedObjects.push(textObj);
@@ -139,19 +145,32 @@ function createMockSceneContext() {
             setScrollFactor: jest.fn().mockReturnThis(),
             setDepth: jest.fn().mockReturnThis(),
             setVisible: jest.fn().mockReturnThis(),
-            on: jest.fn().mockReturnThis()
+            setFillStyle: jest.fn().mockReturnThis(),
+            on: jest.fn().mockReturnThis(),
+            destroy: jest.fn()
           };
           return rect;
         }),
         graphics: jest.fn(() => {
           const gfx = {
+            y: 0,
+            alpha: 1,
             fillStyle: jest.fn().mockReturnThis(),
             fillRoundedRect: jest.fn().mockReturnThis(),
             fillRect: jest.fn().mockReturnThis(),
             lineStyle: jest.fn().mockReturnThis(),
             strokeRoundedRect: jest.fn().mockReturnThis(),
             strokeRect: jest.fn().mockReturnThis(),
-            clear: jest.fn().mockReturnThis()
+            beginPath: jest.fn().mockReturnThis(),
+            moveTo: jest.fn().mockReturnThis(),
+            lineTo: jest.fn().mockReturnThis(),
+            closePath: jest.fn().mockReturnThis(),
+            fillPath: jest.fn().mockReturnThis(),
+            clear: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setAlpha: jest.fn().mockReturnThis(),
+            destroy: jest.fn()
           };
           addedObjects.push(gfx);
           return gfx;
@@ -178,11 +197,20 @@ function createMockSceneContext() {
       }
     },
     time: {
-      delayedCall: jest.fn((delay: number, callback: Function) => {
+      delayedCall: jest.fn((_delay: number, callback: Function) => {
         // Immediately invoke callback for testing
         callback();
         return { remove: jest.fn() };
       })
+    },
+    tweens: {
+      add: jest.fn((config: any) => {
+        if (config.onComplete) {
+          config.onComplete();
+        }
+        return { stop: jest.fn(), remove: jest.fn() };
+      }),
+      killTweensOf: jest.fn()
     },
     addedObjects,
     keyboardHandlers
@@ -232,6 +260,7 @@ describe('ScenarioGameScene', () => {
     (sceneInstance as any).cameras = mockContext.cameras;
     (sceneInstance as any).input = mockContext.input;
     (sceneInstance as any).time = mockContext.time;
+    (sceneInstance as any).tweens = mockContext.tweens;
   });
 
   describe('initialization', () => {

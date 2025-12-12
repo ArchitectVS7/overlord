@@ -1,12 +1,14 @@
 /**
  * ScenarioGameScene - Main gameplay scene for scenario execution
  * Story 1-3: Scenario Initialization and Victory Conditions
+ * Story 1-4: Tutorial Step Guidance System
  *
  * Features:
  * - Initializes GameState from scenario configuration
  * - Shows ObjectivesPanel at start
  * - Handles "O" key to toggle objectives
  * - Checks victory conditions
+ * - Tutorial step guidance for tutorial scenarios
  * - Returns to FlashConflictsScene on error
  */
 
@@ -14,7 +16,11 @@ import Phaser from 'phaser';
 import { Scenario } from '@core/models/ScenarioModels';
 import { ScenarioInitializer, ScenarioGameState } from '@core/ScenarioInitializer';
 import { VictoryConditionSystem } from '@core/VictoryConditionSystem';
+import { TutorialManager } from '@core/TutorialManager';
+import { TutorialActionDetector } from '@core/TutorialActionDetector';
 import { ObjectivesPanel } from './ui/ObjectivesPanel';
+import { TutorialHighlight } from './ui/TutorialHighlight';
+import { TutorialStepPanel } from './ui/TutorialStepPanel';
 
 /**
  * Data passed to this scene
@@ -31,6 +37,12 @@ export class ScenarioGameScene extends Phaser.Scene {
   private gameState?: ScenarioGameState;
   private objectivesPanel!: ObjectivesPanel;
   private victorySystem!: VictoryConditionSystem;
+
+  // Tutorial system (Story 1-4)
+  private tutorialManager!: TutorialManager;
+  private tutorialActionDetector!: TutorialActionDetector;
+  private tutorialHighlight!: TutorialHighlight;
+  private tutorialStepPanel!: TutorialStepPanel;
 
   // Error display
   private errorText?: Phaser.GameObjects.Text;
@@ -100,11 +112,109 @@ export class ScenarioGameScene extends Phaser.Scene {
     // Show objectives at start
     this.objectivesPanel.show();
 
+    // Initialize tutorial system (Story 1-4)
+    this.initializeTutorialSystem();
+
     // Register keyboard shortcuts
     this.registerKeyboardShortcuts();
 
     // Create basic HUD
     this.createHUD();
+  }
+
+  /**
+   * Initialize tutorial system if scenario has tutorial steps
+   * Story 1-4: Tutorial Step Guidance System
+   */
+  private initializeTutorialSystem(): void {
+    // Create tutorial components
+    this.tutorialManager = new TutorialManager();
+    this.tutorialActionDetector = new TutorialActionDetector();
+    this.tutorialHighlight = new TutorialHighlight(this);
+    this.tutorialStepPanel = new TutorialStepPanel(this);
+
+    // Initialize tutorial if scenario has steps
+    if (!this.scenario) return;
+
+    const hasTutorial = this.tutorialManager.initialize(this.scenario);
+
+    if (hasTutorial) {
+      // Wire up tutorial events
+      this.tutorialManager.onStepStarted = (step) => {
+        this.onTutorialStepStarted(step);
+      };
+
+      this.tutorialManager.onStepCompleted = () => {
+        this.onTutorialStepCompleted();
+      };
+
+      this.tutorialManager.onTutorialComplete = () => {
+        this.onTutorialComplete();
+      };
+
+      // Wire up action detector
+      this.tutorialActionDetector.onActionCompleted = () => {
+        this.tutorialManager.completeCurrentStep();
+      };
+
+      // Wire up skip button
+      this.tutorialStepPanel.onSkip = () => {
+        this.tutorialManager.skip();
+      };
+    }
+  }
+
+  /**
+   * Called when a tutorial step starts
+   */
+  private onTutorialStepStarted(step: import('@core/models/TutorialModels').TutorialStep): void {
+    // Update step panel
+    this.tutorialStepPanel.showStep(
+      step,
+      this.tutorialManager.getCurrentStepIndex() + 1,
+      this.tutorialManager.getStepCount()
+    );
+
+    // Apply highlight if specified
+    if (step.highlight) {
+      // In full implementation, look up element by ID
+      // For now, show a default highlight
+      this.tutorialHighlight.showGlow({ x: 400, y: 300, width: 100, height: 50 }, true);
+    }
+
+    // Watch for the required action
+    this.tutorialActionDetector.watchFor(step.action);
+  }
+
+  /**
+   * Called when a tutorial step is completed
+   */
+  private onTutorialStepCompleted(): void {
+    this.tutorialHighlight.clear();
+    this.tutorialStepPanel.showCompletion();
+  }
+
+  /**
+   * Called when tutorial is complete
+   */
+  private onTutorialComplete(): void {
+    this.tutorialHighlight.clear();
+    this.tutorialStepPanel.hide();
+    console.log('Tutorial complete!');
+  }
+
+  /**
+   * Check if tutorial is active
+   */
+  public isTutorialActive(): boolean {
+    return this.tutorialManager?.isActive() ?? false;
+  }
+
+  /**
+   * Get tutorial action detector for external event reporting
+   */
+  public getTutorialActionDetector(): TutorialActionDetector | undefined {
+    return this.tutorialActionDetector;
   }
 
   /**

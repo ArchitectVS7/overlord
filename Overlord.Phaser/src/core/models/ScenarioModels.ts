@@ -1,4 +1,8 @@
 import { AIPersonality, AIDifficulty } from './Enums';
+import { TutorialStep } from './TutorialModels';
+
+// Re-export TutorialStep for backward compatibility
+export type { TutorialStep } from './TutorialModels';
 
 /**
  * Core scenario structure for Flash Conflicts
@@ -57,16 +61,6 @@ export interface ResourceState {
   fuel?: number;
   food?: number;
   energy?: number;
-}
-
-/**
- * Tutorial step for guided learning
- */
-export interface TutorialStep {
-  step: number;
-  text: string;
-  highlight?: string;
-  action?: string;
 }
 
 /**
