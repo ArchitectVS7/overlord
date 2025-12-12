@@ -6,7 +6,14 @@
 
 # ORCHESTRATOR METADATA
 # ======================
-epic_order: [11, 5, 6, 7, 1, 8, 9, 10, 12]
+epic_order: [6, 7, 1, 8, 9, 10, 12]
+
+# Stories requiring human input (skip during autonomous execution)
+human_input_required:
+  - 8-1-tactical-scenario-content-and-variety      # Scenario design/balance
+  - 10-1-user-account-creation                     # Supabase setup required
+  - 12-1-sound-effects-for-game-actions            # Audio assets needed
+  - 12-2-background-music-during-gameplay          # Music assets needed
 
 epic_metadata:
   11:
@@ -175,7 +182,7 @@ development_status:
   # =============================================================================
   epic-1: backlog
   1-1-flash-conflicts-menu-access: drafted                # [GREENFIELD] New FlashConflict system
-  1-2-scenario-selection-interface: drafted               # [GREENFIELD] Depends on 1-1
+  1-2-scenario-selection-interface: review                # [GREENFIELD] Depends on 1-1 - Complete with minimal FlashConflictsScene
   1-3-scenario-initialization-and-victory-conditions: drafted  # [CORE-PARTIAL] Victory logic exists
   1-4-tutorial-step-guidance-system: drafted              # [GREENFIELD] Tutorial engine - COMPLEX
   1-5-scenario-completion-and-results-display: drafted    # [CORE-PARTIAL] Events exist, needs UI
