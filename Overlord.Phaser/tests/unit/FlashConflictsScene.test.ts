@@ -1,8 +1,10 @@
 /**
  * Tests for FlashConflictsScene
  * Story 1-1: Flash Conflicts Menu Access
+ * Story 1-2: Scenario Selection Interface
  *
- * Tests verify the Flash Conflicts tutorial/scenario selection menu.
+ * Tests verify the Flash Conflicts entry point scene with integrated
+ * ScenarioListPanel and ScenarioDetailPanel.
  */
 
 // Mock Phaser before imports
@@ -23,6 +25,7 @@ jest.mock('phaser', () => ({
         visible = true;
         depth = 0;
         list: unknown[] = [];
+        data: Map<string, unknown> = new Map();
 
         constructor(scene: unknown, x = 0, y = 0) {
           this.scene = scene;
@@ -36,7 +39,9 @@ jest.mock('phaser', () => ({
         setVisible(v: boolean): this { this.visible = v; return this; }
         setDepth(d: number): this { this.depth = d; return this; }
         setScrollFactor(): this { return this; }
-        destroy(): void { this.list = []; }
+        setData(key: string, value: unknown): this { this.data.set(key, value); return this; }
+        getData(key: string): unknown { return this.data.get(key); }
+        destroy(): void { this.list = []; this.data.clear(); }
       },
       Graphics: class MockGraphics {
         fillStyle(): this { return this; }
@@ -46,6 +51,7 @@ jest.mock('phaser', () => ({
         strokeRoundedRect(): this { return this; }
         strokeRect(): this { return this; }
         clear(): this { return this; }
+        createGeometryMask(): { destroy: () => void } { return { destroy: jest.fn() }; }
         destroy(): void {}
       },
       Text: class MockText {
@@ -61,12 +67,16 @@ jest.mock('phaser', () => ({
         setOrigin(): this { return this; }
         setColor(): this { return this; }
         setInteractive(): this { return this; }
+        setScrollFactor(): this { return this; }
         on(): this { return this; }
         destroy(): void {}
       },
       Rectangle: class MockRectangle {
         setOrigin(): this { return this; }
         setInteractive(): this { return this; }
+        setScrollFactor(): this { return this; }
+        setDepth(): this { return this; }
+        setVisible(): this { return this; }
         on(): this { return this; }
         destroy(): void {}
       },
@@ -81,7 +91,7 @@ jest.mock('phaser', () => ({
 
 import { FlashConflictsScene } from '../../src/scenes/FlashConflictsScene';
 
-// Create mock scene
+// Create mock scene context
 function createMockSceneContext() {
   const addedObjects: unknown[] = [];
 
@@ -101,6 +111,7 @@ function createMockSceneContext() {
           return textObj;
         }),
         container: jest.fn((x: number, y: number) => {
+          const containerData = new Map<string, unknown>();
           const container = {
             x, y,
             y_local: y,
@@ -111,6 +122,8 @@ function createMockSceneContext() {
             setPosition: jest.fn().mockReturnThis(),
             setMask: jest.fn().mockReturnThis(),
             setInteractive: jest.fn().mockReturnThis(),
+            setData: jest.fn((key: string, value: unknown) => { containerData.set(key, value); return container; }),
+            getData: jest.fn((key: string) => containerData.get(key)),
             on: jest.fn().mockReturnThis(),
             destroy: jest.fn()
           };
@@ -157,6 +170,8 @@ function createMockSceneContext() {
       main: {
         width: 1024,
         height: 768,
+        centerX: 512,
+        centerY: 384,
         setBackgroundColor: jest.fn()
       }
     },
@@ -180,8 +195,6 @@ describe('FlashConflictsScene', () => {
   let mockContext: ReturnType<typeof createMockSceneContext>;
 
   beforeEach(() => {
-    // Clear localStorage
-    localStorage.clear();
     sceneInstance = new FlashConflictsScene();
     mockContext = createMockSceneContext();
     // Assign mock properties to scene instance
@@ -193,144 +206,71 @@ describe('FlashConflictsScene', () => {
   });
 
   describe('initialization', () => {
-    test('should create scene', () => {
+    test('should create scene with correct key', () => {
       expect(sceneInstance).toBeDefined();
+      expect((sceneInstance as any).key).toBe('FlashConflictsScene');
     });
   });
 
   describe('create', () => {
+    test('should set background color', () => {
+      sceneInstance.create();
+      expect(mockContext.cameras.main.setBackgroundColor).toHaveBeenCalledWith('#0a0a1a');
+    });
+
     test('should create title text', () => {
       sceneInstance.create();
 
       const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const titleCall = textCalls.find(call => call[2] === 'FLASH CONFLICTS');
+      const titleCall = textCalls.find(call => call[2] === 'Flash Conflicts');
       expect(titleCall).toBeDefined();
     });
 
-    test('should create subtitle', () => {
+    test('should create title at correct position', () => {
       sceneInstance.create();
 
       const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const subtitleCall = textCalls.find(call => call[2] === 'Tutorial Scenarios & Quick Combat');
-      expect(subtitleCall).toBeDefined();
+      const titleCall = textCalls.find(call => call[2] === 'Flash Conflicts');
+      expect(titleCall).toBeDefined();
+      expect(titleCall[0]).toBe(512); // centerX
+      expect(titleCall[1]).toBe(50);  // y position
     });
 
-    test('should show beginner badge on first visit', () => {
-      localStorage.removeItem('flashConflicts_visited');
-      // Recreate instance to reset first visit flag
-      sceneInstance = new FlashConflictsScene();
-      (sceneInstance as any).add = mockContext.scene.add;
-      (sceneInstance as any).scene = mockContext.scene;
-      (sceneInstance as any).cameras = mockContext.cameras;
-
+    test('should create ScenarioListPanel', () => {
       sceneInstance.create();
 
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const badgeCall = textCalls.find(call => call[2]?.includes('RECOMMENDED FOR BEGINNERS'));
-      expect(badgeCall).toBeDefined();
+      // ScenarioListPanel creates containers for its UI
+      const containerCalls = (mockContext.scene.add.container as jest.Mock).mock.calls;
+      expect(containerCalls.length).toBeGreaterThan(0);
     });
 
-    test('should not show beginner badge on return visit', () => {
-      localStorage.setItem('flashConflicts_visited', 'true');
-      // Recreate instance
-      sceneInstance = new FlashConflictsScene();
-      (sceneInstance as any).add = mockContext.scene.add;
-      (sceneInstance as any).scene = mockContext.scene;
-      (sceneInstance as any).cameras = mockContext.cameras;
-
+    test('should create ScenarioDetailPanel', () => {
       sceneInstance.create();
 
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const badgeCall = textCalls.find(call => call[2]?.includes('RECOMMENDED FOR BEGINNERS'));
-      expect(badgeCall).toBeUndefined();
-    });
-
-    test('should create placeholder scenarios', () => {
-      sceneInstance.create();
-
-      // Should have at least 4 scenario cards (from placeholder data)
-      const zoneCalls = (mockContext.scene.add.zone as jest.Mock).mock.calls;
-      expect(zoneCalls.length).toBeGreaterThanOrEqual(4);
-    });
-
-    test('should create back button', () => {
-      sceneInstance.create();
-
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const backButton = textCalls.find(call => call[2] === 'BACK TO MAIN MENU');
-      expect(backButton).toBeDefined();
+      // Both panels create multiple containers
+      const containerCalls = (mockContext.scene.add.container as jest.Mock).mock.calls;
+      expect(containerCalls.length).toBeGreaterThanOrEqual(2);
     });
   });
 
-  describe('scenario cards', () => {
-    test('should show tutorial scenarios', () => {
+  describe('panels integration', () => {
+    test('should initialize scenario manager', () => {
       sceneInstance.create();
 
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const tutorialCard = textCalls.find(call => call[2] === 'Basic Combat Tutorial');
-      expect(tutorialCard).toBeDefined();
+      // After create, scenarioManager should be initialized
+      expect((sceneInstance as any).scenarioManager).toBeDefined();
     });
 
-    test('should show tactical scenarios', () => {
+    test('should have listPanel accessible', () => {
       sceneInstance.create();
 
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const tacticalCard = textCalls.find(call => call[2] === 'Defend the Colony');
-      expect(tacticalCard).toBeDefined();
+      expect((sceneInstance as any).listPanel).toBeDefined();
     });
 
-    test('should display difficulty levels', () => {
+    test('should have detailPanel accessible', () => {
       sceneInstance.create();
 
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const easyDifficulty = textCalls.find(call => call[2] === 'EASY');
-      const mediumDifficulty = textCalls.find(call => call[2] === 'MEDIUM');
-      expect(easyDifficulty || mediumDifficulty).toBeDefined();
-    });
-
-    test('should display scenario durations', () => {
-      sceneInstance.create();
-
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const durationText = textCalls.find(call => call[2]?.includes('min'));
-      expect(durationText).toBeDefined();
-    });
-  });
-
-  describe('navigation', () => {
-    test('should navigate back to main menu when back button clicked', () => {
-      sceneInstance.create();
-
-      const textCalls = (mockContext.scene.add.text as jest.Mock).mock.calls;
-      const backButton = textCalls.find(call => call[2] === 'BACK TO MAIN MENU');
-      expect(backButton).toBeDefined();
-
-      // Find the pointerdown event handler
-      const backButtonObj = (mockContext.scene.add.text as jest.Mock).mock.results
-        .find(result => result.value.text === 'BACK TO MAIN MENU')?.value;
-
-      if (backButtonObj) {
-        const onCall = backButtonObj.on.mock.calls.find((call: unknown[]) => call[0] === 'pointerdown');
-        if (onCall) {
-          onCall[1](); // Trigger the click handler
-          expect(mockContext.scene.start).toHaveBeenCalledWith('MainMenuScene');
-        }
-      }
-    });
-  });
-
-  describe('localStorage', () => {
-    test('should mark as visited on first load', () => {
-      localStorage.removeItem('flashConflicts_visited');
-      // Recreate instance
-      sceneInstance = new FlashConflictsScene();
-      (sceneInstance as any).add = mockContext.scene.add;
-      (sceneInstance as any).scene = mockContext.scene;
-      (sceneInstance as any).cameras = mockContext.cameras;
-
-      sceneInstance.create();
-
-      expect(localStorage.getItem('flashConflicts_visited')).toBe('true');
+      expect((sceneInstance as any).detailPanel).toBeDefined();
     });
   });
 });
