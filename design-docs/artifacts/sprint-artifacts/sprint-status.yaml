@@ -201,10 +201,10 @@ development_status:
   # EPIC 9: Scenario Pack System
   # Priority: LOW (Phase B) - Content extensibility
   # =============================================================================
-  epic-9: in-progress
+  epic-9: done                                            # v0.9.0-packs All 3 stories complete
   9-1-scenario-pack-browsing-and-selection: done          # ScenarioPackManager, PackListPanel, PackDetailPanel, ScenarioPackScene - 52 tests
   9-2-scenario-pack-switching-and-configuration-loading: done      # PackConfigLoader, PackSwitchDialog - 23 tests
-  9-3-scenario-pack-metadata-display: drafted             # [CORE-PARTIAL] Enums exist, needs wrapper
+  9-3-scenario-pack-metadata-display: done                # PackMetadataHelper - 18 tests
   epic-9-retrospective: optional
 
   # =============================================================================
