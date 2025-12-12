@@ -171,9 +171,9 @@ development_status:
   # EPIC 7: AI Opponent System
   # Priority: MEDIUM - Already implemented, just needs visibility
   # =============================================================================
-  epic-7: backlog
-  7-1-ai-strategic-decision-making: drafted               # [CORE-DONE] AIDecisionSystem complete, needs notifications
-  7-2-ai-personality-and-difficulty-adaptation: drafted   # [CORE-DONE] 4 personalities + 3 difficulties work
+  epic-7: done                                            # v0.7.0-ai All 2 stories complete
+  7-1-ai-strategic-decision-making: done                 # Code review: 3 minor issues, APPROVED
+  7-2-ai-personality-and-difficulty-adaptation: done      # Code review: 4 minor issues, 100% coverage, APPROVED
   epic-7-retrospective: optional
 
   # =============================================================================
