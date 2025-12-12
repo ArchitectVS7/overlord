@@ -161,10 +161,10 @@ development_status:
   # EPIC 6: Combat & Planetary Invasion
   # Priority: MEDIUM - Core combat mechanics
   # =============================================================================
-  epic-6: in-progress
+  epic-6: done                                            # v0.6.0-combat All 3 stories complete
   6-1-initiate-planetary-invasion: done                   # InvasionPanel + 24 tests, integrated with GalaxyMapScene
-  6-2-combat-aggression-configuration: drafted            # [CORE-DONE] Aggression works, needs slider UI
-  6-3-combat-resolution-and-battle-results: drafted       # [CORE-DONE] CombatSystem complete, needs results UI
+  6-2-combat-aggression-configuration: done               # Code review: 4 minor issues, all ACs verified, APPROVED
+  6-3-combat-resolution-and-battle-results: done           # Code review: 5 minor issues, APPROVED
   epic-6-retrospective: optional
 
   # =============================================================================
