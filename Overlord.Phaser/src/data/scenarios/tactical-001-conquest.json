@@ -1,0 +1,52 @@
+{
+  "id": "tactical-001-conquest",
+  "name": "Planetary Conquest",
+  "type": "tactical",
+  "difficulty": "medium",
+  "duration": "10-15 min",
+  "description": "Conquer 3 enemy planets before turn 15. Use your initial fleet wisely and expand your territory through strategic invasions.",
+  "prerequisites": ["tutorial-001"],
+  "victoryConditions": [
+    {
+      "type": "capture_planets",
+      "count": 3,
+      "turnsLimit": 15
+    }
+  ],
+  "defeatConditions": [
+    {
+      "type": "turn_limit",
+      "turns": 15
+    },
+    {
+      "type": "home_planet_lost"
+    }
+  ],
+  "specialRules": [],
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 10000,
+      "minerals": 2000,
+      "fuel": 1000,
+      "food": 500,
+      "energy": 300
+    },
+    "playerCraft": [
+      { "type": "BattleCruiser", "planet": "planet-1" },
+      { "type": "BattleCruiser", "planet": "planet-1" }
+    ],
+    "playerPlatoons": [
+      { "troops": 200, "equipment": "Standard", "weapon": "Rifle", "planet": "planet-1" },
+      { "troops": 200, "equipment": "Standard", "weapon": "Rifle", "planet": "planet-1" }
+    ],
+    "aiPlanets": ["planet-2", "planet-3", "planet-4"],
+    "aiEnabled": true,
+    "aiPersonality": "Defensive",
+    "aiDifficulty": "Normal"
+  },
+  "starTargets": {
+    "threeStarTurns": 8,
+    "twoStarTurns": 12
+  }
+}

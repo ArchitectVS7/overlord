@@ -1,15 +1,32 @@
 import Phaser from 'phaser';
+import { AudioManager } from '@core/AudioManager';
+import { AudioActivationOverlay } from './ui/AudioActivationOverlay';
 
 /**
  * Main Menu Scene
  * AC-1: Entry point with "New Campaign" button
+ * Story 12-3/12-5: Audio initialization and browser compliance
  */
 export class MainMenuScene extends Phaser.Scene {
+  private audioActivationOverlay?: AudioActivationOverlay;
+
   constructor() {
     super({ key: 'MainMenuScene' });
   }
 
   public create(): void {
+    // Story 12-3: Load audio settings from localStorage
+    const audioManager = AudioManager.getInstance();
+    audioManager.loadSettings();
+
+    // Story 12-5: Show audio activation overlay for browser compliance
+    if (!audioManager.isActivated()) {
+      this.audioActivationOverlay = new AudioActivationOverlay(this);
+      this.audioActivationOverlay.onActivated = () => {
+        console.log('Audio activated by user interaction');
+      };
+      this.audioActivationOverlay.show();
+    }
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
 

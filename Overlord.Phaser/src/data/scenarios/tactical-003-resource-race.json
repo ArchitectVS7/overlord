@@ -1,0 +1,47 @@
+{
+  "id": "tactical-003-resource-race",
+  "name": "Credit Rush",
+  "type": "tactical",
+  "difficulty": "easy",
+  "duration": "8-12 min",
+  "description": "Race to accumulate 50,000 credits before the AI opponent. Build your economy fast and outpace the competition.",
+  "prerequisites": ["tutorial-001"],
+  "victoryConditions": [
+    {
+      "type": "resource_target",
+      "resource": "credits",
+      "target": 50000
+    }
+  ],
+  "defeatConditions": [
+    {
+      "type": "ai_resource_target",
+      "resource": "credits",
+      "target": 50000
+    },
+    {
+      "type": "home_planet_lost"
+    }
+  ],
+  "specialRules": [],
+  "initialState": {
+    "playerPlanets": ["planet-1", "planet-2"],
+    "playerResources": {
+      "credits": 5000,
+      "minerals": 2000,
+      "fuel": 1000,
+      "food": 500,
+      "energy": 300
+    },
+    "playerCraft": [],
+    "playerPlatoons": [],
+    "aiPlanets": ["planet-3", "planet-4"],
+    "aiEnabled": true,
+    "aiPersonality": "Economic",
+    "aiDifficulty": "Easy"
+  },
+  "starTargets": {
+    "threeStarTurns": 10,
+    "twoStarTurns": 15
+  }
+}

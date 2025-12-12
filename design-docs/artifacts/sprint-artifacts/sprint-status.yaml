@@ -224,11 +224,12 @@ development_status:
   # =============================================================================
   # EPIC 12: Audio & Atmospheric Immersion
   # Priority: LOW (Phase C) - Polish feature
+  # Infrastructure complete (12-3 through 12-5), awaiting audio assets (12-1, 12-2)
   # =============================================================================
-  epic-12: backlog
+  epic-12: in-progress                                   # Infrastructure stories done, asset stories pending
   12-1-sound-effects-for-game-actions: drafted            # [GREENFIELD] AudioSystem - HUMAN INPUT
   12-2-background-music-during-gameplay: drafted          # [GREENFIELD] Music playback - HUMAN INPUT
-  12-3-independent-volume-controls: drafted               # [GREENFIELD] Mixer + UI
-  12-4-mute-audio-toggle: drafted                         # [GREENFIELD] Mute logic
-  12-5-user-activation-for-browser-audio-compliance: drafted  # [GREENFIELD] Browser policy
+  12-3-independent-volume-controls: done                  # AudioManager + VolumeControlPanel + Scene Integration (69 tests)
+  12-4-mute-audio-toggle: done                            # Mute toggle with Ctrl+M, auto-refresh, label toggle
+  12-5-user-activation-for-browser-audio-compliance: review   # AudioActivationOverlay - 18 tests
   epic-12-retrospective: optional

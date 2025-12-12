@@ -1,0 +1,58 @@
+{
+  "id": "tactical-005-blitz",
+  "name": "Lightning Strike",
+  "type": "tactical",
+  "difficulty": "hard",
+  "duration": "8-12 min",
+  "description": "Conquer all enemy planets in just 8 turns! A high-speed challenge requiring aggressive expansion and perfect timing.",
+  "prerequisites": ["tutorial-001"],
+  "victoryConditions": [
+    {
+      "type": "capture_all_planets",
+      "turnsLimit": 8
+    }
+  ],
+  "defeatConditions": [
+    {
+      "type": "turn_limit",
+      "turns": 8
+    },
+    {
+      "type": "home_planet_lost"
+    }
+  ],
+  "specialRules": [
+    {
+      "type": "no_new_platoons",
+      "description": "Cannot commission new platoons - use your starting forces wisely"
+    }
+  ],
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 20000,
+      "minerals": 5000,
+      "fuel": 3000,
+      "food": 1000,
+      "energy": 600
+    },
+    "playerCraft": [
+      { "type": "BattleCruiser", "planet": "planet-1" },
+      { "type": "BattleCruiser", "planet": "planet-1" },
+      { "type": "BattleCruiser", "planet": "planet-1" }
+    ],
+    "playerPlatoons": [
+      { "troops": 300, "equipment": "Heavy", "weapon": "Laser", "planet": "planet-1" },
+      { "troops": 300, "equipment": "Heavy", "weapon": "Laser", "planet": "planet-1" },
+      { "troops": 200, "equipment": "Standard", "weapon": "Rifle", "planet": "planet-1" }
+    ],
+    "aiPlanets": ["planet-2", "planet-3"],
+    "aiEnabled": true,
+    "aiPersonality": "Defensive",
+    "aiDifficulty": "Hard"
+  },
+  "starTargets": {
+    "threeStarTurns": 5,
+    "twoStarTurns": 7
+  }
+}

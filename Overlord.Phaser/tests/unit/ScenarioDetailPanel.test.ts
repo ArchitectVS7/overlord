@@ -247,4 +247,68 @@ describe('ScenarioDetailPanel', () => {
       expect(details?.starRating).toBe(2);
     });
   });
+
+  describe('special rules display (Story 8-1)', () => {
+    const scenarioWithRules: Scenario = {
+      id: 'tactical-001',
+      name: 'Last Stand',
+      type: 'tactical',
+      difficulty: 'expert',
+      duration: '15-20 min',
+      description: 'Defend against overwhelming odds',
+      prerequisites: [],
+      victoryConditions: [{ type: 'survive_turns', turns: 15 }],
+      specialRules: [
+        { type: 'no_new_platoons', description: 'Cannot commission new platoons' },
+        { type: 'no_new_craft', description: 'Cannot purchase new spacecraft' },
+        { type: 'limited_income', description: 'Resource income reduced by 50%', value: 50 }
+      ],
+      initialState: {
+        playerPlanets: ['planet-1'],
+        playerResources: { credits: 5000 },
+        aiPlanets: ['planet-2'],
+        aiEnabled: true
+      }
+    };
+
+    test('should have formatSpecialRules method', () => {
+      expect(typeof panel.formatSpecialRules).toBe('function');
+    });
+
+    test('should return empty string for scenario without special rules', async () => {
+      await manager.loadScenario(mockScenario);
+      panel.setScenario(mockScenario);
+
+      const rulesText = panel.formatSpecialRules();
+      expect(rulesText).toBe('');
+    });
+
+    test('should format special rules for display', async () => {
+      await manager.loadScenario(scenarioWithRules);
+      panel.setScenario(scenarioWithRules);
+
+      const rulesText = panel.formatSpecialRules();
+      expect(rulesText).toContain('Cannot commission new platoons');
+      expect(rulesText).toContain('Cannot purchase new spacecraft');
+      expect(rulesText).toContain('Resource income reduced by 50%');
+    });
+
+    test('should have getSpecialRulesCount method', () => {
+      expect(typeof panel.getSpecialRulesCount).toBe('function');
+    });
+
+    test('should return correct special rules count', async () => {
+      await manager.loadScenario(scenarioWithRules);
+      panel.setScenario(scenarioWithRules);
+
+      expect(panel.getSpecialRulesCount()).toBe(3);
+    });
+
+    test('should return 0 for scenario without special rules', async () => {
+      await manager.loadScenario(mockScenario);
+      panel.setScenario(mockScenario);
+
+      expect(panel.getSpecialRulesCount()).toBe(0);
+    });
+  });
 });
