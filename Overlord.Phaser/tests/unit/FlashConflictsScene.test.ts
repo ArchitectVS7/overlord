@@ -14,6 +14,67 @@ jest.mock('phaser', () => ({
       constructor(config: { key: string }) {
         this.key = config.key;
       }
+    },
+    GameObjects: {
+      Container: class MockContainer {
+        scene: unknown;
+        x = 0;
+        y = 0;
+        visible = true;
+        depth = 0;
+        list: unknown[] = [];
+
+        constructor(scene: unknown, x = 0, y = 0) {
+          this.scene = scene;
+          this.x = x;
+          this.y = y;
+        }
+
+        add(child: unknown): this { this.list.push(child); return this; }
+        removeAll(): this { this.list = []; return this; }
+        setPosition(x: number, y: number): this { this.x = x; this.y = y; return this; }
+        setVisible(v: boolean): this { this.visible = v; return this; }
+        setDepth(d: number): this { this.depth = d; return this; }
+        setScrollFactor(): this { return this; }
+        destroy(): void { this.list = []; }
+      },
+      Graphics: class MockGraphics {
+        fillStyle(): this { return this; }
+        fillRoundedRect(): this { return this; }
+        fillRect(): this { return this; }
+        lineStyle(): this { return this; }
+        strokeRoundedRect(): this { return this; }
+        strokeRect(): this { return this; }
+        clear(): this { return this; }
+        destroy(): void {}
+      },
+      Text: class MockText {
+        x = 0;
+        y = 0;
+        text = '';
+        constructor(_scene: unknown, x: number, y: number, text: string) {
+          this.x = x;
+          this.y = y;
+          this.text = text;
+        }
+        setText(t: string): this { this.text = t; return this; }
+        setOrigin(): this { return this; }
+        setColor(): this { return this; }
+        setInteractive(): this { return this; }
+        on(): this { return this; }
+        destroy(): void {}
+      },
+      Rectangle: class MockRectangle {
+        setOrigin(): this { return this; }
+        setInteractive(): this { return this; }
+        on(): this { return this; }
+        destroy(): void {}
+      },
+      Zone: class MockZone {
+        setInteractive(): this { return this; }
+        on(): this { return this; }
+        destroy(): void {}
+      }
     }
   }
 }));
@@ -32,18 +93,51 @@ function createMockSceneContext() {
             x, y, text, style,
             setOrigin: jest.fn().mockReturnThis(),
             setInteractive: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setColor: jest.fn().mockReturnThis(),
             on: jest.fn().mockReturnThis()
           };
           addedObjects.push(textObj);
           return textObj;
         }),
+        container: jest.fn((x: number, y: number) => {
+          const container = {
+            x, y,
+            y_local: y,
+            add: jest.fn().mockReturnThis(),
+            setVisible: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setPosition: jest.fn().mockReturnThis(),
+            setMask: jest.fn().mockReturnThis(),
+            setInteractive: jest.fn().mockReturnThis(),
+            on: jest.fn().mockReturnThis(),
+            destroy: jest.fn()
+          };
+          addedObjects.push(container);
+          return container;
+        }),
+        existing: jest.fn().mockReturnValue(undefined),
+        rectangle: jest.fn(() => {
+          return {
+            setOrigin: jest.fn().mockReturnThis(),
+            setInteractive: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
+            setVisible: jest.fn().mockReturnThis(),
+            on: jest.fn().mockReturnThis()
+          };
+        }),
         graphics: jest.fn(() => {
           const gfx = {
             fillStyle: jest.fn().mockReturnThis(),
             fillRoundedRect: jest.fn().mockReturnThis(),
+            fillRect: jest.fn().mockReturnThis(),
             lineStyle: jest.fn().mockReturnThis(),
             strokeRoundedRect: jest.fn().mockReturnThis(),
-            clear: jest.fn().mockReturnThis()
+            strokeRect: jest.fn().mockReturnThis(),
+            clear: jest.fn().mockReturnThis(),
+            createGeometryMask: jest.fn().mockReturnValue({ destroy: jest.fn() })
           };
           addedObjects.push(gfx);
           return gfx;
@@ -62,8 +156,20 @@ function createMockSceneContext() {
     cameras: {
       main: {
         width: 1024,
-        height: 768
+        height: 768,
+        setBackgroundColor: jest.fn()
       }
+    },
+    input: {
+      on: jest.fn().mockReturnThis(),
+      off: jest.fn().mockReturnThis()
+    },
+    tweens: {
+      add: jest.fn((config) => {
+        if (config.onComplete) config.onComplete();
+        return { stop: jest.fn() };
+      }),
+      killTweensOf: jest.fn()
     },
     addedObjects
   };
@@ -82,6 +188,8 @@ describe('FlashConflictsScene', () => {
     (sceneInstance as any).add = mockContext.scene.add;
     (sceneInstance as any).scene = mockContext.scene;
     (sceneInstance as any).cameras = mockContext.cameras;
+    (sceneInstance as any).input = mockContext.input;
+    (sceneInstance as any).tweens = mockContext.tweens;
   });
 
   describe('initialization', () => {
