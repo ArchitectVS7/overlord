@@ -31,6 +31,13 @@ const SUCCESS_COLOR = '#44aa44';
 const BUTTON_BG_COLOR = 0x4488ff;
 const BUTTON_HOVER_COLOR = 0x5599ff;
 const BUTTON_DISABLED_COLOR = 0x333344;
+const STAR_COLOR_FILLED = '#ffcc00';
+const STAR_COLOR_EMPTY = '#444444';
+
+interface CompletionDetails {
+  bestTimeSeconds: number;
+  starRating: number;
+}
 
 export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;
@@ -40,6 +47,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
 
   private scenario: Scenario | null = null;
   private manager: ScenarioManager;
+  private completionDetails?: CompletionDetails;
 
   // UI elements
   private titleText!: Phaser.GameObjects.Text;
@@ -47,6 +55,8 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
   private victoryText!: Phaser.GameObjects.Text;
   private prerequisitesText!: Phaser.GameObjects.Text;
   private completionText!: Phaser.GameObjects.Text;
+  private bestTimeText!: Phaser.GameObjects.Text;
+  private starRatingContainer!: Phaser.GameObjects.Container;
   private startButton!: Phaser.GameObjects.Container;
   private backButton!: Phaser.GameObjects.Container;
 
@@ -153,6 +163,17 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
       fontStyle: 'bold'
     });
     this.contentContainer.add(this.completionText);
+
+    // Best time (Story 1-6)
+    this.bestTimeText = this.scene.add.text(0, 350, '', {
+      fontSize: '14px',
+      color: LABEL_COLOR
+    });
+    this.contentContainer.add(this.bestTimeText);
+
+    // Star rating container (Story 1-6)
+    this.starRatingContainer = this.scene.add.container(0, 380);
+    this.contentContainer.add(this.starRatingContainer);
 
     // Start button
     this.startButton = this.createButton(
@@ -381,6 +402,51 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
   isCompleted(): boolean {
     if (!this.scenario) return false;
     return this.manager.getCompletion(this.scenario.id)?.completed === true;
+  }
+
+  /**
+   * Set completion details (best time, star rating)
+   * Story 1-6: Scenario Completion History Tracking
+   */
+  setCompletionDetails(details: CompletionDetails): void {
+    this.completionDetails = details;
+    this.updateCompletionDetailsDisplay();
+  }
+
+  /**
+   * Get completion details
+   */
+  getCompletionDetails(): CompletionDetails | undefined {
+    return this.completionDetails;
+  }
+
+  /**
+   * Update the best time and star rating display
+   */
+  private updateCompletionDetailsDisplay(): void {
+    if (!this.completionDetails) {
+      this.bestTimeText.setText('');
+      this.starRatingContainer.removeAll(true);
+      return;
+    }
+
+    // Format and display best time
+    const minutes = Math.floor(this.completionDetails.bestTimeSeconds / 60);
+    const seconds = Math.floor(this.completionDetails.bestTimeSeconds % 60);
+    const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    this.bestTimeText.setText(`Best Time: ${timeFormatted}`);
+
+    // Display star rating
+    this.starRatingContainer.removeAll(true);
+    for (let i = 0; i < 3; i++) {
+      const starX = i * 25;
+      const starColor = i < this.completionDetails.starRating ? STAR_COLOR_FILLED : STAR_COLOR_EMPTY;
+      const starText = this.scene.add.text(starX, 0, '★', {
+        fontSize: '20px',
+        color: starColor
+      });
+      this.starRatingContainer.add(starText);
+    }
   }
 
   /**

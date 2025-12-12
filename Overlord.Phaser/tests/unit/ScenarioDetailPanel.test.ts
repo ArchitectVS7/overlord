@@ -24,6 +24,7 @@ jest.mock('phaser', () => ({
         }
 
         add(child: unknown): this { this.list.push(child); return this; }
+        removeAll(destroyChildren?: boolean): this { this.list = []; return this; }
         setPosition(x: number, y: number): this { this.x = x; this.y = y; return this; }
         setVisible(v: boolean): this { this.visible = v; return this; }
         setDepth(d: number): this { this.depth = d; return this; }
@@ -211,5 +212,39 @@ describe('ScenarioDetailPanel', () => {
 
     // Should show as completed
     expect(panel.isCompleted()).toBe(true);
+  });
+
+  describe('completion details (Story 1-6)', () => {
+    test('should have setCompletionDetails method', () => {
+      expect(typeof panel.setCompletionDetails).toBe('function');
+    });
+
+    test('should accept best time and star rating', async () => {
+      await manager.loadScenario(mockScenario);
+      panel.setScenario(mockScenario);
+
+      expect(() => panel.setCompletionDetails({
+        bestTimeSeconds: 120,
+        starRating: 3
+      })).not.toThrow();
+    });
+
+    test('should return empty details when no completion data set', () => {
+      const details = panel.getCompletionDetails();
+      expect(details).toBeUndefined();
+    });
+
+    test('should store completion details', async () => {
+      await manager.loadScenario(mockScenario);
+      panel.setScenario(mockScenario);
+      panel.setCompletionDetails({
+        bestTimeSeconds: 90,
+        starRating: 2
+      });
+
+      const details = panel.getCompletionDetails();
+      expect(details?.bestTimeSeconds).toBe(90);
+      expect(details?.starRating).toBe(2);
+    });
   });
 });

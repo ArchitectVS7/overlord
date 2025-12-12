@@ -180,13 +180,13 @@ development_status:
   # EPIC 1: Player Onboarding & Tutorials
   # Priority: HIGH (Phase B) - Critical for new players
   # =============================================================================
-  epic-1: in-progress
+  epic-1: done                                            # v0.8.0-onboarding All 6 stories complete
   1-1-flash-conflicts-menu-access: done                   # FlashConflictsScene minimal impl for 1-2 integration
   1-2-scenario-selection-interface: done                  # Code review: 19 tests passing, mock issue noted for followup
   1-3-scenario-initialization-and-victory-conditions: done      # ScenarioInitializer, VictoryConditionSystem, ObjectivesPanel - 44 tests
   1-4-tutorial-step-guidance-system: done                  # TutorialManager, ActionDetector, Highlight, StepPanel - 106 tests
   1-5-scenario-completion-and-results-display: done       # ScenarioResultsPanel, StarRatingSystem, ScenarioCompletionService - 55 tests
-  1-6-scenario-completion-history-tracking: drafted       # [CORE-PARTIAL] Save logic exists
+  1-6-scenario-completion-history-tracking: done          # ScenarioDetailPanel best time/stars display - 8 tests
   epic-1-retrospective: optional
 
   # =============================================================================
