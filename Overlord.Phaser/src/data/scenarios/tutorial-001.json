@@ -1,0 +1,50 @@
+{
+  "id": "tutorial-001",
+  "name": "First Steps",
+  "type": "tutorial",
+  "difficulty": "easy",
+  "duration": "5-10 min",
+  "description": "Learn the basics of planet management and resource gathering. This tutorial will guide you through selecting your planet, building your first mining station, and understanding the core game mechanics.",
+  "prerequisites": [],
+  "victoryConditions": [
+    {
+      "type": "build_structure",
+      "target": "MiningStation",
+      "count": 1
+    }
+  ],
+  "initialState": {
+    "playerPlanets": ["planet-alpha"],
+    "playerResources": {
+      "credits": 5000,
+      "minerals": 1000,
+      "fuel": 500,
+      "food": 200,
+      "energy": 100
+    },
+    "aiPlanets": [],
+    "aiEnabled": false
+  },
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Welcome to Overlord! Click on your planet to select it.",
+      "highlight": "planet"
+    },
+    {
+      "step": 2,
+      "text": "Great! Now open the build menu to see available structures.",
+      "highlight": "build-button"
+    },
+    {
+      "step": 3,
+      "text": "Select the Mining Station from the list. Mining stations generate minerals each turn.",
+      "highlight": "mining-station-option"
+    },
+    {
+      "step": 4,
+      "text": "Confirm the construction. The mining station will be built on your planet.",
+      "highlight": "confirm-build-button"
+    }
+  ]
+}
