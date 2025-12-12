@@ -30,6 +30,14 @@ const TEXT_COLOR = '#ffffff';
 const LABEL_COLOR = '#aaaaaa';
 const TUTORIAL_BADGE_COLOR = 0x44aa44;
 const TACTICAL_BADGE_COLOR = 0xaa4444;
+const COMPLETED_BADGE_COLOR = 0x44aaff;
+const STAR_COLOR_FILLED = '#ffcc00';
+const STAR_COLOR_EMPTY = '#444444';
+
+interface CompletionData {
+  completed: boolean;
+  starRating: number;
+}
 
 interface ScenarioCard {
   scenario: Scenario;
@@ -49,6 +57,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
   private scrollY: number = 0;
   private maxScrollY: number = 0;
   private isVisible: boolean = false;
+  private completionData: Map<string, CompletionData> = new Map();
 
   // UI elements
   private titleText!: Phaser.GameObjects.Text;
@@ -154,6 +163,15 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Set completion data for scenarios
+   * @param data Map of scenario ID to completion info
+   */
+  setCompletionData(data: Map<string, CompletionData>): void {
+    this.completionData = data;
+    this.renderScenarioCards();
+  }
+
+  /**
    * Render scenario cards
    */
   private renderScenarioCards(): void {
@@ -243,6 +261,36 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
       }
     );
     container.add(infoText);
+
+    // Completion badge and stars (Story 1-5)
+    const completion = this.completionData.get(scenario.id);
+    if (completion?.completed) {
+      // Completed badge
+      const completedBadge = this.scene.add.graphics();
+      completedBadge.fillStyle(COMPLETED_BADGE_COLOR, 1);
+      completedBadge.fillRoundedRect(cardWidth - 130, 10, 80, 24, 4);
+      container.add(completedBadge);
+
+      const completedText = this.scene.add.text(cardWidth - 90, 22, 'DONE', {
+        fontSize: '12px',
+        color: TEXT_COLOR,
+        fontStyle: 'bold'
+      });
+      completedText.setOrigin(0.5, 0.5);
+      container.add(completedText);
+
+      // Star rating
+      const starY = 50;
+      for (let i = 0; i < 3; i++) {
+        const starX = cardWidth - 130 + i * 20;
+        const starColor = i < completion.starRating ? STAR_COLOR_FILLED : STAR_COLOR_EMPTY;
+        const starText = this.scene.add.text(starX, starY, '★', {
+          fontSize: '16px',
+          color: starColor
+        });
+        container.add(starText);
+      }
+    }
 
     return {
       scenario,

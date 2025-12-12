@@ -18,9 +18,12 @@ import { ScenarioInitializer, ScenarioGameState } from '@core/ScenarioInitialize
 import { VictoryConditionSystem } from '@core/VictoryConditionSystem';
 import { TutorialManager } from '@core/TutorialManager';
 import { TutorialActionDetector } from '@core/TutorialActionDetector';
+import { StarRatingSystem, ScenarioResults, StarTargets } from '@core/StarRatingSystem';
+import { getCompletionService } from '@core/ScenarioCompletionService';
 import { ObjectivesPanel } from './ui/ObjectivesPanel';
 import { TutorialHighlight } from './ui/TutorialHighlight';
 import { TutorialStepPanel } from './ui/TutorialStepPanel';
+import { ScenarioResultsPanel } from './ui/ScenarioResultsPanel';
 
 /**
  * Data passed to this scene
@@ -43,6 +46,14 @@ export class ScenarioGameScene extends Phaser.Scene {
   private tutorialActionDetector!: TutorialActionDetector;
   private tutorialHighlight!: TutorialHighlight;
   private tutorialStepPanel!: TutorialStepPanel;
+
+  // Completion tracking (Story 1-5)
+  private scenarioStartTime: number = 0;
+  private resultsPanel!: ScenarioResultsPanel;
+  private ratingSystem!: StarRatingSystem;
+  private scenarioPaused: boolean = false;
+  private conditionCheckTimer?: Phaser.Time.TimerEvent;
+  private lastResults?: ScenarioResults;
 
   // Error display
   private errorText?: Phaser.GameObjects.Text;
@@ -82,6 +93,14 @@ export class ScenarioGameScene extends Phaser.Scene {
     // Initialize victory system
     this.victorySystem = new VictoryConditionSystem();
 
+    // Initialize completion tracking (Story 1-5)
+    this.scenarioStartTime = Date.now();
+    this.ratingSystem = new StarRatingSystem();
+    this.resultsPanel = new ScenarioResultsPanel(this);
+    this.resultsPanel.onContinue = () => this.handleContinue();
+    this.resultsPanel.onRetry = () => this.handleRetry();
+    this.resultsPanel.onExit = () => this.handleExit();
+
     // Set up background
     this.cameras.main.setBackgroundColor('#0a0a1a');
 
@@ -120,6 +139,14 @@ export class ScenarioGameScene extends Phaser.Scene {
 
     // Create basic HUD
     this.createHUD();
+
+    // Set up periodic victory/defeat condition checking (every 500ms to ensure <1s detection)
+    this.conditionCheckTimer = this.time.addEvent({
+      delay: 500,
+      callback: this.onConditionCheck,
+      callbackScope: this,
+      loop: true
+    });
   }
 
   /**
@@ -215,6 +242,169 @@ export class ScenarioGameScene extends Phaser.Scene {
    */
   public getTutorialActionDetector(): TutorialActionDetector | undefined {
     return this.tutorialActionDetector;
+  }
+
+  // ==================== Completion Time Tracking (Story 1-5) ====================
+
+  /**
+   * Get elapsed time since scenario started in seconds
+   */
+  public getElapsedTimeSeconds(): number {
+    if (!this.scenarioStartTime) {
+      return 0;
+    }
+    return Math.floor((Date.now() - this.scenarioStartTime) / 1000);
+  }
+
+  /**
+   * Show results panel for victory or defeat
+   * @param isVictory Whether the player won
+   * @param conditionMet Victory condition description (for victory)
+   * @param defeatReason Defeat reason (for defeat)
+   */
+  public showResults(isVictory: boolean, conditionMet?: string, defeatReason?: string): void {
+    if (!this.scenario) return;
+
+    // Pause gameplay
+    this.scenarioPaused = true;
+
+    // Calculate completion time
+    const completionTime = this.getElapsedTimeSeconds();
+
+    // Get star targets from scenario or use defaults
+    const targets: StarTargets = {
+      threeStarTime: (this.scenario as any).starTargets?.threeStarTime ?? 120,
+      twoStarTime: (this.scenario as any).starTargets?.twoStarTime ?? 240
+    };
+
+    // Create results object
+    const results: ScenarioResults = this.ratingSystem.createResults(
+      this.scenario.id,
+      isVictory,
+      completionTime,
+      targets,
+      conditionMet,
+      defeatReason,
+      1 // attempts (to be tracked in Story 1-6)
+    );
+
+    // Store results for later use
+    this.lastResults = results;
+
+    // Stop condition checking timer
+    if (this.conditionCheckTimer) {
+      this.conditionCheckTimer.remove();
+    }
+
+    // Show appropriate panel
+    if (isVictory) {
+      this.resultsPanel.showVictory(results);
+    } else {
+      this.resultsPanel.showDefeat(results);
+    }
+  }
+
+  /**
+   * Handle Continue button click from results panel
+   */
+  private handleContinue(): void {
+    // Record completion (Story 1-5)
+    if (this.lastResults && this.lastResults.completed) {
+      const completionService = getCompletionService();
+      completionService.markCompleted(
+        this.lastResults.scenarioId,
+        this.lastResults.completionTime,
+        this.lastResults.starRating
+      );
+    }
+
+    // Return to Flash Conflicts menu
+    this.scene.start('FlashConflictsScene');
+  }
+
+  /**
+   * Handle Retry button click from results panel
+   */
+  private handleRetry(): void {
+    // Restart the same scenario
+    this.scene.start('ScenarioGameScene', { scenario: this.scenario });
+  }
+
+  /**
+   * Handle Exit button click from results panel
+   */
+  private handleExit(): void {
+    // Return to menu without recording completion
+    this.scene.start('FlashConflictsScene');
+  }
+
+  /**
+   * Check if gameplay is paused (results showing)
+   */
+  public isGameplayPaused(): boolean {
+    return this.scenarioPaused;
+  }
+
+  /**
+   * Periodic callback to check victory/defeat conditions
+   */
+  private onConditionCheck(): void {
+    // Check defeat first (player lost)
+    if (this.checkDefeatConditions()) {
+      return;
+    }
+
+    // Then check victory
+    this.checkVictoryConditions();
+  }
+
+  /**
+   * Check if victory conditions are met
+   * @returns true if victory triggered, false otherwise
+   */
+  private checkVictoryConditions(): boolean {
+    if (this.scenarioPaused || !this.gameState || !this.scenario) {
+      return false;
+    }
+
+    const startTurn = this.gameState.scenarioStartTurn ?? 1;
+    const results = this.victorySystem.evaluateAll(
+      this.scenario.victoryConditions,
+      this.gameState,
+      startTurn
+    );
+
+    if (results.allMet) {
+      // Find the first met condition for the description
+      const metCondition = results.conditions.find(c => c.met);
+      const conditionDescription = metCondition?.description ?? 'Victory!';
+
+      // Trigger victory
+      this.showResults(true, conditionDescription);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if defeat conditions are met
+   * @returns true if defeat triggered, false otherwise
+   */
+  private checkDefeatConditions(): boolean {
+    if (this.scenarioPaused || !this.gameState) {
+      return false;
+    }
+
+    // Primary defeat condition: player has no planets
+    if (this.gameState.playerFaction.ownedPlanetIDs.length === 0) {
+      this.showResults(false, undefined, 'All planets lost');
+      return true;
+    }
+
+    // Additional defeat conditions can be added here (e.g., scenario-specific)
+
+    return false;
   }
 
   /**

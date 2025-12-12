@@ -201,6 +201,9 @@ function createMockSceneContext() {
         // Immediately invoke callback for testing
         callback();
         return { remove: jest.fn() };
+      }),
+      addEvent: jest.fn((config: any) => {
+        return { remove: jest.fn(), paused: false, ...config };
       })
     },
     tweens: {
@@ -335,6 +338,147 @@ describe('ScenarioGameScene', () => {
       sceneInstance.create();
 
       expect((sceneInstance as any).victorySystem).toBeDefined();
+    });
+  });
+
+  describe('completion time tracking (Story 1-5)', () => {
+    test('should record scenario start time on create', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+
+      const beforeCreate = Date.now();
+      sceneInstance.create();
+      const afterCreate = Date.now();
+
+      const startTime = (sceneInstance as any).scenarioStartTime;
+      expect(startTime).toBeDefined();
+      expect(startTime).toBeGreaterThanOrEqual(beforeCreate);
+      expect(startTime).toBeLessThanOrEqual(afterCreate);
+    });
+
+    test('should calculate elapsed time in seconds', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      // Manually set start time to 60 seconds ago
+      (sceneInstance as any).scenarioStartTime = Date.now() - 60000;
+
+      const elapsed = sceneInstance.getElapsedTimeSeconds();
+      expect(elapsed).toBeGreaterThanOrEqual(59); // Allow for timing variance
+      expect(elapsed).toBeLessThanOrEqual(61);
+    });
+
+    test('should have getElapsedTimeSeconds method', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      expect(typeof sceneInstance.getElapsedTimeSeconds).toBe('function');
+    });
+
+    test('should return 0 for elapsed time if scenario not started', () => {
+      // Don't call create
+      expect(sceneInstance.getElapsedTimeSeconds()).toBe(0);
+    });
+
+    test('should have ScenarioResultsPanel after create', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      expect((sceneInstance as any).resultsPanel).toBeDefined();
+    });
+
+    test('should have showResults method', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      expect(typeof sceneInstance.showResults).toBe('function');
+    });
+  });
+
+  describe('victory/defeat detection integration (Story 1-5)', () => {
+    test('should have checkVictoryConditions method', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      expect(typeof (sceneInstance as any).checkVictoryConditions).toBe('function');
+    });
+
+    test('should have checkDefeatConditions method', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      expect(typeof (sceneInstance as any).checkDefeatConditions).toBe('function');
+    });
+
+    test('should set up periodic condition checking', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      // Verify time.addEvent was called for condition checking
+      expect((sceneInstance as any).conditionCheckTimer).toBeDefined();
+    });
+
+    test('should not check conditions when gameplay is paused', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      // Manually pause gameplay
+      (sceneInstance as any).scenarioPaused = true;
+
+      // Manually call check - should return early
+      const result = (sceneInstance as any).checkVictoryConditions();
+      expect(result).toBe(false);
+    });
+
+    test('should trigger victory when all conditions met', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      // Mock victory system to return all conditions met
+      (sceneInstance as any).victorySystem.evaluateAll = jest.fn().mockReturnValue({
+        allMet: true,
+        conditions: [{ condition: { type: 'defeat_enemy' }, met: true, progress: 1, description: 'Victory!' }]
+      });
+
+      // Check conditions
+      const result = (sceneInstance as any).checkVictoryConditions();
+      expect(result).toBe(true);
+      expect((sceneInstance as any).scenarioPaused).toBe(true);
+    });
+
+    test('should detect defeat when player has no planets', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      // Remove all player planets from game state
+      (sceneInstance as any).gameState.playerFaction.ownedPlanetIDs = [];
+
+      // Check defeat conditions
+      const result = (sceneInstance as any).checkDefeatConditions();
+      expect(result).toBe(true);
+    });
+
+    test('should not detect defeat when player has planets', () => {
+      const scenario = createValidScenario();
+      sceneInstance.init({ scenario });
+      sceneInstance.create();
+
+      // Ensure player has planets
+      expect((sceneInstance as any).gameState.playerFaction.ownedPlanetIDs.length).toBeGreaterThan(0);
+
+      // Check defeat conditions
+      const result = (sceneInstance as any).checkDefeatConditions();
+      expect(result).toBe(false);
     });
   });
 });

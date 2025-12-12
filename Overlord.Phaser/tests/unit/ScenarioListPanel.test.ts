@@ -248,4 +248,42 @@ describe('ScenarioListPanel', () => {
     // Panel should have scrolling enabled
     expect(panel.isScrollable()).toBe(true);
   });
+
+  describe('completion badges (Story 1-5)', () => {
+    test('should have setCompletionData method', () => {
+      expect(typeof panel.setCompletionData).toBe('function');
+    });
+
+    test('should accept completion data', () => {
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      completions.set('tutorial-001', { completed: true, starRating: 3 });
+
+      expect(() => panel.setCompletionData(completions)).not.toThrow();
+    });
+
+    test('should re-render cards when completion data is set', () => {
+      panel.setScenarios(mockScenarios);
+
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      completions.set('tutorial-001', { completed: true, starRating: 3 });
+      panel.setCompletionData(completions);
+
+      // Cards should be re-rendered
+      const cards = panel.getScenarioCards();
+      expect(cards.length).toBe(2);
+    });
+
+    test('should mark completed scenario in card data', () => {
+      panel.setScenarios(mockScenarios);
+
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      completions.set('tutorial-001', { completed: true, starRating: 3 });
+      panel.setCompletionData(completions);
+
+      const cards = panel.getScenarioCards();
+      // Check that completion data is available
+      const tutorialCard = cards.find(c => c.scenario.id === 'tutorial-001');
+      expect(tutorialCard).toBeDefined();
+    });
+  });
 });

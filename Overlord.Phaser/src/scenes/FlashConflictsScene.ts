@@ -10,6 +10,7 @@
 
 import Phaser from 'phaser';
 import { ScenarioManager } from '@core/ScenarioManager';
+import { getCompletionService } from '@core/ScenarioCompletionService';
 import { ScenarioListPanel } from './ui/ScenarioListPanel';
 import { ScenarioDetailPanel } from './ui/ScenarioDetailPanel';
 import { Scenario } from '@core/models/ScenarioModels';
@@ -79,7 +80,32 @@ export class FlashConflictsScene extends Phaser.Scene {
     // Get all scenarios and show list
     const scenarios = this.scenarioManager.getScenarios();
     this.listPanel.setScenarios(scenarios);
+
+    // Load completion data (Story 1-5)
+    this.loadCompletionData(scenarios);
+
     this.listPanel.show();
+  }
+
+  /**
+   * Load completion data for scenarios
+   * Story 1-5: Scenario Completion and Results Display
+   */
+  private loadCompletionData(scenarios: Scenario[]): void {
+    const completionService = getCompletionService();
+    const completionData = new Map<string, { completed: boolean; starRating: number }>();
+
+    for (const scenario of scenarios) {
+      const completion = completionService.getCompletion(scenario.id);
+      if (completion) {
+        completionData.set(scenario.id, {
+          completed: completion.completed,
+          starRating: completion.starRating
+        });
+      }
+    }
+
+    this.listPanel.setCompletionData(completionData);
   }
 
   /**
