@@ -2,6 +2,10 @@
 
 This document consolidates all art, UI, and sound requirements in one place and adds generation-ready prompts for three image platforms.
 
+## Upstream design docs (for reference)
+- [Product Requirements Document](./artifacts/prd.md)
+- [Prototype wireframes (Excalidraw)](./artifacts/diagrams/wireframe-overlord-prototype-20251209.excalidraw)
+
 ## Canonical Requirements from Existing Specs
 - Rendering approach: 2D/isometric presentation (sprites over 3D).【F:design-docs/artifacts/prd.md†L153-L164】
 - Asset budgets and load strategy: <10 MB critical load (UI, galaxy background, 5 planet placeholders); on-demand craft/planet detail/combat assets; reuse base sprites with faction tinting (Player=blue, AI=red, Neutral=gray).【F:design-docs/artifacts/prd.md†L840-L864】
