@@ -286,4 +286,185 @@ describe('ScenarioListPanel', () => {
       expect(tutorialCard).toBeDefined();
     });
   });
+
+  describe('difficulty filtering (Story 8-1)', () => {
+    let scenariosWithDifficulties: Scenario[];
+
+    beforeEach(() => {
+      scenariosWithDifficulties = [
+        {
+          id: 'easy-1',
+          name: 'Easy Mission',
+          type: 'tactical',
+          difficulty: 'easy',
+          duration: '5 min',
+          description: 'Easy',
+          prerequisites: [],
+          victoryConditions: [{ type: 'defeat_enemy' }],
+          initialState: { playerPlanets: ['planet-1'], playerResources: { credits: 1000 }, aiPlanets: [], aiEnabled: false }
+        },
+        {
+          id: 'medium-1',
+          name: 'Medium Mission',
+          type: 'tactical',
+          difficulty: 'medium',
+          duration: '10 min',
+          description: 'Medium',
+          prerequisites: [],
+          victoryConditions: [{ type: 'defeat_enemy' }],
+          initialState: { playerPlanets: ['planet-1'], playerResources: { credits: 1000 }, aiPlanets: [], aiEnabled: false }
+        },
+        {
+          id: 'hard-1',
+          name: 'Hard Mission',
+          type: 'tactical',
+          difficulty: 'hard',
+          duration: '15 min',
+          description: 'Hard',
+          prerequisites: [],
+          victoryConditions: [{ type: 'defeat_enemy' }],
+          initialState: { playerPlanets: ['planet-1'], playerResources: { credits: 1000 }, aiPlanets: [], aiEnabled: false }
+        },
+        {
+          id: 'expert-1',
+          name: 'Expert Mission',
+          type: 'tactical',
+          difficulty: 'expert',
+          duration: '20 min',
+          description: 'Expert',
+          prerequisites: [],
+          victoryConditions: [{ type: 'defeat_enemy' }],
+          initialState: { playerPlanets: ['planet-1'], playerResources: { credits: 1000 }, aiPlanets: [], aiEnabled: false }
+        }
+      ];
+    });
+
+    test('should have setDifficultyFilter method', () => {
+      expect(typeof panel.setDifficultyFilter).toBe('function');
+    });
+
+    test('should filter scenarios by difficulty', () => {
+      panel.setScenarios(scenariosWithDifficulties);
+      panel.setDifficultyFilter('hard');
+
+      const cards = panel.getScenarioCards();
+      expect(cards.length).toBe(1);
+      expect(cards[0].scenario.difficulty).toBe('hard');
+    });
+
+    test('should show all scenarios with "all" filter', () => {
+      panel.setScenarios(scenariosWithDifficulties);
+      panel.setDifficultyFilter('all');
+
+      const cards = panel.getScenarioCards();
+      expect(cards.length).toBe(4);
+    });
+
+    test('should sort scenarios by difficulty (easy → expert)', () => {
+      // Set scenarios in non-sorted order
+      const unsortedScenarios = [
+        scenariosWithDifficulties[3], // expert
+        scenariosWithDifficulties[0], // easy
+        scenariosWithDifficulties[2], // hard
+        scenariosWithDifficulties[1]  // medium
+      ];
+      panel.setScenarios(unsortedScenarios);
+
+      const cards = panel.getScenarioCards();
+      expect(cards[0].scenario.difficulty).toBe('easy');
+      expect(cards[1].scenario.difficulty).toBe('medium');
+      expect(cards[2].scenario.difficulty).toBe('hard');
+      expect(cards[3].scenario.difficulty).toBe('expert');
+    });
+
+    test('should have getDifficultyColor helper', () => {
+      expect(typeof panel.getDifficultyColor).toBe('function');
+    });
+
+    test('should return different colors for each difficulty', () => {
+      const easyColor = panel.getDifficultyColor('easy');
+      const mediumColor = panel.getDifficultyColor('medium');
+      const hardColor = panel.getDifficultyColor('hard');
+      const expertColor = panel.getDifficultyColor('expert');
+
+      // All colors should be different
+      const colors = [easyColor, mediumColor, hardColor, expertColor];
+      const uniqueColors = new Set(colors);
+      expect(uniqueColors.size).toBe(4);
+    });
+  });
+
+  describe('prerequisites check (Story 8-1)', () => {
+    let scenariosWithPrereqs: Scenario[];
+
+    beforeEach(() => {
+      scenariosWithPrereqs = [
+        {
+          id: 'tutorial-001',
+          name: 'Tutorial',
+          type: 'tutorial',
+          difficulty: 'easy',
+          duration: '5 min',
+          description: 'Tutorial',
+          prerequisites: [],
+          victoryConditions: [{ type: 'defeat_enemy' }],
+          initialState: { playerPlanets: ['planet-1'], playerResources: { credits: 1000 }, aiPlanets: [], aiEnabled: false }
+        },
+        {
+          id: 'tactical-001',
+          name: 'Tactical Mission',
+          type: 'tactical',
+          difficulty: 'medium',
+          duration: '10 min',
+          description: 'Tactical',
+          prerequisites: ['tutorial-001'],
+          victoryConditions: [{ type: 'defeat_enemy' }],
+          initialState: { playerPlanets: ['planet-1'], playerResources: { credits: 1000 }, aiPlanets: [], aiEnabled: false }
+        }
+      ];
+    });
+
+    test('should have isScenarioUnlocked method', () => {
+      expect(typeof panel.isScenarioUnlocked).toBe('function');
+    });
+
+    test('should return true for scenario with no prerequisites', () => {
+      panel.setScenarios(scenariosWithPrereqs);
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      panel.setCompletionData(completions);
+
+      expect(panel.isScenarioUnlocked('tutorial-001')).toBe(true);
+    });
+
+    test('should return false for scenario with unmet prerequisites', () => {
+      panel.setScenarios(scenariosWithPrereqs);
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      panel.setCompletionData(completions);
+
+      expect(panel.isScenarioUnlocked('tactical-001')).toBe(false);
+    });
+
+    test('should return true for scenario with met prerequisites', () => {
+      panel.setScenarios(scenariosWithPrereqs);
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      completions.set('tutorial-001', { completed: true, starRating: 3 });
+      panel.setCompletionData(completions);
+
+      expect(panel.isScenarioUnlocked('tactical-001')).toBe(true);
+    });
+
+    test('should have getLockedScenarios method', () => {
+      expect(typeof panel.getLockedScenarios).toBe('function');
+    });
+
+    test('should return list of locked scenarios', () => {
+      panel.setScenarios(scenariosWithPrereqs);
+      const completions = new Map<string, { completed: boolean; starRating: number }>();
+      panel.setCompletionData(completions);
+
+      const locked = panel.getLockedScenarios();
+      expect(locked.length).toBe(1);
+      expect(locked[0]).toBe('tactical-001');
+    });
+  });
 });

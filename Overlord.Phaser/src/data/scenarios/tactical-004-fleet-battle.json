@@ -1,0 +1,55 @@
+{
+  "id": "tactical-004-fleet-battle",
+  "name": "Fleet Annihilation",
+  "type": "tactical",
+  "difficulty": "medium",
+  "duration": "12-18 min",
+  "description": "Destroy all enemy spacecraft to achieve victory. Hunt down the enemy fleet and eliminate them from the galaxy.",
+  "prerequisites": ["tutorial-001"],
+  "victoryConditions": [
+    {
+      "type": "destroy_all_ships"
+    }
+  ],
+  "defeatConditions": [
+    {
+      "type": "all_ships_destroyed"
+    },
+    {
+      "type": "home_planet_lost"
+    }
+  ],
+  "specialRules": [],
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 15000,
+      "minerals": 3000,
+      "fuel": 2000,
+      "food": 500,
+      "energy": 400
+    },
+    "playerCraft": [
+      { "type": "BattleCruiser", "planet": "planet-1" },
+      { "type": "BattleCruiser", "planet": "planet-1" },
+      { "type": "Scout", "planet": "planet-1" }
+    ],
+    "playerPlatoons": [
+      { "troops": 150, "equipment": "Standard", "weapon": "Rifle", "planet": "planet-1" }
+    ],
+    "aiPlanets": ["planet-2", "planet-3"],
+    "aiCraft": [
+      { "type": "BattleCruiser", "planet": "planet-2" },
+      { "type": "BattleCruiser", "planet": "planet-3" },
+      { "type": "Scout", "planet": "planet-2" },
+      { "type": "Scout", "planet": "planet-3" }
+    ],
+    "aiEnabled": true,
+    "aiPersonality": "Aggressive",
+    "aiDifficulty": "Normal"
+  },
+  "starTargets": {
+    "threeStarTurns": 10,
+    "twoStarTurns": 15
+  }
+}

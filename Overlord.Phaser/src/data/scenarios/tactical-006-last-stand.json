@@ -1,0 +1,67 @@
+{
+  "id": "tactical-006-last-stand",
+  "name": "Last Stand",
+  "type": "tactical",
+  "difficulty": "expert",
+  "duration": "15-20 min",
+  "description": "Defend against overwhelming odds with limited forces and no reinforcements. Survive 15 turns against a superior enemy to claim victory.",
+  "prerequisites": ["tutorial-001"],
+  "victoryConditions": [
+    {
+      "type": "survive_turns",
+      "turns": 15
+    }
+  ],
+  "defeatConditions": [
+    {
+      "type": "home_planet_lost"
+    }
+  ],
+  "specialRules": [
+    {
+      "type": "no_new_platoons",
+      "description": "Cannot commission new platoons"
+    },
+    {
+      "type": "no_new_craft",
+      "description": "Cannot purchase new spacecraft"
+    },
+    {
+      "type": "limited_income",
+      "description": "Resource income reduced by 50%",
+      "value": 50
+    }
+  ],
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 5000,
+      "minerals": 1500,
+      "fuel": 800,
+      "food": 400,
+      "energy": 200
+    },
+    "playerCraft": [
+      { "type": "BattleCruiser", "planet": "planet-1" }
+    ],
+    "playerPlatoons": [
+      { "troops": 400, "equipment": "Heavy", "weapon": "Laser", "planet": "planet-1" },
+      { "troops": 300, "equipment": "Standard", "weapon": "Rifle", "planet": "planet-1" }
+    ],
+    "aiPlanets": ["planet-2", "planet-3", "planet-4", "planet-5"],
+    "aiCraft": [
+      { "type": "BattleCruiser", "planet": "planet-2" },
+      { "type": "BattleCruiser", "planet": "planet-3" },
+      { "type": "BattleCruiser", "planet": "planet-4" },
+      { "type": "Scout", "planet": "planet-2" },
+      { "type": "Scout", "planet": "planet-3" }
+    ],
+    "aiEnabled": true,
+    "aiPersonality": "Aggressive",
+    "aiDifficulty": "Hard"
+  },
+  "starTargets": {
+    "threeStarTurns": 15,
+    "twoStarTurns": 15
+  }
+}

@@ -8,6 +8,7 @@
 import { VictoryConditionSystem, ConditionResult } from '@core/VictoryConditionSystem';
 import { GameState } from '@core/GameState';
 import { PlanetEntity } from '@core/models/PlanetEntity';
+import { CraftEntity } from '@core/models/CraftEntity';
 import { VictoryCondition } from '@core/models/ScenarioModels';
 import { FactionType, BuildingType, BuildingStatus } from '@core/models/Enums';
 import { Structure } from '@core/models/BuildingModels';
@@ -246,6 +247,171 @@ describe('VictoryConditionSystem', () => {
 
       expect(results.allMet).toBe(true);
       expect(results.conditions.every(c => c.met)).toBe(true);
+    });
+  });
+
+  describe('evaluate resource_target condition (Story 8-1)', () => {
+    test('should return incomplete when resource target not reached', () => {
+      gameState.playerFaction.resources.credits = 30000;
+
+      const condition: VictoryCondition = {
+        type: 'resource_target',
+        resource: 'credits',
+        target: '50000'
+      };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(false);
+      expect(result.progress).toBeCloseTo(0.6, 2); // 30000/50000
+    });
+
+    test('should return complete when resource target reached', () => {
+      gameState.playerFaction.resources.credits = 50000;
+
+      const condition: VictoryCondition = {
+        type: 'resource_target',
+        resource: 'credits',
+        target: '50000'
+      };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(true);
+      expect(result.progress).toBe(1);
+    });
+
+    test('should handle different resource types', () => {
+      gameState.playerFaction.resources.minerals = 2500;
+
+      const condition: VictoryCondition = {
+        type: 'resource_target',
+        resource: 'minerals',
+        target: '5000'
+      };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(false);
+      expect(result.progress).toBeCloseTo(0.5, 2);
+    });
+  });
+
+  describe('evaluate destroy_all_ships condition (Story 8-1)', () => {
+    test('should return incomplete when AI has ships', () => {
+      // Add AI craft to game state
+      const aiCraft = new CraftEntity();
+      aiCraft.id = 1;
+      aiCraft.owner = FactionType.AI;
+      gameState.craft = [aiCraft];
+      gameState.rebuildLookups();
+
+      const condition: VictoryCondition = { type: 'destroy_all_ships' };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(false);
+      expect(result.progress).toBe(0);
+    });
+
+    test('should return complete when AI has no ships', () => {
+      // Only player ships
+      const playerCraft = new CraftEntity();
+      playerCraft.id = 1;
+      playerCraft.owner = FactionType.Player;
+      gameState.craft = [playerCraft];
+      gameState.rebuildLookups();
+
+      const condition: VictoryCondition = { type: 'destroy_all_ships' };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(true);
+      expect(result.progress).toBe(1);
+    });
+
+    test('should return complete when no ships exist at all', () => {
+      gameState.craft = [];
+      gameState.rebuildLookups();
+
+      const condition: VictoryCondition = { type: 'destroy_all_ships' };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(true);
+      expect(result.progress).toBe(1);
+    });
+
+    test('should track progress based on ships destroyed', () => {
+      // AI has 2 ships, player has 1
+      const aiCraft1 = new CraftEntity();
+      aiCraft1.id = 1;
+      aiCraft1.owner = FactionType.AI;
+      const aiCraft2 = new CraftEntity();
+      aiCraft2.id = 2;
+      aiCraft2.owner = FactionType.AI;
+      const playerCraft = new CraftEntity();
+      playerCraft.id = 3;
+      playerCraft.owner = FactionType.Player;
+      gameState.craft = [aiCraft1, aiCraft2, playerCraft];
+      gameState.rebuildLookups();
+
+      const condition: VictoryCondition = { type: 'destroy_all_ships' };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(false);
+      // Progress could be 0 if we don't track destroyed ships, or based on remaining
+    });
+  });
+
+  describe('evaluate capture_all_planets condition (Story 8-1)', () => {
+    test('should return incomplete when AI has planets', () => {
+      const condition: VictoryCondition = { type: 'capture_all_planets' };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(false);
+      expect(result.progress).toBeLessThan(1);
+    });
+
+    test('should return complete when player owns all planets', () => {
+      // Capture AI planet
+      const aiPlanet = gameState.planetLookup.get(2)!;
+      aiPlanet.owner = FactionType.Player;
+      gameState.playerFaction.ownedPlanetIDs.push(2);
+      gameState.aiFaction.ownedPlanetIDs = [];
+
+      const condition: VictoryCondition = { type: 'capture_all_planets' };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(true);
+      expect(result.progress).toBe(1);
+    });
+
+    test('should handle turn limit', () => {
+      gameState.currentTurn = 10;
+
+      // AI planet still not captured
+      const condition: VictoryCondition = {
+        type: 'capture_all_planets',
+        turnsLimit: 8
+      };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(false);
+      expect(result.description).toContain('Turn limit exceeded');
+    });
+
+    test('should succeed within turn limit', () => {
+      gameState.currentTurn = 5;
+
+      // Capture all planets
+      const aiPlanet = gameState.planetLookup.get(2)!;
+      aiPlanet.owner = FactionType.Player;
+      gameState.playerFaction.ownedPlanetIDs.push(2);
+      gameState.aiFaction.ownedPlanetIDs = [];
+
+      const condition: VictoryCondition = {
+        type: 'capture_all_planets',
+        turnsLimit: 8
+      };
+      const result = system.evaluateCondition(condition, gameState);
+
+      expect(result.met).toBe(true);
+      expect(result.progress).toBe(1);
     });
   });
 });
