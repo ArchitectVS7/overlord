@@ -29,6 +29,7 @@ import { EntitySystem } from '@core/EntitySystem';
 import { NavigationSystem } from '@core/NavigationSystem';
 import { CombatSystem } from '@core/CombatSystem';
 import { AIDecisionSystem } from '@core/AIDecisionSystem';
+import { AudioManager } from '@core/AudioManager';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -543,6 +544,13 @@ export class GalaxyMapScene extends Phaser.Scene {
       ctrl: true,
       action: 'save'
     });
+
+    // Ctrl+M - Mute Toggle
+    this.inputManager.registerShortcut({
+      key: 'm',
+      ctrl: true,
+      action: 'mute'
+    });
   }
 
   private setupInputCallbacks(): void {
@@ -592,6 +600,16 @@ export class GalaxyMapScene extends Phaser.Scene {
       case 'save':
         console.log('Save game (Ctrl+S pressed)');
         // TODO: Save game
+        break;
+      case 'mute':
+        const audioManager = AudioManager.getInstance();
+        audioManager.toggleMute();
+        const muteState = audioManager.isMuted() ? 'muted' : 'unmuted';
+        console.log(`Audio ${muteState} (Ctrl+M pressed)`);
+        // Show notification
+        if (this.notificationManager) {
+          this.notificationManager.showNotification(`Audio ${muteState}`, 'info');
+        }
         break;
       case 'endTurn':
         console.log('End turn (Space pressed in action phase)');
