@@ -1,0 +1,49 @@
+{
+  "id": "tactical-002-defense",
+  "name": "Fortress Defense",
+  "type": "tactical",
+  "difficulty": "medium",
+  "duration": "10-15 min",
+  "description": "Defend your home planet against waves of enemy invasions. Survive for 12 turns while protecting your territory.",
+  "prerequisites": ["tutorial-001"],
+  "victoryConditions": [
+    {
+      "type": "survive_turns",
+      "turns": 12
+    }
+  ],
+  "defeatConditions": [
+    {
+      "type": "home_planet_lost"
+    },
+    {
+      "type": "all_planets_lost"
+    }
+  ],
+  "specialRules": [],
+  "initialState": {
+    "playerPlanets": ["planet-1", "planet-2"],
+    "playerResources": {
+      "credits": 8000,
+      "minerals": 3000,
+      "fuel": 1500,
+      "food": 800,
+      "energy": 500
+    },
+    "playerCraft": [
+      { "type": "BattleCruiser", "planet": "planet-1" }
+    ],
+    "playerPlatoons": [
+      { "troops": 300, "equipment": "Heavy", "weapon": "Laser", "planet": "planet-1" },
+      { "troops": 200, "equipment": "Standard", "weapon": "Rifle", "planet": "planet-2" }
+    ],
+    "aiPlanets": ["planet-3", "planet-4", "planet-5"],
+    "aiEnabled": true,
+    "aiPersonality": "Aggressive",
+    "aiDifficulty": "Normal"
+  },
+  "starTargets": {
+    "threeStarTurns": 12,
+    "twoStarTurns": 12
+  }
+}

@@ -421,6 +421,28 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Format special rules for display (Story 8-1)
+   * @returns Formatted string of special rules
+   */
+  formatSpecialRules(): string {
+    if (!this.scenario || !this.scenario.specialRules || this.scenario.specialRules.length === 0) {
+      return '';
+    }
+
+    return this.scenario.specialRules.map(rule => {
+      return `⚠ ${rule.description}`;
+    }).join('\n');
+  }
+
+  /**
+   * Get count of special rules (Story 8-1)
+   * @returns Number of special rules
+   */
+  getSpecialRulesCount(): number {
+    return this.scenario?.specialRules?.length ?? 0;
+  }
+
+  /**
    * Update the best time and star rating display
    */
   private updateCompletionDetailsDisplay(): void {

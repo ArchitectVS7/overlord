@@ -229,7 +229,7 @@ development_status:
   epic-12: in-progress                                   # Infrastructure stories done, asset stories pending
   12-1-sound-effects-for-game-actions: drafted            # [GREENFIELD] AudioSystem - HUMAN INPUT
   12-2-background-music-during-gameplay: drafted          # [GREENFIELD] Music playback - HUMAN INPUT
-  12-3-independent-volume-controls: review                # AudioManager + VolumeControlPanel - 69 tests
-  12-4-mute-audio-toggle: review                          # Integrated in AudioManager + VolumeControlPanel + Ctrl+M shortcut
+  12-3-independent-volume-controls: done                  # AudioManager + VolumeControlPanel + Scene Integration (69 tests)
+  12-4-mute-audio-toggle: done                            # Mute toggle with Ctrl+M, auto-refresh, label toggle
   12-5-user-activation-for-browser-audio-compliance: review   # AudioActivationOverlay - 18 tests
   epic-12-retrospective: optional
