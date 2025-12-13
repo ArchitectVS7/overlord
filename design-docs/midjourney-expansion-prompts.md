@@ -829,6 +829,52 @@ battle engagement active --ar 16:9
 
 ## Expansion Alien Leaders
 
+### Technocrat Leader (Intellectual Archetype)
+
+**Purpose:** Technology-focused AI personality, research-driven
+
+**Design Notes:** Fifth AI personality type for technology/research faction. Would require new AIPersonality enum value.
+
+**Master Prompt (Calm Pose):**
+```
+isometric head-and-shoulders portrait, technocrat alien,
+bioluminescent circuitry on skin, sleek neural interface mask,
+violet HUD reflections in eyes, blue faction lab coat,
+calm analytical expression, smooth features,
+neutral gray backdrop, cool lighting,
+tech integration visible --ar 2:3
+```
+
+**Acceptance Criteria:**
+- Technology integrated into body (cybernetics, implants)
+- Blue faction identification (lab coat, badge)
+- Intelligent/analytical appearance
+- Violet tech accents (exotic technology)
+- Smooth, cerebral features
+- Readable at 1024x1536
+
+**Variant: Technocrat (Scheming Pose)**
+```
+isometric portrait, technocrat alien, bioluminescent circuits,
+neural mask, violet HUD active, blue faction coat,
+calculating expression, data streaming across eyes,
+plotting demeanor, neutral backdrop --ar 2:3
+```
+
+**Modifiers if tech unclear:**
+- Add: "cybernetic implants visible", "neural interface active"
+- Emphasize: "bioluminescent circuitry", "violet tech glow"
+- Increase: HUD reflections, tech integration
+
+**Continuity Notes:**
+- Bioluminescent circuit pattern locked
+- Neural mask design constant
+- Blue faction coat unchanged
+- Violet HUD always present
+- Expression/posture varies
+
+---
+
 ### Zealot Prophet (Religious Archetype)
 
 **Purpose:** Ideological AI personality, fanatical expansion
