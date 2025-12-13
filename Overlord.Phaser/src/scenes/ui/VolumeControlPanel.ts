@@ -73,6 +73,13 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
     this.createVolumeSliders();
     this.createMuteToggle();
 
+    // Subscribe to external mute changes (e.g., Ctrl+M shortcut)
+    this.audioManager.onMuteChanged = (_isMuted: boolean) => {
+      if (this.visible) {
+        this.refresh();
+      }
+    };
+
     scene.add.existing(this as unknown as Phaser.GameObjects.GameObject);
   }
 
@@ -310,7 +317,8 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
   private updateMuteVisuals(): void {
     const isMuted = this.audioManager.isMuted();
     this.muteButton.setFillStyle(isMuted ? COLORS.MUTE_ACTIVE : COLORS.MUTE_INACTIVE);
-    this.muteIndicator.setText(isMuted ? 'Muted' : '');
+    this.muteLabel.setText(isMuted ? 'Unmute' : 'Mute All');
+    this.muteIndicator.setText(isMuted ? 'Audio Muted' : '');
   }
 
   // ============================================
@@ -398,7 +406,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
   }
 
   public getMuteIndicatorText(): string {
-    return this.audioManager.isMuted() ? 'Muted' : '';
+    return this.audioManager.isMuted() ? 'Audio Muted' : '';
   }
 
   // ============================================

@@ -268,7 +268,7 @@ describe('VolumeControlPanel', () => {
   describe('mute indicator', () => {
     test('should show muted indicator when muted', () => {
       panel.toggleMute();
-      expect(panel.getMuteIndicatorText()).toBe('Muted');
+      expect(panel.getMuteIndicatorText()).toBe('Audio Muted');
     });
 
     test('should not show muted indicator when unmuted', () => {
