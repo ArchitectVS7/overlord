@@ -30,6 +30,7 @@ import { NavigationSystem } from '@core/NavigationSystem';
 import { CombatSystem } from '@core/CombatSystem';
 import { AIDecisionSystem } from '@core/AIDecisionSystem';
 import { AudioManager } from '@core/AudioManager';
+import { VolumeControlPanel } from './ui/VolumeControlPanel';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -60,6 +61,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private navigationSystem!: NavigationSystem;
   private combatSystem!: CombatSystem;
   private aiDecisionSystem!: AIDecisionSystem;
+  private volumeControlPanel!: VolumeControlPanel;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -469,6 +471,15 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up victory/defeat detection (Story 2-4, 2-5)
     this.setupVictoryDetection();
 
+    // Create Volume Control Panel - Story 12-3
+    this.volumeControlPanel = new VolumeControlPanel(this);
+    this.volumeControlPanel.setPosition(
+      this.cameras.main.width / 2 - 200,
+      this.cameras.main.height / 2 - 175
+    );
+    this.volumeControlPanel.setScrollFactor(0);
+    this.volumeControlPanel.setDepth(1500);
+
     // Render all planets
     this.renderPlanets();
 
@@ -551,6 +562,13 @@ export class GalaxyMapScene extends Phaser.Scene {
       ctrl: true,
       action: 'mute'
     });
+
+    // Ctrl+, - Audio Settings (Story 12-3)
+    this.inputManager.registerShortcut({
+      key: ',',
+      ctrl: true,
+      action: 'audioSettings'
+    });
   }
 
   private setupInputCallbacks(): void {
@@ -609,6 +627,17 @@ export class GalaxyMapScene extends Phaser.Scene {
         // Show notification
         if (this.notificationManager) {
           this.notificationManager.showNotification(`Audio ${muteState}`, 'info');
+        }
+        break;
+      case 'audioSettings':
+        // Toggle audio settings panel
+        if (this.volumeControlPanel.visible) {
+          this.volumeControlPanel.hide();
+          this.volumeControlPanel.saveSettings();
+          console.log('Audio settings closed (Ctrl+, pressed)');
+        } else {
+          this.volumeControlPanel.show();
+          console.log('Audio settings opened (Ctrl+, pressed)');
         }
         break;
       case 'endTurn':
