@@ -42,8 +42,8 @@ export class ScenarioManager {
       throw new Error('Scenario type must be "tutorial" or "tactical"');
     }
 
-    if (!['easy', 'medium', 'hard'].includes(scenario.difficulty)) {
-      throw new Error('Scenario difficulty must be "easy", "medium", or "hard"');
+    if (!['easy', 'medium', 'hard', 'expert'].includes(scenario.difficulty)) {
+      throw new Error('Scenario difficulty must be "easy", "medium", "hard", or "expert"');
     }
 
     if (!scenario.description || typeof scenario.description !== 'string') {
@@ -141,19 +141,21 @@ export class ScenarioManager {
     // Tutorials first
     if (scenario.type === 'tutorial') {
       // Sort tutorials by difficulty
-      const difficultyPriority = {
+      const difficultyPriority: Record<string, number> = {
         'easy': 0,
         'medium': 100,
-        'hard': 200
+        'hard': 200,
+        'expert': 250
       };
       return difficultyPriority[scenario.difficulty];
     }
 
     // Tactical scenarios second
-    const difficultyPriority = {
+    const difficultyPriority: Record<string, number> = {
       'easy': 300,
       'medium': 400,
-      'hard': 500
+      'hard': 500,
+      'expert': 600
     };
     return difficultyPriority[scenario.difficulty];
   }

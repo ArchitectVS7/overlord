@@ -54,8 +54,14 @@ export class VictoryConditionSystem {
         return this.evaluateBuildStructure(condition, gameState);
       case 'capture_planet':
         return this.evaluateCapturePlanet(condition, gameState);
+      case 'capture_all_planets':
+        return this.evaluateCaptureAllPlanets(condition, gameState);
       case 'survive_turns':
         return this.evaluateSurviveTurns(condition, gameState, startTurn);
+      case 'resource_target':
+        return this.evaluateResourceTarget(condition, gameState);
+      case 'destroy_all_ships':
+        return this.evaluateDestroyAllShips(condition, gameState);
       default:
         return {
           condition,
@@ -223,6 +229,101 @@ export class VictoryConditionSystem {
       description: met
         ? `Survived ${requiredTurns} turns!`
         : `Survive ${requiredTurns} turns (${turnsSurvived}/${requiredTurns})`
+    };
+  }
+
+  /**
+   * Evaluate resource_target condition (Story 8-1)
+   * Victory when player reaches the specified resource amount
+   */
+  private evaluateResourceTarget(
+    condition: VictoryCondition,
+    gameState: GameState
+  ): ConditionResult {
+    const resourceType = condition.resource ?? 'credits';
+    // Target can be string or number, parse it
+    const targetAmount = typeof condition.target === 'string'
+      ? parseInt(condition.target, 10)
+      : (condition.target ?? 0);
+
+    const resources = gameState.playerFaction.resources;
+    // Get numeric resource value only (not methods)
+    let currentAmount = 0;
+    switch (resourceType) {
+      case 'credits': currentAmount = resources.credits; break;
+      case 'minerals': currentAmount = resources.minerals; break;
+      case 'fuel': currentAmount = resources.fuel; break;
+      case 'food': currentAmount = resources.food; break;
+      case 'energy': currentAmount = resources.energy; break;
+    }
+    const met = currentAmount >= targetAmount;
+    const progress = targetAmount > 0 ? Math.min(1, currentAmount / targetAmount) : 1;
+
+    return {
+      condition,
+      met,
+      progress: met ? 1 : progress,
+      description: met
+        ? `Reached ${targetAmount.toLocaleString()} ${resourceType}!`
+        : `Reach ${targetAmount.toLocaleString()} ${resourceType} (${currentAmount.toLocaleString()}/${targetAmount.toLocaleString()})`
+    };
+  }
+
+  /**
+   * Evaluate destroy_all_ships condition (Story 8-1)
+   * Victory when all enemy spacecraft are destroyed
+   */
+  private evaluateDestroyAllShips(
+    condition: VictoryCondition,
+    gameState: GameState
+  ): ConditionResult {
+    const aiShips = gameState.craft.filter(c => c.owner === FactionType.AI);
+    const met = aiShips.length === 0;
+
+    // Progress is based on remaining ships (0 when all remain, 1 when none)
+    // Since we don't track original ship count, progress is 0 until all destroyed
+    const progress = met ? 1 : 0;
+
+    return {
+      condition,
+      met,
+      progress,
+      description: met
+        ? 'All enemy ships destroyed!'
+        : `Destroy all enemy ships (${aiShips.length} remaining)`
+    };
+  }
+
+  /**
+   * Evaluate capture_all_planets condition (Story 8-1)
+   * Victory when player captures all planets (optionally within turn limit)
+   */
+  private evaluateCaptureAllPlanets(
+    condition: VictoryCondition,
+    gameState: GameState
+  ): ConditionResult {
+    const totalPlanets = gameState.planets.length;
+    const playerPlanets = gameState.playerFaction.ownedPlanetIDs.length;
+    const allCaptured = playerPlanets === totalPlanets;
+    const progress = totalPlanets > 0 ? playerPlanets / totalPlanets : 1;
+
+    // Check turn limit if specified
+    if (condition.turnsLimit && gameState.currentTurn > condition.turnsLimit) {
+      return {
+        condition,
+        met: false,
+        progress,
+        description: `Turn limit exceeded! Capture all planets within ${condition.turnsLimit} turns`
+      };
+    }
+
+    return {
+      condition,
+      met: allCaptured,
+      progress: allCaptured ? 1 : progress,
+      description: allCaptured
+        ? 'All planets captured!'
+        : `Capture all planets (${playerPlanets}/${totalPlanets})`
     };
   }
 }

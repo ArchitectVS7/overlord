@@ -34,6 +34,22 @@ const COMPLETED_BADGE_COLOR = 0x44aaff;
 const STAR_COLOR_FILLED = '#ffcc00';
 const STAR_COLOR_EMPTY = '#444444';
 
+// Difficulty colors (Story 8-1)
+const DIFFICULTY_COLORS: Record<string, number> = {
+  easy: 0x44aa44,    // Green
+  medium: 0xaaaa44,  // Yellow
+  hard: 0xaa6644,    // Orange
+  expert: 0xaa4444   // Red
+};
+
+// Difficulty order for sorting
+const DIFFICULTY_ORDER: Record<string, number> = {
+  easy: 0,
+  medium: 1,
+  hard: 2,
+  expert: 3
+};
+
 interface CompletionData {
   completed: boolean;
   starRating: number;
@@ -58,6 +74,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
   private maxScrollY: number = 0;
   private isVisible: boolean = false;
   private completionData: Map<string, CompletionData> = new Map();
+  private difficultyFilter: string = 'all'; // Story 8-1
 
   // UI elements
   private titleText!: Phaser.GameObjects.Text;
@@ -173,6 +190,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
 
   /**
    * Render scenario cards
+   * Story 8-1: Sort by difficulty and apply filter
    */
   private renderScenarioCards(): void {
     // Clear existing cards
@@ -180,14 +198,26 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     this.scenarioCards = [];
     this.scrollY = 0;
 
+    // Sort scenarios by difficulty (easy → expert)
+    const sortedScenarios = [...this.scenarios].sort((a, b) => {
+      const orderA = DIFFICULTY_ORDER[a.difficulty] ?? 99;
+      const orderB = DIFFICULTY_ORDER[b.difficulty] ?? 99;
+      return orderA - orderB;
+    });
+
+    // Apply difficulty filter
+    const filteredScenarios = this.difficultyFilter === 'all'
+      ? sortedScenarios
+      : sortedScenarios.filter(s => s.difficulty === this.difficultyFilter);
+
     // Create card for each scenario
-    this.scenarios.forEach((scenario, index) => {
+    filteredScenarios.forEach((scenario, index) => {
       const card = this.createScenarioCard(scenario, index);
       this.scenarioCards.push(card);
     });
 
     // Calculate max scroll
-    const totalHeight = this.scenarios.length * (CARD_HEIGHT + CARD_SPACING);
+    const totalHeight = filteredScenarios.length * (CARD_HEIGHT + CARD_SPACING);
     const visibleHeight = MAX_VISIBLE_CARDS * (CARD_HEIGHT + CARD_SPACING);
     this.maxScrollY = Math.max(0, totalHeight - visibleHeight);
   }
@@ -355,6 +385,62 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
    */
   getScenarioCards(): ScenarioCard[] {
     return this.scenarioCards;
+  }
+
+  /**
+   * Set difficulty filter (Story 8-1)
+   * @param filter 'all' | 'easy' | 'medium' | 'hard' | 'expert'
+   */
+  setDifficultyFilter(filter: string): void {
+    this.difficultyFilter = filter;
+    this.renderScenarioCards();
+  }
+
+  /**
+   * Get difficulty filter
+   */
+  getDifficultyFilter(): string {
+    return this.difficultyFilter;
+  }
+
+  /**
+   * Get color for difficulty level (Story 8-1)
+   * @param difficulty The difficulty level
+   * @returns The hex color for the difficulty
+   */
+  getDifficultyColor(difficulty: string): number {
+    return DIFFICULTY_COLORS[difficulty] ?? 0x888888;
+  }
+
+  /**
+   * Check if a scenario is unlocked (Story 8-1)
+   * @param scenarioId The scenario ID to check
+   * @returns true if all prerequisites are met
+   */
+  isScenarioUnlocked(scenarioId: string): boolean {
+    const scenario = this.scenarios.find(s => s.id === scenarioId);
+    if (!scenario) return false;
+
+    // No prerequisites means always unlocked
+    if (!scenario.prerequisites || scenario.prerequisites.length === 0) {
+      return true;
+    }
+
+    // Check all prerequisites are completed
+    return scenario.prerequisites.every(prereqId => {
+      const completion = this.completionData.get(prereqId);
+      return completion?.completed === true;
+    });
+  }
+
+  /**
+   * Get list of locked scenario IDs (Story 8-1)
+   * @returns Array of scenario IDs that are locked
+   */
+  getLockedScenarios(): string[] {
+    return this.scenarios
+      .filter(s => !this.isScenarioUnlocked(s.id))
+      .map(s => s.id);
   }
 
   /**
