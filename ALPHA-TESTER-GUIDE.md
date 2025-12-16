@@ -346,10 +346,11 @@ Your feedback is invaluable. Every bug you report, every suggestion you make, an
 
 ---
 
-**Version:** Pre-Alpha v0.8.0
+**Version:** Pre-Alpha v0.7.0
 **Last Updated:** 2025-12-16
 **Expected Test Duration:** 2-3 weeks
 
 ---
 
 **Ready to play? Start with the tutorial and have fun conquering the galaxy! 🚀**
+
