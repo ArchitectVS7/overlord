@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "buildCommand": "cd Overlord.Phaser && npm install && npm run build",
+  "outputDirectory": "Overlord.Phaser/dist",
+  "framework": null,
+  "devCommand": "cd Overlord.Phaser && npm start",
+  "installCommand": "cd Overlord.Phaser && npm install",
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
