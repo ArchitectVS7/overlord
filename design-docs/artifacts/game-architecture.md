@@ -22,7 +22,7 @@
 ### Technical Pivot Rationale
 
 The project was originally developed in Unity 6000 + C# with .NET Standard 2.1 core libraries. After proving incompatible with Claude Code workflows, all 18 core game systems were successfully ported to TypeScript with:
-- **304 passing tests** (93.78% code coverage maintained)
+- **1,272 passing tests** (comprehensive coverage maintained)
 - **Platform-agnostic architecture** (zero rendering dependencies in core logic)
 - **AI-assisted development compatibility** (2-second edit → browser refresh cycle)
 
@@ -142,7 +142,7 @@ All 18 systems exist in `Overlord.Phaser/src/core/` with TypeScript implementati
 - Webpack 5 bundler with TypeScript loader (ts-loader)
 - Phaser 3.85.2 (released September 17, 2024)
 - TypeScript strict mode enabled
-- Jest testing framework (304 tests, 93.78% coverage)
+- Jest testing framework (1,272 tests)
 - Development server at http://localhost:8080
 
 **Recommendation:**
@@ -162,7 +162,7 @@ npm install phaser@3.90.0 @supabase/supabase-js@2.86.2
 | **Game Engine** | Phaser 3 | 3.85.2 → 3.90.0 recommended | All epics | Browser-based WebGL rendering, mature ecosystem, TypeScript support |
 | **Language** | TypeScript | 5.x (strict mode) | All epics | Type safety for AI-assisted development, excellent IDE support |
 | **Build Tool** | Webpack | 5.x | All epics | Code splitting, hot module reload, asset optimization |
-| **Testing** | Jest | Latest | All epics | 304 existing tests, TypeScript integration, coverage reporting |
+| **Testing** | Jest | Latest | All epics | 1,272 tests, TypeScript integration, coverage reporting |
 | **Backend/Auth** | Supabase | SDK 2.86.2 | Persistence, Authentication | PostgreSQL backend, built-in auth, real-time subscriptions |
 | **Deployment** | Vercel | Edge Network | Hosting | Instant deploys, global CDN, zero config, free tier |
 | **State Management** | Custom (GameState) | N/A | Core systems | Platform-agnostic, already implemented with 93.78% coverage |
@@ -201,8 +201,8 @@ npm install phaser@3.90.0 @supabase/supabase-js@2.86.2
 
 **Testing:**
 - **Jest** - Test runner with TypeScript support
-  - 304 existing tests (93.78% coverage)
-  - Coverage threshold: 70% minimum (current: 93.78%)
+  - 1,272 tests with comprehensive coverage
+  - Coverage threshold: 70% minimum
   - Watch mode for TDD workflows
 
 **Backend & Cloud Services:**
@@ -1335,7 +1335,7 @@ jobs:
 ```
 
 **Quality Gates:**
-- All 304 tests must pass
+- All tests must pass
 - Code coverage must be ≥70%
 - TypeScript compilation must succeed with zero errors
 - ESLint warnings allowed, errors block deploy
@@ -1423,7 +1423,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 **Decision:** Migrate to Phaser 3 + TypeScript for browser-based deployment and AI compatibility.
 **Consequences:**
 - ✅ Zero-friction iteration (2-second edit → refresh cycle)
-- ✅ Platform-agnostic testing (no editor required, 304 tests run in <5 seconds)
+- ✅ Platform-agnostic testing (no editor required, 1,272 tests run in ~10 seconds)
 - ✅ Web-first deployment (instant access, no downloads)
 - ❌ Loss of Unity's 3D rendering capabilities (mitigated by 2D/isometric sprites)
 - ❌ Loss of native mobile app support (mitigated by responsive web design)
@@ -1496,7 +1496,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 
 5. **Performance Targets:** 60 FPS desktop (WebGL 2.0), 30 FPS mobile (Canvas fallback), <5 second load time, >99.9% save/load success rate.
 
-**Technology Stack:** Phaser 3.90.0, TypeScript 5.x strict mode, Webpack 5, Jest (304 tests), Supabase SDK 2.86.2, Vercel Edge deployment.
+**Technology Stack:** Phaser 3.90.0, TypeScript 5.x strict mode, Webpack 5, Jest (1,272 tests), Supabase SDK 2.86.2, Vercel Edge deployment.
 
 **Security:** Supabase Auth (bcrypt passwords), HTTPS/TLS 1.3, Row Level Security policies, encrypted data at rest, GDPR-compliant data handling.
 

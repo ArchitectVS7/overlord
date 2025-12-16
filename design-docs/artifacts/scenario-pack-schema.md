@@ -1150,23 +1150,23 @@ describe('ScenarioPackLoader', () => {
 
 ---
 
-## Approval and Next Steps
+## Implementation Status
 
-**Status:** Draft - Awaiting Review
+**Status:** ✅ Implemented (v0.9.0-packs)
 
-**Next Actions:**
-1. Review schema with development team
-2. Implement `ScenarioPackLoader.ts` in Overlord.Phaser
-3. Create official scenario packs (default_balanced, warmonger_kratos, economic_midas)
-4. Write comprehensive unit tests for schema validation
-5. Update Epic 8 stories with schema implementation details
-6. Integrate with Supabase for community pack distribution
+**Completed:**
+1. ✅ Schema reviewed and finalized
+2. ✅ `ScenarioPackManager.ts` implemented (52 tests)
+3. ✅ `PackConfigLoader.ts` implemented (23 tests)
+4. ✅ `PackMetadataHelper.ts` implemented (18 tests)
+5. ✅ UI: PackListPanel, PackDetailPanel, PackSwitchDialog
+6. ✅ ScenarioPackScene integrated with main menu
 
-**Questions for Discussion:**
-- Should we support scenario pack "dependencies" (Pack A requires Pack B)?
-- Should we allow user-uploaded custom sprites/audio via URLs?
-- Do we need a versioning/update notification system for packs?
-- Should planet type distribution validation be an error or warning?
+**Deferred to Post-MVP:**
+- Scenario pack dependencies
+- User-uploaded custom sprites/audio
+- Versioning/update notification system
+- Supabase integration for community packs
 
 ---
 
@@ -1174,5 +1174,5 @@ describe('ScenarioPackLoader', () => {
 - **File:** `scenario-pack-schema.md`
 - **Location:** `design-docs/artifacts/`
 - **Created:** 2025-12-09
-- **Last Updated:** 2025-12-09
+- **Last Updated:** 2025-12-16
 - **Related Documents:** prd.md, epics.md, implementation-readiness-report-2025-12-09.md
