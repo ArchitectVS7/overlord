@@ -30,7 +30,7 @@ import {
 
 // Skip admin tests entirely until admin user is configured
 // Change this to false once you have a test admin set up
-const ADMIN_TESTS_ENABLED = false;
+const ADMIN_TESTS_ENABLED = true;
 
 adminTest.describe('Admin UI Editor', () => {
   // Skip entire suite until admin tests are enabled

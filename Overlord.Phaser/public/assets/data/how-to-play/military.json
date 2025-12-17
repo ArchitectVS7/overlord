@@ -1,0 +1,302 @@
+{
+  "categoryId": "military",
+  "categoryName": "Military & Combat",
+  "sections": [
+    {
+      "sectionId": "military-overview",
+      "title": "Building Your Military",
+      "content": "Military power in Overlord comes from two sources: ground forces (platoons) and naval forces (spacecraft). Ground forces capture planets; spacecraft transport them and provide orbital support. Neither alone is sufficient for conquest.",
+      "subsections": [
+        {
+          "subsectionId": "force-composition",
+          "title": "Force Composition",
+          "content": "A balanced military requires both ground and naval elements. Battle Cruisers carry platoons to enemy planets, where ground combat determines ownership. Without Battle Cruisers, your platoons cannot reach enemy territory. Without platoons, your Battle Cruisers cannot capture planets.",
+          "keyPoints": [
+            "Platoons fight ground battles and capture planets",
+            "Battle Cruisers transport platoons between worlds",
+            "Both elements required for successful invasions"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "platoons",
+      "title": "Ground Forces: Platoons",
+      "content": "Platoons are your ground combat units. Each platoon consists of troops equipped with armor and weapons, trained at your Starbase to fight effectively.",
+      "subsections": [
+        {
+          "subsectionId": "commissioning",
+          "title": "Commissioning Platoons",
+          "content": "Creating a platoon requires selecting troop count, equipment level, and weapon level. Troops are drafted from planetary population, so commissioning reduces available workforce. Choose your platoon composition based on your strategic needs and available resources.",
+          "requirements": [
+            "Must commission at a planet (ideally Starbase)",
+            "Requires credits for equipment and weapons",
+            "Troops drafted from population (1-200 per platoon)",
+            "Maximum 24 platoons empire-wide"
+          ]
+        },
+        {
+          "subsectionId": "equipment",
+          "title": "Equipment Levels",
+          "content": "Equipment determines your troops' baseline combat effectiveness. Higher equipment levels cost more but provide significant combat advantages. The multiplier affects overall military strength.",
+          "equipmentTable": [
+            {
+              "level": "Civilian",
+              "cost": 20000,
+              "multiplier": "0.5x",
+              "description": "Untrained militia with minimal protection"
+            },
+            {
+              "level": "Basic",
+              "cost": 35000,
+              "multiplier": "1.0x",
+              "description": "Standard military gear, adequate protection"
+            },
+            {
+              "level": "Standard",
+              "cost": 55000,
+              "multiplier": "1.5x",
+              "description": "Professional equipment, good protection"
+            },
+            {
+              "level": "Advanced",
+              "cost": 80000,
+              "multiplier": "2.0x",
+              "description": "High-tech gear, excellent protection"
+            },
+            {
+              "level": "Elite",
+              "cost": 109000,
+              "multiplier": "2.5x",
+              "description": "Best available equipment, superior protection"
+            }
+          ],
+          "tip": "Elite equipment costs 5× more than Civilian but provides 5× the effectiveness. Quality often beats quantity."
+        },
+        {
+          "subsectionId": "weapons",
+          "title": "Weapon Levels",
+          "content": "Weapons determine your troops' offensive capability. Higher weapon levels increase damage output. Weapon multipliers stack with equipment multipliers for combined effect.",
+          "weaponTable": [
+            {
+              "level": "Pistol",
+              "cost": 5000,
+              "multiplier": "0.8x",
+              "description": "Basic sidearm, limited firepower"
+            },
+            {
+              "level": "Rifle",
+              "cost": 10000,
+              "multiplier": "1.0x",
+              "description": "Standard infantry weapon, reliable"
+            },
+            {
+              "level": "Assault Rifle",
+              "cost": 18000,
+              "multiplier": "1.3x",
+              "description": "Automatic weapon, high rate of fire"
+            },
+            {
+              "level": "Plasma",
+              "cost": 30000,
+              "multiplier": "1.6x",
+              "description": "Energy weapon, devastating firepower"
+            }
+          ]
+        },
+        {
+          "subsectionId": "training",
+          "title": "Training",
+          "content": "Newly commissioned platoons are untrained and nearly useless in combat. Training takes place at your Starbase over 10 turns, increasing effectiveness by 10% each turn. Only fully trained platoons (100%) fight at full strength.",
+          "formula": {
+            "description": "Training Progress",
+            "expression": "Training increases 10% per turn at Starbase",
+            "duration": "10 turns for full training (0% → 100%)"
+          },
+          "warning": "Untrained platoons (0% training) have zero combat effectiveness. Never deploy them until training completes.",
+          "keyPoints": [
+            "Training only occurs at Starbase (Metropolis planet)",
+            "Progress: +10% per turn",
+            "Duration: 10 turns total",
+            "Effectiveness scales linearly with training level"
+          ]
+        },
+        {
+          "subsectionId": "strength-calculation",
+          "title": "Military Strength",
+          "content": "A platoon's military strength determines its combat effectiveness. Strength is calculated by multiplying troop count by all applicable modifiers.",
+          "formula": {
+            "description": "Strength Formula",
+            "expression": "Strength = Troops × Equipment × Weapon × (Training / 100)",
+            "variables": [
+              {"name": "Troops", "description": "Number of soldiers (1-200)"},
+              {"name": "Equipment", "description": "Equipment multiplier (0.5-2.5)"},
+              {"name": "Weapon", "description": "Weapon multiplier (0.8-1.6)"},
+              {"name": "Training", "description": "Training percentage (0-100)"}
+            ],
+            "example": "100 troops × Elite (2.5) × Plasma (1.6) × 100% = 400 strength"
+          }
+        }
+      ]
+    },
+    {
+      "sectionId": "spacecraft",
+      "title": "Naval Forces: Spacecraft",
+      "content": "Spacecraft project power across the galaxy. Battle Cruisers carry your invasion forces, Cargo Cruisers supply your economy, and defensive platforms protect your worlds.",
+      "subsections": [
+        {
+          "subsectionId": "battle-cruisers",
+          "title": "Battle Cruisers",
+          "content": "Battle Cruisers are your primary military spacecraft. Each can carry up to 4 platoons and provides orbital bombardment capability. They are expensive but essential for power projection.",
+          "specs": {
+            "cost": "50,000 credits, 10,000 minerals, 5,000 fuel",
+            "crew": 50,
+            "platoonCapacity": 4,
+            "speed": 50,
+            "fuelEfficiency": "1 fuel per 10 distance"
+          },
+          "capabilities": [
+            "Transport up to 4 platoons",
+            "Orbital bombardment of enemy planets",
+            "Space combat against enemy craft",
+            "Fast movement (speed 50)"
+          ]
+        },
+        {
+          "subsectionId": "fleet-limits",
+          "title": "Fleet Composition",
+          "content": "Your empire is limited to 32 total spacecraft across all types. This limit forces strategic decisions about fleet composition. A fleet heavy on Battle Cruisers has military power but limited logistics; a fleet heavy on Cargo Cruisers has logistics but no teeth.",
+          "tip": "A typical balanced fleet might include 8-10 Battle Cruisers, 4-6 Cargo Cruisers, and the rest as utility craft."
+        }
+      ]
+    },
+    {
+      "sectionId": "combat",
+      "title": "Ground Combat",
+      "content": "When your platoons engage enemy forces, combat resolves based on relative strength and your chosen aggression level. Understanding combat mechanics helps you win battles with acceptable losses.",
+      "subsections": [
+        {
+          "subsectionId": "combat-resolution",
+          "title": "How Combat Resolves",
+          "content": "Combat compares total military strength of attackers versus defenders. The side with higher strength wins, but both sides take casualties. Combat is not about avoiding losses entirely—it is about ensuring the enemy loses more.",
+          "process": [
+            "Total attacker strength calculated (sum of all platoon strengths)",
+            "Aggression modifier applied to attacker strength",
+            "Total defender strength calculated",
+            "Winner determined by higher total strength",
+            "Casualties calculated for both sides",
+            "Losing side destroyed, winner retains survivors"
+          ]
+        },
+        {
+          "subsectionId": "aggression",
+          "title": "Aggression Level",
+          "content": "Before combat, you choose an aggression level from 0% to 100%. This slider fundamentally changes how your forces fight and what losses to expect.",
+          "aggressionEffects": [
+            {
+              "level": "Low (0-25%)",
+              "strengthMod": "0.80-0.90x",
+              "casualties": "Lower attacker losses",
+              "description": "Cautious fighting, preserves forces but battles take longer"
+            },
+            {
+              "level": "Medium (50%)",
+              "strengthMod": "1.00x",
+              "casualties": "Balanced losses",
+              "description": "Standard engagement, neither aggressive nor defensive"
+            },
+            {
+              "level": "High (75-100%)",
+              "strengthMod": "1.10-1.20x",
+              "casualties": "Higher attacker losses",
+              "description": "Aggressive assault, faster victory but costly"
+            }
+          ],
+          "tip": "Use high aggression when you have overwhelming superiority. Use low aggression in even fights to preserve forces for future battles."
+        },
+        {
+          "subsectionId": "casualties",
+          "title": "Casualty Rates",
+          "content": "Both winners and losers take casualties in combat. The winner takes moderate losses while the loser is devastated. Planning for casualties is essential—pyrrhic victories can lose you the war.",
+          "casualtyRates": [
+            {
+              "outcome": "Base Rate",
+              "percentage": "20%",
+              "description": "Starting point for all casualty calculations"
+            },
+            {
+              "outcome": "Winner Casualties",
+              "percentage": "10-30%",
+              "description": "Victorious force loses 10-30% of engaged troops"
+            },
+            {
+              "outcome": "Loser Casualties",
+              "percentage": "50-90%",
+              "description": "Defeated force is largely destroyed"
+            }
+          ],
+          "warning": "A close victory can still cost you most of your army. Ensure you have reserves before committing to major battles."
+        }
+      ]
+    },
+    {
+      "sectionId": "invasion",
+      "title": "Planetary Invasion",
+      "content": "Capturing enemy planets is the path to victory. Invasion is a multi-step process requiring orbital control, ground assault, and occupation.",
+      "subsections": [
+        {
+          "subsectionId": "invasion-process",
+          "title": "Invasion Steps",
+          "content": "A successful invasion follows a specific sequence. Missing any step prevents capture.",
+          "steps": [
+            {
+              "step": 1,
+              "title": "Achieve Orbital Control",
+              "description": "Your Battle Cruisers must defeat or drive away all enemy spacecraft above the target planet. You cannot land troops while enemy ships threaten your transports."
+            },
+            {
+              "step": 2,
+              "title": "Deploy Ground Forces",
+              "description": "With orbital control established, disembark your platoons from Battle Cruisers to the planet surface. Each Battle Cruiser can carry up to 4 platoons."
+            },
+            {
+              "step": 3,
+              "title": "Ground Combat",
+              "description": "Your platoons engage any defending forces. Combat resolves based on strength comparison and aggression settings. Undefended planets surrender immediately."
+            },
+            {
+              "step": 4,
+              "title": "Capture Complete",
+              "description": "Upon defeating all defenders, the planet changes ownership to you. Captured populations start with -30% morale penalty from occupation."
+            }
+          ]
+        },
+        {
+          "subsectionId": "bombardment",
+          "title": "Orbital Bombardment",
+          "content": "Battle Cruisers can bombard enemy planets from orbit, destroying structures and causing civilian casualties. Bombardment softens defenses before invasion but damages the planet you are trying to capture.",
+          "effects": [
+            "Destroys up to 3 structures per bombardment",
+            "Causes civilian casualties (reduces population)",
+            "Reduces morale by 20% per turn",
+            "Does not affect Docking Bays or Orbital Defense"
+          ],
+          "warning": "Bombardment damages the planet's economy. A captured ruin is less valuable than an intact world. Use bombardment sparingly."
+        },
+        {
+          "subsectionId": "defense",
+          "title": "Planetary Defense",
+          "content": "Orbital Defense platforms protect your planets from invasion. Each platform provides a 20% defensive bonus to your garrison, up to a maximum of 2 platforms (40% total bonus).",
+          "defenseSpecs": {
+            "maxPlatforms": 2,
+            "bonusPerPlatform": "20%",
+            "maxBonus": "40%",
+            "crew": 20,
+            "cost": "12,000 credits, 3,000 minerals, 2,000 fuel"
+          },
+          "tip": "Defend your Starbase first. Losing your only training facility cripples your military production."
+        }
+      ]
+    }
+  ]
+}

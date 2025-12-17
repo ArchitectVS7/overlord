@@ -10,17 +10,18 @@
 
 This three-volume developer's manual provides **comprehensive documentation** for the Overlord game remake project. It's designed to enable anyone to understand, extend, or fork the project using only these documents.
 
-**Total Documentation:** 20+ chapters across 3 volumes
+**Total Documentation:** 31 chapters across 3 volumes
 **Code Examples:** 100+ working TypeScript examples
 **Diagrams:** 15+ Mermaid architecture diagrams
 **Templates:** 10+ JSON/code templates
 **Guides:** Step-by-step instructions for all tasks
+**How to Play:** Game-ready JSON system (4 categories, TypeScript interfaces)
 
 ---
 
 ## Manual Structure
 
-### Volume I: Technical Reference Manual (8 chapters)
+### Volume I: Technical Reference Manual (9 chapters)
 **Target Audience:** Developers understanding existing implementation
 
 **Key Chapters:**
@@ -31,6 +32,7 @@ This three-volume developer's manual provides **comprehensive documentation** fo
 - **05: Data Models & State** - Entity models, GameState, lookups
 - **06: Testing Guide** - TDD workflow, test patterns, coverage (835 tests)
 - **07: Build System & Tooling** - Webpack, TypeScript, CI/CD
+- **08: Adjustable Variables Reference** - Tunable gameplay parameters with impact analysis (NEW)
 - **11: UI Components Reference** - 13 Phaser UI panels documented
 
 **What You'll Learn:**
@@ -45,7 +47,7 @@ This three-volume developer's manual provides **comprehensive documentation** fo
 
 ---
 
-### Volume II: Development Guide & Open Items (10 chapters)
+### Volume II: Development Guide & Open Items (11 chapters)
 **Target Audience:** Contributors working on remaining features
 
 **Key Chapters:**
@@ -56,9 +58,10 @@ This three-volume developer's manual provides **comprehensive documentation** fo
 - **05: Content Creation Guide** - General workflows
 - **06: Audio Assets** - Sound effects and music (free sources listed)
 - **07: Supabase Integration** - Cloud persistence setup (SQL schemas provided)
-- **08: Contributing Guide** - Git workflow, TDD, code review
-- **09: Coding Patterns** - Reusable patterns with examples
-- **10: Free Tools & Resources** - No-cost asset sources
+- **08: Git, PR & Issues Guide** - Branch naming, commits, PRs, issue management (NEW)
+- **09: Contributing Guide** - Git workflow, TDD, code review
+- **10: Coding Patterns** - Reusable patterns with examples
+- **11: Free Tools & Resources** - No-cost asset sources
 
 **What You'll Learn:**
 - Exactly what work remains (Epics 1, 8, 9, 10, 12)
@@ -72,22 +75,25 @@ This three-volume developer's manual provides **comprehensive documentation** fo
 
 ---
 
-### Volume III: Future Expansion & Operations (10 chapters)
+### Volume III: Future Expansion & Operations (11 chapters)
 **Target Audience:** Project leads, maintainers, community managers
 
 **Key Chapters:**
-- **01: Testing Procedures** - Alpha/beta testing workflows
-- **02: Player Feedback Management** - Triage and prioritization
-- **03: Scaling Strategies** - Performance optimization (0-10,000+ users)
-- **04: Release Strategies** - Open source vs commercial (3 revenue models)
-- **05: Cross-Platform Deployment** - Desktop, mobile, native (4 options)
-- **06: Sequel & Expansion Planning** - Future game design
-- **07: Multiplayer Implementation** - Sync strategies (3 approaches)
-- **08: Monetization Approaches** - Ethical revenue models
-- **09: Community Management** - Discord, Reddit, moderation
-- **10: Long-Term Maintenance** - Technical debt, deprecation
+- **01: UAT Methodology** - Core mechanics test scripts for alpha testing (NEW)
+- **02: Alpha Testing Procedures** - Tester onboarding, bug reporting, release criteria (NEW)
+- **03: Player Feedback Management** - Triage and prioritization
+- **04: Scaling Strategies** - Performance optimization (0-10,000+ users)
+- **05: Release Strategies** - Open source vs commercial (3 revenue models)
+- **06: Cross-Platform Deployment** - Desktop, mobile, native (4 options)
+- **07: Sequel & Expansion Planning** - Future game design
+- **08: Multiplayer Implementation** - Sync strategies (3 approaches)
+- **09: Monetization Approaches** - Ethical revenue models
+- **10: Community Management** - Discord, Reddit, moderation
+- **11: Long-Term Maintenance** - Technical debt, deprecation
 
 **What You'll Learn:**
+- UAT test scripts for core mechanics (resource, combat, AI, save/load)
+- Alpha tester onboarding and bug reporting workflows
 - How to run alpha/beta tests (tester profiles, timelines)
 - Infrastructure scaling (Vercel tiers, Supabase limits)
 - Platform expansion options (Electron, Tauri, React Native, Unity)
@@ -374,6 +380,15 @@ All documentation in this manual follows:
 
 ## Changelog
 
+**v1.1.0 (December 16, 2025)**
+- Added Adjustable Variables Reference (Volume I, Chapter 08)
+- Added Git, PR & Issues Guide (Volume II, Chapter 08)
+- Added UAT Methodology with 13 test scripts (Volume III, Chapter 01)
+- Added Alpha Testing Procedures (Volume III, Chapter 02)
+- Added How to Play JSON system (4 categories: basics, economy, military, advanced)
+- Added HowToPlayModels.ts TypeScript interfaces
+- Updated navigation and cross-references
+
 **v1.0.0 (December 11, 2025)**
 - Initial comprehensive manual created
 - Volume I: Technical Reference (8 chapters)
@@ -384,7 +399,7 @@ All documentation in this manual follows:
 - Diagrams: 15+ Mermaid charts
 - Templates: 10+ JSON/code templates
 
-**Next Review:** Q1 2026 (after MVP launch)
+**Next Review:** Q1 2026 (after alpha testing)
 
 ---
 
@@ -410,12 +425,13 @@ All documentation in this manual follows:
 
 ## Manual Statistics
 
-**Total Chapters:** 28 (across 3 volumes)
-**Word Count:** 30,000+ words
+**Total Chapters:** 31 (across 3 volumes)
+**Word Count:** 40,000+ words
 **Code Examples:** 100+ TypeScript/JSON snippets
 **Diagrams:** 15+ Mermaid architecture charts
 **Templates:** 10+ ready-to-use templates
 **External Resources:** 20+ free tool/asset sources
+**How to Play Content:** 4 JSON files with TypeScript interfaces
 
 **Estimated Reading Time:**
 - Full manual: 10-12 hours
@@ -435,6 +451,6 @@ All documentation in this manual follows:
 
 **End of Summary**
 
-**Last Updated:** December 11, 2025
-**Manual Version:** 1.0.0
-**Project Status:** 7 of 12 epics complete, 36-50 hours to MVP
+**Last Updated:** December 16, 2025
+**Manual Version:** 1.1.0
+**Project Status:** 7 of 12 epics complete, closed alpha testing ready

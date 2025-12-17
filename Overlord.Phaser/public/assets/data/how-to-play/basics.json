@@ -1,0 +1,196 @@
+{
+  "categoryId": "basics",
+  "categoryName": "Game Basics",
+  "sections": [
+    {
+      "sectionId": "welcome",
+      "title": "Welcome to Overlord",
+      "content": "Overlord is a classic 4X space strategy game where you command an interstellar empire competing for galactic dominance. Originally released in 1990 under the name 'Supremacy', this remake brings the timeless gameplay to modern browsers while preserving the strategic depth that made the original a cult classic.",
+      "subsections": [
+        {
+          "subsectionId": "4x-explained",
+          "title": "What is 4X?",
+          "content": "The term '4X' stands for eXplore, eXpand, eXploit, and eXterminate. These four pillars define the core gameplay loop: you explore the galaxy to discover new planets, expand your territory through colonization and conquest, exploit resources to build your economy and military, and exterminate your opponent to achieve victory.",
+          "keyPoints": [
+            "Explore: Scout the galaxy map to find planets worth claiming",
+            "Expand: Colonize neutral planets or capture enemy territory",
+            "Exploit: Build infrastructure to generate resources",
+            "Exterminate: Defeat your opponent through military conquest"
+          ]
+        },
+        {
+          "subsectionId": "goal",
+          "title": "Your Objective",
+          "content": "Victory in Overlord is achieved by eliminating your opponent. This means capturing or destroying all enemy planets, leaving them with no territory from which to operate. Your opponent, the AI Overlord, has the same goal and will work against you throughout the game.",
+          "tip": "Focus on building a strong economy early. Military might without economic foundation leads to defeat."
+        }
+      ]
+    },
+    {
+      "sectionId": "game-flow",
+      "title": "Understanding Turns",
+      "content": "Overlord is a turn-based game, meaning you and your opponent take alternating turns. During your turn, you have complete control to issue orders, build structures, and move forces. Time does not pressure you during your turn, so consider your options carefully before ending it.",
+      "subsections": [
+        {
+          "subsectionId": "turn-phases",
+          "title": "Turn Phases",
+          "content": "Each turn consists of four sequential phases that process automatically. Understanding what happens in each phase helps you plan your strategy effectively.",
+          "phases": [
+            {
+              "name": "Income Phase",
+              "description": "Your planets generate resources based on their buildings and population. Income calculations happen automatically at the start of each turn."
+            },
+            {
+              "name": "Action Phase",
+              "description": "This is your opportunity to act. Build structures, train platoons, purchase spacecraft, move your fleet, and prepare invasions. Take as much time as you need."
+            },
+            {
+              "name": "Combat Phase",
+              "description": "Any battles that result from your actions are resolved. Ground invasions and space combat occur during this phase."
+            },
+            {
+              "name": "End Phase",
+              "description": "The game checks victory conditions, updates construction and training progress, and prepares for the next turn."
+            }
+          ]
+        },
+        {
+          "subsectionId": "ending-turn",
+          "title": "Ending Your Turn",
+          "content": "When you're satisfied with your orders, click the 'End Turn' button to advance to the next turn. The game will process all phases, your opponent will take their turn, and then control returns to you. There is no undo once you end your turn, so review your decisions carefully."
+        }
+      ]
+    },
+    {
+      "sectionId": "galaxy-map",
+      "title": "The Galaxy Map",
+      "content": "The galaxy map is your strategic overview of the game world. It displays all planets, spacecraft positions, and territory ownership. Learning to read and navigate this map is fundamental to success.",
+      "subsections": [
+        {
+          "subsectionId": "planet-types",
+          "title": "Planet Types",
+          "content": "Planets in Overlord have different characteristics that affect their production capabilities. Understanding planet types helps you prioritize expansion targets.",
+          "planetTypes": [
+            {
+              "type": "Metropolis",
+              "description": "Your starting planet and the AI's home world. Metropolis planets have balanced production bonuses and are the only locations where platoons can be trained."
+            },
+            {
+              "type": "Tropical",
+              "description": "Lush worlds with abundant vegetation. Tropical planets have enhanced food production multipliers, making them ideal for supporting large populations."
+            },
+            {
+              "type": "Volcanic",
+              "description": "Geologically active worlds rich in minerals. Volcanic planets excel at mineral and fuel production but may have lower food yields."
+            },
+            {
+              "type": "Desert",
+              "description": "Arid worlds with balanced but modest production. Desert planets don't specialize in any resource but provide steady, reliable output."
+            }
+          ]
+        },
+        {
+          "subsectionId": "territory",
+          "title": "Territory and Ownership",
+          "content": "Planets are colored to indicate ownership. Your planets appear in one color, enemy planets in another, and neutral (uncolonized) planets in a third. Neutral planets have no defenders and can be claimed through colonization, while enemy planets must be captured through military force.",
+          "tip": "Expand to neutral planets early when possible. They provide resources without the cost of combat."
+        }
+      ]
+    },
+    {
+      "sectionId": "interface",
+      "title": "Game Interface",
+      "content": "The game interface provides all the information and controls you need to manage your empire. Familiarizing yourself with each element allows you to make decisions quickly and confidently.",
+      "subsections": [
+        {
+          "subsectionId": "resource-hud",
+          "title": "Resource Display",
+          "content": "The Resource HUD in the corner of the screen shows your current stockpile of each resource type. Resources are color-coded to indicate their status: green for healthy levels, yellow for warning (getting low), and red for critical (nearly depleted).",
+          "thresholds": [
+            {
+              "level": "Normal",
+              "threshold": "500+",
+              "color": "green",
+              "meaning": "Healthy stockpile, no immediate concern"
+            },
+            {
+              "level": "Warning",
+              "threshold": "100-499",
+              "color": "yellow",
+              "meaning": "Resources running low, plan ahead"
+            },
+            {
+              "level": "Critical",
+              "threshold": "Below 100",
+              "color": "red",
+              "meaning": "Immediate attention required"
+            }
+          ]
+        },
+        {
+          "subsectionId": "planet-panel",
+          "title": "Planet Information Panel",
+          "content": "Clicking on a planet opens its information panel, showing detailed data about population, morale, resources, buildings, and stationed forces. From this panel, you can issue construction orders and manage the planet's development."
+        },
+        {
+          "subsectionId": "turn-counter",
+          "title": "Turn Counter",
+          "content": "The turn counter shows the current turn number and provides the 'End Turn' button. Watching the turn counter helps you track game progression and estimate how long until various projects complete."
+        }
+      ]
+    },
+    {
+      "sectionId": "first-steps",
+      "title": "Your First Few Turns",
+      "content": "The opening turns of a game establish your economic foundation. Making smart choices early creates advantages that compound throughout the game.",
+      "subsections": [
+        {
+          "subsectionId": "turn-1",
+          "title": "Turn 1: Assessment",
+          "content": "Your first turn should focus on understanding your starting position. Check your Starbase's resources and population. Examine the galaxy map to identify nearby neutral planets and the distance to enemy territory. Don't rush to build anything until you understand the situation.",
+          "keyPoints": [
+            "Review your starting resources",
+            "Identify the nearest neutral planet",
+            "Note the enemy Starbase location",
+            "Plan your first building based on your planet type"
+          ]
+        },
+        {
+          "subsectionId": "early-economy",
+          "title": "Building Your Economy",
+          "content": "Your first several turns should prioritize economic infrastructure. Build Mining Stations for minerals and fuel, Horticultural Stations for food. A strong economy supports everything else: without resources, you cannot build military forces or expand your territory.",
+          "tip": "A Mining Station costs 8,000 credits but generates 50 minerals per turn. After 40 turns, you've recovered the mineral cost and everything after is profit."
+        },
+        {
+          "subsectionId": "expansion",
+          "title": "Planning Expansion",
+          "content": "Once your home planet is producing resources steadily, consider expansion. Building an Atmosphere Processor (10,000 credits, 5,000 minerals, 2,000 fuel) allows you to colonize a neutral planet after 10 turns of terraforming. Choose your expansion target based on its planet type and strategic location.",
+          "warning": "Don't expand too quickly. An under-defended colony is an easy target for your opponent."
+        }
+      ]
+    },
+    {
+      "sectionId": "saving",
+      "title": "Saving Your Game",
+      "content": "Overlord automatically handles save game management. You can save your progress at any time during your turn, and saves are stored both locally and in the cloud (if signed in). This hybrid approach ensures your progress is never lost.",
+      "subsections": [
+        {
+          "subsectionId": "save-system",
+          "title": "How Saving Works",
+          "content": "When you save, the game captures the complete state: all planets, resources, forces, and progress. This data is compressed and validated with a checksum to ensure integrity. You can maintain multiple saves and return to any of them later.",
+          "keyPoints": [
+            "Saves work offline through local storage",
+            "Cloud saves sync when you're online",
+            "Checksums protect against corruption",
+            "Multiple save slots available"
+          ]
+        },
+        {
+          "subsectionId": "loading",
+          "title": "Loading a Save",
+          "content": "From the main menu, select 'Load Game' to see your available saves. Each save shows the turn number, last played date, and a thumbnail preview. Select any save to resume from that point."
+        }
+      ]
+    }
+  ]
+}

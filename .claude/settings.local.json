@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\dev\\GIT\\Overlord\")",
+      "Bash(dir \"C:\\dev\\GIT\\Overlord\\supabase\")"
+    ]
+  }
+}
