@@ -11,6 +11,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.88.0",
     "phaser": "^3.85.2"
   },
   "devDependencies": {

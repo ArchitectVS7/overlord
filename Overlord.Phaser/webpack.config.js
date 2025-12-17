@@ -27,7 +27,8 @@ module.exports = (env, argv) => {
       alias: {
         '@core': path.resolve(__dirname, 'src/core'),
         '@scenes': path.resolve(__dirname, 'src/scenes'),
-        '@config': path.resolve(__dirname, 'src/config')
+        '@config': path.resolve(__dirname, 'src/config'),
+        '@services': path.resolve(__dirname, 'src/services')
       }
     },
     plugins: [

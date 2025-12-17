@@ -24,7 +24,8 @@
     "paths": {
       "@core/*": ["core/*"],
       "@scenes/*": ["scenes/*"],
-      "@config/*": ["config/*"]
+      "@config/*": ["config/*"],
+      "@services/*": ["services/*"]
     }
   },
   "include": ["src/**/*"],
