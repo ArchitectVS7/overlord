@@ -15,8 +15,13 @@ export interface Database {
     Tables: {
       user_profiles: {
         Row: {
-          id: string;
+          user_id: string;
           username: string;
+          ui_scale: number;
+          high_contrast_mode: boolean;
+          audio_enabled: boolean;
+          music_volume: number;
+          sfx_volume: number;
           created_at: string;
           updated_at: string;
         };
@@ -25,8 +30,16 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          save_name: string;
-          save_data: string;
+          slot_name: string;
+          save_name: string | null;
+          campaign_name: string | null;
+          data: Uint8Array;
+          checksum: string | null;
+          turn_number: number;
+          playtime: number;
+          version: string;
+          victory_status: string;
+          thumbnail: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -36,8 +49,15 @@ export interface Database {
           id: string;
           user_id: string;
           scenario_id: string;
-          completed_at: string;
-          score: number;
+          scenario_pack_id: string | null;
+          completed: boolean;
+          attempts: number;
+          best_time_seconds: number | null;
+          last_completion_time_seconds: number | null;
+          stars_earned: number;
+          first_attempted_at: string;
+          last_attempted_at: string;
+          completed_at: string | null;
         };
       };
     };
@@ -93,7 +113,7 @@ export async function testDatabaseConnection(): Promise<{
     // Simple health check - query the user_profiles table (should be empty initially)
     const { data, error } = await client
       .from('user_profiles')
-      .select('id')
+      .select('user_id')
       .limit(1);
 
     if (error) {

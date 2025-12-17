@@ -2,6 +2,12 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+// Try root directory first (where more vars are), then local directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 module.exports = (env, argv) => {
   const isDevelopment = argv.mode === 'development';
