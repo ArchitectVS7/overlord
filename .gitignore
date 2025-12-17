@@ -51,3 +51,6 @@ coverage/
 *.tmp
 *.temp
 ~$*
+
+# Environment Variables
+.env

@@ -123,5 +123,4 @@ CREATE POLICY "Users can delete own scenario packs"
 -- ============================================================================
 -- Storage Complete
 -- ============================================================================
-
-COMMENT ON SCHEMA storage IS 'Supabase Storage schema for file uploads';
+-- Note: COMMENT ON SCHEMA storage removed (requires schema owner permissions)
