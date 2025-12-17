@@ -8,7 +8,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * Database schema types (will be expanded as we implement features)
+ * Database schema types for Supabase
  */
 export interface Database {
   public: {
@@ -22,8 +22,71 @@ export interface Database {
           audio_enabled: boolean;
           music_volume: number;
           sfx_volume: number;
+          is_admin: boolean;
           created_at: string;
           updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          username: string;
+          ui_scale?: number;
+          high_contrast_mode?: boolean;
+          audio_enabled?: boolean;
+          music_volume?: number;
+          sfx_volume?: number;
+          is_admin?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          username?: string;
+          ui_scale?: number;
+          high_contrast_mode?: boolean;
+          audio_enabled?: boolean;
+          music_volume?: number;
+          sfx_volume?: number;
+          is_admin?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      ui_panel_positions: {
+        Row: {
+          id: string;
+          scene_name: string;
+          panel_id: string;
+          x: number;
+          y: number;
+          default_x: number | null;
+          default_y: number | null;
+          modified_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          scene_name: string;
+          panel_id: string;
+          x: number;
+          y: number;
+          default_x?: number | null;
+          default_y?: number | null;
+          modified_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          scene_name?: string;
+          panel_id?: string;
+          x?: number;
+          y?: number;
+          default_x?: number | null;
+          default_y?: number | null;
+          modified_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
       saves: {
@@ -43,6 +106,38 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
+        Insert: {
+          id?: string;
+          user_id: string;
+          slot_name: string;
+          save_name?: string | null;
+          campaign_name?: string | null;
+          data: Uint8Array;
+          checksum?: string | null;
+          turn_number: number;
+          playtime: number;
+          version: string;
+          victory_status: string;
+          thumbnail?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          slot_name?: string;
+          save_name?: string | null;
+          campaign_name?: string | null;
+          data?: Uint8Array;
+          checksum?: string | null;
+          turn_number?: number;
+          playtime?: number;
+          version?: string;
+          victory_status?: string;
+          thumbnail?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
       };
       scenario_completions: {
         Row: {
@@ -58,6 +153,34 @@ export interface Database {
           first_attempted_at: string;
           last_attempted_at: string;
           completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          scenario_id: string;
+          scenario_pack_id?: string | null;
+          completed?: boolean;
+          attempts?: number;
+          best_time_seconds?: number | null;
+          last_completion_time_seconds?: number | null;
+          stars_earned?: number;
+          first_attempted_at?: string;
+          last_attempted_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          scenario_id?: string;
+          scenario_pack_id?: string | null;
+          completed?: boolean;
+          attempts?: number;
+          best_time_seconds?: number | null;
+          last_completion_time_seconds?: number | null;
+          stars_earned?: number;
+          first_attempted_at?: string;
+          last_attempted_at?: string;
+          completed_at?: string | null;
         };
       };
     };

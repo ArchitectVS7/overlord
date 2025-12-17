@@ -1,6 +1,14 @@
 import Phaser from 'phaser';
 import { AudioManager } from '@core/AudioManager';
 import { AudioActivationOverlay } from './ui/AudioActivationOverlay';
+import { LoadGamePanel } from './ui/LoadGamePanel';
+import { getAuthService } from '@services/AuthService';
+import { getSaveService } from '@services/SaveService';
+import { getUserProfileService } from '@services/UserProfileService';
+import { AdminEditModeIndicator } from './ui/AdminEditModeIndicator';
+import { AdminUIEditorController } from '@services/AdminUIEditorController';
+import { getAdminModeService } from '@services/AdminModeService';
+import { getUIPanelPositionService } from '@services/UIPanelPositionService';
 
 /**
  * Main Menu Scene
@@ -9,6 +17,11 @@ import { AudioActivationOverlay } from './ui/AudioActivationOverlay';
  */
 export class MainMenuScene extends Phaser.Scene {
   private audioActivationOverlay?: AudioActivationOverlay;
+  private loadGamePanel?: LoadGamePanel;
+  private userGreeting?: Phaser.GameObjects.Text;
+  private logoutButton?: Phaser.GameObjects.Text;
+  private adminEditIndicator?: AdminEditModeIndicator;
+  private adminUIEditor?: AdminUIEditorController;
 
   constructor() {
     super({ key: 'MainMenuScene' });
@@ -58,31 +71,151 @@ export class MainMenuScene extends Phaser.Scene {
       this.scene.start('CampaignConfigScene');
     });
 
-    // Load Campaign button (disabled placeholder)
-    this.createMenuButton(centerX, buttonY + buttonSpacing, 'LOAD CAMPAIGN', false);
+    // Load Campaign button (now enabled)
+    this.createMenuButton(centerX, buttonY + buttonSpacing, 'LOAD CAMPAIGN', true, () => {
+      this.showLoadGamePanel();
+    });
 
     // Flash Conflicts button (Story 1-1)
     this.createMenuButton(centerX, buttonY + buttonSpacing * 2, 'FLASH CONFLICTS', true, () => {
       this.scene.start('FlashConflictsScene');
     });
 
-    // Coming soon notice
-    this.add
-      .text(centerX, height * 0.85, 'Load Campaign coming soon...', {
-        fontSize: '14px',
-        color: '#666666',
-        fontFamily: 'monospace',
-      })
-      .setOrigin(0.5);
+    // Create load game panel
+    this.createLoadGamePanel(width, height);
+
+    // Create user display (if authenticated)
+    this.createUserDisplay(width);
+
+    // Initialize Admin UI Editor
+    this.setupAdminUIEditor(width, height);
 
     // Version
     this.add
-      .text(width - 10, height - 10, 'v0.3.0-campaign', {
+      .text(width - 10, height - 10, 'v0.4.0-supabase', {
         fontSize: '12px',
         color: '#444444',
         fontFamily: 'monospace',
       })
       .setOrigin(1, 1);
+  }
+
+  private createLoadGamePanel(width: number, height: number): void {
+    this.loadGamePanel = new LoadGamePanel(this);
+    this.loadGamePanel.setPosition(width / 2 - 300, height / 2 - 250);
+
+    this.loadGamePanel.onLoadSelected = async (slotName: string) => {
+      await this.handleLoadGame(slotName);
+    };
+
+    this.loadGamePanel.onDeleteSelected = async (slotName: string) => {
+      await this.handleDeleteSave(slotName);
+    };
+
+    this.loadGamePanel.onClose = () => {
+      // Panel handles its own hide
+    };
+  }
+
+  private createUserDisplay(width: number): void {
+    const authService = getAuthService();
+    const user = authService.getCurrentUser();
+
+    if (user) {
+      // Get username from profile service or fall back to email
+      const profileService = getUserProfileService();
+      const displayName = profileService.getUsername() || user.email || 'Player';
+
+      this.userGreeting = this.add.text(width - 20, 20, `Welcome, ${displayName}`, {
+        fontSize: '14px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
+      });
+      this.userGreeting.setOrigin(1, 0);
+
+      this.logoutButton = this.add.text(width - 20, 45, '[LOGOUT]', {
+        fontSize: '12px',
+        color: '#888888',
+        fontFamily: 'monospace',
+      });
+      this.logoutButton.setOrigin(1, 0);
+      this.logoutButton.setInteractive({ useHandCursor: true });
+
+      this.logoutButton.on('pointerover', () => {
+        this.logoutButton?.setColor('#ff4444');
+      });
+
+      this.logoutButton.on('pointerout', () => {
+        this.logoutButton?.setColor('#888888');
+      });
+
+      this.logoutButton.on('pointerdown', () => {
+        this.handleLogout();
+      });
+    }
+  }
+
+  private showLoadGamePanel(): void {
+    this.loadGamePanel?.show();
+  }
+
+  private async handleLoadGame(slotName: string): Promise<void> {
+    console.log('Loading save:', slotName);
+
+    const saveService = getSaveService();
+    const result = await saveService.loadGame(slotName);
+
+    if (result.success && result.saveData) {
+      // Store the loaded save data in registry for CampaignConfigScene/GalaxyMapScene to use
+      this.registry.set('loadedSaveData', result.saveData);
+      this.registry.set('loadedFrom', result.loadedFrom);
+
+      this.loadGamePanel?.hide();
+
+      // TODO: Navigate to the appropriate scene based on save state
+      // For now, just show a message that loading worked
+      console.log(`Loaded save from ${result.loadedFrom}:`, result.saveData);
+
+      // The actual game state restoration would happen in a scene that can handle it
+      // This is a placeholder - full implementation would restore the game state
+      this.scene.start('GalaxyMapScene');
+    } else {
+      console.error('Failed to load save:', result.error);
+      // Could show an error dialog here
+    }
+  }
+
+  private async handleDeleteSave(slotName: string): Promise<void> {
+    // Simple confirmation via console for now
+    // A proper implementation would show a confirmation dialog
+    console.log('Deleting save:', slotName);
+
+    const saveService = getSaveService();
+    const result = await saveService.deleteSave(slotName);
+
+    if (result.success) {
+      console.log('Save deleted successfully');
+      // Refresh the save list
+      this.loadGamePanel?.refreshSaveList();
+    } else {
+      console.error('Failed to delete save:', result.error);
+    }
+  }
+
+  private async handleLogout(): Promise<void> {
+    const authService = getAuthService();
+    const result = await authService.signOut();
+
+    if (result.success) {
+      // Clear profile cache
+      const profileService = getUserProfileService();
+      profileService.clearCache();
+
+      // Go back to auth scene
+      this.scene.start('AuthScene');
+    } else {
+      console.error('Logout failed:', result.error);
+    }
   }
 
   private createMenuButton(
@@ -117,5 +250,93 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     return button;
+  }
+
+  /**
+   * Sets up the Admin UI Editor for repositioning UI panels.
+   * Only active for admin users.
+   */
+  private async setupAdminUIEditor(width: number, height: number): Promise<void> {
+    const adminService = getAdminModeService();
+    const positionService = getUIPanelPositionService();
+
+    // Create the UI editor controller
+    this.adminUIEditor = new AdminUIEditorController(this, 'MainMenuScene');
+
+    // Create the edit mode indicator with callbacks
+    this.adminEditIndicator = new AdminEditModeIndicator(this, {
+      onSaveAll: async () => {
+        if (!this.adminUIEditor) return;
+        const positions = this.adminUIEditor.getPendingChanges();
+        if (positions.length > 0) {
+          const result = await positionService.saveAllPositions(positions);
+          if (result.success) {
+            this.adminUIEditor.clearPendingChanges();
+            console.log('Saved all panel positions');
+          } else {
+            console.error('Failed to save positions:', result.error);
+          }
+        }
+      },
+      onResetAll: () => {
+        this.adminUIEditor?.resetAllPositions();
+      },
+      onDiscard: () => {
+        this.adminUIEditor?.resetAllPositions();
+        this.adminUIEditor?.clearPendingChanges();
+      },
+      onExit: () => {
+        adminService.exitEditMode();
+      },
+    });
+
+    // Register panels with the editor
+    if (this.loadGamePanel) {
+      this.adminUIEditor.registerPanel(
+        this.loadGamePanel,
+        'LoadGamePanel',
+        width / 2 - 300,
+        height / 2 - 250,
+        600,
+        500
+      );
+    }
+
+    // Apply stored positions from database
+    const positions = await positionService.getPositionsForScene('MainMenuScene');
+    for (const [panelId, position] of positions) {
+      this.adminUIEditor.applyPosition(panelId, position.x, position.y);
+    }
+
+    if (positions.size > 0) {
+      console.log(`Applied ${positions.size} stored panel positions for MainMenuScene`);
+    }
+
+    // Wire up edit mode toggle
+    adminService.onEditModeChanged = (active) => {
+      if (active) {
+        this.adminUIEditor?.enableEditMode();
+        this.adminEditIndicator?.show();
+      } else {
+        this.adminUIEditor?.disableEditMode();
+        this.adminEditIndicator?.hide();
+      }
+    };
+
+    // Register keyboard shortcut (Ctrl+Shift+E)
+    adminService.registerKeyboardShortcut(this);
+
+    // Update indicator when pending changes change
+    this.time.addEvent({
+      delay: 500,
+      callback: () => {
+        if (adminService.isEditModeActive() && this.adminUIEditor && this.adminEditIndicator) {
+          this.adminEditIndicator.updateChangesCount(
+            this.adminUIEditor.getPendingChangesCount()
+          );
+        }
+      },
+      loop: true,
+    });
   }
 }

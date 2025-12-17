@@ -1,0 +1,424 @@
+/**
+ * RegisterPanel - Registration Form UI Component
+ *
+ * Provides username/email/password registration form using DOM input elements
+ * overlaid on the Phaser canvas.
+ */
+
+import Phaser from 'phaser';
+
+const PANEL_WIDTH = 400;
+const PANEL_HEIGHT = 400;
+
+const COLORS = {
+  BACKGROUND: 0x1a1a2e,
+  BORDER: 0x00ff00,
+  INPUT_BG: '#0a0a1a',
+  INPUT_BORDER: '#4a4a6a',
+  INPUT_BORDER_FOCUS: '#00ff00',
+  TEXT: '#00ff00',
+  TEXT_SECONDARY: '#aaaaaa',
+  BUTTON_BG: 0x003300,
+  BUTTON_HOVER: 0x005500,
+  BUTTON_TEXT: '#00ff00',
+  ERROR: '#ff4444',
+};
+
+/**
+ * RegisterPanel - Container-based registration form
+ */
+export class RegisterPanel extends Phaser.GameObjects.Container {
+  private background!: Phaser.GameObjects.Graphics;
+  private titleText!: Phaser.GameObjects.Text;
+  private usernameLabel!: Phaser.GameObjects.Text;
+  private emailLabel!: Phaser.GameObjects.Text;
+  private passwordLabel!: Phaser.GameObjects.Text;
+  private confirmLabel!: Phaser.GameObjects.Text;
+  private registerButton!: Phaser.GameObjects.Rectangle;
+  private registerButtonText!: Phaser.GameObjects.Text;
+  private errorText!: Phaser.GameObjects.Text;
+  private loadingText!: Phaser.GameObjects.Text;
+
+  // DOM input elements
+  private usernameInput!: HTMLInputElement;
+  private emailInput!: HTMLInputElement;
+  private passwordInput!: HTMLInputElement;
+  private confirmPasswordInput!: HTMLInputElement;
+  private inputContainer!: HTMLDivElement;
+
+  private isLoading = false;
+
+  /**
+   * Callback fired when registration is attempted
+   */
+  public onRegisterAttempt?: (email: string, password: string, username: string) => void;
+
+  constructor(scene: Phaser.Scene) {
+    super(scene, 0, 0);
+
+    this.setVisible(false);
+
+    this.createBackground();
+    this.createTitle();
+    this.createLabels();
+    this.createButton();
+    this.createErrorText();
+    this.createLoadingText();
+
+    scene.add.existing(this as unknown as Phaser.GameObjects.GameObject);
+  }
+
+  /**
+   * Show the panel and create DOM inputs
+   */
+  public show(): void {
+    this.setVisible(true);
+    this.createDOMInputs();
+    this.clearError();
+    this.setLoading(false);
+  }
+
+  /**
+   * Hide the panel and remove DOM inputs
+   */
+  public hide(): void {
+    this.setVisible(false);
+    this.removeDOMInputs();
+  }
+
+  /**
+   * Display an error message
+   */
+  public showError(message: string): void {
+    this.errorText.setText(message);
+    this.errorText.setVisible(true);
+  }
+
+  /**
+   * Clear the error message
+   */
+  public clearError(): void {
+    this.errorText.setText('');
+    this.errorText.setVisible(false);
+  }
+
+  /**
+   * Set loading state
+   */
+  public setLoading(loading: boolean): void {
+    this.isLoading = loading;
+    this.loadingText.setVisible(loading);
+    this.registerButtonText.setText(loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT');
+
+    if (this.usernameInput) this.usernameInput.disabled = loading;
+    if (this.emailInput) this.emailInput.disabled = loading;
+    if (this.passwordInput) this.passwordInput.disabled = loading;
+    if (this.confirmPasswordInput) this.confirmPasswordInput.disabled = loading;
+  }
+
+  /**
+   * Clean up resources
+   */
+  public destroy(fromScene?: boolean): void {
+    this.removeDOMInputs();
+    super.destroy(fromScene);
+  }
+
+  // ============================================
+  // UI Creation
+  // ============================================
+
+  private createBackground(): void {
+    this.background = this.scene.add.graphics();
+    this.background.fillStyle(COLORS.BACKGROUND, 0.98);
+    this.background.fillRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.background.lineStyle(2, COLORS.BORDER);
+    this.background.strokeRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.add(this.background);
+  }
+
+  private createTitle(): void {
+    this.titleText = this.scene.add.text(PANEL_WIDTH / 2, 30, 'CREATE ACCOUNT', {
+      fontSize: '28px',
+      color: COLORS.TEXT,
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+    });
+    this.titleText.setOrigin(0.5, 0.5);
+    this.add(this.titleText);
+  }
+
+  private createLabels(): void {
+    this.usernameLabel = this.scene.add.text(30, 60, 'USERNAME', {
+      fontSize: '14px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.add(this.usernameLabel);
+
+    this.emailLabel = this.scene.add.text(30, 120, 'EMAIL', {
+      fontSize: '14px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.add(this.emailLabel);
+
+    this.passwordLabel = this.scene.add.text(30, 180, 'PASSWORD', {
+      fontSize: '14px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.add(this.passwordLabel);
+
+    this.confirmLabel = this.scene.add.text(30, 240, 'CONFIRM PASSWORD', {
+      fontSize: '14px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.add(this.confirmLabel);
+  }
+
+  private createButton(): void {
+    const buttonWidth = PANEL_WIDTH - 60;
+    const buttonHeight = 45;
+    const buttonY = 320;
+
+    this.registerButton = this.scene.add.rectangle(
+      PANEL_WIDTH / 2,
+      buttonY,
+      buttonWidth,
+      buttonHeight,
+      COLORS.BUTTON_BG
+    );
+    this.registerButton.setStrokeStyle(2, COLORS.BORDER);
+    this.registerButton.setInteractive({ useHandCursor: true });
+
+    this.registerButton.on('pointerover', () => {
+      if (!this.isLoading) {
+        this.registerButton.setFillStyle(COLORS.BUTTON_HOVER);
+      }
+    });
+
+    this.registerButton.on('pointerout', () => {
+      this.registerButton.setFillStyle(COLORS.BUTTON_BG);
+    });
+
+    this.registerButton.on('pointerdown', () => {
+      if (!this.isLoading) {
+        this.handleRegister();
+      }
+    });
+
+    this.add(this.registerButton);
+
+    this.registerButtonText = this.scene.add.text(PANEL_WIDTH / 2, buttonY, 'CREATE ACCOUNT', {
+      fontSize: '18px',
+      color: COLORS.BUTTON_TEXT,
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+    });
+    this.registerButtonText.setOrigin(0.5, 0.5);
+    this.add(this.registerButtonText);
+  }
+
+  private createErrorText(): void {
+    this.errorText = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT - 30, '', {
+      fontSize: '14px',
+      color: COLORS.ERROR,
+      fontFamily: 'monospace',
+      wordWrap: { width: PANEL_WIDTH - 40 },
+    });
+    this.errorText.setOrigin(0.5, 0.5);
+    this.errorText.setVisible(false);
+    this.add(this.errorText);
+  }
+
+  private createLoadingText(): void {
+    this.loadingText = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT - 10, 'Please wait...', {
+      fontSize: '12px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.loadingText.setOrigin(0.5, 0.5);
+    this.loadingText.setVisible(false);
+    this.add(this.loadingText);
+  }
+
+  // ============================================
+  // DOM Input Management
+  // ============================================
+
+  private createDOMInputs(): void {
+    // Remove any existing inputs
+    this.removeDOMInputs();
+
+    // Get canvas position for overlay positioning
+    const canvas = this.scene.game.canvas;
+    const canvasRect = canvas.getBoundingClientRect();
+
+    // Calculate panel position in screen coordinates
+    const panelX = this.x + canvasRect.left;
+    const panelY = this.y + canvasRect.top;
+
+    // Create container for inputs
+    this.inputContainer = document.createElement('div');
+    this.inputContainer.style.position = 'absolute';
+    this.inputContainer.style.left = `${panelX}px`;
+    this.inputContainer.style.top = `${panelY}px`;
+    this.inputContainer.style.width = `${PANEL_WIDTH}px`;
+    this.inputContainer.style.height = `${PANEL_HEIGHT}px`;
+    this.inputContainer.style.pointerEvents = 'none';
+    this.inputContainer.style.zIndex = '1000';
+
+    // Username input
+    this.usernameInput = this.createInput('username', 'Choose a username', 78);
+    this.inputContainer.appendChild(this.usernameInput);
+
+    // Email input
+    this.emailInput = this.createInput('email', 'Enter your email', 138);
+    this.inputContainer.appendChild(this.emailInput);
+
+    // Password input
+    this.passwordInput = this.createInput('new-password', 'Create a password', 198);
+    this.passwordInput.type = 'password';
+    this.inputContainer.appendChild(this.passwordInput);
+
+    // Confirm password input
+    this.confirmPasswordInput = this.createInput('confirm-password', 'Confirm password', 258);
+    this.confirmPasswordInput.type = 'password';
+    this.inputContainer.appendChild(this.confirmPasswordInput);
+
+    // Add Enter key handler
+    this.confirmPasswordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !this.isLoading) {
+        this.handleRegister();
+      }
+    });
+
+    document.body.appendChild(this.inputContainer);
+  }
+
+  private createInput(name: string, placeholder: string, top: number): HTMLInputElement {
+    const input = document.createElement('input');
+    input.name = name;
+    input.placeholder = placeholder;
+    input.autocomplete = name as AutoFill;
+    input.style.cssText = `
+      position: absolute;
+      left: 30px;
+      top: ${top}px;
+      width: ${PANEL_WIDTH - 60}px;
+      height: 32px;
+      padding: 6px 12px;
+      font-size: 15px;
+      font-family: monospace;
+      color: ${COLORS.TEXT};
+      background-color: ${COLORS.INPUT_BG};
+      border: 1px solid ${COLORS.INPUT_BORDER};
+      border-radius: 4px;
+      outline: none;
+      pointer-events: auto;
+      box-sizing: border-box;
+    `;
+
+    input.addEventListener('focus', () => {
+      input.style.borderColor = COLORS.INPUT_BORDER_FOCUS;
+    });
+
+    input.addEventListener('blur', () => {
+      input.style.borderColor = COLORS.INPUT_BORDER;
+    });
+
+    return input;
+  }
+
+  private removeDOMInputs(): void {
+    if (this.inputContainer && this.inputContainer.parentNode) {
+      this.inputContainer.parentNode.removeChild(this.inputContainer);
+    }
+  }
+
+  // ============================================
+  // Registration Handler
+  // ============================================
+
+  private handleRegister(): void {
+    const username = this.usernameInput?.value?.trim() ?? '';
+    const email = this.emailInput?.value?.trim() ?? '';
+    const password = this.passwordInput?.value ?? '';
+    const confirmPassword = this.confirmPasswordInput?.value ?? '';
+
+    this.clearError();
+
+    // Validation
+    const error = this.validate(username, email, password, confirmPassword);
+    if (error) {
+      this.showError(error);
+      return;
+    }
+
+    // Trigger callback
+    this.onRegisterAttempt?.(email, password, username);
+  }
+
+  private validate(
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ): string | null {
+    // Username validation
+    if (!username) {
+      return 'Please enter a username';
+    }
+    if (username.length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    if (username.length > 20) {
+      return 'Username must be 20 characters or less';
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      return 'Username can only contain letters, numbers, underscores, and hyphens';
+    }
+
+    // Email validation
+    if (!email) {
+      return 'Please enter your email';
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return 'Please enter a valid email address';
+    }
+
+    // Password validation
+    if (!password) {
+      return 'Please enter a password';
+    }
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
+    // Confirm password
+    if (password !== confirmPassword) {
+      return 'Passwords do not match';
+    }
+
+    return null;
+  }
+
+  /**
+   * Update input positions when panel moves
+   */
+  public updateInputPositions(): void {
+    if (!this.inputContainer || !this.visible) {
+      return;
+    }
+
+    const canvas = this.scene.game.canvas;
+    const canvasRect = canvas.getBoundingClientRect();
+    const panelX = this.x + canvasRect.left;
+    const panelY = this.y + canvasRect.top;
+
+    this.inputContainer.style.left = `${panelX}px`;
+    this.inputContainer.style.top = `${panelY}px`;
+  }
+}

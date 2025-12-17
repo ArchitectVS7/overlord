@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { BootScene } from '@scenes/BootScene';
+import { AuthScene } from '@scenes/AuthScene';
 import { MainMenuScene } from '@scenes/MainMenuScene';
 import { FlashConflictsScene } from '@scenes/FlashConflictsScene';
 import { ScenarioGameScene } from '@scenes/ScenarioGameScene';
@@ -15,7 +16,7 @@ export const PhaserConfig: Phaser.Types.Core.GameConfig = {
   height: 768,
   parent: 'game-container',
   backgroundColor: '#000000',
-  scene: [BootScene, MainMenuScene, FlashConflictsScene, ScenarioGameScene, ScenarioPackScene, CampaignConfigScene, GalaxyMapScene, VictoryScene, DefeatScene],
+  scene: [BootScene, AuthScene, MainMenuScene, FlashConflictsScene, ScenarioGameScene, ScenarioPackScene, CampaignConfigScene, GalaxyMapScene, VictoryScene, DefeatScene],
   physics: {
     default: 'arcade',
     arcade: {

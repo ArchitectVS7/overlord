@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { GameState } from '@core/GameState';
-import { FactionType } from '@core/models/Enums';
-import { SaveSystem } from '@core/SaveSystem';
+import { FactionType, VictoryResult } from '@core/models/Enums';
+import { SaveSystem, SaveData } from '@core/SaveSystem';
+import { getSaveService } from '@services/SaveService';
 
 /**
  * Defeat campaign statistics for display
@@ -341,9 +342,9 @@ export class DefeatScene extends Phaser.Scene {
   }
 
   /**
-   * Saves the campaign to local storage.
+   * Saves the campaign to cloud or local storage.
    */
-  private saveCampaign(): void {
+  private async saveCampaign(): Promise<void> {
     const statusText = this.children.getByName('statusText') as Phaser.GameObjects.Text | null;
 
     if (!this.gameState) {
@@ -355,22 +356,38 @@ export class DefeatScene extends Phaser.Scene {
     }
 
     try {
-      // Create SaveSystem instance
+      // Create SaveSystem instance to generate save data
       const saveSystem = new SaveSystem(this.gameState);
 
       // Generate save name with timestamp
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const slotName = `defeat-${timestamp}`;
 
-      // Save to local storage (uses internal createSaveData and serialize)
-      saveSystem.saveToLocalStorage(slotName, '0.3.0-campaign', 0, `Defeat - Turn ${this.gameState.currentTurn}`);
+      // Create save data
+      const saveData: SaveData = saveSystem.createSaveData(
+        '0.4.0-supabase',
+        0,
+        `Defeat - Turn ${this.gameState.currentTurn}`
+      );
+      saveData.victoryStatus = VictoryResult.AIVictory;
 
-      if (statusText) {
-        statusText.setText(`Campaign saved: ${slotName}`);
-        statusText.setStyle({ color: '#00ff00' });
+      // Save using SaveService (cloud-first with local fallback)
+      const saveService = getSaveService();
+      const result = await saveService.saveGame(saveData, slotName, 'Campaign');
+
+      if (result.success) {
+        if (statusText) {
+          const locationText = result.savedTo === 'cloud' ? '(Cloud)' : '(Local)';
+          statusText.setText(`Campaign saved ${locationText}: ${slotName}`);
+          statusText.setStyle({ color: '#00ff00' });
+        }
+        console.log(`Defeat campaign saved to ${result.savedTo}: ${slotName}`);
+      } else {
+        if (statusText) {
+          statusText.setText(`Save failed: ${result.error}`);
+          statusText.setStyle({ color: '#ff0000' });
+        }
       }
-
-      console.log(`Defeat campaign saved: ${slotName}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (statusText) {

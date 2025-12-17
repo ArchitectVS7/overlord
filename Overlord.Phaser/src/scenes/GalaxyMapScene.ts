@@ -31,6 +31,10 @@ import { CombatSystem } from '@core/CombatSystem';
 import { AIDecisionSystem } from '@core/AIDecisionSystem';
 import { AudioManager } from '@core/AudioManager';
 import { VolumeControlPanel } from './ui/VolumeControlPanel';
+import { AdminEditModeIndicator } from './ui/AdminEditModeIndicator';
+import { AdminUIEditorController } from '@services/AdminUIEditorController';
+import { getAdminModeService } from '@services/AdminModeService';
+import { getUIPanelPositionService } from '@services/UIPanelPositionService';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -62,6 +66,8 @@ export class GalaxyMapScene extends Phaser.Scene {
   private combatSystem!: CombatSystem;
   private aiDecisionSystem!: AIDecisionSystem;
   private volumeControlPanel!: VolumeControlPanel;
+  private adminEditIndicator!: AdminEditModeIndicator;
+  private adminUIEditor!: AdminUIEditorController;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -479,6 +485,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     );
     this.volumeControlPanel.setScrollFactor(0);
     this.volumeControlPanel.setDepth(1500);
+
+    // Initialize Admin UI Editor
+    this.setupAdminUIEditor();
 
     // Render all planets
     this.renderPlanets();
@@ -1108,7 +1117,115 @@ export class GalaxyMapScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Sets up the Admin UI Editor for repositioning UI panels.
+   * Only active for admin users.
+   */
+  private async setupAdminUIEditor(): Promise<void> {
+    const adminService = getAdminModeService();
+    const positionService = getUIPanelPositionService();
+
+    // Create the UI editor controller
+    this.adminUIEditor = new AdminUIEditorController(this, 'GalaxyMapScene');
+
+    // Create the edit mode indicator with callbacks
+    this.adminEditIndicator = new AdminEditModeIndicator(this, {
+      onSaveAll: async () => {
+        const positions = this.adminUIEditor.getPendingChanges();
+        if (positions.length > 0) {
+          const result = await positionService.saveAllPositions(positions);
+          if (result.success) {
+            this.adminUIEditor.clearPendingChanges();
+            console.log('Saved all panel positions');
+          } else {
+            console.error('Failed to save positions:', result.error);
+          }
+        }
+      },
+      onResetAll: () => {
+        this.adminUIEditor.resetAllPositions();
+      },
+      onDiscard: () => {
+        this.adminUIEditor.resetAllPositions();
+        this.adminUIEditor.clearPendingChanges();
+      },
+      onExit: () => {
+        adminService.exitEditMode();
+      },
+    });
+
+    // Register panels with the editor
+    // TurnHUD - positioned at top-left
+    this.adminUIEditor.registerPanel(this.turnHUD, 'TurnHUD', 150, 60, 220, 120);
+
+    // ResourceHUD - positioned at top-right
+    this.adminUIEditor.registerPanel(
+      this.resourceHUD,
+      'ResourceHUD',
+      this.cameras.main.width - 120,
+      95,
+      220,
+      160
+    );
+
+    // OpponentInfoPanel - positioned at top-left below TurnHUD
+    this.adminUIEditor.registerPanel(this.opponentInfoPanel, 'OpponentInfoPanel', 20, 140, 200, 80);
+
+    // Apply stored positions from database
+    await this.applyStoredPanelPositions();
+
+    // Wire up edit mode toggle
+    adminService.onEditModeChanged = (active) => {
+      if (active) {
+        this.adminUIEditor.enableEditMode();
+        this.adminEditIndicator.show();
+      } else {
+        this.adminUIEditor.disableEditMode();
+        this.adminEditIndicator.hide();
+      }
+    };
+
+    // Register keyboard shortcut (Ctrl+Shift+E)
+    adminService.registerKeyboardShortcut(this);
+
+    // Update indicator when pending changes change
+    this.time.addEvent({
+      delay: 500,
+      callback: () => {
+        if (adminService.isEditModeActive()) {
+          this.adminEditIndicator.updateChangesCount(
+            this.adminUIEditor.getPendingChangesCount()
+          );
+        }
+      },
+      loop: true,
+    });
+  }
+
+  /**
+   * Applies stored panel positions from the database.
+   */
+  private async applyStoredPanelPositions(): Promise<void> {
+    const positionService = getUIPanelPositionService();
+    const positions = await positionService.getPositionsForScene('GalaxyMapScene');
+
+    for (const [panelId, position] of positions) {
+      this.adminUIEditor.applyPosition(panelId, position.x, position.y);
+    }
+
+    if (positions.size > 0) {
+      console.log(`Applied ${positions.size} stored panel positions for GalaxyMapScene`);
+    }
+  }
+
   public shutdown(): void {
+    // Clean up admin UI editor
+    if (this.adminUIEditor) {
+      this.adminUIEditor.destroy();
+    }
+    if (this.adminEditIndicator) {
+      this.adminEditIndicator.destroy();
+    }
     if (this.cameraController) {
       this.cameraController.destroy();
     }
