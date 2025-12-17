@@ -296,8 +296,8 @@ Your current `vercel.json` configuration:
   "installCommand": "cd Overlord.Phaser && npm install",
   "devCommand": "cd Overlord.Phaser && npm start",
   "env": {
-    "VITE_SUPABASE_URL": "@supabase-url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key"
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_ANON_KEY": "@supabase-anon-key"
   },
   "headers": [
     {
@@ -584,7 +584,7 @@ vercel ls
 vercel env ls
 
 # Add environment variable
-vercel env add VITE_SUPABASE_URL production
+vercel env add SUPABASE_URL production
 
 # Deploy to production
 vercel --prod
