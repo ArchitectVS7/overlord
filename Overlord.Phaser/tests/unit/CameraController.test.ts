@@ -58,6 +58,11 @@ class MockInput {
       handlers.forEach(handler => handler(...args));
     }
   }
+
+  // Returns empty array - no UI elements under pointer in tests
+  hitTestPointer(_pointer: unknown): unknown[] {
+    return [];
+  }
 }
 
 // Mock Phaser scene

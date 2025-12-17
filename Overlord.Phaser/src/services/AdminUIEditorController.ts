@@ -18,6 +18,8 @@ export interface DraggablePanel {
   originalY: number;
   width: number;
   height: number;
+  /** If true, content is centered on the container position. If false, content starts at (0,0) */
+  centered: boolean;
 }
 
 /**
@@ -40,6 +42,7 @@ export class AdminUIEditorController {
 
   /**
    * Register a panel for admin editing
+   * @param centered - If true (default), content is centered on container position. If false, content starts at (0,0)
    */
   public registerPanel(
     container: Phaser.GameObjects.Container,
@@ -47,7 +50,8 @@ export class AdminUIEditorController {
     defaultX: number,
     defaultY: number,
     width: number = 200,
-    height: number = 100
+    height: number = 100,
+    centered: boolean = true
   ): void {
     const panel: DraggablePanel = {
       container,
@@ -57,6 +61,7 @@ export class AdminUIEditorController {
       originalY: defaultY,
       width,
       height,
+      centered,
     };
 
     this.registeredPanels.set(panelId, panel);
@@ -135,8 +140,11 @@ export class AdminUIEditorController {
     const container = panel.container;
 
     // Make the container interactive and draggable
+    // Use centered or top-left hit area based on panel configuration
+    const offsetX = panel.centered ? -panel.width / 2 : 0;
+    const offsetY = panel.centered ? -panel.height / 2 : 0;
     container.setInteractive(
-      new Phaser.Geom.Rectangle(0, 0, panel.width, panel.height),
+      new Phaser.Geom.Rectangle(offsetX, offsetY, panel.width, panel.height),
       Phaser.Geom.Rectangle.Contains
     );
     this.scene.input.setDraggable(container, true);
@@ -174,9 +182,12 @@ export class AdminUIEditorController {
   private addDragBorder(panel: DraggablePanel): void {
     const graphics = this.scene.add.graphics();
     graphics.lineStyle(2, 0x00ff00, 0.8);
+    // Draw border based on panel centering mode
+    const offsetX = panel.centered ? panel.width / 2 : 0;
+    const offsetY = panel.centered ? panel.height / 2 : 0;
     graphics.strokeRect(
-      panel.container.x,
-      panel.container.y,
+      panel.container.x - offsetX,
+      panel.container.y - offsetY,
       panel.width,
       panel.height
     );
@@ -194,9 +205,12 @@ export class AdminUIEditorController {
     if (graphics) {
       graphics.clear();
       graphics.lineStyle(2, 0x00ff00, 0.8);
+      // Draw border based on panel centering mode
+      const offsetX = panel.centered ? panel.width / 2 : 0;
+      const offsetY = panel.centered ? panel.height / 2 : 0;
       graphics.strokeRect(
-        panel.container.x,
-        panel.container.y,
+        panel.container.x - offsetX,
+        panel.container.y - offsetY,
         panel.width,
         panel.height
       );
@@ -226,9 +240,12 @@ export class AdminUIEditorController {
     if (graphics) {
       graphics.clear();
       graphics.lineStyle(3, 0xffff00, 1);
+      // Draw border based on panel centering mode
+      const offsetX = panel.centered ? panel.width / 2 : 0;
+      const offsetY = panel.centered ? panel.height / 2 : 0;
       graphics.strokeRect(
-        panel.container.x,
-        panel.container.y,
+        panel.container.x - offsetX,
+        panel.container.y - offsetY,
         panel.width,
         panel.height
       );
@@ -281,9 +298,12 @@ export class AdminUIEditorController {
     if (graphics) {
       graphics.clear();
       graphics.lineStyle(2, 0x00ff00, 0.8);
+      // Draw border based on panel centering mode
+      const offsetX = panel.centered ? panel.width / 2 : 0;
+      const offsetY = panel.centered ? panel.height / 2 : 0;
       graphics.strokeRect(
-        panel.container.x,
-        panel.container.y,
+        panel.container.x - offsetX,
+        panel.container.y - offsetY,
         panel.width,
         panel.height
       );
@@ -321,10 +341,10 @@ export class AdminUIEditorController {
     const y = Math.round(panel.container.y);
 
     this.positionOverlay.setText(`${panel.panelId}\nX: ${x}  Y: ${y}`);
-    this.positionOverlay.setPosition(
-      panel.container.x + panel.width + 10,
-      panel.container.y
-    );
+    // Position overlay to the right of the panel based on centering mode
+    const rightEdge = panel.centered ? panel.container.x + panel.width / 2 : panel.container.x + panel.width;
+    const topEdge = panel.centered ? panel.container.y - panel.height / 2 : panel.container.y;
+    this.positionOverlay.setPosition(rightEdge + 10, topEdge);
     this.positionOverlay.setVisible(true);
   }
 

@@ -1169,7 +1169,8 @@ export class GalaxyMapScene extends Phaser.Scene {
     );
 
     // OpponentInfoPanel - positioned at top-left below TurnHUD
-    this.adminUIEditor.registerPanel(this.opponentInfoPanel, 'OpponentInfoPanel', 20, 140, 200, 80);
+    // Uses top-left aligned graphics (not centered)
+    this.adminUIEditor.registerPanel(this.opponentInfoPanel, 'OpponentInfoPanel', 20, 140, 240, 120, false);
 
     // Apply stored positions from database
     await this.applyStoredPanelPositions();

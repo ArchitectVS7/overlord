@@ -231,6 +231,26 @@ export class CameraController {
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
     if (!pointer.leftButtonDown()) return;
 
+    // Don't start camera drag if pointer is over an interactive UI element
+    // This allows UI elements (buttons, draggable panels) to handle their own input
+    const objectsUnderPointer = this.scene.input.hitTestPointer(pointer);
+    if (objectsUnderPointer.length > 0) {
+      // Check if any object under pointer is interactive (has input enabled)
+      const hasInteractiveUI = objectsUnderPointer.some(obj => {
+        // Check if it's a UI element (high depth or scroll factor 0)
+        const gameObject = obj as Phaser.GameObjects.GameObject;
+        const depth = (gameObject as unknown as { depth?: number }).depth ?? 0;
+        const scrollFactor = (gameObject as unknown as { scrollFactorX?: number }).scrollFactorX;
+
+        // UI elements typically have high depth (>= 100) or scrollFactor of 0
+        return depth >= 100 || scrollFactor === 0;
+      });
+
+      if (hasInteractiveUI) {
+        return; // Let UI handle the interaction
+      }
+    }
+
     this.isDragging = true;
     this.dragStartX = pointer.x;
     this.dragStartY = pointer.y;

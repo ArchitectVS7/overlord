@@ -3,6 +3,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/tests/e2e/'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/main.ts',
@@ -19,6 +20,7 @@ module.exports = {
   moduleNameMapper: {
     '^@core/(.*)$': '<rootDir>/src/core/$1',
     '^@scenes/(.*)$': '<rootDir>/src/scenes/$1',
-    '^@config/(.*)$': '<rootDir>/src/config/$1'
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@services/(.*)$': '<rootDir>/src/services/$1'
   }
 };

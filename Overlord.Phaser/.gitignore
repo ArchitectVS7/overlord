@@ -5,3 +5,9 @@ coverage/
 .DS_Store
 .env
 .env.local
+
+# Playwright
+playwright-report/
+playwright/.cache/
+test-results/
+tests/e2e/.auth/
