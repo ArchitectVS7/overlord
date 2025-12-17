@@ -1,7 +1,7 @@
 # Overlord Developer's Manual
 
 **Project:** Overlord - Classic 4X Strategy Game Remake
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Date:** December 2025
 **Maintainer:** Project Team
 
@@ -26,6 +26,7 @@ This three-volume developer's manual provides comprehensive documentation for th
 - Phaser integration patterns
 - Testing strategies and coverage
 - Build system and tooling
+- **NEW: Adjustable Variables Reference** (gameplay tuning)
 
 ### [Volume II: Development Guide & Open Items](volume-2-development-guide/README.md)
 
@@ -38,13 +39,15 @@ This three-volume developer's manual provides comprehensive documentation for th
 - Best practices and coding patterns
 - Free tools and resources
 - Asset creation workflows
+- **NEW: Git, PR, and Issues Guide** (workflow standards)
 
 ### [Volume III: Future Expansion & Operations](volume-3-expansion-operations/README.md)
 
 **Purpose:** Long-term planning and operational guidance
 **Audience:** Project leads, maintainers, community managers
 **Contents:**
-- Alpha/beta testing procedures
+- **NEW: UAT Methodology** (core mechanics testing scripts)
+- **NEW: Alpha Testing Procedures** (tester onboarding, bug reporting)
 - Player feedback management
 - Performance scaling strategies
 - Release strategies (open source vs commercial)
@@ -73,10 +76,13 @@ This three-volume developer's manual provides comprehensive documentation for th
 2. See [Volume II - Audio Assets](volume-2-development-guide/06-audio-assets.md)
 3. Check [Volume II - Scenario Authoring](volume-2-development-guide/03-scenario-authoring.md)
 
+### For Alpha Testing
+1. See [Volume III - UAT Methodology](volume-3-expansion-operations/01-uat-methodology.md)
+2. Review [Volume III - Alpha Testing Procedures](volume-3-expansion-operations/02-alpha-testing-procedures.md)
+
 ### For Operations & Scaling
-1. See [Volume III - Testing Procedures](volume-3-expansion-operations/01-testing-procedures.md)
-2. Review [Volume III - Scaling Strategies](volume-3-expansion-operations/03-scaling-strategies.md)
-3. Check [Volume III - Release Planning](volume-3-expansion-operations/04-release-strategies.md)
+1. Review [Volume III - Scaling Strategies](volume-3-expansion-operations/03-scaling-strategies.md)
+2. Check [Volume III - Release Planning](volume-3-expansion-operations/04-release-strategies.md)
 
 ---
 
@@ -138,6 +144,14 @@ All documentation in this manual follows these principles:
 
 ## Changelog
 
+**v1.1.0 (December 2025)**
+- Added Adjustable Variables Reference (Volume I)
+- Added Git, PR & Issues Guide (Volume II)
+- Added UAT Methodology with 13 core mechanics test scripts (Volume III)
+- Added Alpha Testing Procedures (Volume III)
+- Added How to Play JSON system (`Overlord.Phaser/public/assets/data/how-to-play/`)
+- Added HowToPlayModels.ts TypeScript interfaces
+
 **v1.0.0 (December 2025)**
 - Initial comprehensive manual created
 - Volumes I, II, III published
@@ -154,5 +168,5 @@ All documentation in this manual follows these principles:
 
 ---
 
-**Last Updated:** December 11, 2025
+**Last Updated:** December 16, 2025
 **Next Review:** Q1 2026

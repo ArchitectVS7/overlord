@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "title": "Overlord: How to Play",
+  "description": "Complete guide to playing Overlord, the classic 4X space strategy game.",
+  "categories": [
+    {
+      "id": "basics",
+      "name": "Game Basics",
+      "icon": "help-circle",
+      "file": "basics.json",
+      "order": 1,
+      "description": "Essential concepts for new players"
+    },
+    {
+      "id": "economy",
+      "name": "Economy & Resources",
+      "icon": "coins",
+      "file": "economy.json",
+      "order": 2,
+      "description": "Managing your empire's resources and production"
+    },
+    {
+      "id": "military",
+      "name": "Military & Combat",
+      "icon": "swords",
+      "file": "military.json",
+      "order": 3,
+      "description": "Building forces and engaging in battle"
+    },
+    {
+      "id": "advanced",
+      "name": "Advanced Strategies",
+      "icon": "lightbulb",
+      "file": "advanced.json",
+      "order": 4,
+      "description": "Expert tactics and optimization techniques"
+    }
+  ]
+}

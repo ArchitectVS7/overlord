@@ -1,0 +1,409 @@
+{
+  "categoryId": "advanced",
+  "categoryName": "Advanced Strategies",
+  "sections": [
+    {
+      "sectionId": "ai-opponents",
+      "title": "Understanding AI Opponents",
+      "content": "Your AI opponent has a distinct personality that shapes their strategy throughout the game. Learning to recognize and counter each personality type gives you a significant advantage.",
+      "subsections": [
+        {
+          "subsectionId": "aggressive-ai",
+          "title": "Commander Kratos (Aggressive)",
+          "content": "Commander Kratos believes in strength through conquest. This AI prioritizes military development over economy and attacks early and often. Expect constant pressure from Turn 5 onwards.",
+          "quote": "Strength through conquest! Your planets will fall.",
+          "strategy": {
+            "aiPriorities": [
+              "Military production from Turn 1",
+              "Early Battle Cruiser purchases",
+              "Aggressive expansion attacks"
+            ],
+            "counterStrategy": [
+              "Build Orbital Defense early on vulnerable planets",
+              "Maintain a defensive fleet near likely attack targets",
+              "Exploit their weak economy—they neglect mining infrastructure",
+              "Their aggression creates opportunities when their attacks fail"
+            ]
+          },
+          "tip": "Kratos attacks before building a strong economy. If you survive the early assault, their staying power is limited."
+        },
+        {
+          "subsectionId": "defensive-ai",
+          "title": "Overseer Aegis (Defensive)",
+          "content": "Overseer Aegis plays a patient, defensive game. They fortify their planets, build economic infrastructure, and rarely initiate attacks. Breaking their defenses requires overwhelming force.",
+          "quote": "Patience is the strongest fortress. I can wait.",
+          "strategy": {
+            "aiPriorities": [
+              "Orbital Defense on all planets",
+              "Strong garrison forces",
+              "Economic infrastructure for long game"
+            ],
+            "counterStrategy": [
+              "Don't rush attacks—build superior force first",
+              "Use bombardment to soften defenses before assault",
+              "Target their least-defended planets for flanking",
+              "Their passivity lets you build unmolested—use that time"
+            ]
+          },
+          "warning": "Attacking Aegis without overwhelming superiority leads to costly failures. Be patient and build."
+        },
+        {
+          "subsectionId": "economic-ai",
+          "title": "Magistrate Midas (Economic)",
+          "content": "Magistrate Midas believes wealth is power. This AI builds extensive economic infrastructure before military expansion. They start slow but become dangerous if left unchecked.",
+          "quote": "Credits are power. My wealth will crush you.",
+          "strategy": {
+            "aiPriorities": [
+              "Mining and agricultural development",
+              "Multiple Cargo Cruisers for trade",
+              "Late-game military buildup"
+            ],
+            "counterStrategy": [
+              "Attack early before their economy compounds",
+              "Raid their Cargo Cruisers to disrupt trade",
+              "Don't let them colonize multiple planets",
+              "Time pressure is your ally—strike before Turn 15"
+            ]
+          },
+          "tip": "Midas is vulnerable in the first 10 turns. Strike early or face an economic juggernaut."
+        },
+        {
+          "subsectionId": "balanced-ai",
+          "title": "General Nexus (Balanced)",
+          "content": "General Nexus adapts to the situation. Without strong biases, they respond tactically to your actions. This makes them unpredictable but also exploitable if you understand their decision patterns.",
+          "quote": "Strategy, not emotion, wins wars.",
+          "strategy": {
+            "aiPriorities": [
+              "Adapts based on threat assessment",
+              "Balanced military and economic development",
+              "Responds to player actions"
+            ],
+            "counterStrategy": [
+              "Unpredictability works both ways—vary your approach",
+              "They react to threats, so feint attacks can draw resources",
+              "Watch for patterns in their responses",
+              "Standard solid play is effective—no special counters needed"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "sectionId": "difficulty-settings",
+      "title": "Difficulty Mechanics",
+      "content": "Difficulty settings affect AI behavior thresholds and strength calculations. Understanding these mechanics helps you choose the right challenge level.",
+      "subsections": [
+        {
+          "subsectionId": "difficulty-effects",
+          "title": "Difficulty Effects",
+          "content": "Higher difficulties don't give the AI better units—they make the AI bolder and more efficient. The AI assesses its strength differently and attacks with smaller advantages.",
+          "difficultyTable": [
+            {
+              "difficulty": "Easy",
+              "strengthMod": "0.8x (20% penalty)",
+              "attackThreshold": "Needs 2× your strength to attack",
+              "behavior": "Cautious, waits for overwhelming advantage"
+            },
+            {
+              "difficulty": "Normal",
+              "strengthMod": "1.0x (no modifier)",
+              "attackThreshold": "Needs 1.5× your strength to attack",
+              "behavior": "Balanced, attacks when clearly stronger"
+            },
+            {
+              "difficulty": "Hard",
+              "strengthMod": "1.2x (20% bonus)",
+              "attackThreshold": "Needs 1.2× your strength to attack",
+              "behavior": "Aggressive, attacks with small advantages"
+            }
+          ],
+          "tip": "On Hard difficulty, keep your military strength visible. The AI attacks when it thinks it's stronger—don't give it openings."
+        }
+      ]
+    },
+    {
+      "sectionId": "economic-optimization",
+      "title": "Economic Optimization",
+      "content": "Efficient resource management separates novice players from experts. These techniques maximize your economic output and strategic flexibility.",
+      "subsections": [
+        {
+          "subsectionId": "build-efficiency",
+          "title": "Building Efficiency",
+          "content": "Not all buildings provide equal value for their cost. Understanding cost-efficiency helps you prioritize construction.",
+          "analysis": [
+            {
+              "building": "Mining Station",
+              "cost": "8,000 credits, 2,000 minerals, 1,000 fuel",
+              "output": "50 minerals + 30 fuel per turn",
+              "payback": "40 turns to recover mineral cost, 33 turns for fuel",
+              "verdict": "Essential, but long-term investment"
+            },
+            {
+              "building": "Horticultural Station",
+              "cost": "6,000 credits, 1,500 minerals, 800 fuel",
+              "output": "100 food per turn",
+              "verdict": "Critical for morale, build early"
+            },
+            {
+              "building": "Orbital Defense",
+              "cost": "12,000 credits, 3,000 minerals, 2,000 fuel",
+              "output": "20% defensive bonus",
+              "verdict": "High cost but invaluable for key planets"
+            }
+          ],
+          "tip": "Mining Stations are expensive but compound over time. Build them early when their long payback period matters less."
+        },
+        {
+          "subsectionId": "planet-specialization",
+          "title": "Planet Specialization",
+          "content": "Each planet type has production bonuses. Specializing planets based on their type maximizes output across your empire.",
+          "specializations": [
+            {
+              "planetType": "Volcanic",
+              "specialization": "Mining Hub",
+              "strategy": "Stack Mining Stations, export minerals to other planets"
+            },
+            {
+              "planetType": "Tropical",
+              "specialization": "Agricultural Center",
+              "strategy": "Stack Horticultural Stations, feed your empire"
+            },
+            {
+              "planetType": "Desert",
+              "specialization": "Flexible",
+              "strategy": "Build based on current needs, no strong bonuses"
+            },
+            {
+              "planetType": "Metropolis",
+              "specialization": "Military Training",
+              "strategy": "Focus on platoon production, support with basic economy"
+            }
+          ]
+        },
+        {
+          "subsectionId": "crew-management",
+          "title": "Crew Management",
+          "content": "Crew (population) is a hidden constraint on economic growth. Every building and spacecraft requires crew to operate. Managing crew prevents bottlenecks.",
+          "crewRequirements": [
+            {"item": "Horticultural Station", "crew": 10},
+            {"item": "Mining Station", "crew": 15},
+            {"item": "Solar Satellite", "crew": 5},
+            {"item": "Battle Cruiser", "crew": 50},
+            {"item": "Cargo Cruiser", "crew": 30},
+            {"item": "Atmosphere Processor", "crew": 20}
+          ],
+          "tip": "Calculate crew requirements before expanding. A planet with more buildings than crew capacity produces nothing from the overflow."
+        }
+      ]
+    },
+    {
+      "sectionId": "military-tactics",
+      "title": "Military Tactics",
+      "content": "Winning battles is about more than raw strength. These tactical considerations improve your military effectiveness.",
+      "subsections": [
+        {
+          "subsectionId": "force-composition",
+          "title": "Optimal Force Composition",
+          "content": "Quality versus quantity is a key decision. Understanding when each approach works helps you build effective forces.",
+          "comparison": [
+            {
+              "approach": "Quantity (many cheap platoons)",
+              "pros": "Fast to produce, expendable, good for defense",
+              "cons": "Weak individually, fill platoon limit quickly",
+              "when": "Early game defense, attrition warfare"
+            },
+            {
+              "approach": "Quality (few elite platoons)",
+              "pros": "Strong individually, efficient use of platoon limit",
+              "cons": "Expensive, slow to replace losses",
+              "when": "Decisive attacks, limited engagement windows"
+            }
+          ],
+          "tip": "Mix both approaches. Elite platoons for offensive operations, cheaper units for garrison duty."
+        },
+        {
+          "subsectionId": "aggression-tactics",
+          "title": "Aggression Slider Tactics",
+          "content": "The aggression slider is a tactical tool, not just a preference setting. Match aggression to the situation.",
+          "tactics": [
+            {
+              "situation": "Overwhelming superiority (3:1+)",
+              "aggression": "High (75-100%)",
+              "reason": "End battle quickly, accept losses for speed"
+            },
+            {
+              "situation": "Moderate advantage (1.5:1 to 3:1)",
+              "aggression": "Medium (40-60%)",
+              "reason": "Balanced approach, reasonable losses"
+            },
+            {
+              "situation": "Even fight (0.8:1 to 1.5:1)",
+              "aggression": "Low (0-25%)",
+              "reason": "Preserve forces, even wins are costly"
+            },
+            {
+              "situation": "Underdog (below 0.8:1)",
+              "aggression": "Consider not fighting",
+              "reason": "Likely defeat regardless of aggression"
+            }
+          ]
+        },
+        {
+          "subsectionId": "timing",
+          "title": "Attack Timing",
+          "content": "When you attack matters as much as how you attack. These timing considerations improve your chances of success.",
+          "considerations": [
+            {
+              "factor": "AI construction",
+              "timing": "Strike after AI commits to non-military buildings",
+              "reason": "Their resources are tied up, military weak"
+            },
+            {
+              "factor": "Training completion",
+              "timing": "Wait for platoon training to complete (100%)",
+              "reason": "Partially trained platoons are ineffective"
+            },
+            {
+              "factor": "Fleet position",
+              "timing": "Position fleet before declaring intent",
+              "reason": "AI responds to your fleet movements"
+            },
+            {
+              "factor": "Multiple targets",
+              "timing": "Coordinate attacks to split AI response",
+              "reason": "AI cannot defend everywhere simultaneously"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "common-mistakes",
+      "title": "Common Mistakes",
+      "content": "Learning from others' mistakes accelerates your improvement. These common errors trap many new players.",
+      "subsections": [
+        {
+          "subsectionId": "early-game-mistakes",
+          "title": "Early Game Mistakes",
+          "content": "The first 10 turns establish your trajectory. These mistakes can doom your game before it really begins.",
+          "mistakes": [
+            {
+              "mistake": "Neglecting food production",
+              "consequence": "Morale collapse, economic spiral",
+              "solution": "Build Horticultural Station in first 3 turns"
+            },
+            {
+              "mistake": "Building military too early",
+              "consequence": "Weak economy, can't sustain forces",
+              "solution": "Economic infrastructure first, military after Turn 8-10"
+            },
+            {
+              "mistake": "Overexpanding to neutral planets",
+              "consequence": "Resources spread thin, each planet weak",
+              "solution": "Develop core planets before expanding"
+            }
+          ]
+        },
+        {
+          "subsectionId": "combat-mistakes",
+          "title": "Combat Mistakes",
+          "content": "Even strong armies lose to poor tactics. Avoid these combat errors.",
+          "mistakes": [
+            {
+              "mistake": "Attacking without full training",
+              "consequence": "Platoons at 50% training have 50% strength",
+              "solution": "Always wait for 100% training"
+            },
+            {
+              "mistake": "High aggression in even fights",
+              "consequence": "Pyrrhic victory, no forces for follow-up",
+              "solution": "Match aggression to strength advantage"
+            },
+            {
+              "mistake": "Attacking fortified planets without superiority",
+              "consequence": "Orbital Defense bonus defeats close attacks",
+              "solution": "Bring 1.5× strength against defended planets"
+            },
+            {
+              "mistake": "Leaving Starbase undefended",
+              "consequence": "Lose training capability if captured",
+              "solution": "Always garrison Starbase, build Orbital Defense"
+            }
+          ]
+        },
+        {
+          "subsectionId": "strategic-mistakes",
+          "title": "Strategic Mistakes",
+          "content": "These errors compound over many turns, slowly losing you the game.",
+          "mistakes": [
+            {
+              "mistake": "Ignoring the AI's strategy",
+              "consequence": "Surprised by attacks, caught off-guard",
+              "solution": "Watch AI actions, anticipate their moves"
+            },
+            {
+              "mistake": "Never scrapping obsolete structures",
+              "consequence": "Crew tied up in useless buildings",
+              "solution": "Scrap buildings that no longer serve your strategy"
+            },
+            {
+              "mistake": "Hoarding resources instead of building",
+              "consequence": "Stockpiles don't produce anything",
+              "solution": "Resources should flow into productive assets"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "victory-paths",
+      "title": "Paths to Victory",
+      "content": "Victory requires eliminating your opponent, but there are multiple strategic approaches to achieve this goal.",
+      "subsections": [
+        {
+          "subsectionId": "rush-strategy",
+          "title": "Rush Strategy",
+          "content": "Attack early before the opponent establishes defenses. Risky but can end games quickly.",
+          "execution": [
+            "Minimal economic buildings (1 Mining, 1 Horticultural)",
+            "Commission platoons immediately",
+            "Purchase Battle Cruiser as soon as affordable",
+            "Attack by Turn 8-10 with whatever force available"
+          ],
+          "bestAgainst": "Economic AI (Magistrate Midas)",
+          "weakAgainst": "Defensive AI (Overseer Aegis)",
+          "warning": "If the rush fails, you'll be far behind economically. Commit fully or not at all."
+        },
+        {
+          "subsectionId": "economic-strategy",
+          "title": "Economic Superiority",
+          "content": "Build an overwhelming economy, then crush the opponent with superior production.",
+          "execution": [
+            "Heavy investment in Mining and Horticultural Stations",
+            "Colonize neutral planets for resource multipliers",
+            "Delay military until Turn 15-20",
+            "Build elite platoons with best equipment",
+            "Attack with decisive force advantage"
+          ],
+          "bestAgainst": "Aggressive AI (Commander Kratos)",
+          "weakAgainst": "None if you survive the early game",
+          "warning": "Requires surviving early aggression. Build Orbital Defense on Starbase."
+        },
+        {
+          "subsectionId": "attrition-strategy",
+          "title": "Attrition Warfare",
+          "content": "Trade space for time, wearing down the opponent through defensive battles.",
+          "execution": [
+            "Orbital Defense on all planets",
+            "Cheap garrison platoons for defense",
+            "Counterattack only when opponent is weakened",
+            "Force opponent to attack into fortified positions"
+          ],
+          "bestAgainst": "Aggressive AI (Commander Kratos)",
+          "weakAgainst": "Economic AI (Magistrate Midas)",
+          "warning": "Requires patience. Don't attack until you've ground down their forces."
+        }
+      ]
+    }
+  ]
+}
