@@ -95,12 +95,38 @@ import { PhaserConfig } from '@config/PhaserConfig';
 - Tests in `tests/` directory with `.test.ts` suffix
 - E2E tests use `.spec.ts` suffix
 
-## Backend (Supabase)
+## Supabase Backend
 
 - Database migrations in `supabase/migrations/`
-- Tables: `user_profiles`, `saves`, `scenario_completions`
+- Tables: `user_profiles`, `saves`, `scenario_completions`, `ui_panel_positions`
 - Row Level Security enforced on all tables
-- Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- Admin role system for UI editor access
+
+### Supabase CLI Commands
+
+```bash
+# Install Supabase CLI globally
+npm install -g supabase
+
+# Login to Supabase
+supabase login
+
+# Link to your project
+supabase link --project-ref your-project-ref
+
+# Push migrations to Supabase
+supabase db push
+```
+
+### Environment Variables
+
+Create `.env` file in `Overlord.Phaser/`:
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+For E2E tests, create `.env.test` with test user credentials.
 
 ## Legacy .NET Projects
 
@@ -108,3 +134,10 @@ The repository contains legacy C# projects (no longer actively developed):
 - `Overlord.Core/` - .NET Standard 2.1 library
 - `Overlord.Console/` - .NET 8 console app
 - `Overlord.Core.Tests/` - .NET test project
+
+## Deployment
+
+- **Platform:** Vercel (automatic deployments from main branch)
+- **Build command:** `npm run build` (runs from `Overlord.Phaser/`)
+- **Output directory:** `Overlord.Phaser/dist/`
+- **Environment variables:** Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel dashboard

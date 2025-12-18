@@ -38,7 +38,7 @@ date: '2025-12-09'
 | Term | Type | Duration | Description |
 |------|------|----------|-------------|
 | Flash Conflict | Tactical Challenge | 5-15 min | Single scenario with pre-configured state and victory conditions |
-| Campaign | Full Game | 45-60 min | Complete 4X experience with all 18 systems |
+| Campaign | Full Game | 45-60 min | Complete 4X experience with all 34+ core systems |
 | Scenario Pack | Configuration | N/A | JSON-based AI and galaxy template |
 
 **Usage Notes:**
@@ -58,7 +58,17 @@ date: '2025-12-09'
 The original Unity 6000 + C# implementation proved incompatible with Claude Code-assisted development workflows. To maintain development velocity and leverage AI-assisted coding capabilities, the project has been rebuilt using Phaser 3 + TypeScript with a platform-agnostic core architecture.
 
 **Migration Status:**
-All 18 core game systems have been successfully ported to `Overlord.Phaser/src/core/` with 304 passing tests and 93.78% code coverage. The game logic is platform-independent and battle-tested.
+All 34+ core game systems have been successfully ported to `Overlord.Phaser/src/core/` with 835+ passing tests and 93%+ code coverage. The game logic is platform-independent and battle-tested.
+
+**Core Systems Implemented:**
+- State & Game Loop: GameState, TurnSystem, PhaseProcessor, EntitySystem
+- Economy: ResourceSystem, IncomeSystem, TaxationSystem, PopulationSystem, SaveSystem
+- Military: CraftSystem, PlatoonSystem, CombatSystem, SpaceCombatSystem, InvasionSystem, BombardmentSystem
+- Infrastructure: BuildingSystem, DefenseSystem, UpgradeSystem, NavigationSystem
+- Scenario: ScenarioManager, ScenarioInitializer, ScenarioPackManager, PackConfigLoader, VictoryConditionSystem, StarRatingSystem
+- AI & Tutorial: AIDecisionSystem, TutorialManager, TutorialActionDetector
+- Audio & Input: AudioManager, InputSystem
+- UI Services: AdminModeService, AdminUIEditorController, UIPanelPositionService
 
 ### What Makes This Special
 
@@ -144,7 +154,7 @@ This transforms a fixed single-player experience into a platform for unlimited s
 ### Strategic Differentiators from Unity PRD
 
 **What's Preserved:**
-- All 18 game systems (combat, economy, AI, etc.)
+- All 34+ game systems (combat, economy, AI, scenarios, tutorials, etc.)
 - Turn-based 4X gameplay mechanics
 - Original game's strategic depth
 - 4-6 planet galaxy system
@@ -545,7 +555,7 @@ These three journeys reveal the following capabilities needed for the playable p
 
 ## Innovation & Novel Patterns
 
-This project introduces three strategic innovations that differentiate it from traditional 4X strategy games and demonstrate novel approaches to game design and development.
+This project introduces five strategic innovations that differentiate it from traditional 4X strategy games and demonstrate novel approaches to game design and development.
 
 ---
 
@@ -769,6 +779,60 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 
 ---
 
+### Innovation 4: Admin UI Editor Mode
+
+**What Makes It Novel:**
+
+Game UI development typically requires recompiling code to adjust panel positions, sizes, and layouts. Overlord introduces an **Admin UI Editor Mode** that allows authorized users to reposition UI panels in real-time, with changes persisted to the database.
+
+**Implementation:**
+- **AdminModeService:** Toggles edit mode on/off, restricts access to admin users
+- **AdminUIEditorController:** Enables drag-and-drop repositioning of registered UI panels
+- **UIPanelPositionService:** Persists custom positions to Supabase `ui_panel_positions` table
+
+**Why This Matters:**
+- Eliminates code deploys for UI layout adjustments
+- Enables per-user UI customization (future feature)
+- Demonstrates Supabase integration for non-save-game data
+- Accelerates alpha testing iterations
+
+**Database Schema:**
+```sql
+CREATE TABLE ui_panel_positions (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  panel_key TEXT NOT NULL,
+  x INTEGER NOT NULL,
+  y INTEGER NOT NULL,
+  UNIQUE(user_id, panel_key)
+);
+```
+
+---
+
+### Innovation 5: Star Rating System for Flash Conflicts
+
+**What Makes It Novel:**
+
+Traditional 4X games lack completion metrics beyond win/lose. Overlord introduces a **Star Rating System** for Flash Conflicts that scores performance based on completion time:
+
+- **3 Stars:** Excellent - completed well under target time
+- **2 Stars:** Good - completed near target time
+- **1 Star:** Completed - finished but took longer than target
+
+**Implementation:**
+- `StarRatingSystem.ts` calculates stars based on scenario target times
+- `ScenarioCompletionService.ts` persists best times to Supabase
+- `ScenarioResultsPanel.ts` displays earned stars with animations
+- `ScenarioDetailPanel.ts` shows historical best performance
+
+**Why This Matters:**
+- Adds replayability ("Can I 3-star this scenario?")
+- Enables leaderboards for competitive players
+- Provides clear progression feedback
+
+---
+
 ### Innovation Summary Table
 
 | Innovation | Problem Solved | Market Gap | Risk Level | MVP Priority |
@@ -776,6 +840,8 @@ Treating **AI-assisted development compatibility as a hard requirement** that in
 | **Flash Conflicts** | 4X tutorials are boring; quick-play modes don't teach skills | No 4X game has MTG Arena-style scenario puzzles | Medium | **HIGH** (Core MVP feature) |
 | **Data-Driven Scenario Packs** | Fixed enemy factions limit replayability; mods are fragile | JSON-based enemy/galaxy configs don't exist in 4X | Low | **MEDIUM** (Foundation in MVP, full system post-Alpha) |
 | **Developer Experience as Requirement** | Game dev tools slow AI-assisted development | No game has optimized architecture for Claude Code workflows | Low | **HIGH** (Already implemented) |
+| **Admin UI Editor Mode** | UI layout changes require code deploys | Real-time UI positioning with database persistence | Low | **LOW** (Admin tool, not player-facing) |
+| **Star Rating System** | No completion metrics beyond win/lose | Time-based scoring for replayability incentives | Low | **MEDIUM** (Enhances Flash Conflicts) |
 
 ---
 
