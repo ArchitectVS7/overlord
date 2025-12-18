@@ -11,14 +11,14 @@ const PLANET_TYPE_MAP: Record<PlanetType, string> = {
   [PlanetType.Desert]: 'Desert',
   [PlanetType.Volcanic]: 'Volcanic',
   [PlanetType.Tropical]: 'Terran',     // Use Terran visuals for Tropical
-  [PlanetType.Metropolis]: 'GasGiant'  // Use GasGiant visuals for Metropolis (largest, developed)
+  [PlanetType.Metropolis]: 'GasGiant',  // Use GasGiant visuals for Metropolis (largest, developed)
 };
 
 // Map FactionType to owner color keys
 const FACTION_MAP: Record<FactionType, string> = {
   [FactionType.Player]: 'Player',
   [FactionType.AI]: 'AI',
-  [FactionType.Neutral]: 'Neutral'
+  [FactionType.Neutral]: 'Neutral',
 };
 
 export class PlanetRenderer {
@@ -52,7 +52,7 @@ export class PlanetRenderer {
     highlight.fillCircle(
       -VISUAL_CONSTANTS.HIGHLIGHT_OFFSET,
       -VISUAL_CONSTANTS.HIGHLIGHT_OFFSET,
-      radius * VISUAL_CONSTANTS.HIGHLIGHT_SIZE_MULTIPLIER
+      radius * VISUAL_CONSTANTS.HIGHLIGHT_SIZE_MULTIPLIER,
     );
     container.add(highlight);
 
@@ -71,7 +71,7 @@ export class PlanetRenderer {
       color: '#ffffff',
       stroke: '#000000',
       strokeThickness: VISUAL_CONSTANTS.TEXT_STROKE_WIDTH,
-      fontFamily: 'Arial'
+      fontFamily: 'Arial',
     });
     nameLabel.setOrigin(0.5, 0.5);
     container.add(nameLabel);

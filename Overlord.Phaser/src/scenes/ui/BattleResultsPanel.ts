@@ -81,7 +81,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
   }
 
   public show(resultData: BattleResultData, onClose?: () => void): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.closeCallback = onClose || null;
     this.isVisible = true;
@@ -103,7 +103,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     // Fade in
@@ -112,7 +112,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 150,
-      ease: 'Power2'
+      ease: 'Power2',
     });
   }
 
@@ -124,7 +124,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
       fontSize: '24px',
       fontFamily: 'Arial',
       color: '#22aa44',
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     header.setOrigin(0.5, 0);
     this.contentContainer.add(header);
@@ -134,7 +134,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const planetText = this.scene.add.text(PANEL_WIDTH / 2, yPos, `${data.planetName} Conquered!`, {
       fontSize: '18px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     planetText.setOrigin(0.5, 0);
     this.contentContainer.add(planetText);
@@ -144,7 +144,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const casualtyLabel = this.scene.add.text(PADDING, yPos, 'Battle Casualties:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(casualtyLabel);
     yPos += 25;
@@ -152,7 +152,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const yourLosses = this.scene.add.text(PADDING, yPos, `Your losses: ${data.attackerCasualties} troops`, {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(yourLosses);
     yPos += 22;
@@ -160,7 +160,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const enemyLosses = this.scene.add.text(PADDING, yPos, `Enemy losses: ${data.defenderCasualties} troops`, {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: '#66ff66'
+      color: '#66ff66',
     });
     this.contentContainer.add(enemyLosses);
     yPos += 35;
@@ -170,7 +170,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
       const resourceLabel = this.scene.add.text(PADDING, yPos, 'Resources Captured:', {
         fontSize: '14px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       this.contentContainer.add(resourceLabel);
       yPos += 25;
@@ -182,7 +182,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
         `Fuel: ${resources.fuel.toLocaleString()}`, {
         fontSize: '13px',
         fontFamily: 'Arial',
-        color: '#ffdd88'
+        color: '#ffdd88',
       });
       this.contentContainer.add(resourceText);
       yPos += 70;
@@ -200,7 +200,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
       fontSize: '24px',
       fontFamily: 'Arial',
       color: '#cc4444',
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     header.setOrigin(0.5, 0);
     this.contentContainer.add(header);
@@ -210,7 +210,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const planetText = this.scene.add.text(PANEL_WIDTH / 2, yPos, `Invasion of ${data.planetName} Failed`, {
       fontSize: '18px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     planetText.setOrigin(0.5, 0);
     this.contentContainer.add(planetText);
@@ -220,7 +220,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const casualtyLabel = this.scene.add.text(PADDING, yPos, 'Battle Casualties:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(casualtyLabel);
     yPos += 25;
@@ -228,7 +228,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const yourLosses = this.scene.add.text(PADDING, yPos, `Your losses: ${data.attackerCasualties} troops`, {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: '#ff6666'
+      color: '#ff6666',
     });
     this.contentContainer.add(yourLosses);
     yPos += 22;
@@ -236,7 +236,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     const enemyLosses = this.scene.add.text(PADDING, yPos, `Enemy losses: ${data.defenderCasualties} troops`, {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(enemyLosses);
     yPos += 35;
@@ -246,7 +246,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
       const reasonLabel = this.scene.add.text(PADDING, yPos, 'Defeat Reason:', {
         fontSize: '14px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       this.contentContainer.add(reasonLabel);
       yPos += 25;
@@ -255,7 +255,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
         fontSize: '13px',
         fontFamily: 'Arial',
         color: TEXT_COLOR,
-        wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+        wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
       });
       this.contentContainer.add(reasonText);
       yPos += 50;
@@ -282,7 +282,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5);
     buttonContainer.add(text);
@@ -310,7 +310,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -325,7 +325,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 

@@ -22,7 +22,16 @@ const COLORS = {
   BUTTON_HOVER: 0x005500,
   BUTTON_TEXT: '#00ff00',
   ERROR: '#ff4444',
+  STRENGTH_WEAK: '#ff4444',
+  STRENGTH_FAIR: '#ffaa00',
+  STRENGTH_GOOD: '#88cc00',
+  STRENGTH_STRONG: '#00ff00',
 };
+
+/**
+ * Password strength levels
+ */
+type PasswordStrength = 'none' | 'weak' | 'fair' | 'good' | 'strong';
 
 /**
  * RegisterPanel - Container-based registration form
@@ -46,6 +55,10 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
   private confirmPasswordInput!: HTMLInputElement;
   private inputContainer!: HTMLDivElement;
 
+  // Password strength indicator
+  private strengthBar!: HTMLDivElement;
+  private strengthText!: Phaser.GameObjects.Text;
+
   private isLoading = false;
 
   /**
@@ -61,6 +74,7 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
     this.createBackground();
     this.createTitle();
     this.createLabels();
+    this.createStrengthText();
     this.createButton();
     this.createErrorText();
     this.createLoadingText();
@@ -110,10 +124,10 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
     this.loadingText.setVisible(loading);
     this.registerButtonText.setText(loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT');
 
-    if (this.usernameInput) this.usernameInput.disabled = loading;
-    if (this.emailInput) this.emailInput.disabled = loading;
-    if (this.passwordInput) this.passwordInput.disabled = loading;
-    if (this.confirmPasswordInput) this.confirmPasswordInput.disabled = loading;
+    if (this.usernameInput) {this.usernameInput.disabled = loading;}
+    if (this.emailInput) {this.emailInput.disabled = loading;}
+    if (this.passwordInput) {this.passwordInput.disabled = loading;}
+    if (this.confirmPasswordInput) {this.confirmPasswordInput.disabled = loading;}
   }
 
   /**
@@ -178,6 +192,17 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
     this.add(this.confirmLabel);
   }
 
+  private createStrengthText(): void {
+    // Password strength label - positioned below password input
+    this.strengthText = this.scene.add.text(PANEL_WIDTH - 30, 228, '', {
+      fontSize: '11px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.strengthText.setOrigin(1, 0.5);
+    this.add(this.strengthText);
+  }
+
   private createButton(): void {
     const buttonWidth = PANEL_WIDTH - 60;
     const buttonHeight = 45;
@@ -188,7 +213,7 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
       buttonY,
       buttonWidth,
       buttonHeight,
-      COLORS.BUTTON_BG
+      COLORS.BUTTON_BG,
     );
     this.registerButton.setStrokeStyle(2, COLORS.BORDER);
     this.registerButton.setInteractive({ useHandCursor: true });
@@ -283,6 +308,15 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
     this.passwordInput.type = 'password';
     this.inputContainer.appendChild(this.passwordInput);
 
+    // Password strength bar
+    this.strengthBar = this.createStrengthBar(230);
+    this.inputContainer.appendChild(this.strengthBar);
+
+    // Listen for password changes
+    this.passwordInput.addEventListener('input', () => {
+      this.updateStrengthIndicator(this.passwordInput.value);
+    });
+
     // Confirm password input
     this.confirmPasswordInput = this.createInput('confirm-password', 'Confirm password', 258);
     this.confirmPasswordInput.type = 'password';
@@ -332,6 +366,121 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
     return input;
   }
 
+  private createStrengthBar(top: number): HTMLDivElement {
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: absolute;
+      left: 30px;
+      top: ${top}px;
+      width: ${PANEL_WIDTH - 100}px;
+      height: 4px;
+      background-color: ${COLORS.INPUT_BORDER};
+      border-radius: 2px;
+      overflow: hidden;
+      pointer-events: none;
+    `;
+
+    const bar = document.createElement('div');
+    bar.id = 'password-strength-fill';
+    bar.style.cssText = `
+      width: 0%;
+      height: 100%;
+      background-color: ${COLORS.STRENGTH_WEAK};
+      border-radius: 2px;
+      transition: width 0.2s ease, background-color 0.2s ease;
+    `;
+
+    container.appendChild(bar);
+    return container;
+  }
+
+  /**
+   * Calculate password strength based on various criteria
+   */
+  private calculatePasswordStrength(password: string): PasswordStrength {
+    if (!password) {
+      return 'none';
+    }
+
+    let score = 0;
+
+    // Length checks
+    if (password.length >= 6) {score += 1;}
+    if (password.length >= 8) {score += 1;}
+    if (password.length >= 12) {score += 1;}
+
+    // Character variety checks
+    if (/[a-z]/.test(password)) {score += 1;}
+    if (/[A-Z]/.test(password)) {score += 1;}
+    if (/[0-9]/.test(password)) {score += 1;}
+    if (/[^a-zA-Z0-9]/.test(password)) {score += 1;}
+
+    // Bonus for mixing character types
+    const types = [
+      /[a-z]/.test(password),
+      /[A-Z]/.test(password),
+      /[0-9]/.test(password),
+      /[^a-zA-Z0-9]/.test(password),
+    ].filter(Boolean).length;
+
+    if (types >= 3) {score += 1;}
+    if (types === 4) {score += 1;}
+
+    // Map score to strength level
+    if (score <= 2) {return 'weak';}
+    if (score <= 4) {return 'fair';}
+    if (score <= 6) {return 'good';}
+    return 'strong';
+  }
+
+  /**
+   * Update the password strength indicator visuals
+   */
+  private updateStrengthIndicator(password: string): void {
+    const strength = this.calculatePasswordStrength(password);
+    const fill = this.strengthBar?.querySelector('#password-strength-fill') as HTMLDivElement;
+
+    if (!fill || !this.strengthText) {
+      return;
+    }
+
+    let widthPercent = 0;
+    let color = COLORS.TEXT_SECONDARY;
+    let text = '';
+
+    switch (strength) {
+      case 'none':
+        widthPercent = 0;
+        text = '';
+        break;
+      case 'weak':
+        widthPercent = 25;
+        color = COLORS.STRENGTH_WEAK;
+        text = 'WEAK';
+        break;
+      case 'fair':
+        widthPercent = 50;
+        color = COLORS.STRENGTH_FAIR;
+        text = 'FAIR';
+        break;
+      case 'good':
+        widthPercent = 75;
+        color = COLORS.STRENGTH_GOOD;
+        text = 'GOOD';
+        break;
+      case 'strong':
+        widthPercent = 100;
+        color = COLORS.STRENGTH_STRONG;
+        text = 'STRONG';
+        break;
+    }
+
+    fill.style.width = `${widthPercent}%`;
+    fill.style.backgroundColor = color;
+    this.strengthText.setText(text);
+    this.strengthText.setColor(color);
+  }
+
   private removeDOMInputs(): void {
     if (this.inputContainer && this.inputContainer.parentNode) {
       this.inputContainer.parentNode.removeChild(this.inputContainer);
@@ -365,7 +514,7 @@ export class RegisterPanel extends Phaser.GameObjects.Container {
     username: string,
     email: string,
     password: string,
-    confirmPassword: string
+    confirmPassword: string,
   ): string | null {
     // Username validation
     if (!username) {

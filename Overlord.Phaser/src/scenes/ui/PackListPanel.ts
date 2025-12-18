@@ -78,7 +78,7 @@ export class PackListPanel extends Phaser.GameObjects.Container {
     const titleText = this.scene.add.text(0, 0, 'Scenario Packs', {
       fontSize: '24px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(titleText);
 
@@ -137,21 +137,21 @@ export class PackListPanel extends Phaser.GameObjects.Container {
     const nameText = this.scene.add.text(10, 10, pack.name, {
       fontSize: '16px',
       color: nameColor,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     card.add(nameText);
 
     // Leader name
     const leaderText = this.scene.add.text(10, 32, pack.factionLeader, {
       fontSize: '12px',
-      color: pack.isLocked ? LOCKED_COLOR : LABEL_COLOR
+      color: pack.isLocked ? LOCKED_COLOR : LABEL_COLOR,
     });
     card.add(leaderText);
 
     // Difficulty and personality
     const metaText = this.scene.add.text(10, 50, `${pack.difficulty} | ${pack.aiPersonality}`, {
       fontSize: '11px',
-      color: pack.isLocked ? LOCKED_COLOR : LABEL_COLOR
+      color: pack.isLocked ? LOCKED_COLOR : LABEL_COLOR,
     });
     card.add(metaText);
 
@@ -160,7 +160,7 @@ export class PackListPanel extends Phaser.GameObjects.Container {
       const activeBadge = this.scene.add.text(PANEL_WIDTH - PADDING * 2 - 60, 10, 'ACTIVE', {
         fontSize: '10px',
         color: ACTIVE_BADGE_COLOR,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       });
       card.add(activeBadge);
     }
@@ -170,7 +170,7 @@ export class PackListPanel extends Phaser.GameObjects.Container {
       const lockedText = this.scene.add.text(PANEL_WIDTH - PADDING * 2 - 60, 10, 'LOCKED', {
         fontSize: '10px',
         color: LOCKED_COLOR,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       });
       card.add(lockedText);
     }
@@ -181,7 +181,7 @@ export class PackListPanel extends Phaser.GameObjects.Container {
         0, 0,
         PANEL_WIDTH - PADDING * 2,
         CARD_HEIGHT,
-        0x000000, 0
+        0x000000, 0,
       );
       hitArea.setOrigin(0, 0);
       hitArea.setInteractive({ useHandCursor: true });
@@ -287,12 +287,12 @@ export class PackListPanel extends Phaser.GameObjects.Container {
   getSortedPacks(): PackDisplayData[] {
     return [...this.packs].sort((a, b) => {
       // Active pack first
-      if (a.isActive && !b.isActive) return -1;
-      if (!a.isActive && b.isActive) return 1;
+      if (a.isActive && !b.isActive) {return -1;}
+      if (!a.isActive && b.isActive) {return 1;}
 
       // Unlocked before locked
-      if (!a.isLocked && b.isLocked) return -1;
-      if (a.isLocked && !b.isLocked) return 1;
+      if (!a.isLocked && b.isLocked) {return -1;}
+      if (a.isLocked && !b.isLocked) {return 1;}
 
       // Then by name
       return a.name.localeCompare(b.name);

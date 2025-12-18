@@ -45,7 +45,7 @@ export class VictoryConditionSystem {
   public evaluateCondition(
     condition: VictoryCondition,
     gameState: GameState,
-    startTurn: number = 1
+    startTurn: number = 1,
   ): ConditionResult {
     switch (condition.type) {
       case 'defeat_enemy':
@@ -67,7 +67,7 @@ export class VictoryConditionSystem {
           condition,
           met: false,
           progress: 0,
-          description: `Unknown condition type: ${(condition as any).type}`
+          description: `Unknown condition type: ${(condition as any).type}`,
         };
     }
   }
@@ -82,12 +82,12 @@ export class VictoryConditionSystem {
   public evaluateAll(
     conditions: VictoryCondition[],
     gameState: GameState,
-    startTurn: number = 1
+    startTurn: number = 1,
   ): AllConditionsResult {
     const results = conditions.map(c => this.evaluateCondition(c, gameState, startTurn));
     return {
       allMet: results.every(r => r.met),
-      conditions: results
+      conditions: results,
     };
   }
 
@@ -97,7 +97,7 @@ export class VictoryConditionSystem {
    */
   private evaluateDefeatEnemy(
     condition: VictoryCondition,
-    gameState: GameState
+    gameState: GameState,
   ): ConditionResult {
     const totalPlanets = gameState.planets.length;
 
@@ -113,7 +113,7 @@ export class VictoryConditionSystem {
       progress: aiPlanetsInState === 0 ? 1 : capturedFromAI,
       description: aiPlanetsInState === 0
         ? 'All enemies defeated!'
-        : `Defeat all enemies (${aiPlanetsInState} remaining)`
+        : `Defeat all enemies (${aiPlanetsInState} remaining)`,
     };
   }
 
@@ -123,7 +123,7 @@ export class VictoryConditionSystem {
    */
   private evaluateBuildStructure(
     condition: VictoryCondition,
-    gameState: GameState
+    gameState: GameState,
   ): ConditionResult {
     const targetType = condition.target as BuildingType;
     const requiredCount = condition.count ?? 1;
@@ -134,7 +134,7 @@ export class VictoryConditionSystem {
 
     for (const planetId of gameState.playerFaction.ownedPlanetIDs) {
       const planet = gameState.planetLookup.get(planetId);
-      if (!planet) continue;
+      if (!planet) {continue;}
 
       for (const structure of planet.structures) {
         if (structure.type === targetType) {
@@ -157,7 +157,7 @@ export class VictoryConditionSystem {
       progress: met ? 1 : progress,
       description: met
         ? `Built ${requiredCount} ${targetType}!`
-        : `Build ${targetType} (${activeCount}/${requiredCount})`
+        : `Build ${targetType} (${activeCount}/${requiredCount})`,
     };
   }
 
@@ -167,7 +167,7 @@ export class VictoryConditionSystem {
    */
   private evaluateCapturePlanet(
     condition: VictoryCondition,
-    gameState: GameState
+    gameState: GameState,
   ): ConditionResult {
     // If target specified, check for specific planet
     if (condition.target) {
@@ -177,7 +177,7 @@ export class VictoryConditionSystem {
           condition,
           met: false,
           progress: 0,
-          description: `Target planet "${condition.target}" not found`
+          description: `Target planet "${condition.target}" not found`,
         };
       }
 
@@ -188,7 +188,7 @@ export class VictoryConditionSystem {
         progress: met ? 1 : 0,
         description: met
           ? `Captured ${condition.target}!`
-          : `Capture ${condition.target}`
+          : `Capture ${condition.target}`,
       };
     }
 
@@ -204,7 +204,7 @@ export class VictoryConditionSystem {
       progress,
       description: met
         ? `Captured ${requiredCount} planets!`
-        : `Capture ${requiredCount} planets (${playerPlanetCount}/${requiredCount})`
+        : `Capture ${requiredCount} planets (${playerPlanetCount}/${requiredCount})`,
     };
   }
 
@@ -215,7 +215,7 @@ export class VictoryConditionSystem {
   private evaluateSurviveTurns(
     condition: VictoryCondition,
     gameState: GameState,
-    startTurn: number
+    startTurn: number,
   ): ConditionResult {
     const requiredTurns = condition.turns ?? 10;
     const turnsSurvived = gameState.currentTurn - startTurn;
@@ -228,7 +228,7 @@ export class VictoryConditionSystem {
       progress,
       description: met
         ? `Survived ${requiredTurns} turns!`
-        : `Survive ${requiredTurns} turns (${turnsSurvived}/${requiredTurns})`
+        : `Survive ${requiredTurns} turns (${turnsSurvived}/${requiredTurns})`,
     };
   }
 
@@ -238,7 +238,7 @@ export class VictoryConditionSystem {
    */
   private evaluateResourceTarget(
     condition: VictoryCondition,
-    gameState: GameState
+    gameState: GameState,
   ): ConditionResult {
     const resourceType = condition.resource ?? 'credits';
     // Target can be string or number, parse it
@@ -265,7 +265,7 @@ export class VictoryConditionSystem {
       progress: met ? 1 : progress,
       description: met
         ? `Reached ${targetAmount.toLocaleString()} ${resourceType}!`
-        : `Reach ${targetAmount.toLocaleString()} ${resourceType} (${currentAmount.toLocaleString()}/${targetAmount.toLocaleString()})`
+        : `Reach ${targetAmount.toLocaleString()} ${resourceType} (${currentAmount.toLocaleString()}/${targetAmount.toLocaleString()})`,
     };
   }
 
@@ -275,7 +275,7 @@ export class VictoryConditionSystem {
    */
   private evaluateDestroyAllShips(
     condition: VictoryCondition,
-    gameState: GameState
+    gameState: GameState,
   ): ConditionResult {
     const aiShips = gameState.craft.filter(c => c.owner === FactionType.AI);
     const met = aiShips.length === 0;
@@ -290,7 +290,7 @@ export class VictoryConditionSystem {
       progress,
       description: met
         ? 'All enemy ships destroyed!'
-        : `Destroy all enemy ships (${aiShips.length} remaining)`
+        : `Destroy all enemy ships (${aiShips.length} remaining)`,
     };
   }
 
@@ -300,7 +300,7 @@ export class VictoryConditionSystem {
    */
   private evaluateCaptureAllPlanets(
     condition: VictoryCondition,
-    gameState: GameState
+    gameState: GameState,
   ): ConditionResult {
     const totalPlanets = gameState.planets.length;
     const playerPlanets = gameState.playerFaction.ownedPlanetIDs.length;
@@ -313,7 +313,7 @@ export class VictoryConditionSystem {
         condition,
         met: false,
         progress,
-        description: `Turn limit exceeded! Capture all planets within ${condition.turnsLimit} turns`
+        description: `Turn limit exceeded! Capture all planets within ${condition.turnsLimit} turns`,
       };
     }
 
@@ -323,7 +323,7 @@ export class VictoryConditionSystem {
       progress: allCaptured ? 1 : progress,
       description: allCaptured
         ? 'All planets captured!'
-        : `Capture all planets (${playerPlanets}/${totalPlanets})`
+        : `Capture all planets (${playerPlanets}/${totalPlanets})`,
     };
   }
 }

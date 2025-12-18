@@ -66,7 +66,7 @@ class ScenarioSyncService {
     scenarioId: string,
     timeSeconds: number,
     stars: number,
-    scenarioPackId?: string
+    scenarioPackId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     // Always save locally first
     this.localService.markCompleted(scenarioId, timeSeconds, stars);
@@ -108,7 +108,7 @@ class ScenarioSyncService {
         await this.saveCompletionToCloud(
           completion.scenarioId,
           completion.bestTimeSeconds,
-          completion.starRating
+          completion.starRating,
         );
         synced++;
       } catch (error) {
@@ -142,7 +142,7 @@ class ScenarioSyncService {
           this.localService.markCompleted(
             cloud.scenarioId,
             cloud.bestTimeSeconds,
-            cloud.starRating
+            cloud.starRating,
           );
         } else {
           // Both exist - keep best scores
@@ -295,7 +295,7 @@ class ScenarioSyncService {
     scenarioId: string,
     timeSeconds: number,
     stars: number,
-    scenarioPackId?: string
+    scenarioPackId?: string,
   ): Promise<void> {
     const supabase = getSupabaseClient();
     const authService = getAuthService();

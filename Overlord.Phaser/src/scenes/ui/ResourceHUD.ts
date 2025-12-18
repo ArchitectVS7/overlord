@@ -83,7 +83,7 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     y: number,
     gameState: GameState,
     phaseProcessor: PhaseProcessor,
-    config?: ResourceHUDConfig
+    config?: ResourceHUDConfig,
   ) {
     super(scene, x, y);
     this.gameState = gameState;
@@ -170,7 +170,7 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     y: number,
     labelX: number,
     valueX: number,
-    incomeX: number
+    incomeX: number,
   ): void {
     // Label
     const label = this.scene.add.text(labelX, y, name, {
@@ -256,13 +256,13 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
    */
   private showIncomeSummary(income: ResourceDelta): void {
     const parts: string[] = [];
-    if (income.credits !== 0) parts.push(`+${this.formatNumber(income.credits)} Credits`);
-    if (income.minerals !== 0) parts.push(`+${this.formatNumber(income.minerals)} Minerals`);
-    if (income.fuel !== 0) parts.push(`+${this.formatNumber(income.fuel)} Fuel`);
-    if (income.food !== 0) parts.push(`+${this.formatNumber(income.food)} Food`);
-    if (income.energy !== 0) parts.push(`+${this.formatNumber(income.energy)} Energy`);
+    if (income.credits !== 0) {parts.push(`+${this.formatNumber(income.credits)} Credits`);}
+    if (income.minerals !== 0) {parts.push(`+${this.formatNumber(income.minerals)} Minerals`);}
+    if (income.fuel !== 0) {parts.push(`+${this.formatNumber(income.fuel)} Fuel`);}
+    if (income.food !== 0) {parts.push(`+${this.formatNumber(income.food)} Food`);}
+    if (income.energy !== 0) {parts.push(`+${this.formatNumber(income.energy)} Energy`);}
 
-    if (parts.length === 0) return;
+    if (parts.length === 0) {return;}
 
     const summaryText = `Income: ${parts.join(', ')}`;
 
@@ -277,7 +277,7 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
         fontFamily: 'monospace',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         padding: { x: 15, y: 8 },
-      }
+      },
     ).setOrigin(0.5).setDepth(1000);
 
     // Fade out after 3 seconds
@@ -359,7 +359,7 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     valueText: Phaser.GameObjects.Text,
     incomeText: Phaser.GameObjects.Text,
     total: number,
-    income: number
+    income: number,
   ): void {
     // Format value with thousand separators
     valueText.setText(this.formatNumber(total));
@@ -381,10 +381,10 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     resourceKey: string,
     oldValue: number,
     newValue: number,
-    targetText: Phaser.GameObjects.Text
+    targetText: Phaser.GameObjects.Text,
   ): void {
     const change = newValue - oldValue;
-    if (change === 0) return;
+    if (change === 0) {return;}
 
     // Remove existing animation for this resource
     const existingAnim = this.changeAnimations.get(resourceKey);
@@ -476,7 +476,7 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
         fontFamily: 'monospace',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         padding: { x: 15, y: 8 },
-      }
+      },
     ).setOrigin(0.5).setDepth(1000);
 
     // Fade out after 2 seconds

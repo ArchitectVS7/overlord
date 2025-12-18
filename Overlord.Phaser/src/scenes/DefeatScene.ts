@@ -180,7 +180,7 @@ export class DefeatScene extends Phaser.Scene {
 
     // Count AI-controlled planets (these were lost by the player)
     const aiPlanets = this.gameState.planets.filter(
-      p => p.owner === FactionType.AI
+      p => p.owner === FactionType.AI,
     );
 
     return {
@@ -193,10 +193,10 @@ export class DefeatScene extends Phaser.Scene {
       finalFood: this.gameState.playerFaction.resources.food,
       finalEnergy: this.gameState.playerFaction.resources.energy,
       totalPlatoons: this.gameState.platoons.filter(
-        p => p.owner === FactionType.Player
+        p => p.owner === FactionType.Player,
       ).length,
       totalCraft: this.gameState.craft.filter(
-        c => c.owner === FactionType.Player
+        c => c.owner === FactionType.Player,
       ).length,
     };
   }
@@ -235,7 +235,7 @@ export class DefeatScene extends Phaser.Scene {
       centerX,
       y,
       'Planets Lost to AI:',
-      `${stats.planetsLost} / ${stats.totalPlanets}`
+      `${stats.planetsLost} / ${stats.totalPlanets}`,
     );
     y += lineHeight;
 
@@ -280,7 +280,7 @@ export class DefeatScene extends Phaser.Scene {
     y: number,
     label: string,
     value: string,
-    valueColor: string = '#ffffff'
+    valueColor: string = '#ffffff',
   ): void {
     // Label on left
     this.add
@@ -367,7 +367,7 @@ export class DefeatScene extends Phaser.Scene {
       const saveData: SaveData = saveSystem.createSaveData(
         '0.4.0-supabase',
         0,
-        `Defeat - Turn ${this.gameState.currentTurn}`
+        `Defeat - Turn ${this.gameState.currentTurn}`,
       );
       saveData.victoryStatus = VictoryResult.AIVictory;
 

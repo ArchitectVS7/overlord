@@ -7,6 +7,7 @@
 
 import { User, AuthError } from '@supabase/supabase-js';
 import { getSupabaseClient } from './SupabaseClient';
+import { getGuestModeService } from './GuestModeService';
 
 /**
  * Result of authentication operations
@@ -203,19 +204,31 @@ class AuthService {
   }
 
   /**
-   * Check if a user is currently authenticated
-   * @returns true if authenticated, false otherwise
+   * Check if a user is currently authenticated (includes guest mode)
+   * @returns true if authenticated or in guest mode, false otherwise
    */
   public isAuthenticated(): boolean {
-    return this.currentUser !== null;
+    return this.currentUser !== null || getGuestModeService().isGuestMode();
   }
 
   /**
-   * Get the current user's ID
+   * Check if current user is a guest (local-only mode)
+   * @returns true if in guest mode, false if authenticated with Supabase
+   */
+  public isGuest(): boolean {
+    return getGuestModeService().isGuestMode();
+  }
+
+  /**
+   * Get the current user's ID (supports both authenticated and guest users)
    * @returns User ID string or null if not authenticated
    */
   public getUserId(): string | null {
-    return this.currentUser?.id ?? null;
+    if (this.currentUser) {
+      return this.currentUser.id;
+    }
+    // Check for guest mode
+    return getGuestModeService().getGuestId();
   }
 
   /**
@@ -234,6 +247,63 @@ class AuthService {
       }
     } catch (error) {
       console.error('Session refresh error:', error);
+    }
+  }
+
+  /**
+   * Send a password reset email to the user
+   * @param email - The user's email address
+   * @returns AuthResult with success status
+   */
+  public async resetPassword(email: string): Promise<AuthResult> {
+    const supabase = getSupabaseClient();
+
+    try {
+      // Validate email format
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return { success: false, error: 'Please enter a valid email address' };
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        return { success: false, error: this.formatAuthError(error) };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Password reset error:', error);
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
+    }
+  }
+
+  /**
+   * Update the user's password (after reset email link)
+   * @param newPassword - The new password
+   * @returns AuthResult with success status
+   */
+  public async updatePassword(newPassword: string): Promise<AuthResult> {
+    const supabase = getSupabaseClient();
+
+    try {
+      if (!newPassword || newPassword.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters' };
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        return { success: false, error: this.formatAuthError(error) };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Password update error:', error);
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
   }
 

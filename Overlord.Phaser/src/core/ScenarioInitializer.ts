@@ -48,7 +48,7 @@ export class ScenarioInitializer {
     if (validationError) {
       return {
         success: false,
-        error: validationError
+        error: validationError,
       };
     }
 
@@ -87,18 +87,18 @@ export class ScenarioInitializer {
       if (!gameState.validate()) {
         return {
           success: false,
-          error: 'GameState validation failed after initialization'
+          error: 'GameState validation failed after initialization',
         };
       }
 
       return {
         success: true,
-        gameState
+        gameState,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Initialization failed: ${(error as Error).message}`
+        error: `Initialization failed: ${(error as Error).message}`,
       };
     }
   }
@@ -159,7 +159,7 @@ export class ScenarioInitializer {
         planetId,
         planetName,
         FactionType.AI,
-        scenario.initialState.playerPlanets.length + i
+        scenario.initialState.playerPlanets.length + i,
       );
       gameState.planets.push(planet);
       planetIds.push(planetId);
@@ -175,7 +175,7 @@ export class ScenarioInitializer {
     id: number,
     name: string,
     owner: FactionType,
-    index: number
+    index: number,
   ): PlanetEntity {
     const planet = new PlanetEntity();
     planet.id = id;
@@ -189,7 +189,7 @@ export class ScenarioInitializer {
     planet.position = new Position3D(
       Math.cos(angle) * radius,
       Math.sin(angle) * radius,
-      0
+      0,
     );
 
     // Initialize with basic resources

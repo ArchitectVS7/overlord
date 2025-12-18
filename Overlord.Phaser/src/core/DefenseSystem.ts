@@ -47,7 +47,7 @@ export class DefenseSystem {
     // Count active Orbital Defense platforms
     // Note: Platforms require 20 crew to be active (handled by IncomeSystem crew allocation)
     return planet.structures.filter(
-      s => s.type === BuildingType.OrbitalDefense && s.status === BuildingStatus.Active
+      s => s.type === BuildingType.OrbitalDefense && s.status === BuildingStatus.Active,
     ).length;
   }
 

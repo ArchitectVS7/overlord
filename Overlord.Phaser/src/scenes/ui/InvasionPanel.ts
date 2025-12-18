@@ -105,7 +105,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: ERROR_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(title);
 
@@ -122,14 +122,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Target:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
     this.targetInfoText = this.scene.add.text(PADDING, startY + 22, '', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.targetInfoText);
   }
@@ -140,14 +140,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Invasion Force:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
     this.forceInfoText = this.scene.add.text(PADDING, startY + 22, '', {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.forceInfoText);
   }
@@ -158,7 +158,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Combat Strategy:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
@@ -166,7 +166,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: WARNING_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.aggressionText);
 
@@ -177,7 +177,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     this.casualtyText = this.scene.add.text(PADDING, startY + 100, '', {
       fontSize: '12px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.casualtyText);
   }
@@ -199,7 +199,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
       { value: 25, label: 'Defensive' },
       { value: 50, label: 'Balanced' },
       { value: 75, label: 'Aggressive' },
-      { value: 100, label: 'All-Out\nAssault' }
+      { value: 100, label: 'All-Out\nAssault' },
     ];
 
     ticks.forEach(tick => {
@@ -213,7 +213,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
         fontSize: '9px',
         fontFamily: 'Arial',
         color: LABEL_COLOR,
-        align: 'center'
+        align: 'center',
       });
       label.setOrigin(0.5, 0);
       this.contentContainer.add(label);
@@ -262,7 +262,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: DISABLED_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5);
     this.invadeButton.add(text);
@@ -290,7 +290,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
       fontFamily: 'Arial',
-      color: '#999999'
+      color: '#999999',
     });
     closeText.setOrigin(0.5);
     closeContainer.add(closeText);
@@ -306,15 +306,15 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     targetPlanet: PlanetEntity,
     cruisers: CraftEntity[],
     platoons: PlatoonEntity[],
-    onClose?: () => void
+    onClose?: () => void,
   ): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.targetPlanet = targetPlanet;
     this.cruisers = cruisers.filter(c =>
       c.type === CraftType.BattleCruiser &&
       c.owner === FactionType.Player &&
-      c.carriedPlatoonIDs.length > 0
+      c.carriedPlatoonIDs.length > 0,
     );
     this.platoons = platoons.filter(p => p.owner === FactionType.Player);
     this.closeCallback = onClose || null;
@@ -327,7 +327,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     this.setAlpha(0);
@@ -335,14 +335,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 100,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     this.updateUI();
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -357,7 +357,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 
@@ -426,14 +426,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
       id: this.targetPlanet.id,
       name: this.targetPlanet.name,
       owner: this.targetPlanet.owner,
-      population: this.targetPlanet.population
+      population: this.targetPlanet.population,
     };
   }
 
   public getAggressionDescription(): string {
-    if (this.aggression <= 25) return 'Cautious';
-    if (this.aggression <= 50) return 'Balanced';
-    if (this.aggression <= 75) return 'Aggressive';
+    if (this.aggression <= 25) {return 'Cautious';}
+    if (this.aggression <= 50) {return 'Balanced';}
+    if (this.aggression <= 75) {return 'Aggressive';}
     return 'All-Out Assault';
   }
 
@@ -442,7 +442,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
   }
 
   public confirmInvasion(): void {
-    if (!this.targetPlanet || !this.isInvadeEnabled()) return;
+    if (!this.targetPlanet || !this.isInvadeEnabled()) {return;}
 
     if (this.onInvade) {
       this.onInvade(this.targetPlanet, this.aggression);
@@ -464,7 +464,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     this.targetInfoText.setText(
       `${info.name}\n` +
       `Owner: ${ownerStr}\n` +
-      `Population: ${info.population.toLocaleString()}`
+      `Population: ${info.population.toLocaleString()}`,
     );
   }
 
@@ -479,7 +479,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     } else {
       this.forceInfoText.setText(
         `${platoonCount} Platoons | ${troopCount.toLocaleString()} Troops\n` +
-        `Combined Strength: ${strength.toLocaleString()}`
+        `Combined Strength: ${strength.toLocaleString()}`,
       );
       this.forceInfoText.setColor(TEXT_COLOR);
     }
@@ -487,12 +487,12 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
   private updateAggressionDisplay(): void {
     this.aggressionText.setText(
-      `${this.getAggressionDescription()} (${this.aggression}%)`
+      `${this.getAggressionDescription()} (${this.aggression}%)`,
     );
 
     const casualties = this.getEstimatedCasualties();
     this.casualtyText.setText(
-      `Estimated casualties: ~${casualties.toLocaleString()} troops`
+      `Estimated casualties: ~${casualties.toLocaleString()} troops`,
     );
   }
 

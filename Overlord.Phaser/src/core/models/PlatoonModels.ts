@@ -107,7 +107,7 @@ export class PlatoonModifiers {
     troops: number,
     equipment: EquipmentLevel,
     weapon: WeaponLevel,
-    trainingLevel: number
+    trainingLevel: number,
   ): number {
     const equipMod = PlatoonModifiers.getEquipmentModifier(equipment);
     const weaponMod = PlatoonModifiers.getWeaponModifier(weapon);

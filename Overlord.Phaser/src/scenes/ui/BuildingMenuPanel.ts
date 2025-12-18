@@ -97,7 +97,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   constructor(
     scene: Phaser.Scene,
     gameState: GameState,
-    buildingSystem: BuildingSystem
+    buildingSystem: BuildingSystem,
   ) {
     super(scene, 0, 0);
     this.gameState = gameState;
@@ -152,7 +152,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
       panelX + panelWidth / 2 - 25,
       panelY - panelHeight / 2 + 25,
       44,
-      44
+      44,
     ).setInteractive();
     closeZone.on('pointerdown', () => this.hide());
     closeZone.on('pointerover', () => this.closeButton.setColor('#ff6666'));
@@ -201,7 +201,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
         buttonHeight,
         buildingInfo,
         planet,
-        hasConstructionInProgress
+        hasConstructionInProgress,
       );
       this.buildingButtons.push(button);
       this.add(button);
@@ -218,7 +218,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
           color: BuildingMenuPanel.COLORS.constructing,
           fontFamily: 'monospace',
           fontStyle: 'italic',
-        }
+        },
       ).setOrigin(0.5);
       this.add(constructionMsg);
       this.buildingButtons.push(constructionMsg as unknown as Phaser.GameObjects.Container);
@@ -252,7 +252,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     height: number,
     buildingInfo: BuildingInfo,
     planet: PlanetEntity,
-    hasConstructionInProgress: boolean
+    hasConstructionInProgress: boolean,
   ): Phaser.GameObjects.Container {
     const container = this.scene.add.container(x, y);
 

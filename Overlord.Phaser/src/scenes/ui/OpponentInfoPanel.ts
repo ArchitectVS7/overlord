@@ -36,8 +36,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
         fontSize: '12px',
         fontFamily: 'Arial',
         color: '#cc6666',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     title.setOrigin(0.5, 0);
     this.add(title);
@@ -51,8 +51,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
         fontSize: '14px',
         fontFamily: 'Arial',
         color: '#ffffff',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.add(this.commanderText);
 
@@ -64,8 +64,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
       {
         fontSize: '11px',
         fontFamily: 'Arial',
-        color: '#aaaaaa'
-      }
+        color: '#aaaaaa',
+      },
     );
     this.add(this.personalityText);
 
@@ -77,8 +77,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
       {
         fontSize: '11px',
         fontFamily: 'Arial',
-        color: '#aaaaaa'
-      }
+        color: '#aaaaaa',
+      },
     );
     this.add(this.difficultyText);
 
@@ -89,7 +89,7 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
   public setOpponentInfo(
     commanderName: string,
     personality: string,
-    difficulty: string
+    difficulty: string,
   ): void {
     this.commanderText.setText(commanderName);
     this.personalityText.setText(`Personality: ${personality}`);

@@ -57,7 +57,7 @@ export class SaveSystem {
     version: string,
     playtime: number,
     saveName?: string,
-    thumbnail?: string
+    thumbnail?: string,
   ): SaveData {
     const saveData: SaveData = {
       version,
@@ -67,7 +67,7 @@ export class SaveSystem {
       gameState: this.cloneGameState(this.gameState),
       thumbnail,
       saveName,
-      victoryStatus: VictoryResult.None
+      victoryStatus: VictoryResult.None,
     };
 
     return saveData;
@@ -142,7 +142,7 @@ export class SaveSystem {
     slotName: string,
     version: string,
     playtime: number,
-    saveName?: string
+    saveName?: string,
   ): void {
     const saveData = this.createSaveData(version, playtime, saveName);
     const json = this.serialize(saveData);

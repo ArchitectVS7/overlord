@@ -96,7 +96,7 @@ export class BuildingSystem {
   public updateConstruction(): void {
     for (const planet of this.gameState.planets) {
       const underConstructionBuildings = planet.structures.filter(
-        s => s.status === BuildingStatus.UnderConstruction && s.turnsRemaining > 0
+        s => s.status === BuildingStatus.UnderConstruction && s.turnsRemaining > 0,
       );
 
       for (const building of underConstructionBuildings) {

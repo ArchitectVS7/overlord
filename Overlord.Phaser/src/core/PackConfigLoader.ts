@@ -45,7 +45,7 @@ export interface PackConfigResult {
  */
 const DEFAULT_CONFIG: LoadedPackConfig = {
   aiPersonality: AIPersonality.Balanced,
-  difficulty: Difficulty.Normal
+  difficulty: Difficulty.Normal,
 };
 
 /**
@@ -60,7 +60,7 @@ export class PackConfigLoader {
     if (!this.validatePackConfig(pack)) {
       return {
         success: false,
-        error: 'Invalid pack configuration: missing required fields'
+        error: 'Invalid pack configuration: missing required fields',
       };
     }
 
@@ -69,17 +69,17 @@ export class PackConfigLoader {
         aiPersonality: pack.aiConfig.personality,
         difficulty: this.convertDifficulty(pack.aiConfig.difficulty),
         galaxyTemplate: pack.galaxyTemplate,
-        aiModifiers: pack.aiConfig.modifiers
+        aiModifiers: pack.aiConfig.modifiers,
       };
 
       return {
         success: true,
-        config
+        config,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error loading pack config'
+        error: error instanceof Error ? error.message : 'Unknown error loading pack config',
       };
     }
   }
@@ -88,13 +88,13 @@ export class PackConfigLoader {
    * Validate pack configuration has required fields
    */
   validatePackConfig(pack: ScenarioPack): boolean {
-    if (!pack) return false;
-    if (!pack.aiConfig) return false;
-    if (!pack.galaxyTemplate) return false;
+    if (!pack) {return false;}
+    if (!pack.aiConfig) {return false;}
+    if (!pack.galaxyTemplate) {return false;}
 
     // Validate planet count range
     const { min, max } = pack.galaxyTemplate.planetCount;
-    if (min > max || min < 1) return false;
+    if (min > max || min < 1) {return false;}
 
     return true;
   }
@@ -134,7 +134,7 @@ export class PackConfigLoader {
     return {
       ...baseConfig,
       difficulty: packResult.config.difficulty,
-      aiPersonality: packResult.config.aiPersonality
+      aiPersonality: packResult.config.aiPersonality,
     };
   }
 }

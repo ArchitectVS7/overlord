@@ -43,7 +43,7 @@ export class Position3D {
     return new Position3D(
       Math.cos(angleRadians) * radius,
       y,
-      Math.sin(angleRadians) * radius
+      Math.sin(angleRadians) * radius,
     );
   }
 

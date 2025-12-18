@@ -101,7 +101,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
@@ -114,7 +114,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: LABEL_COLOR,
-      fontStyle: 'italic'
+      fontStyle: 'italic',
     });
     this.emptyStateText.setVisible(false);
     this.contentContainer.add(this.emptyStateText);
@@ -147,7 +147,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5);
     this.disbandButton.add(text);
@@ -176,7 +176,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
       fontFamily: 'Arial',
-      color: '#999999'
+      color: '#999999',
     });
     closeText.setOrigin(0.5);
     closeContainer.add(closeText);
@@ -189,7 +189,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
   }
 
   public show(planet: PlanetEntity, platoons: PlatoonEntity[], onClose?: () => void): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.planet = planet;
     this.platoons = platoons;
@@ -203,7 +203,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     this.setAlpha(0);
@@ -211,14 +211,14 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 100,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     this.updateUI();
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -233,7 +233,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 
@@ -266,25 +266,25 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
   }
 
   public getSelectedPlatoon(): PlatoonEntity | null {
-    if (this.selectedPlatoonId === null) return null;
+    if (this.selectedPlatoonId === null) {return null;}
     return this.platoons.find(p => p.id === this.selectedPlatoonId) || null;
   }
 
   public isSelectedPlatoonTraining(): boolean {
     const platoon = this.getSelectedPlatoon();
-    if (!platoon) return false;
+    if (!platoon) {return false;}
     return platoon.isTraining;
   }
 
   public getSelectedPlatoonTroopCount(): number | null {
     const platoon = this.getSelectedPlatoon();
-    if (!platoon) return null;
+    if (!platoon) {return null;}
     return platoon.troopCount;
   }
 
   public getSelectedPlatoonStrength(): number | null {
     const platoon = this.getSelectedPlatoon();
-    if (!platoon) return null;
+    if (!platoon) {return null;}
     return platoon.strength;
   }
 
@@ -295,14 +295,14 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
    */
   public getSelectedPlatoonCasualties(): number | null {
     const platoon = this.getSelectedPlatoon();
-    if (!platoon) return null;
+    if (!platoon) {return null;}
     // Use type assertion for maxTroopCount which may be added by combat system
     const maxTroops = (platoon as PlatoonEntity & { maxTroopCount?: number }).maxTroopCount || platoon.troopCount;
     return maxTroops - platoon.troopCount;
   }
 
   public handleDisband(): void {
-    if (this.selectedPlatoonId === null) return;
+    if (this.selectedPlatoonId === null) {return;}
 
     // Save the ID before potentially clearing it
     const platoonIdToDisband = this.selectedPlatoonId;
@@ -345,7 +345,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     // Clear existing list
     this.platoonListContainer.removeAll(true);
 
-    if (this.isEmpty()) return;
+    if (this.isEmpty()) {return;}
 
     // Create list entries
     this.platoons.forEach((platoon, index) => {
@@ -362,7 +362,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       const nameText = this.scene.add.text(10, y + 6, platoon.name || `Platoon ${platoon.id}`, {
         fontSize: '13px',
         fontFamily: 'Arial',
-        color: TEXT_COLOR
+        color: TEXT_COLOR,
       });
       this.platoonListContainer.add(nameText);
 
@@ -376,7 +376,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       const troopText = this.scene.add.text(140, y + 6, troopDisplay, {
         fontSize: '12px',
         fontFamily: 'Arial',
-        color: casualties > 0 ? WARNING_COLOR : LABEL_COLOR
+        color: casualties > 0 ? WARNING_COLOR : LABEL_COLOR,
       });
       this.platoonListContainer.add(troopText);
 
@@ -385,7 +385,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       const equipText = this.scene.add.text(250, y + 6, equipWeapon, {
         fontSize: '10px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       this.platoonListContainer.add(equipText);
 
@@ -394,7 +394,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
         const trainingText = this.scene.add.text(10, y + 18, `⏳ Training ${platoon.trainingLevel}%`, {
           fontSize: '10px',
           fontFamily: 'Arial',
-          color: WARNING_COLOR
+          color: WARNING_COLOR,
         });
         this.platoonListContainer.add(trainingText);
       }
@@ -404,7 +404,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
         (PANEL_WIDTH - PADDING * 2 - 20) / 2,
         y + 16,
         PANEL_WIDTH - PADDING * 2 - 20,
-        32
+        32,
       );
       zone.setInteractive({ useHandCursor: true });
       zone.on('pointerdown', () => this.selectPlatoon(platoon.id));
@@ -417,7 +417,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     this.detailsContainer.removeAll(true);
 
     const platoon = this.getSelectedPlatoon();
-    if (!platoon) return;
+    if (!platoon) {return;}
 
     let y = 0;
 
@@ -433,7 +433,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.detailsContainer.add(headerText);
 
@@ -452,14 +452,14 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       `Equipment: ${platoon.equipment}`,
       `Weapon: ${platoon.weapon}`,
       `Training: ${platoon.trainingLevel}%`,
-      `Strength: ${platoon.strength}`
+      `Strength: ${platoon.strength}`,
     ];
 
     details.forEach((detail, i) => {
       const text = this.scene.add.text(0, y + i * 20, detail, {
         fontSize: '12px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       this.detailsContainer.add(text);
     });

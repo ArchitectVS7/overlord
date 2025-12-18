@@ -8,10 +8,12 @@
 import Phaser from 'phaser';
 import { LoginPanel } from './ui/LoginPanel';
 import { RegisterPanel } from './ui/RegisterPanel';
+import { ForgotPasswordPanel } from './ui/ForgotPasswordPanel';
 import { getAuthService } from '@services/AuthService';
 import { getSaveService } from '@services/SaveService';
 import { getScenarioSyncService } from '@services/ScenarioSyncService';
 import { getUserProfileService } from '@services/UserProfileService';
+import { getGuestModeService } from '@services/GuestModeService';
 
 const COLORS = {
   BACKGROUND: 0x0a0a1a,
@@ -22,7 +24,7 @@ const COLORS = {
   TAB_BORDER: 0x00ff00,
 };
 
-type AuthTab = 'login' | 'register';
+type AuthTab = 'login' | 'register' | 'forgot-password';
 
 /**
  * AuthScene - Authentication flow before main menu
@@ -30,12 +32,14 @@ type AuthTab = 'login' | 'register';
 export class AuthScene extends Phaser.Scene {
   private loginPanel!: LoginPanel;
   private registerPanel!: RegisterPanel;
+  private forgotPasswordPanel!: ForgotPasswordPanel;
   private loginTab!: Phaser.GameObjects.Rectangle;
   private registerTab!: Phaser.GameObjects.Rectangle;
   private loginTabText!: Phaser.GameObjects.Text;
   private registerTabText!: Phaser.GameObjects.Text;
   private titleText!: Phaser.GameObjects.Text;
   private subtitleText!: Phaser.GameObjects.Text;
+  private guestButton!: Phaser.GameObjects.Text;
   private syncingText!: Phaser.GameObjects.Text;
 
   constructor() {
@@ -45,11 +49,13 @@ export class AuthScene extends Phaser.Scene {
   public async create(): Promise<void> {
     const { width, height } = this.scale;
 
-    // Initialize auth service
+    // Initialize auth service and guest mode service
     const authService = getAuthService();
+    const guestService = getGuestModeService();
     await authService.initialize();
+    guestService.initialize();
 
-    // Check if already authenticated
+    // Check if already authenticated (includes guest mode)
     if (authService.isAuthenticated()) {
       this.proceedToMainMenu();
       return;
@@ -66,6 +72,9 @@ export class AuthScene extends Phaser.Scene {
 
     // Create panels
     this.createPanels(width, height);
+
+    // Create guest button
+    this.createGuestButton(width, height);
 
     // Show login panel by default
     this.switchToTab('login');
@@ -100,7 +109,7 @@ export class AuthScene extends Phaser.Scene {
       tabY,
       tabWidth,
       tabHeight,
-      COLORS.TAB_ACTIVE
+      COLORS.TAB_ACTIVE,
     );
     this.loginTab.setStrokeStyle(2, COLORS.TAB_BORDER);
     this.loginTab.setInteractive({ useHandCursor: true });
@@ -120,7 +129,7 @@ export class AuthScene extends Phaser.Scene {
       tabY,
       tabWidth,
       tabHeight,
-      COLORS.TAB_INACTIVE
+      COLORS.TAB_INACTIVE,
     );
     this.registerTab.setStrokeStyle(2, COLORS.TAB_BORDER);
     this.registerTab.setInteractive({ useHandCursor: true });
@@ -142,13 +151,21 @@ export class AuthScene extends Phaser.Scene {
     // Create login panel
     this.loginPanel = new LoginPanel(this);
     this.loginPanel.setPosition(panelX, panelY);
-    this.loginPanel.onLoginAttempt = (email, password) => this.handleLogin(email, password);
+    this.loginPanel.onLoginAttempt = (email, password, rememberMe) =>
+      this.handleLogin(email, password, rememberMe);
+    this.loginPanel.onForgotPasswordClick = () => this.switchToTab('forgot-password');
 
     // Create register panel
     this.registerPanel = new RegisterPanel(this);
     this.registerPanel.setPosition(panelX, panelY - 50); // Slightly higher due to more fields
     this.registerPanel.onRegisterAttempt = (email, password, username) =>
       this.handleRegister(email, password, username);
+
+    // Create forgot password panel
+    this.forgotPasswordPanel = new ForgotPasswordPanel(this);
+    this.forgotPasswordPanel.setPosition(panelX, panelY);
+    this.forgotPasswordPanel.onResetAttempt = (email) => this.handleForgotPassword(email);
+    this.forgotPasswordPanel.onBackClick = () => this.switchToTab('login');
 
     // Create syncing text (hidden initially)
     this.syncingText = this.add.text(width / 2, height / 2, 'Syncing data...', {
@@ -160,7 +177,57 @@ export class AuthScene extends Phaser.Scene {
     this.syncingText.setVisible(false);
   }
 
+  private createGuestButton(width: number, height: number): void {
+    this.guestButton = this.add.text(width / 2, height - 80, 'PLAY AS GUEST', {
+      fontSize: '16px',
+      color: COLORS.TEXT,
+      fontFamily: 'monospace',
+      backgroundColor: '#1a1a2e',
+      padding: { x: 20, y: 10 },
+    });
+    this.guestButton.setOrigin(0.5, 0.5);
+    this.guestButton.setInteractive({ useHandCursor: true });
+
+    this.guestButton.on('pointerover', () => {
+      this.guestButton.setStyle({ backgroundColor: '#2a2a4e' });
+    });
+
+    this.guestButton.on('pointerout', () => {
+      this.guestButton.setStyle({ backgroundColor: '#1a1a2e' });
+    });
+
+    this.guestButton.on('pointerdown', () => {
+      this.handleGuestMode();
+    });
+
+    // Add note about guest mode
+    const guestNote = this.add.text(
+      width / 2,
+      height - 45,
+      'Local saves only • Cannot sync across devices',
+      {
+        fontSize: '11px',
+        color: '#666666',
+        fontFamily: 'monospace',
+      },
+    );
+    guestNote.setOrigin(0.5, 0.5);
+  }
+
   private switchToTab(tab: AuthTab): void {
+    // Hide all panels first
+    this.loginPanel.hide();
+    this.registerPanel.hide();
+    this.forgotPasswordPanel.hide();
+
+    // Show/hide tabs based on mode
+    const showTabs = tab !== 'forgot-password';
+    this.loginTab.setVisible(showTabs);
+    this.registerTab.setVisible(showTabs);
+    this.loginTabText.setVisible(showTabs);
+    this.registerTabText.setVisible(showTabs);
+    this.guestButton.setVisible(showTabs);
+
     if (tab === 'login') {
       // Update tab styles
       this.loginTab.setFillStyle(COLORS.TAB_ACTIVE);
@@ -168,23 +235,24 @@ export class AuthScene extends Phaser.Scene {
       this.loginTabText.setColor(COLORS.TEXT);
       this.registerTabText.setColor(COLORS.TEXT_INACTIVE);
 
-      // Show/hide panels
+      // Show login panel
       this.loginPanel.show();
-      this.registerPanel.hide();
-    } else {
+    } else if (tab === 'register') {
       // Update tab styles
       this.loginTab.setFillStyle(COLORS.TAB_INACTIVE);
       this.registerTab.setFillStyle(COLORS.TAB_ACTIVE);
       this.loginTabText.setColor(COLORS.TEXT_INACTIVE);
       this.registerTabText.setColor(COLORS.TEXT);
 
-      // Show/hide panels
-      this.loginPanel.hide();
+      // Show register panel
       this.registerPanel.show();
+    } else if (tab === 'forgot-password') {
+      // Show forgot password panel (tabs are hidden)
+      this.forgotPasswordPanel.show();
     }
   }
 
-  private async handleLogin(email: string, password: string): Promise<void> {
+  private async handleLogin(email: string, password: string, rememberMe: boolean): Promise<void> {
     this.loginPanel.setLoading(true);
     this.loginPanel.clearError();
 
@@ -192,11 +260,41 @@ export class AuthScene extends Phaser.Scene {
     const result = await authService.signIn(email, password);
 
     if (result.success) {
+      // Store remember me preference
+      if (rememberMe) {
+        localStorage.setItem('overlord_remember_email', email);
+      } else {
+        localStorage.removeItem('overlord_remember_email');
+      }
       await this.onAuthSuccess();
     } else {
       this.loginPanel.setLoading(false);
       this.loginPanel.showError(result.error ?? 'Login failed');
     }
+  }
+
+  private async handleForgotPassword(email: string): Promise<void> {
+    this.forgotPasswordPanel.setLoading(true);
+    this.forgotPasswordPanel.clearError();
+
+    const authService = getAuthService();
+    const result = await authService.resetPassword(email);
+
+    this.forgotPasswordPanel.setLoading(false);
+
+    if (result.success) {
+      this.forgotPasswordPanel.showSuccess(
+        'Password reset email sent! Check your inbox and follow the link to reset your password.',
+      );
+    } else {
+      this.forgotPasswordPanel.showError(result.error ?? 'Failed to send reset email');
+    }
+  }
+
+  private handleGuestMode(): void {
+    const guestService = getGuestModeService();
+    guestService.enterGuestMode();
+    this.proceedToMainMenu();
   }
 
   private async handleRegister(email: string, password: string, username: string): Promise<void> {
@@ -260,5 +358,6 @@ export class AuthScene extends Phaser.Scene {
     // Clean up panels
     this.loginPanel?.destroy();
     this.registerPanel?.destroy();
+    this.forgotPasswordPanel?.destroy();
   }
 }

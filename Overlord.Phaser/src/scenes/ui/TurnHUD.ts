@@ -66,7 +66,7 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     gameState: GameState,
     turnSystem: TurnSystem,
     phaseProcessor: PhaseProcessor,
-    config?: TurnHUDConfig
+    config?: TurnHUDConfig,
   ) {
     super(scene, x, y);
     this.gameState = gameState;
@@ -396,11 +396,11 @@ export class TurnHUD extends Phaser.GameObjects.Container {
   private formatIncomeSummary(income: ResourceDelta, label: string): string {
     const parts: string[] = [];
 
-    if (income.credits > 0) parts.push(`+${income.credits} Credits`);
-    if (income.minerals > 0) parts.push(`+${income.minerals} Minerals`);
-    if (income.fuel > 0) parts.push(`+${income.fuel} Fuel`);
-    if (income.food > 0) parts.push(`+${income.food} Food`);
-    if (income.energy > 0) parts.push(`+${income.energy} Energy`);
+    if (income.credits > 0) {parts.push(`+${income.credits} Credits`);}
+    if (income.minerals > 0) {parts.push(`+${income.minerals} Minerals`);}
+    if (income.fuel > 0) {parts.push(`+${income.fuel} Fuel`);}
+    if (income.food > 0) {parts.push(`+${income.food} Food`);}
+    if (income.energy > 0) {parts.push(`+${income.energy} Energy`);}
 
     if (parts.length === 0) {
       return `${label}: No income`;

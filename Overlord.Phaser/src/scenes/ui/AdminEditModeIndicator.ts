@@ -61,7 +61,7 @@ export class AdminEditModeIndicator extends Phaser.GameObjects.Container {
       AdminEditModeIndicator.PANEL_WIDTH,
       AdminEditModeIndicator.PANEL_HEIGHT,
       0x990000,
-      0.95
+      0.95,
     );
     this.background.setStrokeStyle(2, 0xff0000);
     this.add(this.background);
@@ -110,7 +110,7 @@ export class AdminEditModeIndicator extends Phaser.GameObjects.Container {
     label: string,
     x: number,
     color: number,
-    onClick: () => void
+    onClick: () => void,
   ): Phaser.GameObjects.Container {
     const container = this.scene.add.container(x, 0);
 
@@ -121,7 +121,7 @@ export class AdminEditModeIndicator extends Phaser.GameObjects.Container {
       AdminEditModeIndicator.BUTTON_WIDTH,
       AdminEditModeIndicator.BUTTON_HEIGHT,
       color,
-      1
+      1,
     );
     bg.setStrokeStyle(1, 0xffffff);
     container.add(bg);
@@ -139,7 +139,7 @@ export class AdminEditModeIndicator extends Phaser.GameObjects.Container {
       0,
       0,
       AdminEditModeIndicator.BUTTON_WIDTH,
-      AdminEditModeIndicator.BUTTON_HEIGHT
+      AdminEditModeIndicator.BUTTON_HEIGHT,
     );
     zone.setInteractive({ useHandCursor: true });
     container.add(zone);

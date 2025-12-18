@@ -149,7 +149,7 @@ export class VictoryScene extends Phaser.Scene {
     }
 
     const playerPlanets = this.gameState.planets.filter(
-      p => p.owner === FactionType.Player
+      p => p.owner === FactionType.Player,
     );
 
     return {
@@ -162,10 +162,10 @@ export class VictoryScene extends Phaser.Scene {
       finalFood: this.gameState.playerFaction.resources.food,
       finalEnergy: this.gameState.playerFaction.resources.energy,
       totalPlatoons: this.gameState.platoons.filter(
-        p => p.owner === FactionType.Player
+        p => p.owner === FactionType.Player,
       ).length,
       totalCraft: this.gameState.craft.filter(
-        c => c.owner === FactionType.Player
+        c => c.owner === FactionType.Player,
       ).length,
     };
   }
@@ -204,7 +204,7 @@ export class VictoryScene extends Phaser.Scene {
       centerX,
       y,
       'Planets Controlled:',
-      `${stats.planetsConquered} / ${stats.totalPlanets}`
+      `${stats.planetsConquered} / ${stats.totalPlanets}`,
     );
     y += lineHeight;
 
@@ -249,7 +249,7 @@ export class VictoryScene extends Phaser.Scene {
     y: number,
     label: string,
     value: string,
-    valueColor: string = '#ffffff'
+    valueColor: string = '#ffffff',
   ): void {
     // Label on left
     this.add
@@ -316,7 +316,7 @@ export class VictoryScene extends Phaser.Scene {
       const saveData: SaveData = saveSystem.createSaveData(
         '0.4.0-supabase',
         0,
-        `Victory - Turn ${this.gameState.currentTurn}`
+        `Victory - Turn ${this.gameState.currentTurn}`,
       );
       saveData.victoryStatus = VictoryResult.PlayerVictory;
 

@@ -172,7 +172,7 @@ class UIPanelPositionService {
           },
           {
             onConflict: 'scene_name,panel_id',
-          }
+          },
         );
 
       if (error) {

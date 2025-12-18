@@ -106,7 +106,7 @@ export class SpaceCombatSystem {
       .filter(c => c !== undefined) as CraftEntity[];
 
     // Calculate fleet strengths
-    let attackerStrength = this.calculateFleetStrength(attackerFleet, battle.attackerFaction);
+    const attackerStrength = this.calculateFleetStrength(attackerFleet, battle.attackerFaction);
     let defenderStrength = this.calculateFleetStrength(defenderFleet, battle.defenderFaction);
 
     // Apply orbital defense bonus
@@ -222,7 +222,7 @@ export class SpaceCombatSystem {
     fleet: CraftEntity[],
     damagePerCraft: number,
     craftDamage: Map<number, number>,
-    destroyedCraftIDs: number[]
+    destroyedCraftIDs: number[],
   ): void {
     for (const craft of fleet) {
       // Apply damage

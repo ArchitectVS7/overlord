@@ -54,7 +54,7 @@ export class TutorialActionDetector {
    * @param buttonId ID of the clicked button
    */
   public reportButtonClick(buttonId: string): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'click_button' &&
         this.watchedAction.target === buttonId) {
@@ -67,7 +67,7 @@ export class TutorialActionDetector {
    * @param planetName Name of the selected planet
    */
   public reportPlanetSelection(planetName: string): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'select_planet') {
       // If target is specified, must match; otherwise any planet works
@@ -82,7 +82,7 @@ export class TutorialActionDetector {
    * @param menuId ID of the opened menu
    */
   public reportMenuOpen(menuId: string): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'open_menu' &&
         this.watchedAction.menu === menuId) {
@@ -95,7 +95,7 @@ export class TutorialActionDetector {
    * @param buildingType Type of building being constructed
    */
   public reportConstructionStart(buildingType: string): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'start_construction' &&
         this.watchedAction.building === buildingType) {
@@ -107,7 +107,7 @@ export class TutorialActionDetector {
    * Report turn end event
    */
   public reportTurnEnd(): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'end_turn') {
       this.completeAction();
@@ -119,7 +119,7 @@ export class TutorialActionDetector {
    * @param craftType Type of craft purchased
    */
   public reportCraftPurchase(craftType: string): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'purchase_craft' &&
         this.watchedAction.craftType === craftType) {
@@ -131,7 +131,7 @@ export class TutorialActionDetector {
    * Report a platoon commission event
    */
   public reportPlatoonCommission(): void {
-    if (!this.watchedAction) return;
+    if (!this.watchedAction) {return;}
 
     if (this.watchedAction.type === 'commission_platoon') {
       this.completeAction();

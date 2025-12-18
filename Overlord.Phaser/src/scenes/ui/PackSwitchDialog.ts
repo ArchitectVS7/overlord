@@ -87,8 +87,8 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
       {
         fontSize: '22px',
         color: TEXT_COLOR,
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.titleText.setOrigin(0.5, 0);
     this.add(this.titleText);
@@ -101,8 +101,8 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
       {
         fontSize: '14px',
         color: TEXT_COLOR,
-        wordWrap: { width: DIALOG_WIDTH - PADDING * 2 }
-      }
+        wordWrap: { width: DIALOG_WIDTH - PADDING * 2 },
+      },
     );
     this.messageText.setOrigin(0.5, 0);
     this.add(this.messageText);
@@ -115,8 +115,8 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
       {
         fontSize: '12px',
         color: WARNING_COLOR,
-        fontStyle: 'italic'
-      }
+        fontStyle: 'italic',
+      },
     );
     this.warningText.setOrigin(0.5, 0);
     this.add(this.warningText);
@@ -130,7 +130,7 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
       'Confirm',
       CONFIRM_BG_COLOR,
       CONFIRM_HOVER_COLOR,
-      () => this.confirm()
+      () => this.confirm(),
     );
     this.add(this.confirmButton);
 
@@ -140,7 +140,7 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
       'Cancel',
       CANCEL_BG_COLOR,
       CANCEL_HOVER_COLOR,
-      () => this.cancel()
+      () => this.cancel(),
     );
     this.add(this.cancelButton);
   }
@@ -151,7 +151,7 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
     label: string,
     bgColor: number,
     hoverColor: number,
-    callback: () => void
+    callback: () => void,
   ): Phaser.GameObjects.Container {
     const container = this.scene.add.container(x, y);
 
@@ -163,7 +163,7 @@ export class PackSwitchDialog extends Phaser.GameObjects.Container {
     const text = this.scene.add.text(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2, label, {
       fontSize: '14px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5, 0.5);
     container.add(text);

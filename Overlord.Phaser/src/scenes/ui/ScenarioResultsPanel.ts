@@ -89,7 +89,7 @@ export class ScenarioResultsPanel {
     this.titleText = this.scene.add.text(PANEL_WIDTH / 2, PADDING, '', {
       fontSize: '32px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.titleText.setOrigin(0.5, 0);
     this.container.add(this.titleText);
@@ -97,7 +97,7 @@ export class ScenarioResultsPanel {
     // Time
     this.timeText = this.scene.add.text(PANEL_WIDTH / 2, PADDING + 60, '', {
       fontSize: '24px',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.timeText.setOrigin(0.5, 0);
     this.container.add(this.timeText);
@@ -105,7 +105,7 @@ export class ScenarioResultsPanel {
     // Condition/Reason text
     this.conditionText = this.scene.add.text(PANEL_WIDTH / 2, PADDING + 100, '', {
       fontSize: '18px',
-      color: '#aaaaaa'
+      color: '#aaaaaa',
     });
     this.conditionText.setOrigin(0.5, 0);
     this.container.add(this.conditionText);
@@ -115,7 +115,7 @@ export class ScenarioResultsPanel {
       const starX = PANEL_WIDTH / 2 - 50 + i * 50;
       const star = this.scene.add.text(starX, PADDING + 150, '★', {
         fontSize: '40px',
-        color: STAR_COLOR_EMPTY
+        color: STAR_COLOR_EMPTY,
       });
       star.setOrigin(0.5, 0);
       this.starTexts.push(star);
@@ -126,7 +126,7 @@ export class ScenarioResultsPanel {
     this.ratingText = this.scene.add.text(PANEL_WIDTH / 2, PADDING + 200, '', {
       fontSize: '20px',
       color: STAR_COLOR_FILLED,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.ratingText.setOrigin(0.5, 0);
     this.container.add(this.ratingText);
@@ -137,7 +137,7 @@ export class ScenarioResultsPanel {
       PANEL_HEIGHT - PADDING - 80,
       'Continue',
       '#44ff44',
-      () => this.triggerContinue()
+      () => this.triggerContinue(),
     );
 
     // Retry button
@@ -146,7 +146,7 @@ export class ScenarioResultsPanel {
       PANEL_HEIGHT - PADDING - 30,
       'Retry',
       '#ffaa44',
-      () => this.triggerRetry()
+      () => this.triggerRetry(),
     );
 
     // Exit button
@@ -155,7 +155,7 @@ export class ScenarioResultsPanel {
       PANEL_HEIGHT - PADDING - 30,
       'Exit',
       '#888888',
-      () => this.triggerExit()
+      () => this.triggerExit(),
     );
   }
 
@@ -167,12 +167,12 @@ export class ScenarioResultsPanel {
     y: number,
     text: string,
     color: string,
-    onClick: () => void
+    onClick: () => void,
   ): Phaser.GameObjects.Text {
     const button = this.scene.add.text(x, y, text, {
       fontSize: '20px',
       color: color,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     button.setOrigin(0.5);
     button.setInteractive({ useHandCursor: true });

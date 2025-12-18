@@ -92,7 +92,7 @@ export class PopulationSystem {
     const oldPopulation = planet.population;
     planet.population = Math.min(
       planet.population + growthAmount,
-      PopulationSystem.MAX_POPULATION
+      PopulationSystem.MAX_POPULATION,
     );
     planet.growthRate = growthRate;
 
@@ -107,7 +107,7 @@ export class PopulationSystem {
    */
   private consumeFoodForPopulation(planet: PlanetEntity): void {
     const foodRequired = Math.floor(
-      planet.population * PopulationSystem.FOOD_CONSUMPTION_PER_PERSON
+      planet.population * PopulationSystem.FOOD_CONSUMPTION_PER_PERSON,
     );
 
     if (planet.resources.food >= foodRequired) {
@@ -150,7 +150,7 @@ export class PopulationSystem {
 
     // Food availability impact
     const foodRequired = Math.floor(
-      planet.population * PopulationSystem.FOOD_CONSUMPTION_PER_PERSON
+      planet.population * PopulationSystem.FOOD_CONSUMPTION_PER_PERSON,
     );
 
     if (planet.resources.food === 0 && planet.population > 0) {
@@ -181,7 +181,7 @@ export class PopulationSystem {
     }
 
     return Math.floor(
-      planet.population * PopulationSystem.FOOD_CONSUMPTION_PER_PERSON
+      planet.population * PopulationSystem.FOOD_CONSUMPTION_PER_PERSON,
     );
   }
 

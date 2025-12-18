@@ -205,7 +205,7 @@ export function getSupabaseClient(): SupabaseClient<Database> {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
-      'Missing Supabase environment variables. Please ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.'
+      'Missing Supabase environment variables. Please ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.',
     );
   }
 
@@ -213,8 +213,8 @@ export function getSupabaseClient(): SupabaseClient<Database> {
     auth: {
       persistSession: true,
       storageKey: 'overlord-auth',
-      storage: window.localStorage
-    }
+      storage: window.localStorage,
+    },
   });
 
   return supabaseInstance;
@@ -243,20 +243,20 @@ export async function testDatabaseConnection(): Promise<{
       return {
         success: false,
         message: `Database query failed: ${error.message}`,
-        error: error
+        error: error,
       };
     }
 
     return {
       success: true,
       message: 'Successfully connected to Supabase database!',
-      data: data
+      data: data,
     };
   } catch (error: any) {
     return {
       success: false,
       message: `Connection failed: ${error.message}`,
-      error: error
+      error: error,
     };
   }
 }
@@ -280,6 +280,6 @@ export function checkEnvironmentVariables(): {
 
   return {
     configured: missing.length === 0,
-    missing: missing
+    missing: missing,
   };
 }

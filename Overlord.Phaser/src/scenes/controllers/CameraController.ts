@@ -25,7 +25,7 @@ const DEFAULT_CONFIG: CameraControllerConfig = {
   zoomMax: 2.0,
   zoomStep: 0.075,
   smoothDuration: 500,
-  dragThreshold: 5
+  dragThreshold: 5,
 };
 
 export class CameraController {
@@ -50,7 +50,7 @@ export class CameraController {
   constructor(
     scene: Phaser.Scene,
     galaxyBounds: GalaxyBounds,
-    config?: Partial<CameraControllerConfig>
+    config?: Partial<CameraControllerConfig>,
   ) {
     this.scene = scene;
     this.camera = scene.cameras.main;
@@ -118,7 +118,7 @@ export class CameraController {
         scrollX: x - this.camera.width / 2 / this.camera.zoom,
         scrollY: y - this.camera.height / 2 / this.camera.zoom,
         duration: this.config.smoothDuration,
-        ease: 'Cubic.easeOut'
+        ease: 'Cubic.easeOut',
       });
     } else {
       this.camera.centerOn(x, y);
@@ -136,7 +136,7 @@ export class CameraController {
         scrollX: this.homeX - this.camera.width / 2 / this.defaultZoom,
         scrollY: this.homeY - this.camera.height / 2 / this.defaultZoom,
         duration: this.config.smoothDuration,
-        ease: 'Cubic.easeOut'
+        ease: 'Cubic.easeOut',
       });
     } else {
       this.camera.setZoom(this.defaultZoom);
@@ -156,7 +156,7 @@ export class CameraController {
       this.camera.scrollX,
       this.camera.scrollY,
       width,
-      height
+      height,
     );
   }
 
@@ -203,7 +203,7 @@ export class CameraController {
     const clampedZoom = Phaser.Math.Clamp(
       zoom,
       this.config.zoomMin,
-      this.config.zoomMax
+      this.config.zoomMax,
     );
 
     if (smooth) {
@@ -211,7 +211,7 @@ export class CameraController {
         targets: this.camera,
         zoom: clampedZoom,
         duration: this.config.smoothDuration,
-        ease: 'Cubic.easeOut'
+        ease: 'Cubic.easeOut',
       });
     } else {
       this.camera.setZoom(clampedZoom);
@@ -229,7 +229,7 @@ export class CameraController {
   // Private event handlers
 
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
-    if (!pointer.leftButtonDown()) return;
+    if (!pointer.leftButtonDown()) {return;}
 
     // Don't start camera drag if pointer is over an interactive UI element
     // This allows UI elements (buttons, draggable panels) to handle their own input
@@ -260,7 +260,7 @@ export class CameraController {
   }
 
   private handlePointerMove(pointer: Phaser.Input.Pointer): void {
-    if (!this.isDragging) return;
+    if (!this.isDragging) {return;}
 
     const dx = pointer.x - this.dragStartX;
     const dy = pointer.y - this.dragStartY;
@@ -287,7 +287,7 @@ export class CameraController {
     _gameObjects: Phaser.GameObjects.GameObject[],
     _deltaX: number,
     deltaY: number,
-    _deltaZ: number
+    _deltaZ: number,
   ): void {
     // Get world position of cursor before zoom
     const worldX = this.camera.scrollX + pointer.x / this.camera.zoom;
@@ -298,7 +298,7 @@ export class CameraController {
     const newZoom = Phaser.Math.Clamp(
       this.camera.zoom + zoomDelta,
       this.config.zoomMin,
-      this.config.zoomMax
+      this.config.zoomMax,
     );
 
     // Apply zoom

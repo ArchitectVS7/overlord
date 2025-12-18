@@ -19,7 +19,7 @@ export class InputSystem {
       enableKeyboard: config.enableKeyboard ?? true,
       enableMouse: config.enableMouse ?? true,
       enableFocusWrap: config.enableFocusWrap ?? true,
-      defaultFocusOrder: config.defaultFocusOrder ?? 0
+      defaultFocusOrder: config.defaultFocusOrder ?? 0,
     };
   }
 
@@ -75,7 +75,7 @@ export class InputSystem {
   public triggerShortcut(
     key: string,
     modifiers: { ctrl: boolean; shift: boolean; alt: boolean },
-    timestamp: number
+    timestamp: number,
   ): boolean {
     if (!this.config.enableKeyboard) {
       return false;
@@ -109,9 +109,9 @@ export class InputSystem {
 
   private generateShortcutId(shortcut: KeyboardShortcut): string {
     const parts = [shortcut.key.toLowerCase()];
-    if (shortcut.ctrl) parts.push('ctrl');
-    if (shortcut.shift) parts.push('shift');
-    if (shortcut.alt) parts.push('alt');
+    if (shortcut.ctrl) {parts.push('ctrl');}
+    if (shortcut.shift) {parts.push('shift');}
+    if (shortcut.alt) {parts.push('alt');}
     return parts.join('+');
   }
 

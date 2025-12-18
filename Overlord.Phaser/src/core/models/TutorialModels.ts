@@ -170,13 +170,13 @@ export function createTutorialStep(
   step: number,
   text: string,
   action: TutorialAction,
-  highlight?: string
+  highlight?: string,
 ): TutorialStep {
   return {
     step,
     text,
     action,
-    highlight
+    highlight,
   };
 }
 

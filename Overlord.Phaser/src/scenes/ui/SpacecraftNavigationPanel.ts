@@ -107,7 +107,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
@@ -115,7 +115,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     this.currentLocationText = this.scene.add.text(PADDING, 50, 'Currently at: -', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.currentLocationText);
 
@@ -123,7 +123,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     this.fuelStatusText = this.scene.add.text(PADDING, 75, 'Fuel Available: -', {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.fuelStatusText);
 
@@ -131,14 +131,14 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     this.fuelCostText = this.scene.add.text(PANEL_WIDTH - PADDING - 150, 50, 'Fuel Cost: 10', {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.fuelCostText);
 
     this.travelTimeText = this.scene.add.text(PANEL_WIDTH - PADDING - 150, 70, 'Travel Time: Instant', {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.travelTimeText);
 
@@ -147,7 +147,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(destLabel);
 
@@ -178,7 +178,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5);
     this.navigateButton.add(text);
@@ -207,7 +207,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
       fontFamily: 'Arial',
-      color: '#999999'
+      color: '#999999',
     });
     closeText.setOrigin(0.5);
     closeContainer.add(closeText);
@@ -220,7 +220,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
   }
 
   public show(craft: CraftEntity, planets: PlanetEntity[], onClose?: () => void): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.craft = craft;
     this.planets = planets;
@@ -234,7 +234,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     this.setAlpha(0);
@@ -242,14 +242,14 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 100,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     this.updateUI();
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -264,7 +264,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 
@@ -273,19 +273,19 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
   }
 
   public getCurrentPlanetName(): string {
-    if (!this.craft) return '';
+    if (!this.craft) {return '';}
     const planet = this.planets.find(p => p.id === this.craft!.planetID);
     return planet?.name || '';
   }
 
   public getAvailableDestinations(): PlanetEntity[] {
-    if (!this.craft) return [];
+    if (!this.craft) {return [];}
     return this.planets.filter(p => p.id !== this.craft!.planetID);
   }
 
   public selectDestination(planetID: number): void {
-    if (!this.craft) return;
-    if (planetID === this.craft.planetID) return;
+    if (!this.craft) {return;}
+    if (planetID === this.craft.planetID) {return;}
 
     const planet = this.planets.find(p => p.id === planetID);
     if (planet) {
@@ -311,7 +311,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
   }
 
   public getCurrentFuel(): number {
-    if (!this.craft) return 0;
+    if (!this.craft) {return 0;}
     const planet = this.planets.find(p => p.id === this.craft!.planetID);
     return planet?.resources.fuel || 0;
   }
@@ -321,7 +321,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
   }
 
   public handleNavigate(): void {
-    if (!this.craft || !this.selectedDestinationId || !this.hasEnoughFuel()) return;
+    if (!this.craft || !this.selectedDestinationId || !this.hasEnoughFuel()) {return;}
 
     // If NavigationSystem is provided, call it directly
     if (this.navigationSystem) {
@@ -339,7 +339,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
   }
 
   private updateUI(): void {
-    if (!this.craft) return;
+    if (!this.craft) {return;}
 
     // Update current location
     this.currentLocationText.setText(`Currently at: ${this.getCurrentPlanetName()}`);
@@ -378,7 +378,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
         fontSize: '14px',
         fontFamily: 'Arial',
         color: isReachable ? TEXT_COLOR : DISABLED_COLOR,
-        fontStyle: isSelected ? 'bold' : 'normal'
+        fontStyle: isSelected ? 'bold' : 'normal',
       });
       this.destinationListContainer.add(nameText);
 
@@ -386,7 +386,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       const ownerText = this.scene.add.text(PANEL_WIDTH - PADDING * 2 - 100, y + 10, this.getOwnerLabel(planet), {
         fontSize: '12px',
         fontFamily: 'Arial',
-        color: isReachable ? LABEL_COLOR : DISABLED_COLOR
+        color: isReachable ? LABEL_COLOR : DISABLED_COLOR,
       });
       this.destinationListContainer.add(ownerText);
 
@@ -396,7 +396,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
           (PANEL_WIDTH - PADDING * 2 - 20) / 2,
           y + DESTINATION_ITEM_HEIGHT / 2,
           PANEL_WIDTH - PADDING * 2 - 20,
-          DESTINATION_ITEM_HEIGHT
+          DESTINATION_ITEM_HEIGHT,
         );
         zone.setInteractive({ useHandCursor: true });
         zone.on('pointerdown', () => this.selectDestination(planet.id));

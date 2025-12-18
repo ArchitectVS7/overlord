@@ -60,7 +60,7 @@ export class StarRatingSystem {
   public calculateStarsWithBonus(
     completionTime: number,
     targets: StarTargets,
-    _bonusObjectivesCompleted: number
+    _bonusObjectivesCompleted: number,
   ): 1 | 2 | 3 {
     // Base calculation
     const baseStars = this.calculateStars(completionTime, targets);
@@ -83,7 +83,7 @@ export class StarRatingSystem {
     targets: StarTargets,
     conditionMet?: string,
     defeatReason?: string,
-    attempts: number = 1
+    attempts: number = 1,
   ): ScenarioResults {
     let starRating: 0 | 1 | 2 | 3 = 0;
 
@@ -98,7 +98,7 @@ export class StarRatingSystem {
       conditionMet,
       defeatReason,
       starRating,
-      attempts
+      attempts,
     };
   }
 

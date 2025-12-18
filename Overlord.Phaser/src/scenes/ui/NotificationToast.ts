@@ -36,8 +36,8 @@ export class NotificationToast extends Phaser.GameObjects.Container {
         fontSize: '13px',
         fontFamily: 'Arial',
         color: '#ffffff',
-        wordWrap: { width: NotificationToast.TOAST_WIDTH - NotificationToast.PADDING * 2 }
-      }
+        wordWrap: { width: NotificationToast.TOAST_WIDTH - NotificationToast.PADDING * 2 },
+      },
     );
     this.messageText.setOrigin(0, 0.5);
     this.add(this.messageText);
@@ -48,7 +48,7 @@ export class NotificationToast extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 200,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     // Auto-dismiss
@@ -64,7 +64,7 @@ export class NotificationToast extends Phaser.GameObjects.Container {
       alpha: 0,
       duration: 200,
       ease: 'Power2',
-      onComplete: () => this.destroy()
+      onComplete: () => this.destroy(),
     });
   }
 }
@@ -104,7 +104,7 @@ export class NotificationManager {
         targets: toast,
         y: targetY,
         duration: 200,
-        ease: 'Power2'
+        ease: 'Power2',
       });
     });
   }

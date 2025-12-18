@@ -155,7 +155,7 @@ export class IncomeSystem {
 
     // Priority 1: Horticultural Stations (Food production)
     const horticulturalStations = planet.structures.filter(
-      s => s.type === BuildingType.HorticulturalStation
+      s => s.type === BuildingType.HorticulturalStation,
     );
 
     for (const station of horticulturalStations) {
@@ -184,7 +184,7 @@ export class IncomeSystem {
     // Priority 3: Solar Satellites (Energy production)
     // Note: Solar Satellites are deployed craft, not structures
     const solarSatellites = this.gameState.craft.filter(
-      c => c.planetID === planet.id && c.type === CraftType.SolarSatellite
+      c => c.planetID === planet.id && c.type === CraftType.SolarSatellite,
     );
 
     for (const satellite of solarSatellites) {
@@ -208,7 +208,7 @@ export class IncomeSystem {
    */
   private calculateFoodProduction(planet: PlanetEntity, multiplier: number): number {
     const activeStations = planet.structures.filter(
-      s => s.type === BuildingType.HorticulturalStation && s.status === BuildingStatus.Active
+      s => s.type === BuildingType.HorticulturalStation && s.status === BuildingStatus.Active,
     ).length;
 
     return Math.floor(activeStations * IncomeSystem.BaseFoodProduction * multiplier);
@@ -219,7 +219,7 @@ export class IncomeSystem {
    */
   private calculateMineralProduction(planet: PlanetEntity, multiplier: number): number {
     const activeStations = planet.structures.filter(
-      s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active
+      s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active,
     ).length;
 
     return Math.floor(activeStations * IncomeSystem.BaseMineralProduction * multiplier);
@@ -230,7 +230,7 @@ export class IncomeSystem {
    */
   private calculateFuelProduction(planet: PlanetEntity, multiplier: number): number {
     const activeStations = planet.structures.filter(
-      s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active
+      s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active,
     ).length;
 
     return Math.floor(activeStations * IncomeSystem.BaseFuelProduction * multiplier);
@@ -242,7 +242,7 @@ export class IncomeSystem {
    */
   private calculateEnergyProduction(planet: PlanetEntity, multiplier: number): number {
     const activeSatellites = this.gameState.craft.filter(
-      c => c.planetID === planet.id && c.type === CraftType.SolarSatellite && c.active
+      c => c.planetID === planet.id && c.type === CraftType.SolarSatellite && c.active,
     ).length;
 
     return Math.floor(activeSatellites * IncomeSystem.BaseEnergyProduction * multiplier);
@@ -264,19 +264,19 @@ export class IncomeSystem {
     // Count active Horticultural Stations
     usedCrew +=
       planet.structures.filter(
-        s => s.type === BuildingType.HorticulturalStation && s.status === BuildingStatus.Active
+        s => s.type === BuildingType.HorticulturalStation && s.status === BuildingStatus.Active,
       ).length * IncomeSystem.HorticulturalCrewRequired;
 
     // Count active Mining Stations
     usedCrew +=
       planet.structures.filter(
-        s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active
+        s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active,
       ).length * IncomeSystem.MiningCrewRequired;
 
     // Count active Solar Satellites
     usedCrew +=
       this.gameState.craft.filter(
-        c => c.planetID === planet.id && c.type === CraftType.SolarSatellite && c.active
+        c => c.planetID === planet.id && c.type === CraftType.SolarSatellite && c.active,
       ).length * IncomeSystem.SolarSatelliteCrewRequired;
 
     return { usedCrew, totalPopulation: planet.population };
@@ -300,7 +300,7 @@ export class IncomeSystem {
 
     // Food
     const horticulturalActive = planet.structures.filter(
-      s => s.type === BuildingType.HorticulturalStation && s.status === BuildingStatus.Active
+      s => s.type === BuildingType.HorticulturalStation && s.status === BuildingStatus.Active,
     ).length;
     if (horticulturalActive > 0) {
       report += `  +${income.food} Food (${horticulturalActive} Horticultural × ${multipliers.food.toFixed(1)})\n`;
@@ -308,7 +308,7 @@ export class IncomeSystem {
 
     // Minerals
     const miningActive = planet.structures.filter(
-      s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active
+      s => s.type === BuildingType.MiningStation && s.status === BuildingStatus.Active,
     ).length;
     if (miningActive > 0) {
       report += `  +${income.minerals} Minerals (${miningActive} Mining × ${multipliers.minerals.toFixed(1)})\n`;

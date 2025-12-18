@@ -76,7 +76,7 @@ export class GalaxyGenerator {
       seed: actualSeed,
       name: this.generateGalaxyName(actualSeed),
       difficulty,
-      planets: []
+      planets: [],
     };
 
     // Determine planet count based on difficulty
@@ -85,13 +85,13 @@ export class GalaxyGenerator {
 
     // 1. Generate Starbase (Player starting planet)
     const starbase = this.generateStartingPlanet(
-      0, 'Starbase', PlanetType.Metropolis, FactionType.Player, actualSeed
+      0, 'Starbase', PlanetType.Metropolis, FactionType.Player, actualSeed,
     );
     galaxy.planets.push(starbase);
 
     // 2. Generate Hitotsu (AI starting planet) opposite to Starbase
     const hitotsu = this.generateStartingPlanet(
-      1, 'Hitotsu', PlanetType.Metropolis, FactionType.AI, actualSeed + 1, starbase.position
+      1, 'Hitotsu', PlanetType.Metropolis, FactionType.AI, actualSeed + 1, starbase.position,
     );
     galaxy.planets.push(hitotsu);
 
@@ -103,7 +103,7 @@ export class GalaxyGenerator {
       PlanetType.Tropical,
       PlanetType.Volcanic, // Allow duplicates for 6-planet systems
       PlanetType.Desert,
-      PlanetType.Tropical
+      PlanetType.Tropical,
     ];
 
     // Shuffle available types for variety
@@ -116,7 +116,7 @@ export class GalaxyGenerator {
         `Planet ${String.fromCharCode(65 + i)}`, // 'A', 'B', 'C', etc.
         type,
         galaxy.planets,
-        actualSeed + i + 2
+        actualSeed + i + 2,
       );
       galaxy.planets.push(planet);
     }
@@ -133,7 +133,7 @@ export class GalaxyGenerator {
     type: PlanetType,
     owner: FactionType,
     seed: number,
-    oppositeOf?: Position3D
+    oppositeOf?: Position3D,
   ): PlanetEntity {
     const localRandom = new SeededRandom(seed);
 
@@ -149,7 +149,7 @@ export class GalaxyGenerator {
       position = Position3D.fromPolar(
         angle,
         radius,
-        localRandom.nextInRange(-20, 20) // -20 to +20
+        localRandom.nextInRange(-20, 20), // -20 to +20
       );
     } else {
       // Random position for Starbase
@@ -159,7 +159,7 @@ export class GalaxyGenerator {
       position = Position3D.fromPolar(
         angle,
         radius,
-        localRandom.nextInRange(-20, 20)
+        localRandom.nextInRange(-20, 20),
       );
     }
 
@@ -208,7 +208,7 @@ export class GalaxyGenerator {
     name: string,
     type: PlanetType,
     existingPlanets: PlanetEntity[],
-    seed: number
+    seed: number,
   ): PlanetEntity {
     const localRandom = new SeededRandom(seed);
 
@@ -226,7 +226,7 @@ export class GalaxyGenerator {
       position = Position3D.fromPolar(
         angle,
         radius,
-        localRandom.nextInRange(-20, 20)
+        localRandom.nextInRange(-20, 20),
       );
 
       // Check distance from existing planets

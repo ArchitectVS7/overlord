@@ -97,7 +97,7 @@ class SaveService {
   public async saveGame(
     saveData: SaveData,
     slotName: string,
-    campaignName?: string
+    campaignName?: string,
   ): Promise<SaveResult> {
     this.onSaveStarted?.(slotName);
 
@@ -303,7 +303,7 @@ class SaveService {
   private async saveToCloud(
     saveData: SaveData,
     slotName: string,
-    campaignName?: string
+    campaignName?: string,
   ): Promise<void> {
     const supabase = getSupabaseClient();
     const authService = getAuthService();
@@ -408,7 +408,7 @@ class SaveService {
     const { data, error } = await supabase
       .from('saves')
       .select(
-        'id, slot_name, save_name, campaign_name, turn_number, playtime, version, victory_status, thumbnail, created_at, updated_at'
+        'id, slot_name, save_name, campaign_name, turn_number, playtime, version, victory_status, thumbnail, created_at, updated_at',
       )
       .eq('user_id', userId)
       .order('updated_at', { ascending: false });

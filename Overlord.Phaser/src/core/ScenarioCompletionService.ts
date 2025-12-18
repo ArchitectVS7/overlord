@@ -74,7 +74,7 @@ export class ScenarioCompletionService {
         bestTimeSeconds: timeSeconds,
         starRating,
         attempts: 1,
-        completedAt: Date.now()
+        completedAt: Date.now(),
       });
     }
 

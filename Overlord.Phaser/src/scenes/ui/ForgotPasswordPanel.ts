@@ -1,14 +1,14 @@
 /**
- * LoginPanel - Login Form UI Component
+ * ForgotPasswordPanel - Password Recovery Form UI Component
  *
- * Provides email/password login form using DOM input elements
+ * Provides email input for password reset using DOM input elements
  * overlaid on the Phaser canvas.
  */
 
 import Phaser from 'phaser';
 
 const PANEL_WIDTH = 400;
-const PANEL_HEIGHT = 300;
+const PANEL_HEIGHT = 250;
 
 const COLORS = {
   BACKGROUND: 0x1a1a2e,
@@ -22,41 +22,39 @@ const COLORS = {
   BUTTON_HOVER: 0x005500,
   BUTTON_TEXT: '#00ff00',
   ERROR: '#ff4444',
+  SUCCESS: '#00ff00',
 };
 
 /**
- * LoginPanel - Container-based login form
+ * ForgotPasswordPanel - Container-based password reset form
  */
-export class LoginPanel extends Phaser.GameObjects.Container {
+export class ForgotPasswordPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;
   private titleText!: Phaser.GameObjects.Text;
+  private instructionText!: Phaser.GameObjects.Text;
   private emailLabel!: Phaser.GameObjects.Text;
-  private passwordLabel!: Phaser.GameObjects.Text;
-  private loginButton!: Phaser.GameObjects.Rectangle;
-  private loginButtonText!: Phaser.GameObjects.Text;
+  private sendButton!: Phaser.GameObjects.Rectangle;
+  private sendButtonText!: Phaser.GameObjects.Text;
+  private backButton!: Phaser.GameObjects.Text;
   private errorText!: Phaser.GameObjects.Text;
+  private successText!: Phaser.GameObjects.Text;
   private loadingText!: Phaser.GameObjects.Text;
 
   // DOM input elements
   private emailInput!: HTMLInputElement;
-  private passwordInput!: HTMLInputElement;
-  private rememberMeCheckbox!: HTMLInputElement;
   private inputContainer!: HTMLDivElement;
-
-  // Forgot password link
-  private forgotPasswordText!: Phaser.GameObjects.Text;
 
   private isLoading = false;
 
   /**
-   * Callback fired when login is attempted
+   * Callback fired when reset is attempted
    */
-  public onLoginAttempt?: (email: string, password: string, rememberMe: boolean) => void;
+  public onResetAttempt?: (email: string) => void;
 
   /**
-   * Callback fired when forgot password is clicked
+   * Callback fired when back is clicked
    */
-  public onForgotPasswordClick?: () => void;
+  public onBackClick?: () => void;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -65,10 +63,12 @@ export class LoginPanel extends Phaser.GameObjects.Container {
 
     this.createBackground();
     this.createTitle();
+    this.createInstruction();
     this.createLabels();
-    this.createForgotPasswordLink();
     this.createButton();
+    this.createBackButton();
     this.createErrorText();
+    this.createSuccessText();
     this.createLoadingText();
 
     scene.add.existing(this as unknown as Phaser.GameObjects.GameObject);
@@ -81,6 +81,7 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     this.setVisible(true);
     this.createDOMInputs();
     this.clearError();
+    this.clearSuccess();
     this.setLoading(false);
   }
 
@@ -96,6 +97,7 @@ export class LoginPanel extends Phaser.GameObjects.Container {
    * Display an error message
    */
   public showError(message: string): void {
+    this.clearSuccess();
     this.errorText.setText(message);
     this.errorText.setVisible(true);
   }
@@ -109,18 +111,32 @@ export class LoginPanel extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Display a success message
+   */
+  public showSuccess(message: string): void {
+    this.clearError();
+    this.successText.setText(message);
+    this.successText.setVisible(true);
+  }
+
+  /**
+   * Clear the success message
+   */
+  public clearSuccess(): void {
+    this.successText.setText('');
+    this.successText.setVisible(false);
+  }
+
+  /**
    * Set loading state
    */
   public setLoading(loading: boolean): void {
     this.isLoading = loading;
     this.loadingText.setVisible(loading);
-    this.loginButtonText.setText(loading ? 'SIGNING IN...' : 'SIGN IN');
+    this.sendButtonText.setText(loading ? 'SENDING...' : 'SEND RESET EMAIL');
 
     if (this.emailInput) {
       this.emailInput.disabled = loading;
-    }
-    if (this.passwordInput) {
-      this.passwordInput.disabled = loading;
     }
   }
 
@@ -146,8 +162,8 @@ export class LoginPanel extends Phaser.GameObjects.Container {
   }
 
   private createTitle(): void {
-    this.titleText = this.scene.add.text(PANEL_WIDTH / 2, 30, 'SIGN IN', {
-      fontSize: '28px',
+    this.titleText = this.scene.add.text(PANEL_WIDTH / 2, 25, 'RESET PASSWORD', {
+      fontSize: '24px',
       color: COLORS.TEXT,
       fontFamily: 'monospace',
       fontStyle: 'bold',
@@ -156,105 +172,128 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     this.add(this.titleText);
   }
 
+  private createInstruction(): void {
+    this.instructionText = this.scene.add.text(
+      PANEL_WIDTH / 2,
+      55,
+      'Enter your email to receive a password reset link.',
+      {
+        fontSize: '12px',
+        color: COLORS.TEXT_SECONDARY,
+        fontFamily: 'monospace',
+        wordWrap: { width: PANEL_WIDTH - 60 },
+        align: 'center',
+      },
+    );
+    this.instructionText.setOrigin(0.5, 0.5);
+    this.add(this.instructionText);
+  }
+
   private createLabels(): void {
-    this.emailLabel = this.scene.add.text(30, 70, 'EMAIL', {
+    this.emailLabel = this.scene.add.text(30, 85, 'EMAIL', {
       fontSize: '14px',
       color: COLORS.TEXT_SECONDARY,
       fontFamily: 'monospace',
     });
     this.add(this.emailLabel);
-
-    this.passwordLabel = this.scene.add.text(30, 140, 'PASSWORD', {
-      fontSize: '14px',
-      color: COLORS.TEXT_SECONDARY,
-      fontFamily: 'monospace',
-    });
-    this.add(this.passwordLabel);
-  }
-
-  private createForgotPasswordLink(): void {
-    this.forgotPasswordText = this.scene.add.text(PANEL_WIDTH - 30, 192, 'Forgot Password?', {
-      fontSize: '12px',
-      color: COLORS.TEXT_SECONDARY,
-      fontFamily: 'monospace',
-    });
-    this.forgotPasswordText.setOrigin(1, 0);
-    this.forgotPasswordText.setInteractive({ useHandCursor: true });
-
-    this.forgotPasswordText.on('pointerover', () => {
-      this.forgotPasswordText.setColor(COLORS.TEXT);
-    });
-
-    this.forgotPasswordText.on('pointerout', () => {
-      this.forgotPasswordText.setColor(COLORS.TEXT_SECONDARY);
-    });
-
-    this.forgotPasswordText.on('pointerdown', () => {
-      if (!this.isLoading) {
-        this.onForgotPasswordClick?.();
-      }
-    });
-
-    this.add(this.forgotPasswordText);
   }
 
   private createButton(): void {
     const buttonWidth = PANEL_WIDTH - 60;
     const buttonHeight = 45;
-    const buttonY = 220;
+    const buttonY = 160;
 
-    this.loginButton = this.scene.add.rectangle(
+    this.sendButton = this.scene.add.rectangle(
       PANEL_WIDTH / 2,
       buttonY,
       buttonWidth,
       buttonHeight,
       COLORS.BUTTON_BG,
     );
-    this.loginButton.setStrokeStyle(2, COLORS.BORDER);
-    this.loginButton.setInteractive({ useHandCursor: true });
+    this.sendButton.setStrokeStyle(2, COLORS.BORDER);
+    this.sendButton.setInteractive({ useHandCursor: true });
 
-    this.loginButton.on('pointerover', () => {
+    this.sendButton.on('pointerover', () => {
       if (!this.isLoading) {
-        this.loginButton.setFillStyle(COLORS.BUTTON_HOVER);
+        this.sendButton.setFillStyle(COLORS.BUTTON_HOVER);
       }
     });
 
-    this.loginButton.on('pointerout', () => {
-      this.loginButton.setFillStyle(COLORS.BUTTON_BG);
+    this.sendButton.on('pointerout', () => {
+      this.sendButton.setFillStyle(COLORS.BUTTON_BG);
     });
 
-    this.loginButton.on('pointerdown', () => {
+    this.sendButton.on('pointerdown', () => {
       if (!this.isLoading) {
-        this.handleLogin();
+        this.handleReset();
       }
     });
 
-    this.add(this.loginButton);
+    this.add(this.sendButton);
 
-    this.loginButtonText = this.scene.add.text(PANEL_WIDTH / 2, buttonY, 'SIGN IN', {
-      fontSize: '18px',
+    this.sendButtonText = this.scene.add.text(PANEL_WIDTH / 2, buttonY, 'SEND RESET EMAIL', {
+      fontSize: '16px',
       color: COLORS.BUTTON_TEXT,
       fontFamily: 'monospace',
       fontStyle: 'bold',
     });
-    this.loginButtonText.setOrigin(0.5, 0.5);
-    this.add(this.loginButtonText);
+    this.sendButtonText.setOrigin(0.5, 0.5);
+    this.add(this.sendButtonText);
+  }
+
+  private createBackButton(): void {
+    this.backButton = this.scene.add.text(30, PANEL_HEIGHT - 25, '← Back to Sign In', {
+      fontSize: '12px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.backButton.setInteractive({ useHandCursor: true });
+
+    this.backButton.on('pointerover', () => {
+      this.backButton.setColor(COLORS.TEXT);
+    });
+
+    this.backButton.on('pointerout', () => {
+      this.backButton.setColor(COLORS.TEXT_SECONDARY);
+    });
+
+    this.backButton.on('pointerdown', () => {
+      if (!this.isLoading) {
+        this.onBackClick?.();
+      }
+    });
+
+    this.add(this.backButton);
   }
 
   private createErrorText(): void {
-    this.errorText = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT - 30, '', {
-      fontSize: '14px',
+    this.errorText = this.scene.add.text(PANEL_WIDTH / 2, 195, '', {
+      fontSize: '12px',
       color: COLORS.ERROR,
       fontFamily: 'monospace',
       wordWrap: { width: PANEL_WIDTH - 40 },
+      align: 'center',
     });
-    this.errorText.setOrigin(0.5, 0.5);
+    this.errorText.setOrigin(0.5, 0);
     this.errorText.setVisible(false);
     this.add(this.errorText);
   }
 
+  private createSuccessText(): void {
+    this.successText = this.scene.add.text(PANEL_WIDTH / 2, 195, '', {
+      fontSize: '12px',
+      color: COLORS.SUCCESS,
+      fontFamily: 'monospace',
+      wordWrap: { width: PANEL_WIDTH - 40 },
+      align: 'center',
+    });
+    this.successText.setOrigin(0.5, 0);
+    this.successText.setVisible(false);
+    this.add(this.successText);
+  }
+
   private createLoadingText(): void {
-    this.loadingText = this.scene.add.text(PANEL_WIDTH / 2, 280, 'Please wait...', {
+    this.loadingText = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT - 25, 'Please wait...', {
       fontSize: '12px',
       color: COLORS.TEXT_SECONDARY,
       fontFamily: 'monospace',
@@ -291,64 +330,17 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     this.inputContainer.style.zIndex = '1000';
 
     // Email input
-    this.emailInput = this.createInput('email', 'Enter your email', 90);
+    this.emailInput = this.createInput('email', 'Enter your email address', 105);
     this.inputContainer.appendChild(this.emailInput);
 
-    // Password input
-    this.passwordInput = this.createInput('password', 'Enter your password', 160);
-    this.passwordInput.type = 'password';
-    this.inputContainer.appendChild(this.passwordInput);
-
-    // Remember me checkbox
-    const checkboxContainer = this.createRememberMeCheckbox(195);
-    this.inputContainer.appendChild(checkboxContainer);
-
     // Add Enter key handler
-    this.passwordInput.addEventListener('keydown', (e) => {
+    this.emailInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !this.isLoading) {
-        this.handleLogin();
+        this.handleReset();
       }
     });
 
     document.body.appendChild(this.inputContainer);
-  }
-
-  private createRememberMeCheckbox(top: number): HTMLDivElement {
-    const container = document.createElement('div');
-    container.style.cssText = `
-      position: absolute;
-      left: 30px;
-      top: ${top}px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      pointer-events: auto;
-    `;
-
-    this.rememberMeCheckbox = document.createElement('input');
-    this.rememberMeCheckbox.type = 'checkbox';
-    this.rememberMeCheckbox.id = 'remember-me';
-    this.rememberMeCheckbox.style.cssText = `
-      width: 16px;
-      height: 16px;
-      accent-color: ${COLORS.TEXT};
-      cursor: pointer;
-    `;
-
-    const label = document.createElement('label');
-    label.htmlFor = 'remember-me';
-    label.textContent = 'Remember me';
-    label.style.cssText = `
-      font-size: 12px;
-      font-family: monospace;
-      color: ${COLORS.TEXT_SECONDARY};
-      cursor: pointer;
-    `;
-
-    container.appendChild(this.rememberMeCheckbox);
-    container.appendChild(label);
-
-    return container;
   }
 
   private createInput(name: string, placeholder: string, top: number): HTMLInputElement {
@@ -392,15 +384,14 @@ export class LoginPanel extends Phaser.GameObjects.Container {
   }
 
   // ============================================
-  // Login Handler
+  // Reset Handler
   // ============================================
 
-  private handleLogin(): void {
+  private handleReset(): void {
     const email = this.emailInput?.value?.trim() ?? '';
-    const password = this.passwordInput?.value ?? '';
-    const rememberMe = this.rememberMeCheckbox?.checked ?? false;
 
     this.clearError();
+    this.clearSuccess();
 
     // Basic validation
     if (!email) {
@@ -408,13 +399,13 @@ export class LoginPanel extends Phaser.GameObjects.Container {
       return;
     }
 
-    if (!password) {
-      this.showError('Please enter your password');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.showError('Please enter a valid email address');
       return;
     }
 
     // Trigger callback
-    this.onLoginAttempt?.(email, password, rememberMe);
+    this.onResetAttempt?.(email);
   }
 
   /**
