@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { AudioManager } from '@core/AudioManager';
 import { AudioActivationOverlay } from './ui/AudioActivationOverlay';
 import { LoadGamePanel } from './ui/LoadGamePanel';
+import { StatisticsPanel } from './ui/StatisticsPanel';
 import { getAuthService } from '@services/AuthService';
 import { getSaveService } from '@services/SaveService';
 import { getUserProfileService } from '@services/UserProfileService';
@@ -19,6 +20,7 @@ import { getUIPanelPositionService } from '@services/UIPanelPositionService';
 export class MainMenuScene extends Phaser.Scene {
   private audioActivationOverlay?: AudioActivationOverlay;
   private loadGamePanel?: LoadGamePanel;
+  private statisticsPanel?: StatisticsPanel;
   private userGreeting?: Phaser.GameObjects.Text;
   private logoutButton?: Phaser.GameObjects.Text;
   private adminEditIndicator?: AdminEditModeIndicator;
@@ -82,8 +84,16 @@ export class MainMenuScene extends Phaser.Scene {
       this.scene.start('FlashConflictsScene');
     });
 
+    // Statistics button (Story 10-7)
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 3, 'STATISTICS', true, () => {
+      this.showStatisticsPanel();
+    });
+
     // Create load game panel
     this.createLoadGamePanel(width, height);
+
+    // Create statistics panel (Story 10-7)
+    this.createStatisticsPanel();
 
     // Create user display (if authenticated)
     this.createUserDisplay(width);
@@ -193,6 +203,14 @@ export class MainMenuScene extends Phaser.Scene {
 
   private showLoadGamePanel(): void {
     this.loadGamePanel?.show();
+  }
+
+  private createStatisticsPanel(): void {
+    this.statisticsPanel = new StatisticsPanel(this);
+  }
+
+  private showStatisticsPanel(): void {
+    this.statisticsPanel?.show();
   }
 
   private async handleLoadGame(slotName: string): Promise<void> {

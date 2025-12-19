@@ -1,7 +1,7 @@
 # Story 10-6: User Settings Persistence
 
 **Epic:** 10 - User Accounts & Cross-Device Persistence
-**Status:** in-progress
+**Status:** done
 **Complexity:** Low
 **Implementation Tag:** [GREENFIELD] - Settings system
 
@@ -11,11 +11,11 @@ As a player, I want my settings (audio, UI scale, accessibility) to persist and 
 
 ## Acceptance Criteria
 
-- [ ] AC1: Settings saved to user profile
-- [ ] AC2: Settings sync across devices
-- [ ] AC3: Local fallback for guests
-- [ ] AC4: Settings load on app start
-- [ ] AC5: Default settings on first login
+- [x] AC1: Settings saved to user profile
+- [x] AC2: Settings sync across devices
+- [x] AC3: Local fallback for guests
+- [x] AC4: Settings load on app start
+- [x] AC5: Default settings on first login
 
 ## Task Breakdown
 
@@ -50,7 +50,7 @@ As a player, I want my settings (audio, UI scale, accessibility) to persist and 
 
 ## Definition of Done
 
-- [ ] Settings persist across sessions
-- [ ] Sync works for logged-in users
-- [ ] Local storage for guests
-- [ ] 10+ tests passing
+- [x] Settings persist across sessions
+- [x] Sync works for logged-in users
+- [x] Local storage for guests
+- [x] 19 tests passing (UserProfileService.test.ts)

@@ -211,16 +211,16 @@ development_status:
   # =============================================================================
   # EPIC 10: User Accounts & Cross-Device Persistence
   # Priority: LOW (Phase C) - Polish feature
-  # IN PROGRESS: Auth + Save system complete (5/7 stories)
+  # COMPLETE: All 7 stories done (2025-12-18)
   # =============================================================================
-  epic-10: in-progress
+  epic-10: done
   10-1-user-account-creation: done                        # AuthService, RegisterPanel, guest mode - full Supabase integration
   10-2-user-login: done                                   # LoginPanel, ForgotPasswordPanel, session persistence
   10-3-save-campaign-progress: done                       # SaveService, SaveGamePanel, OfflineSaveQueue - cloud/local hybrid
   10-4-load-previously-saved-campaigns: done              # LoadGamePanel, cloud sync, delete functionality
   10-5-cross-device-save-synchronization: done            # Offline queue, auto-sync on reconnect
-  10-6-user-settings-persistence: in-progress             # Audio settings sync complete, UI settings (scale/contrast) NOT synced
-  10-7-user-statistics-tracking: backlog                  # NOT STARTED - needs UserStatsService, StatsPanel, database table
+  10-6-user-settings-persistence: done                    # UserProfileService local + cloud sync, BootScene initialization (19 tests)
+  10-7-user-statistics-tracking: done                     # UserStatisticsService, StatisticsPanel, VictoryScene/DefeatScene integration (26 tests)
   epic-10-retrospective: optional
 
   # =============================================================================

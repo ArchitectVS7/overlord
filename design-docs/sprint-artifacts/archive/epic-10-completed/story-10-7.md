@@ -1,7 +1,7 @@
 # Story 10-7: User Statistics Tracking
 
 **Epic:** 10 - User Accounts & Cross-Device Persistence
-**Status:** drafted
+**Status:** done
 **Complexity:** Low
 **Implementation Tag:** [GREENFIELD] - Stats aggregation
 
@@ -11,11 +11,11 @@ As a player, I want to view my gameplay statistics (games played, wins, play tim
 
 ## Acceptance Criteria
 
-- [ ] AC1: Statistics panel accessible from main menu
-- [ ] AC2: Shows games played, won, lost
-- [ ] AC3: Total play time tracked
-- [ ] AC4: Flash Conflict completion stats
-- [ ] AC5: Statistics sync across devices
+- [x] AC1: Statistics panel accessible from main menu
+- [x] AC2: Shows games played, won, lost
+- [x] AC3: Total play time tracked
+- [x] AC4: Flash Conflict completion stats
+- [x] AC5: Statistics sync across devices
 
 ## Task Breakdown
 
@@ -49,7 +49,7 @@ As a player, I want to view my gameplay statistics (games played, wins, play tim
 
 ## Definition of Done
 
-- [ ] All statistics tracked
-- [ ] Stats panel displays correctly
-- [ ] Sync works across devices
-- [ ] 10+ tests passing
+- [x] All statistics tracked
+- [x] Stats panel displays correctly
+- [x] Sync works across devices
+- [x] 26 tests passing (UserStatisticsService.test.ts)

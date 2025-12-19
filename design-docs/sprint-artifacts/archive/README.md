@@ -17,9 +17,9 @@ This folder contains completed user stories organized by epic.
 | [epic-11-completed/](epic-11-completed/) | Accessible UI | 4 stories |
 | [epic-12-partial/](epic-12-partial/) | Audio (infrastructure only) | 3 stories |
 | [epic-8-completed/](epic-8-completed/) | Quick-Play Tactical Scenarios | 1 story |
-| [epic-10-partial/](epic-10-partial/) | User Accounts (auth/saves complete) | 5 stories |
+| [epic-10-completed/](epic-10-completed/) | User Accounts & Persistence | 7 stories |
 
-**Total Archived:** 44 stories
+**Total Archived:** 46 stories
 
 ## Completion Summary
 
@@ -35,7 +35,7 @@ This folder contains completed user stories organized by epic.
 | 1 | 2025-12-12 | v0.8.0-onboarding |
 | 9 | 2025-12-13 | v0.9.0-packs |
 | 8 | 2025-12-18 | Tactical scenarios (1 story) |
-| 10 | 2025-12-18 | Auth + Saves complete (5/7 stories) |
+| 10 | 2025-12-18 | All 7 stories complete - auth, saves, settings, stats |
 
 ## Story File Format
 

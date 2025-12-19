@@ -3,6 +3,7 @@ import { GameState } from '@core/GameState';
 import { FactionType, VictoryResult } from '@core/models/Enums';
 import { SaveSystem, SaveData } from '@core/SaveSystem';
 import { getSaveService } from '@services/SaveService';
+import { getUserStatisticsService } from '@services/UserStatisticsService';
 
 /**
  * Victory campaign statistics for display
@@ -43,6 +44,9 @@ export class VictoryScene extends Phaser.Scene {
 
     // Calculate statistics
     this.statistics = this.calculateStatistics();
+
+    // Story 10-7: Record victory in user statistics
+    this.recordVictoryStats();
 
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
@@ -381,5 +385,31 @@ export class VictoryScene extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut',
     });
+  }
+
+  /**
+   * Story 10-7: Record victory statistics
+   */
+  private async recordVictoryStats(): Promise<void> {
+    const statsService = getUserStatisticsService();
+
+    try {
+      // Record campaign won
+      await statsService.recordCampaignWon();
+
+      // Record planets conquered from this campaign
+      if (this.statistics) {
+        for (let i = 0; i < this.statistics.planetsConquered; i++) {
+          await statsService.recordPlanetConquered();
+        }
+      }
+
+      // Stop playtime tracking (started in GalaxyMapScene)
+      await statsService.stopPlaytimeTracking();
+
+      console.log('Victory statistics recorded');
+    } catch (error) {
+      console.warn('Failed to record victory statistics:', error);
+    }
   }
 }

@@ -1,13 +1,42 @@
 /**
  * UserProfileService - User Profile Management
+ * Story 10-6: User Settings Persistence
  *
- * Manages user profile settings including audio preferences.
- * Syncs between cloud storage and local AudioManager.
+ * Manages user profile settings including audio and UI preferences.
+ * Features:
+ * - Cloud sync for authenticated users (Supabase)
+ * - LocalStorage fallback for guest mode
+ * - Debounced sync to prevent server flooding
+ * - UI settings (uiScale, highContrastMode) persistence
  */
 
 import { getSupabaseClient } from './SupabaseClient';
 import { getAuthService } from './AuthService';
+import { getGuestModeService } from './GuestModeService';
 import { AudioManager } from '@core/AudioManager';
+
+// LocalStorage key for guest/offline settings
+const LOCAL_SETTINGS_KEY = 'overlord_user_settings';
+
+// Default settings for new users
+const DEFAULT_SETTINGS: LocalSettings = {
+  uiScale: 1.0,
+  highContrastMode: false,
+  audioEnabled: true,
+  musicVolume: 0.7,
+  sfxVolume: 0.8,
+};
+
+/**
+ * Settings that can be stored locally for guest mode
+ */
+export interface LocalSettings {
+  uiScale: number;
+  highContrastMode: boolean;
+  audioEnabled: boolean;
+  musicVolume: number;
+  sfxVolume: number;
+}
 
 /**
  * User profile data structure
@@ -41,6 +70,11 @@ export interface ProfileResult {
 class UserProfileService {
   private static instance: UserProfileService | null = null;
   private cachedProfile: UserProfile | null = null;
+  private syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private pendingUpdates: Partial<UserProfile> = {};
+
+  // Debounce delay for settings sync (ms)
+  private static readonly SYNC_DEBOUNCE_MS = 1000;
 
   private constructor() {
     // Private constructor for singleton
@@ -288,12 +322,240 @@ class UserProfileService {
    */
   public clearCache(): void {
     this.cachedProfile = null;
+    this.pendingUpdates = {};
+    if (this.syncDebounceTimer) {
+      clearTimeout(this.syncDebounceTimer);
+      this.syncDebounceTimer = null;
+    }
+  }
+
+  // ============================================
+  // Story 10-6: UI Settings Methods
+  // ============================================
+
+  /**
+   * Get current UI settings (from profile or local storage)
+   * Works for both authenticated users and guests
+   */
+  public getUISettings(): { uiScale: number; highContrastMode: boolean } {
+    // Try cached profile first (authenticated users)
+    if (this.cachedProfile) {
+      return {
+        uiScale: this.cachedProfile.uiScale,
+        highContrastMode: this.cachedProfile.highContrastMode,
+      };
+    }
+
+    // Fall back to local storage
+    const localSettings = this.getLocalSettings();
+    return {
+      uiScale: localSettings.uiScale,
+      highContrastMode: localSettings.highContrastMode,
+    };
+  }
+
+  /**
+   * Update UI scale setting with debounced sync
+   * @param scale - UI scale factor (0.5 to 2.0)
+   */
+  public async setUIScale(scale: number): Promise<void> {
+    // Clamp to valid range
+    const clampedScale = Math.max(0.5, Math.min(2.0, scale));
+
+    // Update local storage immediately
+    this.updateLocalSettings({ uiScale: clampedScale });
+
+    // Update cached profile if available
+    if (this.cachedProfile) {
+      this.cachedProfile.uiScale = clampedScale;
+    }
+
+    // Debounced cloud sync for authenticated users
+    await this.debouncedSync({ uiScale: clampedScale });
+  }
+
+  /**
+   * Update high contrast mode setting with debounced sync
+   * @param enabled - Whether high contrast mode is enabled
+   */
+  public async setHighContrastMode(enabled: boolean): Promise<void> {
+    // Update local storage immediately
+    this.updateLocalSettings({ highContrastMode: enabled });
+
+    // Update cached profile if available
+    if (this.cachedProfile) {
+      this.cachedProfile.highContrastMode = enabled;
+    }
+
+    // Debounced cloud sync for authenticated users
+    await this.debouncedSync({ highContrastMode: enabled });
+  }
+
+  /**
+   * Sync all settings to cloud with debouncing
+   * Collects updates and syncs after debounce delay
+   */
+  private async debouncedSync(updates: Partial<UserProfile>): Promise<void> {
+    const authService = getAuthService();
+    const guestService = getGuestModeService();
+
+    // Don't sync to cloud for guests
+    if (guestService.isGuestMode() || !authService.isAuthenticated()) {
+      return;
+    }
+
+    // Merge with pending updates
+    this.pendingUpdates = { ...this.pendingUpdates, ...updates };
+
+    // Clear existing timer
+    if (this.syncDebounceTimer) {
+      clearTimeout(this.syncDebounceTimer);
+    }
+
+    // Set new timer
+    this.syncDebounceTimer = setTimeout(async () => {
+      if (Object.keys(this.pendingUpdates).length > 0) {
+        const toSync = { ...this.pendingUpdates };
+        this.pendingUpdates = {};
+        await this.updateProfile(toSync);
+      }
+      this.syncDebounceTimer = null;
+    }, UserProfileService.SYNC_DEBOUNCE_MS);
+  }
+
+  /**
+   * Force immediate sync of pending settings
+   * Use before logout or app close
+   */
+  public async flushPendingSync(): Promise<void> {
+    if (this.syncDebounceTimer) {
+      clearTimeout(this.syncDebounceTimer);
+      this.syncDebounceTimer = null;
+    }
+
+    if (Object.keys(this.pendingUpdates).length > 0) {
+      const toSync = { ...this.pendingUpdates };
+      this.pendingUpdates = {};
+      await this.updateProfile(toSync);
+    }
+  }
+
+  // ============================================
+  // Local Storage Methods (Guest Mode Fallback)
+  // ============================================
+
+  /**
+   * Get settings from local storage
+   * Used for guest mode and offline fallback
+   */
+  public getLocalSettings(): LocalSettings {
+    try {
+      const stored = localStorage.getItem(LOCAL_SETTINGS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<LocalSettings>;
+        // Merge with defaults to ensure all fields exist
+        return { ...DEFAULT_SETTINGS, ...parsed };
+      }
+    } catch (error) {
+      console.warn('Failed to load local settings:', error);
+    }
+    return { ...DEFAULT_SETTINGS };
+  }
+
+  /**
+   * Update settings in local storage
+   * @param updates - Partial settings to update
+   */
+  public updateLocalSettings(updates: Partial<LocalSettings>): void {
+    try {
+      const current = this.getLocalSettings();
+      const updated = { ...current, ...updates };
+      localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(updated));
+    } catch (error) {
+      console.warn('Failed to save local settings:', error);
+    }
+  }
+
+  /**
+   * Apply all settings from profile/local storage
+   * Call this on app startup to restore user preferences
+   */
+  public async applyAllSettings(): Promise<void> {
+    const authService = getAuthService();
+    const guestService = getGuestModeService();
+
+    // Apply audio settings first (from AudioManager's own localStorage)
+    const audioManager = AudioManager.getInstance();
+    audioManager.loadSettings();
+
+    // If authenticated, try to load from cloud
+    if (authService.isAuthenticated() && !guestService.isGuestMode()) {
+      const result = await this.getProfile(true);
+      if (result.success && result.profile) {
+        // Apply audio settings from profile
+        audioManager.setMusicVolume(Math.round(result.profile.musicVolume * 100));
+        audioManager.setSfxVolume(Math.round(result.profile.sfxVolume * 100));
+        if (result.profile.audioEnabled) {
+          audioManager.unmute();
+        } else {
+          audioManager.mute();
+        }
+        audioManager.saveSettings();
+
+        // Also update local storage as backup
+        this.updateLocalSettings({
+          uiScale: result.profile.uiScale,
+          highContrastMode: result.profile.highContrastMode,
+          audioEnabled: result.profile.audioEnabled,
+          musicVolume: result.profile.musicVolume,
+          sfxVolume: result.profile.sfxVolume,
+        });
+      }
+    }
+    // For guests, settings are already in local storage
+  }
+
+  /**
+   * Sync all current settings to cloud
+   * Used after login to push local settings to cloud
+   */
+  public async syncAllSettingsToCloud(): Promise<ProfileResult> {
+    const authService = getAuthService();
+    const guestService = getGuestModeService();
+
+    if (guestService.isGuestMode() || !authService.isAuthenticated()) {
+      return { success: false, error: 'Not authenticated or in guest mode' };
+    }
+
+    const audioManager = AudioManager.getInstance();
+    const audioSettings = audioManager.getSettings();
+    const localSettings = this.getLocalSettings();
+
+    const updates: Partial<UserProfile> = {
+      uiScale: localSettings.uiScale,
+      highContrastMode: localSettings.highContrastMode,
+      audioEnabled: !audioSettings.isMuted,
+      musicVolume: audioSettings.musicVolume / 100,
+      sfxVolume: audioSettings.sfxVolume / 100,
+    };
+
+    return this.updateProfile(updates);
+  }
+
+  /**
+   * Get default settings
+   */
+  public getDefaultSettings(): LocalSettings {
+    return { ...DEFAULT_SETTINGS };
   }
 
   /**
    * Reset the singleton instance (for testing)
    */
   public static resetInstance(): void {
+    if (UserProfileService.instance) {
+      UserProfileService.instance.clearCache();
+    }
     UserProfileService.instance = null;
   }
 }

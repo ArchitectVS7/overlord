@@ -3,6 +3,7 @@ import { GameState } from '@core/GameState';
 import { FactionType, VictoryResult } from '@core/models/Enums';
 import { SaveSystem, SaveData } from '@core/SaveSystem';
 import { getSaveService } from '@services/SaveService';
+import { getUserStatisticsService } from '@services/UserStatisticsService';
 
 /**
  * Defeat campaign statistics for display
@@ -44,6 +45,9 @@ export class DefeatScene extends Phaser.Scene {
 
     // Calculate statistics
     this.statistics = this.calculateStatistics();
+
+    // Story 10-7: Record defeat in user statistics
+    this.recordDefeatStats();
 
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
@@ -418,5 +422,31 @@ export class DefeatScene extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut',
     });
+  }
+
+  /**
+   * Story 10-7: Record defeat statistics
+   */
+  private async recordDefeatStats(): Promise<void> {
+    const statsService = getUserStatisticsService();
+
+    try {
+      // Record campaign lost
+      await statsService.recordCampaignLost();
+
+      // Record planets lost from this campaign
+      if (this.statistics) {
+        for (let i = 0; i < this.statistics.planetsLost; i++) {
+          await statsService.recordPlanetLost();
+        }
+      }
+
+      // Stop playtime tracking (started in GalaxyMapScene)
+      await statsService.stopPlaytimeTracking();
+
+      console.log('Defeat statistics recorded');
+    } catch (error) {
+      console.warn('Failed to record defeat statistics:', error);
+    }
   }
 }
