@@ -38,6 +38,7 @@ import { AdminUIEditorController } from '@services/AdminUIEditorController';
 import { getAdminModeService } from '@services/AdminModeService';
 import { getUIPanelPositionService } from '@services/UIPanelPositionService';
 import { getSaveService } from '@services/SaveService';
+import { TopMenuBar } from './ui/TopMenuBar';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -72,6 +73,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private saveGamePanel!: SaveGamePanel;
   private adminEditIndicator!: AdminEditModeIndicator;
   private adminUIEditor!: AdminUIEditorController;
+  private topMenuBar!: TopMenuBar;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
@@ -150,6 +152,19 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Enable camera controls
     this.cameraController.enableDragPan();
     this.cameraController.enableWheelZoom();
+
+    // Create top menu bar with help and reset camera
+    this.topMenuBar = new TopMenuBar(this, {
+      showHome: true,
+      showHelp: true,
+      showResetCamera: true,
+      onResetCamera: () => {
+        if (!this.cameraController.getIsDragging()) {
+          this.cameraController.resetView(true);
+        }
+      },
+    });
+    this.topMenuBar.setScrollFactor(0);
 
     // Initialize renderers
     this.planetRenderer = new PlanetRenderer(this);
@@ -521,9 +536,6 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Setup arrow key navigation
     this.setupArrowKeyNavigation();
 
-    // Add Reset View button
-    this.addResetViewButton();
-
     // Add debug info and controls help
     this.addDebugInfo();
     this.addControlsHelp();
@@ -854,111 +866,6 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.controlsText.setOrigin(1, 0);
     this.controlsText.setScrollFactor(0);
     this.controlsText.setVisible(false); // Hidden by default
-  }
-
-  private addResetViewButton(): void {
-    const buttonX = this.cameras.main.width - 120;
-    const buttonY = this.cameras.main.height - 50;
-
-    // Create button background
-    const buttonBg = this.add.graphics();
-    buttonBg.fillStyle(0x333333, 0.9);
-    buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-    buttonBg.setScrollFactor(0);
-
-    // Create button text
-    const buttonText = this.add.text(
-      buttonX + 50,
-      buttonY + 17,
-      'Reset View',
-      {
-        fontSize: '14px',
-        color: '#ffffff',
-        fontFamily: 'Arial',
-      },
-    );
-    buttonText.setOrigin(0.5);
-    buttonText.setScrollFactor(0);
-
-    // Create invisible interactive zone
-    const hitZone = this.add.zone(buttonX + 50, buttonY + 17, 100, 35);
-    hitZone.setScrollFactor(0);
-    hitZone.setInteractive({ useHandCursor: true });
-
-    // Hover effects
-    hitZone.on('pointerover', () => {
-      buttonBg.clear();
-      buttonBg.fillStyle(0x555555, 0.9);
-      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-      buttonText.setStyle({ color: '#00bfff' });
-    });
-
-    hitZone.on('pointerout', () => {
-      buttonBg.clear();
-      buttonBg.fillStyle(0x333333, 0.9);
-      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-      buttonText.setStyle({ color: '#ffffff' });
-    });
-
-    // Click handler
-    hitZone.on('pointerdown', () => {
-      if (!this.cameraController.getIsDragging()) {
-        this.cameraController.resetView(true);
-      }
-    });
-
-    // Add Exit Game button
-    this.addExitButton();
-  }
-
-  private addExitButton(): void {
-    const buttonX = this.cameras.main.width - 120;
-    const buttonY = this.cameras.main.height - 95; // Above Reset View
-
-    // Create button background
-    const buttonBg = this.add.graphics();
-    buttonBg.fillStyle(0x330000, 0.9);
-    buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-    buttonBg.setScrollFactor(0);
-
-    // Create button text
-    const buttonText = this.add.text(
-      buttonX + 50,
-      buttonY + 17,
-      'Exit Game',
-      {
-        fontSize: '14px',
-        color: '#ffaaaa',
-        fontFamily: 'Arial',
-      },
-    );
-    buttonText.setOrigin(0.5);
-    buttonText.setScrollFactor(0);
-
-    // Create invisible interactive zone
-    const hitZone = this.add.zone(buttonX + 50, buttonY + 17, 100, 35);
-    hitZone.setScrollFactor(0);
-    hitZone.setInteractive({ useHandCursor: true });
-
-    // Hover effects
-    hitZone.on('pointerover', () => {
-      buttonBg.clear();
-      buttonBg.fillStyle(0x550000, 0.9);
-      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-      buttonText.setStyle({ color: '#ffffff' });
-    });
-
-    hitZone.on('pointerout', () => {
-      buttonBg.clear();
-      buttonBg.fillStyle(0x330000, 0.9);
-      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-      buttonText.setStyle({ color: '#ffaaaa' });
-    });
-
-    // Click handler
-    hitZone.on('pointerdown', () => {
-      this.scene.start('MainMenuScene');
-    });
   }
 
   /**
@@ -1374,6 +1281,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     }
     if (this.adminEditIndicator) {
       this.adminEditIndicator.destroy();
+    }
+    if (this.topMenuBar) {
+      this.topMenuBar.destroy();
     }
     if (this.cameraController) {
       this.cameraController.destroy();

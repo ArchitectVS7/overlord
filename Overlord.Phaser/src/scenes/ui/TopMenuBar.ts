@@ -1,10 +1,12 @@
 /**
  * TopMenuBar
- * Minimal top menu bar with audio controls and navigation.
+ * Top menu bar with navigation, help, and audio controls.
+ * Fixed to top of screen, unaffected by camera movement.
  */
 
 import Phaser from 'phaser';
 import { AudioManager } from '../../core/AudioManager';
+import { HelpPanel } from './HelpPanel';
 
 const BAR_HEIGHT = 32;
 const BAR_DEPTH = 1000;
@@ -20,33 +22,50 @@ const COLORS = {
 
 export interface TopMenuBarOptions {
   showHome?: boolean;
+  showHelp?: boolean;
+  showResetCamera?: boolean;
+  onResetCamera?: () => void;
 }
 
 /**
- * TopMenuBar - Minimal top menu bar with home navigation and audio toggle
+ * TopMenuBar - Top menu bar with home navigation, help, reset camera, and audio toggle
+ * Uses individual elements with scrollFactor(0) for proper fixed positioning.
  */
-export class TopMenuBar extends Phaser.GameObjects.Container {
+export class TopMenuBar {
+  private scene: Phaser.Scene;
   private audioManager: AudioManager;
   private barBackground!: Phaser.GameObjects.Rectangle;
   private barBorder!: Phaser.GameObjects.Rectangle;
   private homeButton!: Phaser.GameObjects.Text;
+  private helpButton!: Phaser.GameObjects.Text;
+  private resetCameraButton!: Phaser.GameObjects.Text;
   private speakerIcon!: Phaser.GameObjects.Text;
+  private helpPanel!: HelpPanel;
   private options: TopMenuBarOptions;
+  private elements: Phaser.GameObjects.GameObject[] = [];
 
   constructor(scene: Phaser.Scene, options: TopMenuBarOptions = {}) {
-    super(scene, 0, 0);
-
-    this.options = { showHome: true, ...options };
+    this.scene = scene;
+    this.options = {
+      showHome: true,
+      showHelp: false,
+      showResetCamera: false,
+      ...options,
+    };
     this.audioManager = AudioManager.getInstance();
-    this.setDepth(BAR_DEPTH);
 
     this.createBar();
     if (this.options.showHome) {
       this.createHomeButton();
     }
+    if (this.options.showHelp) {
+      this.createHelpButton();
+      this.createHelpPanel();
+    }
+    if (this.options.showResetCamera) {
+      this.createResetCameraButton();
+    }
     this.createSpeakerIcon();
-
-    scene.add.existing(this as unknown as Phaser.GameObjects.GameObject);
   }
 
   private createBar(): void {
@@ -61,7 +80,9 @@ export class TopMenuBar extends Phaser.GameObjects.Container {
       COLORS.BAR_BG,
       0.9
     );
-    this.add(this.barBackground);
+    this.barBackground.setScrollFactor(0);
+    this.barBackground.setDepth(BAR_DEPTH);
+    this.elements.push(this.barBackground);
 
     // Bottom border line
     this.barBorder = this.scene.add.rectangle(
@@ -71,7 +92,9 @@ export class TopMenuBar extends Phaser.GameObjects.Container {
       1,
       COLORS.BAR_BORDER
     );
-    this.add(this.barBorder);
+    this.barBorder.setScrollFactor(0);
+    this.barBorder.setDepth(BAR_DEPTH);
+    this.elements.push(this.barBorder);
   }
 
   private createHomeButton(): void {
@@ -84,8 +107,10 @@ export class TopMenuBar extends Phaser.GameObjects.Container {
       fontFamily: 'monospace',
     });
     this.homeButton.setOrigin(0, 0.5);
+    this.homeButton.setScrollFactor(0);
+    this.homeButton.setDepth(BAR_DEPTH + 1);
     this.homeButton.setInteractive({ useHandCursor: true });
-    this.add(this.homeButton);
+    this.elements.push(this.homeButton);
 
     // Click handler - navigate to main menu
     this.homeButton.on('pointerdown', () => {
@@ -102,6 +127,90 @@ export class TopMenuBar extends Phaser.GameObjects.Container {
     });
   }
 
+  private createHelpButton(): void {
+    // Position after HOME button
+    const iconX = this.options.showHome ? 110 : 15;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.helpButton = this.scene.add.text(iconX, iconY, '❓ HELP', {
+      fontSize: '14px',
+      color: COLORS.ICON_DEFAULT,
+      fontFamily: 'monospace',
+    });
+    this.helpButton.setOrigin(0, 0.5);
+    this.helpButton.setScrollFactor(0);
+    this.helpButton.setDepth(BAR_DEPTH + 1);
+    this.helpButton.setInteractive({ useHandCursor: true });
+    this.elements.push(this.helpButton);
+
+    // Click handler - toggle help panel
+    this.helpButton.on('pointerdown', () => {
+      this.toggleHelpPanel();
+    });
+
+    // Hover effects
+    this.helpButton.on('pointerover', () => {
+      this.helpButton.setColor(COLORS.ICON_HOVER);
+    });
+
+    this.helpButton.on('pointerout', () => {
+      if (!this.helpPanel?.isVisible()) {
+        this.helpButton.setColor(COLORS.ICON_DEFAULT);
+      }
+    });
+  }
+
+  private createResetCameraButton(): void {
+    // Position after HELP button
+    let iconX = 15;
+    if (this.options.showHome) iconX += 95;
+    if (this.options.showHelp) iconX += 80;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.resetCameraButton = this.scene.add.text(iconX, iconY, '🎯 RESET', {
+      fontSize: '14px',
+      color: COLORS.ICON_DEFAULT,
+      fontFamily: 'monospace',
+    });
+    this.resetCameraButton.setOrigin(0, 0.5);
+    this.resetCameraButton.setScrollFactor(0);
+    this.resetCameraButton.setDepth(BAR_DEPTH + 1);
+    this.resetCameraButton.setInteractive({ useHandCursor: true });
+    this.elements.push(this.resetCameraButton);
+
+    // Click handler - call onResetCamera callback
+    this.resetCameraButton.on('pointerdown', () => {
+      this.options.onResetCamera?.();
+    });
+
+    // Hover effects
+    this.resetCameraButton.on('pointerover', () => {
+      this.resetCameraButton.setColor(COLORS.ICON_HOVER);
+    });
+
+    this.resetCameraButton.on('pointerout', () => {
+      this.resetCameraButton.setColor(COLORS.ICON_DEFAULT);
+    });
+  }
+
+  private createHelpPanel(): void {
+    this.helpPanel = new HelpPanel(this.scene);
+    this.helpPanel.onClose = () => {
+      this.helpButton?.setColor(COLORS.ICON_DEFAULT);
+    };
+  }
+
+  private toggleHelpPanel(): void {
+    if (this.helpPanel) {
+      this.helpPanel.toggle();
+      if (this.helpPanel.isVisible()) {
+        this.helpButton.setColor(COLORS.ICON_ACTIVE);
+      } else {
+        this.helpButton.setColor(COLORS.ICON_DEFAULT);
+      }
+    }
+  }
+
   private createSpeakerIcon(): void {
     const { width } = this.scene.cameras.main;
 
@@ -113,8 +222,10 @@ export class TopMenuBar extends Phaser.GameObjects.Container {
       fontSize: '18px',
     });
     this.speakerIcon.setOrigin(1, 0.5);
+    this.speakerIcon.setScrollFactor(0);
+    this.speakerIcon.setDepth(BAR_DEPTH + 1);
     this.speakerIcon.setInteractive({ useHandCursor: true });
-    this.add(this.speakerIcon);
+    this.elements.push(this.speakerIcon);
 
     // Click handler
     this.speakerIcon.on('pointerdown', () => {
@@ -161,17 +272,46 @@ export class TopMenuBar extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Show the help panel programmatically
+   */
+  public showHelp(): void {
+    if (this.helpPanel && !this.helpPanel.isVisible()) {
+      this.helpPanel.show();
+      this.helpButton?.setColor(COLORS.ICON_ACTIVE);
+    }
+  }
+
+  /**
+   * Hide the help panel programmatically
+   */
+  public hideHelp(): void {
+    if (this.helpPanel && this.helpPanel.isVisible()) {
+      this.helpPanel.hide();
+      this.helpButton?.setColor(COLORS.ICON_DEFAULT);
+    }
+  }
+
+  /**
    * Get the bar height for layout purposes
    */
   public static getHeight(): number {
     return BAR_HEIGHT;
   }
 
+  /**
+   * No-op for compatibility - elements already have scrollFactor set
+   */
+  public setScrollFactor(_factor: number): this {
+    // Elements already have scrollFactor(0) set individually
+    return this;
+  }
+
   public destroy(): void {
-    this.barBackground?.destroy();
-    this.barBorder?.destroy();
-    this.homeButton?.destroy();
-    this.speakerIcon?.destroy();
-    super.destroy();
+    // Destroy all tracked elements
+    for (const element of this.elements) {
+      element.destroy();
+    }
+    this.elements = [];
+    this.helpPanel?.destroy();
   }
 }

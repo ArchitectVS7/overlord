@@ -82,6 +82,11 @@ export class MainMenuScene extends Phaser.Scene {
       this.showStatisticsPanel();
     });
 
+    // How to Play button
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 4, 'HOW TO PLAY', true, () => {
+      this.scene.start('HowToPlayScene');
+    });
+
     // Create load game panel
     this.createLoadGamePanel(width, height);
 
