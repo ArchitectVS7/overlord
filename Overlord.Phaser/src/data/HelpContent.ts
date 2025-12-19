@@ -1,7 +1,7 @@
 /**
  * HelpContent.ts
  * Contains all help chapter content for the in-game help system.
- * Written as actionable "How To Play" instructions.
+ * Written as actionable "How To Play" instructions based on the complete playthrough manual.
  */
 
 export interface HelpChapter {
@@ -17,169 +17,260 @@ export const HELP_CHAPTERS: HelpChapter[] = [
     content: `HOW TO PLAY OVERLORD
 =====================================
 
-GOAL: Capture all enemy planets to win.
+GOAL: Capture all enemy planets to win the galaxy!
+
+GETTING STARTED
+---------------
+New players should start with FLASH CONFLICTS:
+1. From Main Menu, click "FLASH CONFLICTS"
+2. Select "First Steps" tutorial
+3. Complete 2-3 scenarios to learn the basics
+4. Return to Main Menu and click "NEW CAMPAIGN"
 
 THE TURN CYCLE
 --------------
 Every turn has 4 phases that cycle automatically:
 
   1. INCOME PHASE (automatic)
-     Just watch - resources generate, population grows.
-     You cannot do anything during this phase.
+     Resources generate, population grows, food consumed.
+     Buildings under construction make progress.
+     Just watch - you cannot act during this phase.
 
   2. ACTION PHASE (your turn!)
      This is when YOU play. Click planets, build things,
-     move ships. When done, click "END TURN" or press Space.
+     move ships, train troops. Take your time - no timer!
+     When done, press SPACE or click "END TURN".
 
   3. COMBAT PHASE (automatic)
-     Battles resolve. Watch the results.
+     All battles resolve. Your ships vs enemy ships.
+     Ground invasions complete. Watch the results.
 
   4. END PHASE (automatic)
-     Buildings complete. Victory check happens.
-     Then the next turn starts.
+     Victory condition checked. Next turn begins.
 
-YOUR FIRST TURN - STEP BY STEP
-------------------------------
-1. Look at the top-left: It says "Turn 1" and "ACTION"
+YOUR FIRST TURN
+---------------
+1. Look at the HUD: It says "Turn 1" and "ACTION"
    This means it's your turn to act.
 
-2. Click on your blue planet (your home world)
+2. Click on your blue planet (your homeworld)
    A panel opens on the right showing planet info.
 
 3. Click the "Build" button
    A menu opens showing available buildings.
 
 4. Click "Mining Station" to start building it
-   (You need minerals and fuel for ships later)
+   (You need minerals and fuel for ships later!)
 
-5. Close the panel by clicking outside it
+5. Click outside the panel to close it
 
-6. Click "END TURN" button (or press Space)
-   The turn advances through Combat and End phases.
+6. Click "END TURN" button (or press SPACE)
+   Watch the turn cycle through phases.
 
-7. Repeat! Each turn, build more, train troops, buy ships.`
+7. Repeat! Each turn: build, train troops, buy ships.
+
+RECOMMENDED BUILD ORDER
+-----------------------
+Turn 1-3:  Mining Station (minerals + fuel)
+Turn 3-5:  Horticultural Station (food!)
+Turn 5-7:  Docking Bay (allows ship building)
+Turn 7-10: Commission platoons (start training)
+Turn 10+:  Battle Cruisers + expand!`
   },
   {
     id: 'phases',
     title: 'Turn Phases',
-    content: `WHAT TO DO IN EACH PHASE
+    content: `UNDERSTANDING TURN PHASES
 =====================================
 
 INCOME PHASE - "I see INCOME on screen"
 ---------------------------------------
-WHAT HAPPENS: Resources generate automatically.
-WHAT YOU DO:  Nothing. Just wait 1-2 seconds.
-              Watch your resource numbers update.
+WHAT HAPPENS (all automatic):
 
-The game shows you income notifications:
-  "+500 Credits from taxes"
-  "+50 Minerals from Mining Station"
+1. PRODUCTION - Buildings generate resources:
+   Mining Station: +50 Minerals, +30 Fuel
+   Horticultural Station: +100 Food
+   Solar Satellite: +80 Energy
 
-This phase ends automatically.
+   Planet bonuses multiply production:
+   - Volcanic: 5x Minerals, 3x Fuel
+   - Tropical: 2x Food
+   - Desert: 2x Energy
+   - Metropolis: 2x Credits
+
+2. TAX COLLECTION:
+   Credits = Population x Tax Rate x Planet Bonus
+   Example: 500 pop x 40% tax x 2.0 bonus = 400 Cr
+
+3. FOOD CONSUMPTION:
+   Food used = Population x 0.5 per turn
+   Example: 500 pop = 250 Food consumed
+
+   WARNING: If Food reaches 0:
+   - Population decreases 5% per turn
+   - Morale drops to 25%
+   - Production halts!
+
+4. MORALE UPDATE:
+   Tax > 75%: Morale decreases
+   Tax < 25%: Morale increases
+   Food shortage: Morale -10
+
+5. POPULATION GROWTH:
+   New pop = Current x (Morale/100) x 0.05
+   Example: 500 x 0.75 x 0.05 = 19 new people
+
+6. CONSTRUCTION PROGRESS:
+   Each building: Turns Remaining - 1
+   If reaches 0: Building becomes operational!
+
+This phase ends automatically after 2-3 seconds.
 
 
 ACTION PHASE - "I see ACTION on screen"
 ---------------------------------------
-WHAT HAPPENS: This is YOUR turn to play!
-WHAT YOU DO:  Everything! This is the main game phase.
+THIS IS YOUR TURN! The game WAITS for you.
 
 You can:
-  - Click planets to see info and take actions
+  - Click planets to view info and take actions
   - Build structures on your planets
-  - Purchase spacecraft
-  - Train platoons (troops)
-  - Move your ships to other planets
+  - Purchase spacecraft (requires Docking Bay)
+  - Commission platoons (ground troops)
+  - Move ships to other planets
   - Load troops onto Battle Cruisers
+  - Adjust tax rates
 
 HOW TO END YOUR TURN:
-  Click the "END TURN" button (top-left)
-  OR press the Space bar
-  OR press Enter
+  - Press SPACE bar, or
+  - Press ENTER, or
+  - Click the "END TURN" button
 
-Take your time - there's no timer.
+Take your time - there's no timer!
 
 
 COMBAT PHASE - "I see COMBAT on screen"
 ---------------------------------------
-WHAT HAPPENS: All battles resolve automatically.
-WHAT YOU DO:  Watch. You cannot intervene.
+All battles resolve automatically:
 
-If your ships arrived at an enemy planet, combat happens.
-Results appear as notifications.
+1. SPACE COMBAT first:
+   Your ships vs enemy ships + orbital defenses
+   Higher strength wins
 
-This phase ends automatically after ~2 seconds.
+2. GROUND COMBAT second (if you have troops):
+   Your platoons vs enemy garrison
+   Winner controls the planet!
+
+Combat results appear as notifications.
+This phase ends automatically after battles resolve.
 
 
 END PHASE - "I see END on screen"
 ---------------------------------
-WHAT HAPPENS: Buildings finish, victory is checked.
-WHAT YOU DO:  Nothing. Just wait.
-
-If a building was 1 turn from completion, it finishes now.
-You'll see: "Mining Station completed on [Planet]!"
+WHAT HAPPENS (automatic):
+- AI opponent takes their turn
+- Victory condition checked
+- If you control all planets: YOU WIN!
+- If you lost all planets: DEFEAT
 
 Then the next turn begins with Income Phase.`
   },
   {
     id: 'planets',
     title: 'Planet Actions',
-    content: `WHAT CAN I DO WITH PLANETS?
+    content: `PLANET MANAGEMENT
 =====================================
 
 HOW TO SELECT A PLANET
 ----------------------
 1. Click on any planet in the galaxy map
 2. A panel appears on the right side
-3. You see: name, type, population, resources
+3. You see: name, type, population, resources, buildings
 
 The panel has ACTION BUTTONS at the bottom.
-Different buttons appear based on who owns the planet.
+Different options appear based on planet owner.
 
 
 YOUR PLANETS (Blue) - Available Actions:
 ----------------------------------------
 
-BUILD BUTTON
+[BUILD] BUTTON
   Opens the construction menu.
   Pick a building to start construction.
   Buildings take 2-3 turns to complete.
+  Only one building can construct at a time.
 
-COMMISSION BUTTON
+[COMMISSION] BUTTON
   Train a new platoon (ground troops).
-  Pick equipment quality and weapons.
-  Platoons take ~10 turns to reach full training.
+  Configure: troop count, equipment, weapons.
+  Platoons take 10 turns to reach 100% training.
+  WARNING: Untrained troops fight poorly!
 
-PLATOONS BUTTON
+[PLATOONS] BUTTON
   View troops stationed on this planet.
-  You can disband them here.
-  Or load them onto Battle Cruisers.
+  Options:
+  - [EMBARK] - Load onto a Battle Cruiser
+  - [DISBAND] - Remove the platoon
 
-SPACECRAFT BUTTON
-  Buy new ships at this planet.
+[SPACECRAFT] BUTTON
+  Purchase new ships (requires Docking Bay).
   Ships appear immediately when purchased.
-  Requires a Docking Bay to build most ships.
+  View docked ships and their status.
 
-NAVIGATE BUTTON
+[NAVIGATE] BUTTON
   Send a ship to another planet.
-  Select destination, ship travels over turns.
-  Uses fuel during transit.
+  Select ship, then select destination.
+  Travel time depends on distance and ship speed.
+
+TAX SLIDER
+  Adjust tax rate (0-100%)
+  Higher tax = more Credits
+  But tax > 75% hurts morale!
+  Recommended: 40-60%
 
 
 ENEMY PLANETS (Red) - Available Actions:
 ----------------------------------------
 
-INVADE BUTTON (if you have troops nearby)
+[INVADE] BUTTON (if you have troops in orbit)
   Launch ground assault with your platoons.
-  Must have Battle Cruisers with loaded troops.
+  Requirements:
+  - Battle Cruiser(s) in orbit
+  - Platoons loaded on cruisers
+  - Orbital control (no enemy ships)
+
   Win the battle to capture the planet!
 
 
 NEUTRAL PLANETS (Gray):
 -----------------------
 These are unclaimed. To colonize:
-1. Buy an Atmosphere Processor
+1. Build an Atmosphere Processor
 2. Navigate it to the neutral planet
-3. Deploy it (colonization takes time)`
+3. Deploy it when you arrive
+4. Wait ~10 turns for terraforming
+5. Planet becomes yours!
+
+
+PLANET INFO EXPLAINED
+---------------------
+POPULATION: X / 99,999
+  Current pop / Maximum capacity
+  More people = more tax income
+
+MORALE: X%
+  Happiness of your citizens
+  High morale = faster growth
+  Low morale = slow growth, unrest
+
+RESOURCES (stored on planet):
+  Credits, Minerals, Fuel, Food, Energy
+
+BUILDINGS: (X/5 slots used)
+  Shows built and under-construction buildings
+  Each planet has 5 building slots
+
+SPACECRAFT: (X docked)
+  Ships currently at this planet`
   },
   {
     id: 'building',
@@ -190,65 +281,94 @@ These are unclaimed. To colonize:
 STEP-BY-STEP BUILDING
 ---------------------
 1. Click on YOUR planet (blue color)
-2. Click the "Build" button in the panel
-3. A menu shows available buildings
+2. Click the [BUILD] button in the panel
+3. Review available buildings
 4. Buildings you can't afford are grayed out
 5. Click a building to start construction
-6. Construction takes 2-3 turns to complete
+6. Click [CONFIRM] in the dialog
 
 DURING CONSTRUCTION:
-  The planet panel shows a progress bar
-  "Mining Station - 2 turns remaining"
+  The planet panel shows progress:
+  "[Mining Station] - 2 turns remaining"
   You cannot build another thing until it finishes.
 
-
-WHAT SHOULD I BUILD FIRST?
---------------------------
-Turn 1-2: Mining Station
-  Gives you Minerals (+50) and Fuel (+30) per turn.
-  You need these to build ships!
-
-Turn 3-4: Horticultural Station
-  Gives you Food (+100) per turn.
-  Your population starves without food!
-
-Turn 5+: Docking Bay
-  Allows you to build spacecraft.
-  You can't buy ships without this!
-
-Later: Orbital Defense
-  Protects your planet from attack.
-  Build these before the enemy arrives.
+WHEN COMPLETE:
+  You'll see: "Mining Station completed!"
+  Production begins on the NEXT turn.
 
 
-BUILDING COSTS (Credits / Minerals / Fuel)
-------------------------------------------
-Mining Station        8,000 / 2,000 / 1,000  (3 turns)
-Horticultural Station 6,000 / 1,500 / 800    (2 turns)
-Docking Bay           5,000 / 1,000 / 500    (2 turns)
-Orbital Defense      12,000 / 3,000 / 2,000  (3 turns)
+BUILDING PRIORITY GUIDE
+-----------------------
+TURN 1-3: Mining Station
+  Cost: 8,000 Cr / 2,000 Min / 1,000 Fuel
+  Build Time: 3 turns
+  Produces: +50 Minerals, +30 Fuel per turn
+  WHY: You need minerals and fuel for everything!
+
+TURN 3-5: Horticultural Station
+  Cost: 6,000 Cr / 1,500 Min / 800 Fuel
+  Build Time: 2 turns
+  Produces: +100 Food per turn
+  WHY: Prevents starvation as population grows!
+
+TURN 5-7: Docking Bay
+  Cost: 5,000 Cr / 1,000 Min / 500 Fuel
+  Build Time: 2 turns
+  Effect: Allows spacecraft construction
+  WHY: You can't buy ships without this!
+
+LATER: Orbital Defense Platform
+  Cost: 12,000 Cr / 3,000 Min / 2,000 Fuel
+  Build Time: 3 turns
+  Effect: +20% defense bonus per platform
+  WHY: Protects against enemy attacks!
+
+
+BUILDING COSTS TABLE
+--------------------
+Building              Cr      Min    Fuel   Time
+---------------------------------------------
+Mining Station        8,000   2,000  1,000  3 turns
+Horticultural Stn     6,000   1,500    800  2 turns
+Docking Bay           5,000   1,000    500  2 turns
+Orbital Defense      12,000   3,000  2,000  3 turns
 
 
 PLANET TYPE BONUSES
 -------------------
-Build the RIGHT buildings on the RIGHT planets:
+Build the RIGHT buildings on the RIGHT planets!
 
-Volcanic planets:  5x minerals, 3x fuel
-  -> Build Mining Stations here!
+VOLCANIC PLANETS (red/orange):
+  5x Minerals, 3x Fuel from Mining Stations
+  -> BUILD: Mining Stations here!
+  Example: Mining Station = 250 Min, 90 Fuel!
 
-Tropical planets:  2x food
-  -> Build Horticultural Stations here!
+TROPICAL PLANETS (green):
+  2x Food from Horticultural Stations
+  -> BUILD: Horticultural Stations here!
+  Example: Hort Station = 200 Food!
 
-Desert planets:    2x energy
-  -> Deploy Solar Satellites here!
+DESERT PLANETS (tan):
+  2x Energy from Solar Satellites
+  -> DEPLOY: Solar Satellites here!
 
-Metropolis:        2x credits
-  -> Already developed, just collect taxes!`
+METROPOLIS PLANETS (developed):
+  2x Credits from taxes
+  -> Focus on high population + taxes!
+
+
+SCRAPPING BUILDINGS
+-------------------
+If you need to free up a slot:
+1. Click planet
+2. Click the building you want to remove
+3. Click [SCRAP]
+4. You receive 50% of original cost back`
   },
   {
     id: 'military',
     title: 'Military Guide',
-    content: `HOW TO BUILD AN ARMY
+    content: `HOW TO BUILD YOUR MILITARY
 =====================================
 
 YOUR MILITARY HAS TWO PARTS:
@@ -258,57 +378,98 @@ YOUR MILITARY HAS TWO PARTS:
 You need BOTH to conquer enemy planets!
 
 
-HOW TO BUY SPACECRAFT
----------------------
-1. Click on your planet (must have a Docking Bay)
-2. Click "Spacecraft" button
-3. Choose a ship type:
+BUYING SPACECRAFT
+-----------------
+REQUIREMENTS:
+  - Planet must have a Docking Bay
+  - Sufficient resources
 
-   Battle Cruiser - 50,000 Cr / 10,000 Min / 5,000 Fuel
-     Your main warship. Can carry 4 platoons.
-     Fast (50 speed). Use these for invasions!
+STEP-BY-STEP:
+1. Click on your planet with Docking Bay
+2. Click [SPACECRAFT] button
+3. Select ship type to purchase
+4. Click [CONFIRM]
+5. Ship appears immediately, docked at planet
 
-   Cargo Cruiser - 30,000 Cr / 5,000 Min / 3,000 Fuel
-     Carries resources between planets.
-     Slower (30 speed). For logistics.
+SHIP TYPES:
 
-   Atmosphere Processor - 10,000 Cr / 5,000 Min / 2,000 Fuel
-     Colonizes neutral planets.
-     Consumed when you use it.
+BATTLE CRUISER
+  Cost: 50,000 Cr / 10,000 Min / 5,000 Fuel
+  Crew: 50 people from population
+  Speed: 50 units/turn (fast)
+  Capacity: 4 platoons
+  PURPOSE: Combat + troop transport
 
-4. Click to purchase. Ship appears immediately.
+CARGO CRUISER
+  Cost: 30,000 Cr / 5,000 Min / 3,000 Fuel
+  Crew: 30 people
+  Speed: 30 units/turn
+  Capacity: 1,000 of each resource
+  PURPOSE: Transport resources between planets
+
+ATMOSPHERE PROCESSOR
+  Cost: 10,000 Cr / 5,000 Min / 2,000 Fuel
+  Crew: 20 people
+  Speed: 30 units/turn
+  PURPOSE: Colonize neutral planets
+  NOTE: Consumed when deployed!
+
+SOLAR SATELLITE
+  Cost: 15,000 Cr / 3,000 Min / 1,000 Fuel
+  Crew: 5 people
+  Speed: Stationary (orbits planet)
+  Produces: +80 Energy per turn
+  PURPOSE: Energy production
 
 
-HOW TO TRAIN TROOPS (PLATOONS)
-------------------------------
+TRAINING PLATOONS
+-----------------
+STEP-BY-STEP:
 1. Click on your planet
-2. Click "Commission" button
-3. Choose troop count (up to 200 per platoon)
-4. Choose equipment quality:
-   - Civilian (cheap but weak)
-   - Basic (standard)
-   - Standard (good)
-   - Advanced (strong)
-   - Elite (best, very expensive)
-5. Choose weapons:
-   - Pistol / Rifle / Assault Rifle / Plasma
-6. Click to commission
+2. Click [COMMISSION] button
+3. Configure your platoon:
 
-IMPORTANT: New platoons start at 0% training!
-They gain +10% per turn. Wait 10 turns for 100%.
-Untrained troops fight poorly!
+TROOP COUNT: 1-200 troops per platoon
+  More troops = more strength
+  But costs more and takes crew
+
+EQUIPMENT (armor quality):
+  Civilian    - 20,000 Cr - 0.5x strength
+  Basic       - 35,000 Cr - 1.0x strength
+  Standard    - 55,000 Cr - 1.5x strength
+  Advanced    - 80,000 Cr - 2.0x strength
+  Elite      - 109,000 Cr - 2.5x strength
+
+WEAPONS:
+  Pistol        - 5,000 Cr - 0.8x damage
+  Rifle        - 10,000 Cr - 1.0x damage
+  Assault Rifle - 18,000 Cr - 1.3x damage
+  Plasma       - 30,000 Cr - 1.6x damage
+
+4. Click [COMMISSION]
+5. Platoon begins training!
+
+TRAINING PROGRESS:
+  - New platoons start at 0% training
+  - Gain +10% per turn
+  - 10 turns to reach 100%
+  - NEVER attack with untrained troops!
+
+  Training = Combat effectiveness multiplier
+  50% trained = 50% effective!
 
 
-HOW TO LOAD TROOPS ONTO SHIPS
------------------------------
-1. Click your planet with platoons and Battle Cruisers
-2. Click "Platoons" button
+LOADING TROOPS ONTO SHIPS
+-------------------------
+1. Click planet with both platoons and Battle Cruisers
+2. Click [PLATOONS] button
 3. Select a platoon
-4. Click "Load onto Cruiser"
-5. The platoon is now on the ship!
+4. Click [EMBARK]
+5. Choose which Battle Cruiser
+6. Click [CONFIRM]
 
 Each Battle Cruiser holds up to 4 platoons.
-You need loaded cruisers to invade planets.`
+You MUST load troops before invading!`
   },
   {
     id: 'movement',
@@ -319,46 +480,83 @@ You need loaded cruisers to invade planets.`
 STEP-BY-STEP MOVEMENT
 ---------------------
 1. Click on a planet with your ships
-2. Click the "Navigate" button
-3. A list of destinations appears
-4. Click a destination planet
-5. Your ship begins traveling!
+2. Click [NAVIGATE] button
+3. Select the ship you want to move
+4. Destination list appears showing:
+   - Planet name and owner
+   - Distance (sectors)
+   - Travel time (turns)
+5. Click a destination
+6. Click [CONFIRM]
+7. Ship begins traveling!
 
 DURING TRANSIT:
-  The ship is "in transit" and cannot be used
-  Travel time depends on distance and ship speed
-  Fuel is consumed during travel
+  - Ship shows "In Transit" status
+  - Cannot be used for other orders
+  - Fuel consumed during travel
+  - Arrives after calculated travel time
+  - You CANNOT cancel or recall mid-journey!
 
 
-TRAVEL TIMES (approximate)
---------------------------
-Battle Cruiser:  Speed 50 - fastest
-Cargo Cruiser:   Speed 30 - moderate
-Atmosphere Proc: Speed 30 - moderate
+TRAVEL TIMES
+------------
+Speed determines travel time:
+
+BATTLE CRUISER:  Speed 50 - Fastest
+CARGO CRUISER:   Speed 30 - Moderate
+ATMOSPHERE PROC: Speed 30 - Moderate
+SOLAR SATELLITE: Speed 0  - Cannot move
+
+Travel Time = Distance / Speed (rounded up)
+
+Example: 2 sectors at Speed 50 = 1 turn
+Example: 3 sectors at Speed 30 = 2 turns
 
 
-MOVEMENT TIPS
--------------
-- Plan ahead! Ships take multiple turns to arrive.
-- Send troops BEFORE you need them.
-- Keep fuel reserves for emergencies.
-- You can't recall ships mid-journey.
+FUEL CONSUMPTION
+----------------
+Ships consume fuel while traveling:
+  - Base: 500 fuel per journey
+  - Long trips use more fuel
+
+Keep fuel reserves! If you run out:
+  - Ships cannot travel
+  - Build more Mining Stations!
 
 
 WHAT HAPPENS ON ARRIVAL?
 ------------------------
-When your ship reaches a destination:
 
-YOUR PLANET: Ship docks. You can unload cargo/troops.
+ARRIVING AT YOUR PLANET:
+  Ship docks automatically.
+  You can unload cargo or troops.
+  Ship can receive new orders next turn.
 
-NEUTRAL PLANET:
-  If it's an Atmosphere Processor, you can deploy it
-  to begin colonization.
+ARRIVING AT NEUTRAL PLANET:
+  If Atmosphere Processor: Can deploy to colonize
+  If other ship: Just orbits the planet
 
-ENEMY PLANET:
-  SPACE COMBAT happens first!
-  If you win, you achieve orbital control.
-  Then you can INVADE with ground troops.`
+ARRIVING AT ENEMY PLANET:
+  SPACE COMBAT triggers automatically!
+  Your ships fight their ships + defenses.
+
+  If you WIN space combat:
+  - You have orbital control
+  - Can launch ground invasion
+  - Click planet -> Click [INVADE]
+
+  If you LOSE space combat:
+  - Your ships are destroyed
+  - No invasion possible
+
+
+FLEET TACTICS
+-------------
+- Send multiple ships together for strength
+- Don't trickle ships one at a time!
+- Larger fleets win battles
+- Plan travel times - ships arrive together
+- Keep some ships for defense at home`
   },
   {
     id: 'invasion',
@@ -366,59 +564,104 @@ ENEMY PLANET:
     content: `HOW TO CAPTURE ENEMY PLANETS
 =====================================
 
-INVASION CHECKLIST
-------------------
+INVASION REQUIREMENTS CHECKLIST
+-------------------------------
 Before you can invade, you need:
 
-[ ] Battle Cruiser(s) at the enemy planet
-[ ] Platoons LOADED onto those cruisers
-[ ] Orbital control (no enemy ships remaining)
+[X] Battle Cruiser(s) at the enemy planet
+[X] Platoons LOADED onto those cruisers
+[X] Orbital control (enemy ships destroyed)
+[X] Platoons should be 70%+ trained
 
-If enemy ships are present, space combat happens
-first. You must destroy them to proceed.
+If enemy ships are present, space combat
+happens first. You must win to proceed.
 
 
-STEP-BY-STEP INVASION
----------------------
-1. Move Battle Cruiser(s) to enemy planet
-   (Make sure platoons are loaded aboard!)
+COMPLETE INVASION PROCESS
+-------------------------
 
-2. Wait for arrival (may take several turns)
+STEP 1: PREPARE YOUR FORCES
+  1. Commission platoons (10 turns to train!)
+  2. Build Battle Cruisers (need Docking Bay)
+  3. Wait for platoons to reach 70-100% training
 
-3. Space combat resolves automatically
-   Your ships vs their ships + orbital defenses
+STEP 2: LOAD TROOPS
+  1. Click your planet
+  2. Click [PLATOONS]
+  3. Select platoon -> Click [EMBARK]
+  4. Choose Battle Cruiser
+  5. Repeat until cruisers are loaded
 
-4. If you win space combat, you have orbital control
+STEP 3: SEND FLEET TO ENEMY
+  1. Click your planet
+  2. Click [NAVIGATE]
+  3. Select your Battle Cruiser(s)
+  4. Select enemy planet destination
+  5. Click [CONFIRM]
 
-5. Click on the enemy planet
+STEP 4: WAIT FOR ARRIVAL
+  Travel takes 1-3 turns depending on distance.
+  Plan ahead!
 
-6. Click the "Invade" button
+STEP 5: SPACE COMBAT (AUTOMATIC)
+  When fleet arrives at enemy planet:
+  - Your ships vs their ships + orbital defenses
+  - Higher total strength wins
+  - If you win: Orbital control achieved!
+  - If you lose: Fleet destroyed, invasion fails
 
-7. Choose aggression level:
-   - Low: Fewer casualties, but might not win
-   - High: More casualties, but stronger attack
+STEP 6: LAUNCH INVASION
+  After winning space combat:
+  1. Click the enemy planet
+  2. [INVADE] button appears
+  3. Click [INVADE]
+  4. Select aggression level:
+     - Low: Fewer casualties, might not win
+     - Medium: Balanced (recommended)
+     - High: More casualties, stronger attack
+  5. Click [CONFIRM]
 
-8. Ground combat resolves
+STEP 7: GROUND COMBAT (AUTOMATIC)
+  Your platoons vs enemy garrison.
+  Higher strength wins.
 
-9. If you win, the planet is now YOURS!
+STEP 8: VICTORY!
+  If you win ground combat:
+  - Planet turns blue (yours!)
+  - Enemy buildings become yours
+  - You capture 50% of stored resources
+  - Your troops garrison the planet
+
+
+COMBAT STRENGTH CALCULATION
+---------------------------
+Platoon Strength = Troops x Equipment x Weapons x Training
+
+Example:
+  100 troops
+  x Elite equipment (2.5)
+  x Plasma weapons (1.6)
+  x 80% training (0.8)
+  = 100 x 2.5 x 1.6 x 0.8 = 320 strength
 
 
 COMBAT TIPS
 -----------
-- Bring overwhelming force. 2-3 cruisers minimum.
-- Fully trained platoons (100%) fight much better.
-- Elite troops beat larger numbers of basic troops.
-- Orbital Defense platforms give defenders +20% each.
+- Bring overwhelming force (2-3 cruisers minimum)
+- 100% trained platoons fight MUCH better
+- Elite + Plasma beats large numbers of Basic + Rifle
+- Each Orbital Defense gives defender +20%
 - Undefended planets surrender without a fight!
+- After capture, build defenses immediately!
 
 
-AFTER CAPTURING A PLANET
-------------------------
-- The planet turns blue (yours)
-- Enemy buildings become yours
-- You capture 50% of stored resources
-- Population may be reduced from fighting
-- Start building immediately to fortify it!`
+CASUALTIES
+----------
+WINNER takes 10-30% losses
+LOSER takes 50-100% losses (often annihilated)
+
+Higher aggression = more damage both ways
+Use moderate aggression for balance.`
   },
   {
     id: 'colonize',
@@ -427,53 +670,115 @@ AFTER CAPTURING A PLANET
 =====================================
 
 Neutral planets (gray) are unclaimed.
-You can colonize them to expand your empire.
+Colonize them to expand your empire!
 
 
 WHAT YOU NEED
 -------------
 1. An Atmosphere Processor spacecraft
-   Cost: 10,000 Credits / 5,000 Minerals / 2,000 Fuel
-   Buy it like any other ship (Spacecraft button)
+   Cost: 10,000 Cr / 5,000 Min / 2,000 Fuel
 
-2. A destination neutral planet to colonize
+2. A neutral planet to colonize
 
 
 STEP-BY-STEP COLONIZATION
 -------------------------
-1. Buy an Atmosphere Processor at one of your planets
 
-2. Click "Navigate" and select the neutral planet
+STEP 1: BUILD ATMOSPHERE PROCESSOR
+  1. Click your planet (must have Docking Bay)
+  2. Click [SPACECRAFT]
+  3. Click [ATMOSPHERE PROCESSOR]
+  4. Click [CONFIRM]
+  5. Processor appears docked at planet
 
-3. Wait for the Atmosphere Processor to arrive
-   (Travel takes 1-3 turns depending on distance)
+STEP 2: NAVIGATE TO NEUTRAL PLANET
+  1. Click [NAVIGATE]
+  2. Select your Atmosphere Processor
+  3. Select neutral planet destination
+  4. Click [CONFIRM]
+  5. Processor begins traveling
 
-4. Once arrived, click on the neutral planet
+STEP 3: WAIT FOR ARRIVAL
+  Travel takes 1-3 turns.
 
-5. Deploy the Atmosphere Processor
-   The processor is CONSUMED (disappears)
+STEP 4: DEPLOY THE PROCESSOR
+  When arrived:
+  1. Click on the neutral planet
+  2. Click [DEPLOY ATMOSPHERE PROCESSOR]
+  3. Click [CONFIRM]
 
-6. Terraforming begins!
-   Takes about 10 turns to complete.
+  WARNING: The processor is CONSUMED!
+  It disappears after deployment.
 
-7. When finished, the planet turns blue (yours)
+STEP 5: WAIT FOR TERRAFORMING
+  Terraforming takes ~10 turns.
+  Progress shows on planet panel.
+
+STEP 6: COLONY ESTABLISHED!
+  When complete:
+  - Planet turns blue (yours!)
+  - Small starting population
+  - No buildings yet - start building!
+
+
+CHOOSING WHAT TO COLONIZE
+-------------------------
+Scout first! Know the planet type:
+
+VOLCANIC (red/orange):
+  Best for: Mining (5x minerals, 3x fuel)
+  Priority: HIGH if you need production
+
+TROPICAL (green):
+  Best for: Food (2x food production)
+  Priority: HIGH if food is scarce
+
+DESERT (tan):
+  Best for: Energy (2x energy)
+  Priority: MEDIUM
+
+METROPOLIS (developed):
+  Best for: Credits (2x tax income)
+  Rare to find unclaimed!
 
 
 COLONIZATION TIPS
 -----------------
-- Scout first: Know what planet type it is!
-  Volcanic = great for mining
-  Tropical = great for food
-  Desert = great for energy
+1. PROTECT YOUR COLONY
+   New colonies start weak!
+   - Small population
+   - No buildings
+   - No defenses
+   Build Orbital Defense ASAP.
 
-- Send a Cargo Cruiser with the processor
-  New colonies need resources to get started!
+2. SEND RESOURCES
+   Send a Cargo Cruiser with the processor:
+   - Load minerals, fuel, food
+   - New colony can start building immediately
 
-- Protect your colonies: They start weak
-  Build Orbital Defense as soon as possible
+3. DON'T OVEREXTEND
+   Colonizing costs resources.
+   Each colony needs:
+   - Building investments
+   - Defense investments
+   - Time to become productive
 
-- Don't overextend: Colonizing costs resources
-  Make sure you can defend new territory`
+   Expand at a sustainable pace!
+
+4. STRATEGIC LOCATION
+   Consider the planet's position:
+   - Near enemy = frontline (needs defense)
+   - Near you = safe expansion
+   - Cuts off enemy access = strategic value
+
+
+COLONY DEVELOPMENT ORDER
+------------------------
+After colonizing:
+1. Horticultural Station (food for new population)
+2. Mining Station (production)
+3. Docking Bay (if staging military here)
+4. Orbital Defense (protection)`
   },
   {
     id: 'economy',
@@ -483,65 +788,134 @@ COLONIZATION TIPS
 
 THE FIVE RESOURCES
 ------------------
-CREDITS (gold) - Money for everything
-  From: Taxes on population
-  Used for: All purchases
 
-MINERALS (silver) - Building materials
-  From: Mining Stations
+CREDITS (gold color)
+  Source: Taxes on population
+  Formula: Population x Tax Rate x Planet Bonus
+  Used for: All purchases (primary currency)
+  Tips: Metropolis planets give 2x credits!
+
+MINERALS (silver color)
+  Source: Mining Stations
+  Base: +50 per Mining Station
   Used for: Buildings, spacecraft
+  Tips: Volcanic planets give 5x bonus!
 
-FUEL (orange) - Ship propulsion
-  From: Mining Stations
+FUEL (orange color)
+  Source: Mining Stations
+  Base: +30 per Mining Station
   Used for: Building ships, travel
+  Tips: Volcanic planets give 3x bonus!
 
-FOOD (green) - Feeds your people
-  From: Horticultural Stations
+FOOD (green color)
+  Source: Horticultural Stations
+  Base: +100 per station
   Used for: Population (0.5 per person/turn)
-  WARNING: No food = starvation!
+  CRITICAL: No food = STARVATION!
+  Tips: Tropical planets give 2x bonus!
 
-ENERGY (cyan) - Powers operations
-  From: Solar Satellites
+ENERGY (cyan/blue color)
+  Source: Solar Satellites
+  Base: +80 per satellite
   Used for: Building operations
+  Tips: Desert planets give 2x bonus!
 
 
-RESOURCE STATUS INDICATORS
---------------------------
-500+     Normal (white/green)
-100-499  Warning (yellow) - take action soon
-<100     Critical (red) - immediate shortage!
-
-
-HOW TO INCREASE INCOME
+RESOURCE STATUS COLORS
 ----------------------
-Credits:
-  - Increase population (they pay taxes)
-  - Don't set taxes too low
-  - Capture Metropolis planets (2x credits)
+500+      Green/White  - Healthy
+100-499   Yellow       - Warning, take action
+<100      Red          - CRITICAL, act now!
 
-Minerals:
-  - Build Mining Stations
-  - Volcanic planets give 5x bonus!
 
-Fuel:
-  - Mining Stations also produce fuel
-  - Volcanic planets give 3x bonus!
+HOW TO INCREASE EACH RESOURCE
+-----------------------------
 
-Food:
-  - Build Horticultural Stations
-  - Tropical planets give 2x bonus!
+NEED MORE CREDITS?
+  1. Increase population (more taxpayers)
+  2. Keep morale high (population grows)
+  3. Capture Metropolis planets (2x bonus)
+  4. Raise tax rate (but watch morale!)
+  5. Don't overspend on military early
 
-Energy:
-  - Deploy Solar Satellites
-  - Desert planets give 2x bonus!
+NEED MORE MINERALS?
+  1. Build Mining Stations
+  2. Prioritize Volcanic planets (5x bonus!)
+  3. Capture enemy Mining Stations
+  4. Reduce construction temporarily
+
+NEED MORE FUEL?
+  1. Mining Stations also produce fuel
+  2. Volcanic planets give 3x fuel bonus
+  3. Reduce fleet movements
+  4. Don't build ships you don't need yet
+
+NEED MORE FOOD?
+  1. Build Horticultural Stations IMMEDIATELY
+  2. Tropical planets give 2x bonus
+  3. Control population growth (lower morale)
+  4. Capture enemy food production
+
+NEED MORE ENERGY?
+  1. Deploy Solar Satellites
+  2. Desert planets give 2x bonus
+  3. Reduce energy-heavy operations
+
+
+TAX STRATEGY
+------------
+Tax Rate affects:
+  - Credit income (higher = more money)
+  - Morale (higher taxes = lower morale)
+  - Population growth (lower morale = less growth)
+
+RECOMMENDATIONS:
+  40-60%: Balanced (safe choice)
+  <40%:   Happy population, slow income
+  >75%:   High income, morale penalty!
+
+When to raise taxes:
+  - Emergency need for Credits
+  - About to invade (need ships/troops)
+  - Population very high already
+
+When to lower taxes:
+  - Morale dropping
+  - Population growth needed
+  - After a starvation crisis
 
 
 COMMON ECONOMIC MISTAKES
 ------------------------
-- Building military before economy
-- Ignoring food (causes starvation)
-- Setting taxes too high (hurts morale)
-- Not matching buildings to planet types`
+1. Building military before economy
+   -> You'll run out of resources mid-game
+
+2. Ignoring food production
+   -> Starvation destroys your empire!
+
+3. Setting taxes too high too early
+   -> Stunts population growth
+
+4. Not matching buildings to planet types
+   -> Waste 50-80% potential production
+
+5. Over-expanding without economy
+   -> Can't defend new colonies
+
+
+ECONOMIC TIMELINE
+-----------------
+EARLY GAME (Turns 1-10):
+  Focus 80% on economy
+  Build: Mining, Hort Stations, Docking Bay
+
+MID GAME (Turns 10-20):
+  Balance economy and military 50/50
+  Maintain positive income
+
+LATE GAME (Turns 20+):
+  Economy fuels military production
+  Capture enemy resources`
   },
   {
     id: 'combat',
@@ -550,59 +924,128 @@ COMMON ECONOMIC MISTAKES
 =====================================
 
 There are two types of combat:
-
 1. SPACE COMBAT - Ships vs Ships
-2. GROUND COMBAT - Platoons vs Planet Defense
+2. GROUND COMBAT - Platoons vs Garrison
 
 
-SPACE COMBAT
-------------
-Happens when your fleet arrives at an enemy planet.
+SPACE COMBAT MECHANICS
+----------------------
+Triggers when: Your fleet arrives at enemy planet
 
-FACTORS:
-  - Number of Battle Cruisers
-  - Crew on each ship
-  - Weapon technology level
-  - Orbital Defense platforms (+20% each for defender)
+YOUR ATTACK STRENGTH:
+  = Number of Ships x Crew x Weapon Multiplier
 
-Higher total strength wins.
-Loser's ships are destroyed.
+ENEMY DEFENSE STRENGTH:
+  = Their Ships x Crew x Weapons x Defense Bonus
 
-If you win, you have ORBITAL CONTROL.
-Now you can invade with ground troops.
+Defense Bonus: +20% per Orbital Defense Platform
 
+EXAMPLE SPACE BATTLE:
 
-GROUND COMBAT
--------------
-Happens when you click "Invade" on an enemy planet.
+  YOUR FORCES:
+  2x Battle Cruisers, 100 total crew
+  Weapons: Laser (1.0x)
+  Attack = 100 x 1.0 = 100 strength
 
-YOUR STRENGTH:
-  Platoon Strength = Troops x Equipment x Weapons x Training%
+  ENEMY FORCES:
+  1x Battle Cruiser, 50 crew
+  2x Orbital Defense Platforms (+40%)
+  Defense = 50 x 1.0 x 1.4 = 70 strength
 
-  Example: 100 troops, Elite gear (2.5x), Plasma (1.6x), 80% trained
-           100 x 2.5 x 1.6 x 0.80 = 320 strength
-
-DEFENDER STRENGTH:
-  Based on planet population and defense buildings.
+  RESULT: 100 > 70, YOU WIN!
 
 CASUALTIES:
-  - Winner takes 10-30% losses
-  - Loser takes 50-90% losses
-  - Higher aggression = more damage both ways
+  Winner: 10-30% losses
+  Loser: 50-100% losses (often destroyed)
+
+After winning space combat:
+  You have ORBITAL CONTROL
+  Can now launch ground invasion!
+
+
+GROUND COMBAT MECHANICS
+-----------------------
+Triggers when: You click [INVADE]
+
+PLATOON STRENGTH FORMULA:
+  Strength = Troops x Equipment x Weapons x Training%
+
+EQUIPMENT MULTIPLIERS:
+  Civilian   - 0.5x (very weak)
+  Basic      - 1.0x (standard)
+  Standard   - 1.5x (good)
+  Advanced   - 2.0x (strong)
+  Elite      - 2.5x (powerful)
+
+WEAPON MULTIPLIERS:
+  Pistol        - 0.8x
+  Rifle         - 1.0x
+  Assault Rifle - 1.3x
+  Plasma        - 1.6x
+
+TRAINING MULTIPLIER:
+  0% trained   = 0.0x (useless!)
+  50% trained  = 0.5x (weak)
+  100% trained = 1.0x (full power)
+
+EXAMPLE GROUND BATTLE:
+
+  YOUR INVASION FORCE:
+  Platoon 1: 100 troops, Standard (1.5),
+             Assault Rifle (1.3), 100% trained
+  Strength = 100 x 1.5 x 1.3 x 1.0 = 195
+
+  Platoon 2: 100 troops, Advanced (2.0),
+             Plasma (1.6), 80% trained
+  Strength = 100 x 2.0 x 1.6 x 0.8 = 256
+
+  TOTAL: 195 + 256 = 451 strength
+
+  ENEMY DEFENDERS:
+  2 Platoons, 110 total troops
+  Basic equipment (1.0), Rifle (1.0)
+  Strength = 110 x 1.0 x 1.0 = 110
+
+  RESULT: 451 vs 110 = OVERWHELMING VICTORY!
+  Enemy annihilated, minimal losses for you.
 
 
 WINNING COMBAT TIPS
 -------------------
-Space:
-  - Bring multiple Battle Cruisers (strength in numbers)
+SPACE COMBAT:
+  - Bring multiple Battle Cruisers (numbers matter!)
   - Attack before they build Orbital Defenses
+  - 2-3 cruisers minimum for contested planets
   - Research better weapons if available
 
-Ground:
-  - Wait for 100% training on platoons
-  - Elite + Plasma beats larger Basic + Rifle armies
-  - Undefended planets surrender without a fight
-  - Use moderate aggression (50-70%) for balance`
+GROUND COMBAT:
+  - WAIT for 100% training!
+  - 50% trained = 50% combat effectiveness
+  - Elite + Plasma (4.0x) beats Basic + Rifle (1.0x)
+  - Large numbers can compensate for low quality
+  - Undefended planets surrender without fight
+
+GENERAL:
+  - Concentrate force, don't spread thin
+  - Attack enemy weak points first
+  - Leave garrison after capturing
+  - Build defenses on border planets
+
+
+COMBAT OUTCOME EFFECTS
+----------------------
+PLANET CAPTURED:
+  - Planet turns blue (yours)
+  - All buildings become yours
+  - You get 50% of stored resources
+  - Population may be reduced
+  - Your troops become garrison
+
+BATTLE LOST:
+  - Your attacking forces destroyed
+  - Enemy keeps the planet
+  - You lose invested resources
+  - Must rebuild and try again`
   },
   {
     id: 'strategy',
@@ -612,70 +1055,126 @@ Ground:
 
 EARLY GAME (Turns 1-10)
 -----------------------
-Priority: Build your economy!
+PRIORITY: Build your economy!
 
-Turn 1: Start Mining Station (minerals + fuel)
-Turn 2: Wait for Mining Station (still building)
-Turn 3: Mining Station done! Start Horticultural Station
-Turn 4: Start Docking Bay
-Turn 5-6: Docking Bay done! Buy an Atmosphere Processor
-Turn 7-10: Send processor to colonize a good planet
+DO:
+  Turn 1:   Start Mining Station
+  Turn 3-4: Start Horticultural Station
+  Turn 5-6: Start Docking Bay
+  Turn 6-7: Commission platoons (they need 10 turns!)
+  Turn 7-10: Buy Atmosphere Processor, colonize
 
-DO NOT build military yet unless threatened!
-Economy beats military in the long run.
+DON'T:
+  - Build military turn 1 (wastes resources)
+  - Ignore food (starvation spiral is devastating)
+  - Set tax above 60% (hurts growth)
+
+Economy beats military in the long run!
 
 
-MID GAME (Turns 11-25)
+MID GAME (Turns 11-20)
 ----------------------
-Priority: Expand and prepare for war
+PRIORITY: Expand and prepare for war
 
-- Colonize 1-2 neutral planets
-- Build Mining/Horticultural on new colonies
-- Start training platoons (they need 10 turns!)
-- Buy 2-3 Battle Cruisers
-- Build Orbital Defenses on vulnerable planets
+DO:
+  - Colonize 1-2 neutral planets
+  - Build Mining/Hort on new colonies
+  - Buy 2-3 Battle Cruisers
+  - Your platoons reach 100% training
+  - Build Orbital Defense on border planets
+
+DON'T:
+  - Attack with untrained troops
+  - Send single ships against fortified planets
+  - Leave homeworld completely undefended
 
 
-LATE GAME (Turns 25+)
+LATE GAME (Turns 20+)
 ---------------------
-Priority: Crush the enemy
+PRIORITY: Crush the enemy
 
-- Mass your fleet at a staging planet
-- Load trained platoons onto cruisers
-- Attack the weakest enemy planet first
-- Capture and immediately fortify
-- Repeat until victory!
+DO:
+  - Mass your fleet at a staging planet
+  - Load trained platoons onto cruisers
+  - Attack weakest enemy planet first
+  - Capture and immediately fortify
+  - Keep producing reinforcements
+
+DON'T:
+  - Get complacent (enemy can recover)
+  - Ignore enemy counter-attacks
+  - Forget to garrison captured planets
 
 
 COMMON MISTAKES TO AVOID
 ------------------------
-1. Building military before economy
-   -> You'll run out of resources
+1. BUILDING MILITARY TOO EARLY
+   Turn 1: Build Battle Cruiser (50k Cr)
+   Turn 2: Broke, can't build economy
+   Turn 10: Enemy has 3 planets, you have 1
+   SOLUTION: Economy first (turns 1-10)
 
-2. Attacking with untrained troops
-   -> 50% trained = 50% effectiveness
+2. ATTACKING WITH UNTRAINED TROOPS
+   New platoons = 0% training = 0 strength!
+   50% trained = 50% effectiveness
+   SOLUTION: Wait for 100% training
 
-3. Sending ships one at a time
-   -> Mass your fleet, attack together
+3. IGNORING FOOD PRODUCTION
+   Population grows -> needs more food
+   Food hits zero -> STARVATION
+   Population crashes, morale collapses
+   SOLUTION: 1 Hort Station per 200 population
 
-4. Ignoring food production
-   -> Starvation destroys morale and population
+4. SINGLE PLANET FOCUS
+   You: 5/5 buildings on homeworld
+   Enemy: Expanding to neutrals
+   Turn 15: Enemy has 4 planets, you have 1
+   SOLUTION: Colonize early!
 
-5. Not building Orbital Defenses
-   -> Easy target for enemy attacks
-
-6. Over-expanding too fast
-   -> Can't defend all your planets
+5. TRICKLING SHIPS ONE AT A TIME
+   1 ship vs defended planet = destroyed
+   SOLUTION: Mass fleet, attack together
 
 
 KNOW YOUR ENEMY
 ---------------
-Check the opponent panel (top-left area):
+Check enemy behavior:
 
-AGGRESSIVE AI: Will attack early. Build defenses!
-DEFENSIVE AI:  Turtles up. Take your time, build economy.
-ECONOMIC AI:   Out-produces you. Attack before too late!
-BALANCED AI:   Adapts. Be unpredictable.`
+AGGRESSIVE AI (Commander Kratos):
+  - Attacks early (turns 10-15)
+  - Prioritizes military
+  COUNTER: Build defenses early!
+
+DEFENSIVE AI (Overseer Aegis):
+  - Builds many defenses
+  - Rarely attacks first
+  COUNTER: Take your time, build economy
+
+ECONOMIC AI (Magistrate Midas):
+  - Focuses on expansion
+  - Snowballs if left alone
+  COUNTER: Attack before too late!
+
+BALANCED AI (General Nexus):
+  - Adapts to your playstyle
+  - Most unpredictable
+  COUNTER: Be unpredictable yourself
+
+
+RECOMMENDED BUILD ORDER
+-----------------------
+SAFE ECONOMY-FIRST APPROACH:
+
+Turns 1-3:   Mining Station
+Turns 3-5:   Horticultural Station
+Turns 5-7:   Docking Bay
+Turns 6-8:   Commission Platoon #1
+Turns 7-9:   Atmosphere Processor
+Turns 8-12:  Colonize neutral planet
+Turns 10-12: Commission Platoon #2
+Turns 12-14: Battle Cruiser #1
+Turns 14-16: Battle Cruiser #2
+Turns 16+:   Launch invasion!`
   },
   {
     id: 'controls',
@@ -685,53 +1184,115 @@ BALANCED AI:   Adapts. Be unpredictable.`
 
 MOUSE CONTROLS
 --------------
-Left Click on planet: Select it, show info panel
-Left Click outside panel: Close the panel
-Mouse Wheel: Zoom in/out on galaxy map
-Click and Drag: Pan the galaxy map
+LEFT CLICK on planet:
+  Select it, show info panel
+
+LEFT CLICK on button:
+  Activate that button/action
+
+LEFT CLICK outside panel:
+  Close the current panel
+
+MOUSE WHEEL UP/DOWN:
+  Zoom in/out on galaxy map
+
+CLICK AND DRAG:
+  Pan the galaxy map
+
+DRAG SLIDER:
+  Adjust value (like tax rate)
 
 
 KEYBOARD SHORTCUTS
 ------------------
-Space or Enter: End your turn (during Action phase)
-Escape: Close current panel / Pause menu
-H: Toggle help overlay
-Ctrl+S: Save game
-Ctrl+M: Mute/unmute audio
-Ctrl+,: Audio settings
+SPACE or ENTER:
+  End your turn (during Action phase)
+
+ESCAPE:
+  Close current panel
+  Open/close pause menu
+
+H:
+  Toggle this help panel
 
 
 TOP MENU BAR
 ------------
-HOME: Return to main menu
-HELP: Open this help panel
-RESET: Reset camera to home planet
-Speaker icon: Toggle audio on/off
+HOME icon:
+  Return to main menu
+  (Warning: unsaved progress lost!)
+
+HELP icon:
+  Open/close this help panel
+
+RESET icon:
+  Reset camera to your home planet
+
+SPEAKER icon:
+  Toggle audio on/off
 
 
-TURN HUD (Top-Left)
--------------------
-Shows: Current turn number
-Shows: Current phase (Income/Action/Combat/End)
-Button: "END TURN" (only visible during Action phase)
+TURN HUD (Top-Left Corner)
+--------------------------
+Displays:
+  Current turn number
+  Current phase (Income/Action/Combat/End)
+
+END TURN button:
+  Only visible during Action phase
+  Click to end your turn
 
 
 PLANET INFO PANEL (Right Side)
 ------------------------------
 Appears when you click a planet.
-Shows planet details and action buttons.
+Shows:
+  - Planet name and type
+  - Owner (you, enemy, or neutral)
+  - Population and morale
+  - Resource stockpiles
+  - Buildings list
+  - Docked spacecraft
+  - Action buttons
+
 Click outside the panel to close it.
 
 
 RESOURCE HUD (Top-Right)
 ------------------------
-Shows your current resource stockpiles:
+Shows your total resource stockpiles:
   Credits / Minerals / Fuel / Food / Energy
 
-Colors indicate status:
+COLOR CODING:
   White/Green: Healthy (500+)
   Yellow: Warning (100-499)
-  Red: Critical (<100)`
+  Red: Critical (<100)
+
+
+TOUCH CONTROLS (Mobile)
+-----------------------
+TAP planet:
+  Select it, show info
+
+TAP button:
+  Activate action
+
+TAP outside panel:
+  Close panel
+
+PINCH in/out:
+  Zoom map
+
+TWO-FINGER DRAG:
+  Pan map
+
+
+ACCESSIBILITY
+-------------
+- All clickable elements have hover effects
+- Critical warnings shown in red
+- Sound cues for important events
+- No time pressure in Action phase`
   },
   {
     id: 'reference',
@@ -741,63 +1302,95 @@ Colors indicate status:
 
 TURN PHASES
 -----------
-INCOME   -> Resources auto-generate
-ACTION   -> YOUR TURN - build, move, train
-COMBAT   -> Battles auto-resolve
-END      -> Buildings complete, next turn
+INCOME  -> Resources auto-generate
+ACTION  -> YOUR TURN - build, move, train
+COMBAT  -> Battles auto-resolve
+END     -> Victory check, next turn
+
+End your turn: SPACE / ENTER / Click END TURN
 
 
-BUILDINGS (Cost: Cr / Min / Fuel)
----------------------------------
-Mining Station         8k / 2k / 1k    +50 min, +30 fuel
-Horticultural Station  6k / 1.5k / 0.8k +100 food
-Docking Bay            5k / 1k / 0.5k  Allows ship building
-Orbital Defense       12k / 3k / 2k    +20% space defense
+BUILDINGS
+---------
+Building              Cost           Time  Effect
+---------------------------------------------------------
+Mining Station        8k/2k/1k       3T    +50 Min, +30 Fuel
+Horticultural Stn     6k/1.5k/0.8k   2T    +100 Food
+Docking Bay           5k/1k/0.5k     2T    Build spacecraft
+Orbital Defense       12k/3k/2k      3T    +20% defense
 
 
-SPACECRAFT (Cost: Cr / Min / Fuel)
-----------------------------------
-Battle Cruiser    50k / 10k / 5k   Combat, carries 4 platoons
-Cargo Cruiser     30k / 5k / 3k    Transports resources
-Atmosphere Proc   10k / 5k / 2k    Colonizes planets
-Solar Satellite   15k / 3k / 1k    +80 energy
+SPACECRAFT
+----------
+Ship                  Cost           Effect
+---------------------------------------------------------
+Battle Cruiser        50k/10k/5k     Combat, 4 platoons
+Cargo Cruiser         30k/5k/3k      Transport resources
+Atmosphere Processor  10k/5k/2k      Colonize planets
+Solar Satellite       15k/3k/1k      +80 Energy
 
 
 PLATOON EQUIPMENT
 -----------------
-Civilian    20k Cr    0.5x strength
-Basic       35k Cr    1.0x strength
-Standard    55k Cr    1.5x strength
-Advanced    80k Cr    2.0x strength
-Elite      109k Cr    2.5x strength
+Type        Cost      Multiplier
+--------------------------------
+Civilian    20k Cr    0.5x
+Basic       35k Cr    1.0x
+Standard    55k Cr    1.5x
+Advanced    80k Cr    2.0x
+Elite       109k Cr   2.5x
 
 
 PLATOON WEAPONS
 ---------------
-Pistol         5k Cr    0.8x damage
-Rifle         10k Cr    1.0x damage
-Assault Rifle 18k Cr    1.3x damage
-Plasma        30k Cr    1.6x damage
+Type           Cost     Multiplier
+----------------------------------
+Pistol         5k Cr    0.8x
+Rifle          10k Cr   1.0x
+Assault Rifle  18k Cr   1.3x
+Plasma         30k Cr   1.6x
+
+
+PLATOON STRENGTH FORMULA
+------------------------
+Strength = Troops x Equipment x Weapon x Training%
+
+Example: 100 x Elite(2.5) x Plasma(1.6) x 100% = 400
 
 
 PLANET TYPE BONUSES
 -------------------
-Volcanic:   5x minerals, 3x fuel
-Tropical:   2x food
-Desert:     2x energy
-Metropolis: 2x credits
+Type        Minerals  Fuel  Food  Energy  Credits
+-------------------------------------------------
+Volcanic    5x        3x    0.5x  1x      1x
+Tropical    1x        1x    2x    0.75x   1x
+Desert      1x        1x    0.25x 2x      1x
+Metropolis  1x        1x    1x    1x      2x
 
 
-VICTORY CONDITION
------------------
-Capture ALL enemy planets!
-Or destroy all enemy spacecraft.
+RECOMMENDED BUILD ORDER
+-----------------------
+T1-3:  Mining Station
+T3-5:  Horticultural Station
+T5-7:  Docking Bay
+T6-8:  Commission Platoon
+T7-10: Atmosphere Processor -> Colonize
+T10+:  Battle Cruisers -> ATTACK!
 
 
-DEFEAT CONDITION
-----------------
-Lose ALL your planets.
-Or lose all your spacecraft.`
+VICTORY/DEFEAT
+--------------
+WIN:  Capture ALL enemy planets
+LOSE: Lose ALL your planets
+
+
+QUICK TIPS
+----------
+- Economy before military
+- 100% trained troops only
+- Mass your fleet together
+- Food prevents starvation
+- Match buildings to planet type`
   }
 ];
 
