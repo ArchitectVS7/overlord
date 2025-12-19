@@ -1,7 +1,7 @@
 # Story 8-1: Tactical Scenario Content and Variety
 
 **Epic:** 8 - Quick-Play Tactical Scenarios
-**Status:** review
+**Status:** done
 **Complexity:** Medium
 **Implementation Tag:** [GREENFIELD] - Scenario content definitions
 **Human Intervention:** YES - Tactical scenario content design required (COMPLETED)

@@ -1,7 +1,7 @@
 # Story 10-6: User Settings Persistence
 
 **Epic:** 10 - User Accounts & Cross-Device Persistence
-**Status:** drafted
+**Status:** in-progress
 **Complexity:** Low
 **Implementation Tag:** [GREENFIELD] - Settings system
 

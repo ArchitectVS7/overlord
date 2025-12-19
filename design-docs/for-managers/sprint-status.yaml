@@ -10,8 +10,8 @@ epic_order: [6, 7, 1, 8, 9, 10, 12]
 
 # Stories requiring human input (skip during autonomous execution)
 human_input_required:
-  - 8-1-tactical-scenario-content-and-variety      # Scenario design/balance
-  - 10-1-user-account-creation                     # Supabase setup required
+  # COMPLETED: 8-1-tactical-scenario-content-and-variety - Scenario content created
+  # COMPLETED: 10-1-user-account-creation - Supabase configured
   - 12-1-sound-effects-for-game-actions            # Audio assets needed
   - 12-2-background-music-during-gameplay          # Music assets needed
 
@@ -192,9 +192,10 @@ development_status:
   # =============================================================================
   # EPIC 8: Quick-Play Tactical Scenarios
   # Priority: MEDIUM (Phase B) - Content variety
+  # COMPLETE: v0.10.0-tactical (2025-12-18)
   # =============================================================================
-  epic-8: backlog
-  8-1-tactical-scenario-content-and-variety: drafted      # [GREENFIELD] Scenario definitions - HUMAN INPUT
+  epic-8: done
+  8-1-tactical-scenario-content-and-variety: done         # 6 tactical scenarios, VictoryConditionSystem extended, difficulty filtering
   epic-8-retrospective: optional
 
   # =============================================================================
@@ -210,15 +211,16 @@ development_status:
   # =============================================================================
   # EPIC 10: User Accounts & Cross-Device Persistence
   # Priority: LOW (Phase C) - Polish feature
+  # IN PROGRESS: Auth + Save system complete (5/7 stories)
   # =============================================================================
-  epic-10: backlog
-  10-1-user-account-creation: drafted                     # [GREENFIELD] Auth + Supabase - HUMAN INPUT
-  10-2-user-login: drafted                                # [GREENFIELD] Auth + Supabase
-  10-3-save-campaign-progress: drafted                    # [CORE-DONE] SaveSystem works, needs UI + cloud
-  10-4-load-previously-saved-campaigns: drafted           # [CORE-DONE] LoadSystem works, needs UI + cloud
-  10-5-cross-device-save-synchronization: drafted         # [GREENFIELD] Supabase integration
-  10-6-user-settings-persistence: drafted                 # [GREENFIELD] Settings system
-  10-7-user-statistics-tracking: drafted                  # [GREENFIELD] Stats aggregation
+  epic-10: in-progress
+  10-1-user-account-creation: done                        # AuthService, RegisterPanel, guest mode - full Supabase integration
+  10-2-user-login: done                                   # LoginPanel, ForgotPasswordPanel, session persistence
+  10-3-save-campaign-progress: done                       # SaveService, SaveGamePanel, OfflineSaveQueue - cloud/local hybrid
+  10-4-load-previously-saved-campaigns: done              # LoadGamePanel, cloud sync, delete functionality
+  10-5-cross-device-save-synchronization: done            # Offline queue, auto-sync on reconnect
+  10-6-user-settings-persistence: in-progress             # Audio settings sync complete, UI settings (scale/contrast) NOT synced
+  10-7-user-statistics-tracking: backlog                  # NOT STARTED - needs UserStatsService, StatsPanel, database table
   epic-10-retrospective: optional
 
   # =============================================================================
@@ -231,5 +233,5 @@ development_status:
   12-2-background-music-during-gameplay: drafted          # [GREENFIELD] Music playback - HUMAN INPUT
   12-3-independent-volume-controls: done                  # AudioManager + VolumeControlPanel + Scene Integration (69 tests)
   12-4-mute-audio-toggle: done                            # Mute toggle with Ctrl+M, auto-refresh, label toggle
-  12-5-user-activation-for-browser-audio-compliance: review   # AudioActivationOverlay - 18 tests
+  12-5-user-activation-for-browser-audio-compliance: done     # AudioActivationOverlay - 18 tests, MainMenuScene integration
   epic-12-retrospective: optional
