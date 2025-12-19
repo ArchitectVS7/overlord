@@ -55,7 +55,7 @@ export class VictoryScene extends Phaser.Scene {
     this.add
       .text(centerX, 60, 'VICTORY!', {
         fontSize: '72px',
-        color: '#00ff00',
+        color: '#00bfff',
         fontFamily: 'monospace',
         fontStyle: 'bold',
       })
@@ -74,7 +74,7 @@ export class VictoryScene extends Phaser.Scene {
     this.add
       .text(centerX, 180, '=== CAMPAIGN STATISTICS ===', {
         fontSize: '20px',
-        color: '#00ff00',
+        color: '#00bfff',
         fontFamily: 'monospace',
       })
       .setOrigin(0.5);
@@ -88,18 +88,18 @@ export class VictoryScene extends Phaser.Scene {
         fontSize: '24px',
         color: '#ffffff',
         fontFamily: 'monospace',
-        backgroundColor: '#004400',
+        backgroundColor: '#002255',
         padding: { x: 20, y: 10 },
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
     continueButton.on('pointerover', () => {
-      continueButton.setStyle({ backgroundColor: '#006600' });
+      continueButton.setStyle({ backgroundColor: '#003366' });
     });
 
     continueButton.on('pointerout', () => {
-      continueButton.setStyle({ backgroundColor: '#004400' });
+      continueButton.setStyle({ backgroundColor: '#002255' });
     });
 
     continueButton.on('pointerdown', () => {
@@ -239,7 +239,7 @@ export class VictoryScene extends Phaser.Scene {
     this.createStatLine(centerX, y, 'Fuel:', this.formatNumber(stats.finalFuel), '#ff6600');
     y += lineHeight;
 
-    this.createStatLine(centerX, y, 'Food:', this.formatNumber(stats.finalFood), '#00ff00');
+    this.createStatLine(centerX, y, 'Food:', this.formatNumber(stats.finalFood), '#00bfff');
     y += lineHeight;
 
     this.createStatLine(centerX, y, 'Energy:', this.formatNumber(stats.finalEnergy), '#00ffff');
@@ -332,7 +332,7 @@ export class VictoryScene extends Phaser.Scene {
         if (statusText) {
           const locationText = result.savedTo === 'cloud' ? '(Cloud)' : '(Local)';
           statusText.setText(`Campaign saved ${locationText}: ${slotName}`);
-          statusText.setStyle({ color: '#00ff00' });
+          statusText.setStyle({ color: '#00bfff' });
         }
         console.log(`Victory campaign saved to ${result.savedTo}: ${slotName}`);
       } else {

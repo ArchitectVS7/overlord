@@ -14,14 +14,15 @@ import { getSaveService } from '@services/SaveService';
 import { getScenarioSyncService } from '@services/ScenarioSyncService';
 import { getUserProfileService } from '@services/UserProfileService';
 import { getGuestModeService } from '@services/GuestModeService';
+import { TopMenuBar } from './ui/TopMenuBar';
 
 const COLORS = {
   BACKGROUND: 0x0a0a1a,
-  TEXT: '#00ff00',
+  TEXT: '#00bfff',
   TEXT_INACTIVE: '#555555',
-  TAB_ACTIVE: 0x003300,
+  TAB_ACTIVE: 0x002244,
   TAB_INACTIVE: 0x1a1a2e,
-  TAB_BORDER: 0x00ff00,
+  TAB_BORDER: 0x00bfff,
 };
 
 type AuthTab = 'login' | 'register' | 'forgot-password';
@@ -63,6 +64,9 @@ export class AuthScene extends Phaser.Scene {
 
     // Create background
     this.cameras.main.setBackgroundColor(COLORS.BACKGROUND);
+
+    // Create top menu bar (no home button - not authenticated yet)
+    new TopMenuBar(this, { showHome: false });
 
     // Create title
     this.createTitle(width);

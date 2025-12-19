@@ -5,6 +5,7 @@ import {
   DIFFICULTY_DESCRIPTIONS,
   AI_PERSONALITY_DESCRIPTIONS,
 } from '@core/models/CampaignConfig';
+import { TopMenuBar } from './ui/TopMenuBar';
 
 /**
  * Campaign Configuration Scene
@@ -54,11 +55,14 @@ export class CampaignConfigScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
 
-    // Title
+    // Create top menu bar
+    new TopMenuBar(this);
+
+    // Title (positioned below menu bar)
     this.add
-      .text(centerX, 40, 'CAMPAIGN CONFIGURATION', {
+      .text(centerX, TopMenuBar.getHeight() + 10, 'CAMPAIGN CONFIGURATION', {
         fontSize: '36px',
-        color: '#00ff00',
+        color: '#00bfff',
         fontFamily: 'monospace',
         fontStyle: 'bold',
       })
@@ -103,44 +107,22 @@ export class CampaignConfigScene extends Phaser.Scene {
         fontSize: '28px',
         color: '#ffffff',
         fontFamily: 'monospace',
-        backgroundColor: '#004400',
+        backgroundColor: '#002255',
         padding: { x: 30, y: 12 },
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
     startButton.on('pointerover', () => {
-      startButton.setStyle({ backgroundColor: '#006600' });
+      startButton.setStyle({ backgroundColor: '#003366' });
     });
 
     startButton.on('pointerout', () => {
-      startButton.setStyle({ backgroundColor: '#004400' });
+      startButton.setStyle({ backgroundColor: '#002255' });
     });
 
     startButton.on('pointerdown', () => {
       this.startCampaign();
-    });
-
-    // Back button
-    const backButton = this.add
-      .text(60, height - 30, '< BACK', {
-        fontSize: '18px',
-        color: '#888888',
-        fontFamily: 'monospace',
-      })
-      .setOrigin(0, 1)
-      .setInteractive({ useHandCursor: true });
-
-    backButton.on('pointerover', () => {
-      backButton.setStyle({ color: '#ffffff' });
-    });
-
-    backButton.on('pointerout', () => {
-      backButton.setStyle({ color: '#888888' });
-    });
-
-    backButton.on('pointerdown', () => {
-      this.scene.start('MainMenuScene');
     });
   }
 
@@ -157,9 +139,9 @@ export class CampaignConfigScene extends Phaser.Scene {
       const button = this.add
         .text(x, y, this.getDifficultyLabel(difficulty), {
           fontSize: '22px',
-          color: isSelected ? '#00ff00' : '#ffffff',
+          color: isSelected ? '#00bfff' : '#ffffff',
           fontFamily: 'monospace',
-          backgroundColor: isSelected ? '#004400' : '#222222',
+          backgroundColor: isSelected ? '#002255' : '#222222',
           padding: { x: 20, y: 10 },
         })
         .setOrigin(0.5)
@@ -206,9 +188,9 @@ export class CampaignConfigScene extends Phaser.Scene {
       const button = this.add
         .text(x, y, this.getPersonalityLabel(personality), {
           fontSize: '18px',
-          color: isSelected ? '#00ff00' : '#ffffff',
+          color: isSelected ? '#00bfff' : '#ffffff',
           fontFamily: 'monospace',
-          backgroundColor: isSelected ? '#004400' : '#222222',
+          backgroundColor: isSelected ? '#002255' : '#222222',
           padding: { x: 15, y: 10 },
         })
         .setOrigin(0.5)
@@ -248,7 +230,7 @@ export class CampaignConfigScene extends Phaser.Scene {
     this.selectedDifficulty = difficulty;
     const newButton = this.difficultyButtons.get(difficulty);
     if (newButton) {
-      newButton.setStyle({ color: '#00ff00', backgroundColor: '#004400' });
+      newButton.setStyle({ color: '#00bfff', backgroundColor: '#002255' });
     }
   }
 
@@ -263,7 +245,7 @@ export class CampaignConfigScene extends Phaser.Scene {
     this.selectedPersonality = personality;
     const newButton = this.personalityButtons.get(personality);
     if (newButton) {
-      newButton.setStyle({ color: '#00ff00', backgroundColor: '#004400' });
+      newButton.setStyle({ color: '#00bfff', backgroundColor: '#002255' });
     }
   }
 

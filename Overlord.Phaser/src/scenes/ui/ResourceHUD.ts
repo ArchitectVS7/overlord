@@ -68,12 +68,12 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     credits: '#ffff00',    // Yellow/Gold
     minerals: '#888888',   // Gray
     fuel: '#ff6600',       // Orange
-    food: '#00ff00',       // Green
+    food: '#00bfff',       // Electric blue
     energy: '#00ffff',     // Cyan
     normal: '#ffffff',     // White (for amounts)
     warning: '#ffaa00',    // Orange (warning)
     critical: '#ff0000',   // Red (critical)
-    income: '#88ff88',     // Light green (positive income)
+    income: '#88ccff',     // Light blue (positive income)
     negative: '#ff8888',   // Light red (negative income)
   };
 
@@ -94,13 +94,13 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
 
     // Create background panel
     this.background = scene.add.rectangle(0, 0, 220, 160, 0x000000, 0.8);
-    this.background.setStrokeStyle(2, 0x00ff00);
+    this.background.setStrokeStyle(2, 0x00bfff);
     this.add(this.background);
 
     // Create header
     const header = scene.add.text(0, -65, 'RESOURCES', {
       fontSize: '14px',
-      color: '#00ff00',
+      color: '#00bfff',
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);

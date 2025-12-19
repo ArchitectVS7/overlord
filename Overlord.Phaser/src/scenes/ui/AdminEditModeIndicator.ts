@@ -84,7 +84,7 @@ export class AdminEditModeIndicator extends Phaser.GameObjects.Container {
     this.add(this.changesText);
 
     // Create buttons
-    this.saveButton = this.createButton('Save All', 30, 0x006600, () => this.handleSave());
+    this.saveButton = this.createButton('Save All', 30, 0x003366, () => this.handleSave());
     this.add(this.saveButton);
 
     this.resetButton = this.createButton('Reset All', 120, 0x666600, () => this.handleReset());

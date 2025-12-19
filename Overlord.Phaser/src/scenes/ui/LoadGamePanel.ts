@@ -15,15 +15,15 @@ const SLOT_MARGIN = 10;
 
 const COLORS = {
   BACKGROUND: 0x1a1a2e,
-  BORDER: 0x00ff00,
+  BORDER: 0x00bfff,
   SLOT_BG: 0x0a0a1a,
-  SLOT_HOVER: 0x1a2a1a,
-  SLOT_SELECTED: 0x0a2a0a,
-  TEXT: '#00ff00',
+  SLOT_HOVER: 0x1a2a3a,
+  SLOT_SELECTED: 0x0a2a4a,
+  TEXT: '#00bfff',
   TEXT_SECONDARY: '#888888',
   TEXT_DIM: '#555555',
-  BUTTON_BG: 0x003300,
-  BUTTON_HOVER: 0x005500,
+  BUTTON_BG: 0x002244,
+  BUTTON_HOVER: 0x003366,
   BUTTON_DANGER: 0x330000,
   BUTTON_DANGER_HOVER: 0x550000,
   CLOUD_BADGE: 0x003366,
@@ -296,7 +296,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
 
     // Victory status
     if (save.victoryStatus !== 'None') {
-      const statusColor = save.victoryStatus === 'Victory' ? '#00ff00' : '#ff4444';
+      const statusColor = save.victoryStatus === 'Victory' ? '#00bfff' : '#ff4444';
       const statusText = this.scene.add.text(15, 60, save.victoryStatus, {
         fontSize: '12px',
         color: statusColor,

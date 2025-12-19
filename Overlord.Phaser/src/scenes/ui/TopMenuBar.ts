@@ -1,0 +1,317 @@
+/**
+ * TopMenuBar
+ * Top menu bar with navigation, help, and audio controls.
+ * Fixed to top of screen, unaffected by camera movement.
+ */
+
+import Phaser from 'phaser';
+import { AudioManager } from '../../core/AudioManager';
+import { HelpPanel } from './HelpPanel';
+
+const BAR_HEIGHT = 32;
+const BAR_DEPTH = 1000;
+
+const COLORS = {
+  BAR_BG: 0x1a1a2e,
+  BAR_BORDER: 0x2a2a4e,
+  ICON_DEFAULT: '#888888',
+  ICON_HOVER: '#ffffff',
+  ICON_ACTIVE: '#00bfff',
+  ICON_MUTED: '#ff4444',
+};
+
+export interface TopMenuBarOptions {
+  showHome?: boolean;
+  showHelp?: boolean;
+  showResetCamera?: boolean;
+  onResetCamera?: () => void;
+}
+
+/**
+ * TopMenuBar - Top menu bar with home navigation, help, reset camera, and audio toggle
+ * Uses individual elements with scrollFactor(0) for proper fixed positioning.
+ */
+export class TopMenuBar {
+  private scene: Phaser.Scene;
+  private audioManager: AudioManager;
+  private barBackground!: Phaser.GameObjects.Rectangle;
+  private barBorder!: Phaser.GameObjects.Rectangle;
+  private homeButton!: Phaser.GameObjects.Text;
+  private helpButton!: Phaser.GameObjects.Text;
+  private resetCameraButton!: Phaser.GameObjects.Text;
+  private speakerIcon!: Phaser.GameObjects.Text;
+  private helpPanel!: HelpPanel;
+  private options: TopMenuBarOptions;
+  private elements: Phaser.GameObjects.GameObject[] = [];
+
+  constructor(scene: Phaser.Scene, options: TopMenuBarOptions = {}) {
+    this.scene = scene;
+    this.options = {
+      showHome: true,
+      showHelp: false,
+      showResetCamera: false,
+      ...options,
+    };
+    this.audioManager = AudioManager.getInstance();
+
+    this.createBar();
+    if (this.options.showHome) {
+      this.createHomeButton();
+    }
+    if (this.options.showHelp) {
+      this.createHelpButton();
+      this.createHelpPanel();
+    }
+    if (this.options.showResetCamera) {
+      this.createResetCameraButton();
+    }
+    this.createSpeakerIcon();
+  }
+
+  private createBar(): void {
+    const { width } = this.scene.cameras.main;
+
+    // Background
+    this.barBackground = this.scene.add.rectangle(
+      width / 2,
+      BAR_HEIGHT / 2,
+      width,
+      BAR_HEIGHT,
+      COLORS.BAR_BG,
+      0.9
+    );
+    this.barBackground.setScrollFactor(0);
+    this.barBackground.setDepth(BAR_DEPTH);
+    this.elements.push(this.barBackground);
+
+    // Bottom border line
+    this.barBorder = this.scene.add.rectangle(
+      width / 2,
+      BAR_HEIGHT,
+      width,
+      1,
+      COLORS.BAR_BORDER
+    );
+    this.barBorder.setScrollFactor(0);
+    this.barBorder.setDepth(BAR_DEPTH);
+    this.elements.push(this.barBorder);
+  }
+
+  private createHomeButton(): void {
+    const iconX = 15;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.homeButton = this.scene.add.text(iconX, iconY, '🏠 HOME', {
+      fontSize: '14px',
+      color: COLORS.ICON_DEFAULT,
+      fontFamily: 'monospace',
+    });
+    this.homeButton.setOrigin(0, 0.5);
+    this.homeButton.setScrollFactor(0);
+    this.homeButton.setDepth(BAR_DEPTH + 1);
+    this.homeButton.setInteractive({ useHandCursor: true });
+    this.elements.push(this.homeButton);
+
+    // Click handler - navigate to main menu
+    this.homeButton.on('pointerdown', () => {
+      this.scene.scene.start('MainMenuScene');
+    });
+
+    // Hover effects
+    this.homeButton.on('pointerover', () => {
+      this.homeButton.setColor(COLORS.ICON_HOVER);
+    });
+
+    this.homeButton.on('pointerout', () => {
+      this.homeButton.setColor(COLORS.ICON_DEFAULT);
+    });
+  }
+
+  private createHelpButton(): void {
+    // Position after HOME button
+    const iconX = this.options.showHome ? 110 : 15;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.helpButton = this.scene.add.text(iconX, iconY, '❓ HELP', {
+      fontSize: '14px',
+      color: COLORS.ICON_DEFAULT,
+      fontFamily: 'monospace',
+    });
+    this.helpButton.setOrigin(0, 0.5);
+    this.helpButton.setScrollFactor(0);
+    this.helpButton.setDepth(BAR_DEPTH + 1);
+    this.helpButton.setInteractive({ useHandCursor: true });
+    this.elements.push(this.helpButton);
+
+    // Click handler - toggle help panel
+    this.helpButton.on('pointerdown', () => {
+      this.toggleHelpPanel();
+    });
+
+    // Hover effects
+    this.helpButton.on('pointerover', () => {
+      this.helpButton.setColor(COLORS.ICON_HOVER);
+    });
+
+    this.helpButton.on('pointerout', () => {
+      if (!this.helpPanel?.isVisible()) {
+        this.helpButton.setColor(COLORS.ICON_DEFAULT);
+      }
+    });
+  }
+
+  private createResetCameraButton(): void {
+    // Position after HELP button
+    let iconX = 15;
+    if (this.options.showHome) iconX += 95;
+    if (this.options.showHelp) iconX += 80;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.resetCameraButton = this.scene.add.text(iconX, iconY, '🎯 RESET', {
+      fontSize: '14px',
+      color: COLORS.ICON_DEFAULT,
+      fontFamily: 'monospace',
+    });
+    this.resetCameraButton.setOrigin(0, 0.5);
+    this.resetCameraButton.setScrollFactor(0);
+    this.resetCameraButton.setDepth(BAR_DEPTH + 1);
+    this.resetCameraButton.setInteractive({ useHandCursor: true });
+    this.elements.push(this.resetCameraButton);
+
+    // Click handler - call onResetCamera callback
+    this.resetCameraButton.on('pointerdown', () => {
+      this.options.onResetCamera?.();
+    });
+
+    // Hover effects
+    this.resetCameraButton.on('pointerover', () => {
+      this.resetCameraButton.setColor(COLORS.ICON_HOVER);
+    });
+
+    this.resetCameraButton.on('pointerout', () => {
+      this.resetCameraButton.setColor(COLORS.ICON_DEFAULT);
+    });
+  }
+
+  private createHelpPanel(): void {
+    this.helpPanel = new HelpPanel(this.scene);
+    this.helpPanel.onClose = () => {
+      this.helpButton?.setColor(COLORS.ICON_DEFAULT);
+    };
+  }
+
+  private toggleHelpPanel(): void {
+    if (this.helpPanel) {
+      this.helpPanel.toggle();
+      if (this.helpPanel.isVisible()) {
+        this.helpButton.setColor(COLORS.ICON_ACTIVE);
+      } else {
+        this.helpButton.setColor(COLORS.ICON_DEFAULT);
+      }
+    }
+  }
+
+  private createSpeakerIcon(): void {
+    const { width } = this.scene.cameras.main;
+
+    // Position speaker icon on the right side
+    const iconX = width - 20;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.speakerIcon = this.scene.add.text(iconX, iconY, this.getSpeakerEmoji(), {
+      fontSize: '18px',
+    });
+    this.speakerIcon.setOrigin(1, 0.5);
+    this.speakerIcon.setScrollFactor(0);
+    this.speakerIcon.setDepth(BAR_DEPTH + 1);
+    this.speakerIcon.setInteractive({ useHandCursor: true });
+    this.elements.push(this.speakerIcon);
+
+    // Click handler
+    this.speakerIcon.on('pointerdown', () => {
+      this.handleSpeakerClick();
+    });
+
+    // Hover effects
+    this.speakerIcon.on('pointerover', () => {
+      this.speakerIcon.setScale(1.2);
+    });
+
+    this.speakerIcon.on('pointerout', () => {
+      this.speakerIcon.setScale(1.0);
+    });
+
+    // Listen for mute changes
+    this.audioManager.onMuteChanged = () => {
+      this.updateSpeakerIcon();
+    };
+  }
+
+  private getSpeakerEmoji(): string {
+    if (!this.audioManager.isActivated()) {
+      return '🔇'; // Not activated yet
+    }
+    return this.audioManager.isMuted() ? '🔇' : '🔊';
+  }
+
+  private updateSpeakerIcon(): void {
+    this.speakerIcon.setText(this.getSpeakerEmoji());
+  }
+
+  private handleSpeakerClick(): void {
+    if (!this.audioManager.isActivated()) {
+      // First click activates audio
+      this.audioManager.activate();
+      this.updateSpeakerIcon();
+      console.log('Audio activated by user interaction');
+    } else {
+      // Subsequent clicks toggle mute
+      this.audioManager.toggleMute();
+      this.audioManager.saveSettings();
+    }
+  }
+
+  /**
+   * Show the help panel programmatically
+   */
+  public showHelp(): void {
+    if (this.helpPanel && !this.helpPanel.isVisible()) {
+      this.helpPanel.show();
+      this.helpButton?.setColor(COLORS.ICON_ACTIVE);
+    }
+  }
+
+  /**
+   * Hide the help panel programmatically
+   */
+  public hideHelp(): void {
+    if (this.helpPanel && this.helpPanel.isVisible()) {
+      this.helpPanel.hide();
+      this.helpButton?.setColor(COLORS.ICON_DEFAULT);
+    }
+  }
+
+  /**
+   * Get the bar height for layout purposes
+   */
+  public static getHeight(): number {
+    return BAR_HEIGHT;
+  }
+
+  /**
+   * No-op for compatibility - elements already have scrollFactor set
+   */
+  public setScrollFactor(_factor: number): this {
+    // Elements already have scrollFactor(0) set individually
+    return this;
+  }
+
+  public destroy(): void {
+    // Destroy all tracked elements
+    for (const element of this.elements) {
+      element.destroy();
+    }
+    this.elements = [];
+    this.helpPanel?.destroy();
+  }
+}
