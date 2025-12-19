@@ -71,7 +71,11 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   public onSpacecraftClick?: (planet: PlanetEntity) => void;
   public onNavigateClick?: (planet: PlanetEntity) => void;
   public onInvadeClick?: (planet: PlanetEntity) => void;
+  public onDeployProcessorClick?: (planet: PlanetEntity) => void;
   public onTaxRateChanged?: (planetID: number, newTaxRate: number) => void;
+
+  // Flag to indicate if atmosphere processor is available at this planet
+  private hasAtmosphereProcessor: boolean = false;
 
   constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem, taxationSystem?: TaxationSystem) {
     super(scene, 0, 0);
@@ -467,7 +471,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.createButton('Platoons', 0, buttonY + 42, true, 'View garrisoned platoons (Story 5-2)');
     this.createButton('Spacecraft', 125, buttonY + 42, true, 'Purchase spacecraft (Story 5-3)');
     this.createButton('Navigate', 0, buttonY + 84, true, 'Navigate spacecraft (Story 5-5)');
-    this.createButton('Invade', 125, buttonY + 84, true, 'Coming in Epic 6');
+    this.createButton('Invade', 125, buttonY + 84, true, 'Initiate planetary invasion');
+    this.createButton('Deploy', 0, buttonY + 84, true, 'Deploy Atmosphere Processor to colonize'); // index 6
   }
 
   private createButton(
@@ -742,6 +747,10 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private updateButtonStates(isPlayerOwned: boolean): void {
     // Buttons 0-4 are for player (Build, Commission, Platoons, Spacecraft, Navigate)
     // Button 5 is for AI/Neutral (Invade)
+    // Button 6 is for Neutral with Atmosphere Processor (Deploy)
+    const isNeutral = this.planet?.owner === FactionType.Neutral;
+    const isAI = this.planet?.owner === FactionType.AI;
+
     this.actionButtons.forEach((button, i) => {
       const label = button.getData('label');
 
@@ -792,19 +801,47 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
             }
           });
         }
-      } else {
+      } else if (isNeutral) {
+        // For neutral planets, show Deploy button if atmosphere processor is available
+        if (label === 'Deploy') {
+          button.setVisible(this.hasAtmosphereProcessor);
+          if (this.hasAtmosphereProcessor) {
+            this.enableButton(button, () => {
+              if (this.planet && this.onDeployProcessorClick) {
+                this.onDeployProcessorClick(this.planet);
+              }
+            });
+          }
+        } else {
+          button.setVisible(false);
+        }
+      } else if (isAI) {
         // Show and enable Invade button for AI-owned planets (Story 6-1)
-        button.setVisible(i >= 5);
-
         if (label === 'Invade') {
+          button.setVisible(true);
           this.enableButton(button, () => {
             if (this.planet && this.onInvadeClick) {
               this.onInvadeClick(this.planet);
             }
           });
+        } else {
+          button.setVisible(false);
         }
+      } else {
+        button.setVisible(false);
       }
     });
+  }
+
+  /**
+   * Sets whether an atmosphere processor is available at the current planet
+   * Should be called by the scene when showing the panel for a neutral planet
+   */
+  public setHasAtmosphereProcessor(available: boolean): void {
+    this.hasAtmosphereProcessor = available;
+    if (this.planet) {
+      this.updateButtonStates(this.planet.owner === FactionType.Player);
+    }
   }
 
   /**
