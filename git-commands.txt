@@ -1,0 +1,38 @@
+# Quick Copy-Paste Git Commands
+# Copy and paste these commands into your terminal (PowerShell or Git Bash)
+
+# Navigate to the repository root
+cd C:\dev\GIT\Overlord
+
+# Add test suite files (in Overlord.Phaser/tests/e2e/)
+git add Overlord.Phaser/tests/e2e/ui-discovery.spec.ts
+git add Overlord.Phaser/tests/e2e/complete-game-flow.spec.ts
+git add Overlord.Phaser/tests/e2e/helpers/game-helpers.ts
+git add Overlord.Phaser/tests/e2e/run-e2e-tests.js
+git add Overlord.Phaser/tests/e2e/TEST-SUITE-README.md
+git add Overlord.Phaser/tests/e2e/EXECUTION-PLAN.md
+git add Overlord.Phaser/tests/e2e/COMPLETE-SUMMARY.md
+git add Overlord.Phaser/tests/e2e/QUICK-START.md
+
+# Add helper files (in repository root)
+git add START-HERE.md
+git add FILES-CREATED.md
+git add HOW-TO-COMMIT.md
+git add git-commands.txt
+git add commit-and-push.bat
+git add commit-and-push.ps1
+
+# Commit with detailed message
+git commit -m "Add comprehensive E2E test suite for complete game flow validation
+
+Test Files (8 files): ui-discovery, complete-game-flow, game-helpers, documentation
+Helper Files (6 files): START-HERE, commit scripts, documentation
+Purpose: Programmatic UI discovery and validation for alpha testing readiness
+Total: 14 files, ~2,730 lines"
+
+# Push to remote
+git push
+
+# Verify
+git log -1
+git status
