@@ -1,0 +1,197 @@
+{
+  "id": "tutorial-006-building-structure",
+  "name": "Foundation of Empire",
+  "type": "tutorial",
+  "difficulty": "easy",
+  "duration": "5-7 min",
+  "description": "Learn to construct buildings on your planets. Buildings are the backbone of your economy and military infrastructure.",
+  "prerequisites": ["tutorial-003-planet-selection"],
+
+  "story": {
+    "briefing": "Commander, your homeworld needs infrastructure to support your growing empire. Mining Stations extract vital minerals, Horticultural Stations grow food for your population, and Docking Bays allow spacecraft construction. Today, you will construct your first building.",
+    "objective": "Construct a Mining Station on your homeworld to begin resource extraction.",
+    "victory": "Outstanding, Commander! Your Mining Station is under construction. It will be operational in 3 turns, providing a steady flow of minerals and fuel for your empire."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "build_structure",
+      "target": "MiningStation",
+      "count": 1
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 15000,
+      "minerals": 5000,
+      "fuel": 3000,
+      "food": 2000,
+      "energy": 1000
+    },
+    "aiPlanets": [],
+    "aiEnabled": false
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "First, select your homeworld by clicking on it. You'll need to access its construction options.",
+      "highlight": "planet-1",
+      "action": {
+        "type": "select_planet",
+        "target": "planet-1"
+      }
+    },
+    {
+      "step": 2,
+      "text": "The Planet Info Panel is now open. Click the 'Build' button to access the construction menu.",
+      "highlight": "build-button",
+      "action": {
+        "type": "click_button",
+        "target": "build-button"
+      }
+    },
+    {
+      "step": 3,
+      "text": "This is the Build Menu. It shows all available structures, their costs, and construction times. Buildings that you cannot afford appear grayed out.",
+      "highlight": "build-menu",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 4,
+      "text": "Click on 'Mining Station' to begin construction. It costs 8,000 Credits, 2,000 Minerals, and 1,000 Fuel, and takes 3 turns to complete.",
+      "highlight": "mining-station-button",
+      "action": {
+        "type": "start_construction",
+        "building": "MiningStation"
+      }
+    },
+    {
+      "step": 5,
+      "text": "Construction has begun! Notice the 'Under Construction' section in your Planet Info Panel showing progress. The building will complete in 3 turns.",
+      "highlight": "construction-progress",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 6,
+      "text": "To advance time and complete construction, you would press SPACE to end your turn. For now, you've learned the essential building process!",
+      "highlight": "turn-hud",
+      "action": {
+        "type": "click_button",
+        "target": "complete-tutorial"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 1,
+    "twoStarTurns": 2
+  },
+
+  "clickByClickRecipe": {
+    "title": "Building a Structure - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "Select Your Planet",
+        "instruction": "Click on your blue homeworld planet",
+        "expectedResult": "Planet Info Panel opens on the right side of the screen"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Open Build Menu",
+        "instruction": "Click the 'Build' button in the Actions section of the Planet Info Panel",
+        "expectedResult": "Build Menu panel appears in the center of the screen"
+      },
+      {
+        "stepNumber": 3,
+        "action": "Review Building Options",
+        "instruction": "Look at the available buildings: Mining Station, Horticultural Station, Docking Bay, Orbital Defense, Surface Platform",
+        "expectedResult": "Each building shows name, description, cost (Credits, Minerals, Fuel), and construction time"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Check Affordability",
+        "instruction": "Compare the costs to your resources shown in the top-right Resource HUD",
+        "expectedResult": "Affordable buildings have white text; unaffordable ones are grayed out with red cost text"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Select Mining Station",
+        "instruction": "Click on the Mining Station building entry",
+        "expectedResult": "Button highlights on hover, then construction begins on click"
+      },
+      {
+        "stepNumber": 6,
+        "action": "Verify Construction Started",
+        "instruction": "Check the Planet Info Panel for the Construction section",
+        "expectedResult": "Shows 'Under Construction: Mining Station' with progress bar and 'Completes in: 3 turns'"
+      },
+      {
+        "stepNumber": 7,
+        "action": "Note Resource Deduction",
+        "instruction": "Check the Resource HUD in the top-right corner",
+        "expectedResult": "Resources have decreased by the building cost (8,000 Cr, 2,000 Min, 1,000 Fuel)"
+      },
+      {
+        "stepNumber": 8,
+        "action": "Close Build Menu",
+        "instruction": "The menu closes automatically after selecting a building, or click X to close manually",
+        "expectedResult": "Build Menu closes, Planet Info Panel remains visible"
+      }
+    ],
+    "buildingTypes": {
+      "description": "Available Buildings Reference",
+      "buildings": [
+        {
+          "name": "Mining Station",
+          "cost": "8,000 Cr, 2,000 Min, 1,000 Fuel",
+          "time": "3 turns",
+          "benefit": "+50 Minerals/turn, +30 Fuel/turn"
+        },
+        {
+          "name": "Horticultural Station",
+          "cost": "6,000 Cr, 1,500 Min, 800 Fuel",
+          "time": "2 turns",
+          "benefit": "+100 Food/turn"
+        },
+        {
+          "name": "Docking Bay",
+          "cost": "5,000 Cr, 1,000 Min, 500 Fuel",
+          "time": "2 turns",
+          "benefit": "Enables spacecraft construction (max 3 per planet)"
+        },
+        {
+          "name": "Orbital Defense",
+          "cost": "12,000 Cr, 3,000 Min, 2,000 Fuel",
+          "time": "3 turns",
+          "benefit": "+20% defense bonus"
+        },
+        {
+          "name": "Surface Platform",
+          "cost": "2,000 Cr, 500 Min, 0 Fuel",
+          "time": "1 turn",
+          "benefit": "Generic surface expansion"
+        }
+      ]
+    },
+    "tips": [
+      "Only one building can be constructed at a time on each planet",
+      "Buildings complete at the start of the income phase",
+      "A notification will appear when construction completes",
+      "Check planet type for bonuses: Volcanic planets produce 5x minerals!"
+    ]
+  }
+}

@@ -32,9 +32,10 @@ export interface Scenario {
  * - survive_turns: Survive for N turns
  * - resource_target: Reach a specific resource amount
  * - destroy_all_ships: Destroy all enemy spacecraft
+ * - ui_interaction: Complete a specific UI interaction (for tutorials)
  */
 export interface VictoryCondition {
-  type: 'build_structure' | 'capture_planet' | 'capture_all_planets' | 'defeat_enemy' | 'survive_turns' | 'resource_target' | 'destroy_all_ships';
+  type: 'build_structure' | 'capture_planet' | 'capture_all_planets' | 'defeat_enemy' | 'survive_turns' | 'resource_target' | 'destroy_all_ships' | 'ui_interaction';
   target?: string;
   count?: number;
   turns?: number;
