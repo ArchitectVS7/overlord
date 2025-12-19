@@ -13,6 +13,7 @@ import Phaser from 'phaser';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { CraftEntity } from '@core/models/CraftEntity';
 import { CraftType } from '@core/models/Enums';
+import { ResourceDelta } from '@core/models/ResourceModels';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 500;
@@ -233,12 +234,12 @@ export class CargoLoadingPanel extends Phaser.GameObjects.Container {
     });
 
     // Quick load all button
-    const loadAllButton = this.createTransferButton(370, y + 20, 'All→', () => {
+    this.createTransferButton(370, y + 20, 'All→', () => {
       this.loadMax(type);
     }, 40);
 
     // Quick unload all button
-    const unloadAllButton = this.createTransferButton(420, y + 20, '←All', () => {
+    this.createTransferButton(420, y + 20, '←All', () => {
       this.unloadMax(type);
     }, 40);
 
@@ -460,11 +461,11 @@ export class CargoLoadingPanel extends Phaser.GameObjects.Container {
   }
 
   private getShipCargo(type: ResourceType): number {
-    if (!this.craft) return 0;
+    if (!this.craft || !this.craft.cargoHold) return 0;
     switch (type) {
-      case 'credits': return this.craft.cargoCredits;
-      case 'minerals': return this.craft.cargoMinerals;
-      case 'fuel': return this.craft.cargoFuel;
+      case 'credits': return this.craft.cargoHold.credits;
+      case 'minerals': return this.craft.cargoHold.minerals;
+      case 'fuel': return this.craft.cargoHold.fuel;
       default: return 0;
     }
   }
@@ -525,10 +526,13 @@ export class CargoLoadingPanel extends Phaser.GameObjects.Container {
     this.planet.resources.minerals -= this.transferAmounts.minerals;
     this.planet.resources.fuel -= this.transferAmounts.fuel;
 
-    // Apply transfers to ship
-    this.craft.cargoCredits += this.transferAmounts.credits;
-    this.craft.cargoMinerals += this.transferAmounts.minerals;
-    this.craft.cargoFuel += this.transferAmounts.fuel;
+    // Apply transfers to ship (initialize cargoHold if needed)
+    if (!this.craft.cargoHold) {
+      this.craft.cargoHold = new ResourceDelta();
+    }
+    this.craft.cargoHold.credits += this.transferAmounts.credits;
+    this.craft.cargoHold.minerals += this.transferAmounts.minerals;
+    this.craft.cargoHold.fuel += this.transferAmounts.fuel;
 
     // Fire callback
     if (this.onTransferComplete) {

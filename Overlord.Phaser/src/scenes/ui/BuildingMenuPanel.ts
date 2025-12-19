@@ -241,7 +241,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
 
     // Show existing buildings with scrap option
     const completedBuildings = planet.structures.filter(
-      s => s.status === BuildingStatus.Completed,
+      s => s.status === BuildingStatus.Active,
     );
 
     if (completedBuildings.length > 0) {
@@ -469,7 +469,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   private scrapBuilding(buildingType: BuildingType, planet: PlanetEntity, refund: number): void {
     // Remove building from planet
     const buildingIndex = planet.structures.findIndex(
-      s => s.type === buildingType && s.status === BuildingStatus.Completed,
+      s => s.type === buildingType && s.status === BuildingStatus.Active,
     );
 
     if (buildingIndex === -1) {
