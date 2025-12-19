@@ -92,6 +92,12 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   }
 
   private createPanel(): void {
+    // Hit blocker - prevents clicks from reaching the backdrop behind the panel
+    const hitBlocker = this.scene.add.rectangle(PADDING, PADDING, PANEL_WIDTH, PANEL_HEIGHT, 0x000000, 0);
+    hitBlocker.setOrigin(0, 0);
+    hitBlocker.setInteractive(); // Interactive but no handler - just blocks backdrop clicks
+    this.add(hitBlocker);
+
     this.contentContainer = this.scene.add.container(PADDING, PADDING);
     this.add(this.contentContainer);
 

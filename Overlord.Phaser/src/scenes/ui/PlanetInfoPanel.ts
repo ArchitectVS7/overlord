@@ -13,11 +13,12 @@ import { PlanetEntity } from '@core/models/PlanetEntity';
 import { FactionType, BuildingType, BuildingStatus } from '@core/models/Enums';
 import { BuildingCosts, Structure } from '@core/models/BuildingModels';
 import { BuildingSystem } from '@core/BuildingSystem';
+import { TaxationSystem } from '@core/TaxationSystem';
 import { OWNER_COLORS } from '../../config/VisualConfig';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 280;
-const PANEL_HEIGHT = 500; // Increased for construction section + platoons button
+const PANEL_HEIGHT = 560; // Increased for tax slider section
 const PADDING = 15;
 const HEADER_HEIGHT = 60;
 const BUTTON_HEIGHT = 36;
@@ -54,6 +55,15 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private constructionTurnsText!: Phaser.GameObjects.Text;
   private buildingSystem?: BuildingSystem;
 
+  // Tax slider elements
+  private taxContainer!: Phaser.GameObjects.Container;
+  private taxRateText!: Phaser.GameObjects.Text;
+  private taxRevenueText!: Phaser.GameObjects.Text;
+  private taxWarningText!: Phaser.GameObjects.Text;
+  private taxSliderThumb!: Phaser.GameObjects.Graphics;
+  private taxationSystem?: TaxationSystem;
+  private currentTaxRate: number = 50;
+
   // Action callbacks (Story 4-2, Story 5-1, Story 5-2, Story 5-3, Story 5-5, Story 6-1)
   public onBuildClick?: (planet: PlanetEntity) => void;
   public onCommissionClick?: (planet: PlanetEntity) => void;
@@ -61,11 +71,17 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   public onSpacecraftClick?: (planet: PlanetEntity) => void;
   public onNavigateClick?: (planet: PlanetEntity) => void;
   public onInvadeClick?: (planet: PlanetEntity) => void;
+  public onDeployProcessorClick?: (planet: PlanetEntity) => void;
+  public onTaxRateChanged?: (planetID: number, newTaxRate: number) => void;
 
-  constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem) {
+  // Flag to indicate if atmosphere processor is available at this planet
+  private hasAtmosphereProcessor: boolean = false;
+
+  constructor(scene: Phaser.Scene, buildingSystem?: BuildingSystem, taxationSystem?: TaxationSystem) {
     super(scene, 0, 0);
     scene.add.existing(this);
     this.buildingSystem = buildingSystem;
+    this.taxationSystem = taxationSystem;
 
     this.createBackdrop();
     this.createPanel();
@@ -79,6 +95,13 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
    */
   public setBuildingSystem(buildingSystem: BuildingSystem): void {
     this.buildingSystem = buildingSystem;
+  }
+
+  /**
+   * Sets the TaxationSystem reference for tax rate management
+   */
+  public setTaxationSystem(taxationSystem: TaxationSystem): void {
+    this.taxationSystem = taxationSystem;
   }
 
   /**
@@ -101,6 +124,13 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
    * Creates the panel structure with all UI elements
    */
   private createPanel(): void {
+    // Hit blocker - prevents clicks from reaching the backdrop behind the panel
+    // Must be added first (bottom of display list) so buttons render on top
+    const hitBlocker = this.scene.add.rectangle(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 0x000000, 0);
+    hitBlocker.setOrigin(0, 0);
+    hitBlocker.setInteractive(); // Interactive but no handler - just blocks backdrop clicks
+    this.add(hitBlocker);
+
     // Background
     this.background = this.scene.add.graphics();
     this.background.fillStyle(BG_COLOR, 0.95);
@@ -123,6 +153,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Create resource section
     this.createResourceSection();
+
+    // Create tax slider section
+    this.createTaxSection();
 
     // Create construction progress section (Story 4-3)
     this.createConstructionSection();
@@ -235,11 +268,133 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Creates the tax slider section for adjusting planet tax rate
+   */
+  private createTaxSection(): void {
+    const startY = HEADER_HEIGHT + 195;
+
+    // Container for tax elements (shown/hidden based on ownership)
+    this.taxContainer = this.scene.add.container(0, startY);
+    this.contentContainer.add(this.taxContainer);
+
+    // Section divider
+    const divider = this.scene.add.graphics();
+    divider.lineStyle(1, 0x444444, 1);
+    divider.lineBetween(0, -5, PANEL_WIDTH - PADDING * 2, -5);
+    this.taxContainer.add(divider);
+
+    // Section header
+    const headerText = this.scene.add.text(0, 0, 'Tax Rate', {
+      fontSize: '14px',
+      fontFamily: 'Arial',
+      color: TEXT_COLOR,
+      fontStyle: 'bold',
+    });
+    this.taxContainer.add(headerText);
+
+    // Tax rate display
+    this.taxRateText = this.scene.add.text(0, 20, 'Rate: 50%', {
+      fontSize: '12px',
+      fontFamily: 'Arial',
+      color: '#ffd700',
+    });
+    this.taxContainer.add(this.taxRateText);
+
+    // Tax slider track
+    const sliderWidth = PANEL_WIDTH - PADDING * 2 - 20;
+    const sliderY = 42;
+    const track = this.scene.add.graphics();
+    track.fillStyle(0x333333, 1);
+    track.fillRoundedRect(0, sliderY, sliderWidth, 10, 5);
+    this.taxContainer.add(track);
+
+    // Slider thumb
+    this.taxSliderThumb = this.scene.add.graphics();
+    this.taxSliderThumb.fillStyle(0xffd700, 1);
+    this.taxSliderThumb.fillCircle(0, 0, 8);
+    this.taxSliderThumb.lineStyle(2, 0xffffff, 1);
+    this.taxSliderThumb.strokeCircle(0, 0, 8);
+    this.taxSliderThumb.setPosition(sliderWidth / 2, sliderY + 5);
+    this.taxContainer.add(this.taxSliderThumb);
+
+    // Make slider interactive
+    const sliderZone = this.scene.add.zone(sliderWidth / 2, sliderY + 5, sliderWidth + 20, 30);
+    sliderZone.setInteractive({ useHandCursor: true });
+    this.taxContainer.add(sliderZone);
+
+    sliderZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      this.handleTaxSliderDrag(pointer, sliderWidth);
+    });
+
+    sliderZone.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (pointer.isDown) {
+        this.handleTaxSliderDrag(pointer, sliderWidth);
+      }
+    });
+
+    // Estimated revenue text
+    this.taxRevenueText = this.scene.add.text(0, 58, 'Revenue: 0 credits/turn', {
+      fontSize: '11px',
+      fontFamily: 'Arial',
+      color: LABEL_COLOR,
+    });
+    this.taxContainer.add(this.taxRevenueText);
+
+    // Warning text for high taxes
+    this.taxWarningText = this.scene.add.text(0, 73, '', {
+      fontSize: '10px',
+      fontFamily: 'Arial',
+      color: '#ff6600',
+      fontStyle: 'italic',
+    });
+    this.taxContainer.add(this.taxWarningText);
+
+    // Initially hidden
+    this.taxContainer.setVisible(false);
+  }
+
+  /**
+   * Handles tax slider drag interaction
+   */
+  private handleTaxSliderDrag(pointer: Phaser.Input.Pointer, sliderWidth: number): void {
+    if (!this.planet) return;
+
+    // Calculate local X position within the tax container
+    const containerWorldPos = this.taxContainer.getWorldTransformMatrix();
+    const localX = pointer.x - this.x - PADDING - containerWorldPos.tx + this.x;
+
+    // Calculate tax rate from slider position
+    const normalizedX = Math.max(0, Math.min(sliderWidth, localX));
+    const newTaxRate = Math.round((normalizedX / sliderWidth) * 100);
+
+    this.currentTaxRate = newTaxRate;
+
+    // Update slider thumb position
+    this.taxSliderThumb.setPosition(normalizedX, 47);
+
+    // Apply tax rate if TaxationSystem is available
+    if (this.taxationSystem) {
+      this.taxationSystem.setTaxRate(this.planet.id, newTaxRate);
+    } else {
+      // Update planet directly if no system
+      this.planet.taxRate = newTaxRate;
+    }
+
+    // Update UI
+    this.updateTaxSection(true);
+
+    // Fire callback
+    if (this.onTaxRateChanged) {
+      this.onTaxRateChanged(this.planet.id, newTaxRate);
+    }
+  }
+
+  /**
    * Creates the construction progress section (Story 4-3)
    * Shows: building name, progress bar, turns remaining
    */
   private createConstructionSection(): void {
-    const startY = HEADER_HEIGHT + 195;
+    const startY = HEADER_HEIGHT + 285; // Pushed down for tax section
 
     // Container for construction elements (shown/hidden based on construction state)
     this.constructionContainer = this.scene.add.container(0, startY);
@@ -291,7 +446,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   private createActionButtons(): void {
-    const startY = HEADER_HEIGHT + 280; // Pushed down to accommodate construction section
+    const startY = HEADER_HEIGHT + 370; // Pushed down to accommodate tax and construction sections
 
     // Section divider
     const divider = this.scene.add.graphics();
@@ -316,7 +471,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.createButton('Platoons', 0, buttonY + 42, true, 'View garrisoned platoons (Story 5-2)');
     this.createButton('Spacecraft', 125, buttonY + 42, true, 'Purchase spacecraft (Story 5-3)');
     this.createButton('Navigate', 0, buttonY + 84, true, 'Navigate spacecraft (Story 5-5)');
-    this.createButton('Invade', 125, buttonY + 84, true, 'Coming in Epic 6');
+    this.createButton('Invade', 125, buttonY + 84, true, 'Initiate planetary invasion');
+    this.createButton('Deploy', 0, buttonY + 84, true, 'Deploy Atmosphere Processor to colonize'); // index 6
   }
 
   private createButton(
@@ -463,11 +619,58 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
       }
     });
 
+    // Update tax section (only show for player-owned planets)
+    this.updateTaxSection(isPlayerOwned);
+
     // Update construction progress (Story 4-3)
     this.updateConstructionProgress(isPlayerOwned);
 
     // Update button visibility/states based on ownership
     this.updateButtonStates(isPlayerOwned);
+  }
+
+  /**
+   * Updates the tax rate section
+   */
+  private updateTaxSection(isPlayerOwned: boolean): void {
+    if (!isPlayerOwned || !this.planet) {
+      this.taxContainer.setVisible(false);
+      return;
+    }
+
+    // Show tax section for player-owned planets
+    this.taxContainer.setVisible(true);
+
+    // Get current tax rate
+    this.currentTaxRate = this.planet.taxRate;
+    this.taxRateText.setText(`Rate: ${this.currentTaxRate}%`);
+
+    // Update slider thumb position
+    const sliderWidth = PANEL_WIDTH - PADDING * 2 - 20;
+    const thumbX = (this.currentTaxRate / 100) * sliderWidth;
+    this.taxSliderThumb.setPosition(thumbX, 47);
+
+    // Calculate estimated revenue
+    let estimatedRevenue = 0;
+    if (this.taxationSystem) {
+      estimatedRevenue = this.taxationSystem.getEstimatedRevenue(this.planet.id, this.currentTaxRate);
+    } else {
+      // Fallback calculation
+      estimatedRevenue = Math.floor((this.planet.population / 10) * (this.currentTaxRate / 100));
+    }
+    this.taxRevenueText.setText(`Revenue: ~${estimatedRevenue.toLocaleString()} credits/turn`);
+
+    // Show warning for high taxes
+    if (this.currentTaxRate > 75) {
+      this.taxWarningText.setText('⚠️ High taxes hurt morale! (-5/turn)');
+      this.taxWarningText.setVisible(true);
+    } else if (this.currentTaxRate < 25) {
+      this.taxWarningText.setText('Low taxes boost morale (+2/turn)');
+      this.taxWarningText.setColor('#44aa44');
+      this.taxWarningText.setVisible(true);
+    } else {
+      this.taxWarningText.setVisible(false);
+    }
   }
 
   /**
@@ -544,6 +747,10 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private updateButtonStates(isPlayerOwned: boolean): void {
     // Buttons 0-4 are for player (Build, Commission, Platoons, Spacecraft, Navigate)
     // Button 5 is for AI/Neutral (Invade)
+    // Button 6 is for Neutral with Atmosphere Processor (Deploy)
+    const isNeutral = this.planet?.owner === FactionType.Neutral;
+    const isAI = this.planet?.owner === FactionType.AI;
+
     this.actionButtons.forEach((button, i) => {
       const label = button.getData('label');
 
@@ -594,19 +801,47 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
             }
           });
         }
-      } else {
+      } else if (isNeutral) {
+        // For neutral planets, show Deploy button if atmosphere processor is available
+        if (label === 'Deploy') {
+          button.setVisible(this.hasAtmosphereProcessor);
+          if (this.hasAtmosphereProcessor) {
+            this.enableButton(button, () => {
+              if (this.planet && this.onDeployProcessorClick) {
+                this.onDeployProcessorClick(this.planet);
+              }
+            });
+          }
+        } else {
+          button.setVisible(false);
+        }
+      } else if (isAI) {
         // Show and enable Invade button for AI-owned planets (Story 6-1)
-        button.setVisible(i >= 5);
-
         if (label === 'Invade') {
+          button.setVisible(true);
           this.enableButton(button, () => {
             if (this.planet && this.onInvadeClick) {
               this.onInvadeClick(this.planet);
             }
           });
+        } else {
+          button.setVisible(false);
         }
+      } else {
+        button.setVisible(false);
       }
     });
+  }
+
+  /**
+   * Sets whether an atmosphere processor is available at the current planet
+   * Should be called by the scene when showing the panel for a neutral planet
+   */
+  public setHasAtmosphereProcessor(available: boolean): void {
+    this.hasAtmosphereProcessor = available;
+    if (this.planet) {
+      this.updateButtonStates(this.planet.owner === FactionType.Player);
+    }
   }
 
   /**
