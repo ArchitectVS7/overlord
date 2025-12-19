@@ -126,6 +126,11 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.backdrop.on('pointerdown', () => this.hide());
     this.add(this.backdrop);
 
+    // Hit blocker - prevents clicks from reaching the backdrop behind the panel
+    const hitBlocker = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, 0x000000, 0);
+    hitBlocker.setInteractive(); // Interactive but no handler - just blocks backdrop clicks
+    this.add(hitBlocker);
+
     // Main panel
     this.panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, BuildingMenuPanel.COLORS.panelBg, 0.95);
     this.panel.setStrokeStyle(2, BuildingMenuPanel.COLORS.panelBorder);
