@@ -181,7 +181,7 @@ export class AdminUIEditorController {
    */
   private addDragBorder(panel: DraggablePanel): void {
     const graphics = this.scene.add.graphics();
-    graphics.lineStyle(2, 0x00ff00, 0.8);
+    graphics.lineStyle(2, 0x00bfff, 0.8);
     // Draw border based on panel centering mode
     const offsetX = panel.centered ? panel.width / 2 : 0;
     const offsetY = panel.centered ? panel.height / 2 : 0;
@@ -204,7 +204,7 @@ export class AdminUIEditorController {
     const graphics = this.dragBorders.get(panel.panelId);
     if (graphics) {
       graphics.clear();
-      graphics.lineStyle(2, 0x00ff00, 0.8);
+      graphics.lineStyle(2, 0x00bfff, 0.8);
       // Draw border based on panel centering mode
       const offsetX = panel.centered ? panel.width / 2 : 0;
       const offsetY = panel.centered ? panel.height / 2 : 0;
@@ -297,7 +297,7 @@ export class AdminUIEditorController {
     const graphics = this.dragBorders.get(panel.panelId);
     if (graphics) {
       graphics.clear();
-      graphics.lineStyle(2, 0x00ff00, 0.8);
+      graphics.lineStyle(2, 0x00bfff, 0.8);
       // Draw border based on panel centering mode
       const offsetX = panel.centered ? panel.width / 2 : 0;
       const offsetY = panel.centered ? panel.height / 2 : 0;

@@ -14,6 +14,7 @@ import { getCompletionService } from '@core/ScenarioCompletionService';
 import { ScenarioListPanel } from './ui/ScenarioListPanel';
 import { ScenarioDetailPanel } from './ui/ScenarioDetailPanel';
 import { Scenario } from '@core/models/ScenarioModels';
+import { TopMenuBar } from './ui/TopMenuBar';
 
 export class FlashConflictsScene extends Phaser.Scene {
   private scenarioManager!: ScenarioManager;
@@ -32,14 +33,17 @@ export class FlashConflictsScene extends Phaser.Scene {
     // Create background
     this.cameras.main.setBackgroundColor('#0a0a1a');
 
-    // Create title
+    // Create top menu bar
+    new TopMenuBar(this);
+
+    // Create title (positioned below menu bar)
     this.titleText = this.add.text(
       this.cameras.main.centerX,
-      50,
+      TopMenuBar.getHeight() + 20,
       'Flash Conflicts',
       {
         fontSize: '48px',
-        color: '#ffffff',
+        color: '#00bfff',
         fontStyle: 'bold',
       },
     );

@@ -270,7 +270,7 @@ export class DefeatScene extends Phaser.Scene {
     this.createStatLine(centerX, y, 'Fuel:', this.formatNumber(stats.finalFuel), '#ff6600');
     y += lineHeight;
 
-    this.createStatLine(centerX, y, 'Food:', this.formatNumber(stats.finalFood), '#00ff00');
+    this.createStatLine(centerX, y, 'Food:', this.formatNumber(stats.finalFood), '#00bfff');
     y += lineHeight;
 
     this.createStatLine(centerX, y, 'Energy:', this.formatNumber(stats.finalEnergy), '#00ffff');
@@ -383,7 +383,7 @@ export class DefeatScene extends Phaser.Scene {
         if (statusText) {
           const locationText = result.savedTo === 'cloud' ? '(Cloud)' : '(Local)';
           statusText.setText(`Campaign saved ${locationText}: ${slotName}`);
-          statusText.setStyle({ color: '#00ff00' });
+          statusText.setStyle({ color: '#00bfff' });
         }
         console.log(`Defeat campaign saved to ${result.savedTo}: ${slotName}`);
       } else {

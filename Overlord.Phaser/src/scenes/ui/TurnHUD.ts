@@ -81,13 +81,13 @@ export class TurnHUD extends Phaser.GameObjects.Container {
 
     // Background panel
     this.background = scene.add.rectangle(0, 0, 280, 100, 0x000000, 0.7);
-    this.background.setStrokeStyle(2, 0x00ff00);
+    this.background.setStrokeStyle(2, 0x00bfff);
     this.add(this.background);
 
     // Turn number text (top of HUD)
     this.turnText = scene.add.text(0, -35, '', {
       fontSize: '24px',
-      color: '#00ff00',
+      color: '#00bfff',
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -106,18 +106,18 @@ export class TurnHUD extends Phaser.GameObjects.Container {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'monospace',
-      backgroundColor: '#004400',
+      backgroundColor: '#002244',
       padding: { x: 15, y: 6 },
     })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
     this.endTurnButton.on('pointerover', () => {
-      this.endTurnButton.setStyle({ backgroundColor: '#006600' });
+      this.endTurnButton.setStyle({ backgroundColor: '#003366' });
     });
 
     this.endTurnButton.on('pointerout', () => {
-      this.endTurnButton.setStyle({ backgroundColor: '#004400' });
+      this.endTurnButton.setStyle({ backgroundColor: '#002244' });
     });
 
     this.endTurnButton.on('pointerdown', () => {

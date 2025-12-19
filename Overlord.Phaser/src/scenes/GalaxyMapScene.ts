@@ -76,6 +76,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private planetZones: Map<string, Phaser.GameObjects.Zone> = new Map();
   private selectedPlanetId: string | null = null;
   private selectionGraphics!: Phaser.GameObjects.Graphics;
+  private controlsText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'GalaxyMapScene' });
@@ -154,10 +155,15 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.planetRenderer = new PlanetRenderer(this);
     this.starFieldRenderer = new StarFieldRenderer(this);
 
-    // Create star field background (based on galaxy bounds)
+    // Create star field background (based on galaxy bounds, positioned at bounds origin)
     const starFieldWidth = galaxyBounds.maxX - galaxyBounds.minX + 400;
     const starFieldHeight = galaxyBounds.maxY - galaxyBounds.minY + 400;
-    this.starFieldRenderer.createStarField(starFieldWidth, starFieldHeight);
+    this.starFieldRenderer.createStarField(
+      starFieldWidth,
+      starFieldHeight,
+      galaxyBounds.minX - 200,
+      galaxyBounds.minY - 200,
+    );
 
     // Create selection graphics (on top of planets)
     this.selectionGraphics = this.add.graphics();
@@ -262,10 +268,10 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.platoonDetailsPanel.onLoadRequest = (platoonID) => {
       // Get the planet where this platoon is located
       const platoon = this.gameState.platoonLookup.get(platoonID);
-      if (!platoon || platoon.planetID < 0) {return;}
+      if (!platoon || platoon.planetID < 0) { return; }
 
       const planet = this.gameState.planetLookup.get(platoon.planetID);
-      if (!planet) {return;}
+      if (!planet) { return; }
 
       // Find Battle Cruisers at this planet
       const cruisers = this.entitySystem.getCraftAtPlanet(planet.id).filter(c => c.type === 'BattleCruiser');
@@ -302,11 +308,11 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.planetInfoPanel.onNavigateClick = (planet) => {
       // Get spacecraft at this planet
       const craft = this.entitySystem.getCraftAtPlanet(planet.id);
-      if (craft.length === 0) {return;}
+      if (craft.length === 0) { return; }
 
       // For prototype, navigate first available craft
       const firstCraft = craft[0];
-      if (firstCraft.inTransit) {return;}
+      if (firstCraft.inTransit) { return; }
 
       this.planetInfoPanel.hide();
       this.spacecraftNavigationPanel.show(firstCraft, this.galaxy.planets, () => {
@@ -381,7 +387,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up PlanetInfoPanel Invade button to InvasionPanel
     this.planetInfoPanel.onInvadeClick = (planet) => {
       // Only allow invading AI-owned planets
-      if (planet.owner !== FactionType.AI) {return;}
+      if (planet.owner !== FactionType.AI) { return; }
 
       // Get player cruisers with loaded platoons at this planet (nearby for invasion)
       const playerCraft = Array.from(this.gameState.craftLookup.values())
@@ -628,7 +634,9 @@ export class GalaxyMapScene extends Phaser.Scene {
         break;
       case 'help':
         console.log('Help overlay (H pressed)');
-        // TODO: Show help
+        if (this.controlsText) {
+          this.controlsText.setVisible(!this.controlsText.visible);
+        }
         break;
       case 'objectives':
         console.log('Objectives panel (O pressed)');
@@ -770,14 +778,19 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   private addDebugInfo(): void {
-    const debugText = this.add.text(10, 10, '', {
+    // Position in bottom-left corner, clear of other UI elements
+    const debugX = 10;
+    const debugY = this.cameras.main.height - 140;
+
+    const debugText = this.add.text(debugX, debugY, '', {
       fontSize: '12px',
-      color: '#00ff00',
+      color: '#ffaa00',
       fontFamily: 'monospace',
-      backgroundColor: '#000000',
-      padding: { x: 5, y: 5 },
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: { x: 8, y: 6 },
     });
     debugText.setScrollFactor(0);
+    debugText.setDepth(100);
 
     const updateDebug = () => {
       const focusedId = this.inputSystem.getFocusedElementId();
@@ -786,18 +799,13 @@ export class GalaxyMapScene extends Phaser.Scene {
         : null;
 
       debugText.setText([
+        '── DEBUG PANEL ──',
         `Galaxy: ${this.galaxy.name}`,
         `Seed: ${this.galaxy.seed}`,
         `Planets: ${this.galaxy.planets.length}`,
         `Turn: ${this.gameState.currentTurn}`,
-        '',
         `Focused: ${focusedPlanet?.name || 'None'}`,
         `Selected: ${this.selectedPlanetId || 'None'}`,
-        '',
-        'Planet List:',
-        ...this.galaxy.planets.map(p =>
-          `- ${p.name} (${p.owner}) at ${p.position.toString()}`,
-        ),
       ]);
     };
 
@@ -812,7 +820,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   private addControlsHelp(): void {
-    const controlsText = this.add.text(
+    this.controlsText = this.add.text(
       this.cameras.main.width - 10,
       10,
       [
@@ -843,8 +851,9 @@ export class GalaxyMapScene extends Phaser.Scene {
         align: 'right',
       },
     );
-    controlsText.setOrigin(1, 0);
-    controlsText.setScrollFactor(0);
+    this.controlsText.setOrigin(1, 0);
+    this.controlsText.setScrollFactor(0);
+    this.controlsText.setVisible(false); // Hidden by default
   }
 
   private addResetViewButton(): void {
@@ -881,7 +890,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       buttonBg.clear();
       buttonBg.fillStyle(0x555555, 0.9);
       buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
-      buttonText.setStyle({ color: '#00ff00' });
+      buttonText.setStyle({ color: '#00bfff' });
     });
 
     hitZone.on('pointerout', () => {
@@ -896,6 +905,59 @@ export class GalaxyMapScene extends Phaser.Scene {
       if (!this.cameraController.getIsDragging()) {
         this.cameraController.resetView(true);
       }
+    });
+
+    // Add Exit Game button
+    this.addExitButton();
+  }
+
+  private addExitButton(): void {
+    const buttonX = this.cameras.main.width - 120;
+    const buttonY = this.cameras.main.height - 95; // Above Reset View
+
+    // Create button background
+    const buttonBg = this.add.graphics();
+    buttonBg.fillStyle(0x330000, 0.9);
+    buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
+    buttonBg.setScrollFactor(0);
+
+    // Create button text
+    const buttonText = this.add.text(
+      buttonX + 50,
+      buttonY + 17,
+      'Exit Game',
+      {
+        fontSize: '14px',
+        color: '#ffaaaa',
+        fontFamily: 'Arial',
+      },
+    );
+    buttonText.setOrigin(0.5);
+    buttonText.setScrollFactor(0);
+
+    // Create invisible interactive zone
+    const hitZone = this.add.zone(buttonX + 50, buttonY + 17, 100, 35);
+    hitZone.setScrollFactor(0);
+    hitZone.setInteractive({ useHandCursor: true });
+
+    // Hover effects
+    hitZone.on('pointerover', () => {
+      buttonBg.clear();
+      buttonBg.fillStyle(0x550000, 0.9);
+      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
+      buttonText.setStyle({ color: '#ffffff' });
+    });
+
+    hitZone.on('pointerout', () => {
+      buttonBg.clear();
+      buttonBg.fillStyle(0x330000, 0.9);
+      buttonBg.fillRoundedRect(buttonX, buttonY, 100, 35, 5);
+      buttonText.setStyle({ color: '#ffaaaa' });
+    });
+
+    // Click handler
+    hitZone.on('pointerdown', () => {
+      this.scene.start('MainMenuScene');
     });
   }
 
@@ -925,7 +987,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     const currentPlanetId = parseInt(currentId, 10);
     const currentPlanet = this.galaxy.planets.find(p => p.id === currentPlanetId);
-    if (!currentPlanet) {return;}
+    if (!currentPlanet) { return; }
 
     const cx = currentPlanet.position.x;
     const cy = currentPlanet.position.z;
@@ -934,7 +996,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     let bestDistance = Infinity;
 
     for (const planet of this.galaxy.planets) {
-      if (planet.id === currentPlanetId) {continue;}
+      if (planet.id === currentPlanetId) { continue; }
 
       const px = planet.position.x;
       const py = planet.position.z;
@@ -1129,9 +1191,9 @@ export class GalaxyMapScene extends Phaser.Scene {
       message,
       {
         fontSize: '16px',
-        color: '#00ff00',
+        color: '#00bfff',
         fontFamily: 'monospace',
-        backgroundColor: 'rgba(0, 50, 0, 0.9)',
+        backgroundColor: 'rgba(0, 34, 68, 0.9)',
         padding: { x: 15, y: 10 },
       },
     );
@@ -1247,7 +1309,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.adminUIEditor.registerPanel(
       this.resourceHUD,
       'ResourceHUD',
-      this.cameras.main.width - 120,
+      this.cameras.main.width - 220, // Moved left to avoid cutting off
       95,
       220,
       160,
@@ -1255,7 +1317,8 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // OpponentInfoPanel - positioned at top-left below TurnHUD
     // Uses top-left aligned graphics (not centered)
-    this.adminUIEditor.registerPanel(this.opponentInfoPanel, 'OpponentInfoPanel', 20, 140, 240, 120, false);
+    // Moved down y:140 -> y:200 to avoid overlap
+    this.adminUIEditor.registerPanel(this.opponentInfoPanel, 'OpponentInfoPanel', 20, 200, 240, 120, false);
 
     // Apply stored positions from database
     await this.applyStoredPanelPositions();

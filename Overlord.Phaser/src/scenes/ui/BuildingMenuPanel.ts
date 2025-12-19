@@ -83,15 +83,15 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   // Colors
   private static readonly COLORS = {
     panelBg: 0x1a1a2e,
-    panelBorder: 0x00ff00,
-    title: '#00ff00',
+    panelBorder: 0x00bfff,
+    title: '#00bfff',
     available: '#ffffff',
     unavailable: '#666666',
     cost: '#ffff00',
     constructing: '#ff9900',
     hover: 0x2a2a4e,
     button: 0x0a0a1e,
-    buttonBorder: 0x00aa00,
+    buttonBorder: 0x0088cc,
   };
 
   constructor(
@@ -422,7 +422,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const { width, height } = this.scene.cameras.main;
     const notification = this.scene.add.text(width / 2, height - 100, message, {
       fontSize: '16px',
-      color: '#00ff00',
+      color: '#00bfff',
       fontFamily: 'monospace',
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: { x: 15, y: 8 },

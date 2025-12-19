@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { AudioManager } from '@core/AudioManager';
-import { AudioActivationOverlay } from './ui/AudioActivationOverlay';
+import { TopMenuBar } from './ui/TopMenuBar';
 import { LoadGamePanel } from './ui/LoadGamePanel';
 import { StatisticsPanel } from './ui/StatisticsPanel';
 import { getAuthService } from '@services/AuthService';
@@ -18,7 +18,6 @@ import { getUIPanelPositionService } from '@services/UIPanelPositionService';
  * Story 12-3/12-5: Audio initialization and browser compliance
  */
 export class MainMenuScene extends Phaser.Scene {
-  private audioActivationOverlay?: AudioActivationOverlay;
   private loadGamePanel?: LoadGamePanel;
   private statisticsPanel?: StatisticsPanel;
   private userGreeting?: Phaser.GameObjects.Text;
@@ -35,14 +34,8 @@ export class MainMenuScene extends Phaser.Scene {
     const audioManager = AudioManager.getInstance();
     audioManager.loadSettings();
 
-    // Story 12-5: Show audio activation overlay for browser compliance
-    if (!audioManager.isActivated()) {
-      this.audioActivationOverlay = new AudioActivationOverlay(this);
-      this.audioActivationOverlay.onActivated = () => {
-        console.log('Audio activated by user interaction');
-      };
-      this.audioActivationOverlay.show();
-    }
+    // Create top menu bar with audio controls (no home button - we're already home)
+    new TopMenuBar(this, { showHome: false });
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
 
@@ -50,7 +43,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.add
       .text(centerX, height * 0.15, 'OVERLORD', {
         fontSize: '64px',
-        color: '#00ff00',
+        color: '#00bfff',
         fontFamily: 'monospace',
         fontStyle: 'bold',
       })
@@ -60,7 +53,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.add
       .text(centerX, height * 0.25, 'A Strategy Game of Galactic Conquest', {
         fontSize: '20px',
-        color: '#00aa00',
+        color: '#0088cc',
         fontFamily: 'monospace',
       })
       .setOrigin(0.5);
@@ -149,16 +142,18 @@ export class MainMenuScene extends Phaser.Scene {
         ? `Welcome, ${displayName} (Guest)`
         : `Welcome, ${displayName}`;
 
-      this.userGreeting = this.add.text(width - 20, 20, greetingText, {
+      // Position below top menu bar
+      const topOffset = TopMenuBar.getHeight() + 8;
+      this.userGreeting = this.add.text(width - 20, topOffset, greetingText, {
         fontSize: '14px',
-        color: isGuest ? '#ffaa00' : '#00ff00',
+        color: isGuest ? '#ffaa00' : '#00bfff',
         fontFamily: 'monospace',
       });
       this.userGreeting.setOrigin(1, 0);
 
       // Show sign in button for guests, logout for authenticated users
       const buttonText = isGuest ? '[SIGN IN]' : '[LOGOUT]';
-      this.logoutButton = this.add.text(width - 20, 45, buttonText, {
+      this.logoutButton = this.add.text(width - 20, topOffset + 25, buttonText, {
         fontSize: '12px',
         color: '#888888',
         fontFamily: 'monospace',
@@ -167,7 +162,7 @@ export class MainMenuScene extends Phaser.Scene {
       this.logoutButton.setInteractive({ useHandCursor: true });
 
       this.logoutButton.on('pointerover', () => {
-        this.logoutButton?.setColor(isGuest ? '#00ff00' : '#ff4444');
+        this.logoutButton?.setColor(isGuest ? '#00bfff' : '#ff4444');
       });
 
       this.logoutButton.on('pointerout', () => {
@@ -184,7 +179,7 @@ export class MainMenuScene extends Phaser.Scene {
 
       // Show note for guests about local saves
       if (isGuest) {
-        const guestNote = this.add.text(width - 20, 65, 'Saves stored locally only', {
+        const guestNote = this.add.text(width - 20, topOffset + 45, 'Saves stored locally only', {
           fontSize: '10px',
           color: '#666666',
           fontFamily: 'monospace',
@@ -284,7 +279,7 @@ export class MainMenuScene extends Phaser.Scene {
         fontSize: '28px',
         color: enabled ? '#ffffff' : '#555555',
         fontFamily: 'monospace',
-        backgroundColor: enabled ? '#003300' : '#1a1a1a',
+        backgroundColor: enabled ? '#002244' : '#1a1a1a',
         padding: { x: 25, y: 12 },
       })
       .setOrigin(0.5);
@@ -293,11 +288,11 @@ export class MainMenuScene extends Phaser.Scene {
       button.setInteractive({ useHandCursor: true });
 
       button.on('pointerover', () => {
-        button.setStyle({ backgroundColor: '#005500' });
+        button.setStyle({ backgroundColor: '#003366' });
       });
 
       button.on('pointerout', () => {
-        button.setStyle({ backgroundColor: '#003300' });
+        button.setStyle({ backgroundColor: '#002244' });
       });
 
       button.on('pointerdown', onClick);
@@ -320,7 +315,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Create the edit mode indicator with callbacks
     this.adminEditIndicator = new AdminEditModeIndicator(this, {
       onSaveAll: async () => {
-        if (!this.adminUIEditor) {return;}
+        if (!this.adminUIEditor) { return; }
         const positions = this.adminUIEditor.getPendingChanges();
         if (positions.length > 0) {
           const result = await positionService.saveAllPositions(positions);
@@ -351,6 +346,17 @@ export class MainMenuScene extends Phaser.Scene {
         'LoadGamePanel',
         width / 2 - 300,
         height / 2 - 250,
+        600,
+        500,
+      );
+    }
+
+    if (this.statisticsPanel) {
+      this.adminUIEditor.registerPanel(
+        this.statisticsPanel,
+        'StatisticsPanel',
+        width / 2 + 50, // Offset to avoid perfect stacking
+        height / 2 + 50,
         600,
         500,
       );

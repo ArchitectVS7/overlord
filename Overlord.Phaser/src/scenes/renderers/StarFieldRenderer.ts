@@ -12,13 +12,17 @@ export class StarFieldRenderer {
 
   /**
    * Creates a multi-layer star field background
+   * @param width Width of the star field
+   * @param height Height of the star field
+   * @param offsetX X offset to position the star field (default 0)
+   * @param offsetY Y offset to position the star field (default 0)
    */
-  public createStarField(width: number, height: number): void {
+  public createStarField(width: number, height: number, offsetX: number = 0, offsetY: number = 0): void {
     // Clear existing star layers
     this.destroy();
 
     // Layer 1: Background stars (smallest, dimmest, most dense)
-    this.createStarLayer(width, height, {
+    this.createStarLayer(width, height, offsetX, offsetY, {
       count: 300,
       minSize: 1,
       maxSize: 1,
@@ -28,7 +32,7 @@ export class StarFieldRenderer {
     });
 
     // Layer 2: Mid-ground stars (medium brightness)
-    this.createStarLayer(width, height, {
+    this.createStarLayer(width, height, offsetX, offsetY, {
       count: 150,
       minSize: 1,
       maxSize: 2,
@@ -38,7 +42,7 @@ export class StarFieldRenderer {
     });
 
     // Layer 3: Foreground stars (largest, brightest, least dense)
-    this.createStarLayer(width, height, {
+    this.createStarLayer(width, height, offsetX, offsetY, {
       count: 75,
       minSize: 2,
       maxSize: 2,
@@ -54,6 +58,8 @@ export class StarFieldRenderer {
   private createStarLayer(
     width: number,
     height: number,
+    offsetX: number,
+    offsetY: number,
     config: {
       count: number;
       minSize: number;
@@ -67,8 +73,8 @@ export class StarFieldRenderer {
     graphics.setDepth(config.depth);
 
     for (let i = 0; i < config.count; i++) {
-      const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height);
+      const x = offsetX + Phaser.Math.Between(0, width);
+      const y = offsetY + Phaser.Math.Between(0, height);
       const size = Phaser.Math.Between(config.minSize, config.maxSize);
       const alpha = Phaser.Math.FloatBetween(config.minAlpha, config.maxAlpha);
 

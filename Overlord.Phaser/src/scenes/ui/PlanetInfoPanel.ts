@@ -652,7 +652,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
   private getOwnerColorHex(owner: FactionType): string {
     switch (owner) {
-      case FactionType.Player: return '#00ff00';
+      case FactionType.Player: return '#00bfff';
       case FactionType.AI: return '#ff0000';
       case FactionType.Neutral: return '#808080';
       default: return '#ffffff';
@@ -660,7 +660,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   private getMoraleColor(morale: number): string {
-    if (morale >= 70) {return '#00cc00';} // Green - happy
+    if (morale >= 70) {return '#00aacc';} // Blue - happy
     if (morale >= 40) {return '#cccc00';} // Yellow - neutral
     return '#cc0000'; // Red - unhappy
   }

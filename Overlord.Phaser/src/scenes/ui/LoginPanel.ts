@@ -12,15 +12,15 @@ const PANEL_HEIGHT = 300;
 
 const COLORS = {
   BACKGROUND: 0x1a1a2e,
-  BORDER: 0x00ff00,
+  BORDER: 0x00bfff,
   INPUT_BG: '#0a0a1a',
   INPUT_BORDER: '#4a4a6a',
-  INPUT_BORDER_FOCUS: '#00ff00',
-  TEXT: '#00ff00',
+  INPUT_BORDER_FOCUS: '#00bfff',
+  TEXT: '#00bfff',
   TEXT_SECONDARY: '#aaaaaa',
-  BUTTON_BG: 0x003300,
-  BUTTON_HOVER: 0x005500,
-  BUTTON_TEXT: '#00ff00',
+  BUTTON_BG: 0x002244,
+  BUTTON_HOVER: 0x003366,
+  BUTTON_TEXT: '#00bfff',
   ERROR: '#ff4444',
 };
 

@@ -34,7 +34,7 @@ export class InputManager {
 
     this.visualConfig = {
       hoverTint: 0xcccccc,
-      focusBorderColor: 0x00ff00,
+      focusBorderColor: 0x00bfff,
       focusBorderWidth: 3,
       defaultCursor: 'default',
       hoverCursor: 'pointer',

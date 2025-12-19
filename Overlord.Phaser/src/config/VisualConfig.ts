@@ -22,7 +22,7 @@ export const PLANET_VISUALS: Record<string, PlanetVisualConfig> = {
 };
 
 export const OWNER_COLORS: Record<string, number> = {
-  Player: 0x00ff00,
+  Player: 0x00bfff,
   AI: 0xff0000,
   Neutral: 0x808080,
 };

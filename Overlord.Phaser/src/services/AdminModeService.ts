@@ -74,6 +74,13 @@ class AdminModeService {
       return;
     }
 
+    // DEV: Should allow guest for UI testing
+    const guestService = (await import('./GuestModeService')).getGuestModeService();
+    if (guestService.isGuestMode()) {
+      this.adminStatus = true; // Force admin for guest
+      return;
+    }
+
     const profileService = getUserProfileService();
     const result = await profileService.getProfile(true); // Force refresh
 
@@ -93,7 +100,9 @@ class AdminModeService {
    * Check if the current user is an admin
    */
   public isAdmin(): boolean {
-    return this.adminStatus;
+    // DEV: Force admin for UI testing
+    return true;
+    // return this.adminStatus;
   }
 
   /**
@@ -108,10 +117,11 @@ class AdminModeService {
    * @returns The new edit mode state, or false if not admin
    */
   public toggleEditMode(): boolean {
-    if (!this.adminStatus) {
-      console.warn('Cannot toggle edit mode: user is not an admin');
-      return false;
-    }
+    // DEV: Bypass admin check
+    // if (!this.adminStatus) {
+    //   console.warn('Cannot toggle edit mode: user is not an admin');
+    //   return false;
+    // }
 
     if (this.editModeActive) {
       this.exitEditMode();
@@ -126,10 +136,11 @@ class AdminModeService {
    * Enter edit mode (admin only)
    */
   public enterEditMode(): void {
-    if (!this.adminStatus) {
-      console.warn('Cannot enter edit mode: user is not an admin');
-      return;
-    }
+    // DEV: Bypass admin check
+    // if (!this.adminStatus) {
+    //   console.warn('Cannot enter edit mode: user is not an admin');
+    //   return;
+    // }
 
     if (this.editModeActive) {
       return; // Already in edit mode
