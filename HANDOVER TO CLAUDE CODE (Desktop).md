@@ -14,17 +14,28 @@
 
 **Goal:** Create comprehensive E2E test suite that programmatically plays through the entire game, validates all UI elements, and creates visual documentation via screenshots.
 
-**Why:** The developer (VS7) has never played the frontend. This approach allows rapid iteration on UI bugs while simultaneously:
+**Why:** The developer has attempted to play the frontend and suspects elements missing, no obvious signposting, existing help files are inadequate. This approach allows rapid iteration on UI bugs while simultaneously:
 1. Validating the game works end-to-end
-2. Teaching the developer how the game plays
-3. Creating living documentation
-4. Finding and fixing frontend issues quickly
+2.  Creating living documentation
+3. Finding and fixing frontend issues quickly
+
+**Constraint:** PRD and other design documentation is always the source of truth. If during any discovery phase or the direction given below it is discovered that we would deviate from design, we must evaluate:
+
+ - Does the deviation improve or degrade from the design?
+ - If a positive deviation is acceptable and desirable, it needs to be evaluated by additional criteria:
+   > Does it exceed the design or otherwise add a feature?
+   > If it adds a feature, does it make sense for this phase of the launch?
+ - In any case of positive or negative changes between code and design, we will output a full evaluation for the developer to evaluate, who holds the final say for:
+   > Final vision and direction of the game.
+   > Decision to adjust the code to align with design
+   > Decision to adjust the design to align with code
+   > Decision to adopt now or defer deviations to a later stage of development
 
 ---
 
-## 📦 What Has Been Done (Mobile Claude Session)
+## 📦 What Has Been Done 
 
-### ✅ Created Files (Available for Reference)
+### ✅ Created Files
 
 1. **OVERLORD-COMPLETE-PLAYTHROUGH-MANUAL.md** (1000+ lines)
    - Comprehensive procedural manual
@@ -39,7 +50,7 @@
    - Lists critical questions about implementation
    - Identifies potential gaps
 
-3. **E2E Test Framework** (Created in previous desktop session)
+3. **E2E Test Framework** (in desktop session - may be incomplete)
    - Location: `C:\dev\GIT\Overlord\Overlord.Phaser\tests\e2e\`
    - Files created:
      - `ui-discovery.spec.ts` - UI exploration tests
@@ -148,7 +159,7 @@ This test should:
 **As you discover the actual UI, answer these:**
 
 ### Q1: Ship Display
-- Do ship graphics actually exist?
+- Do placeholder/ASCII ship graphics actually exist?
 - Are they shown on galaxy map?
 - Can you select/interact with them?
 - Or are they just in the code but not rendered?
@@ -396,6 +407,18 @@ await waitForSceneTransition(page, from, to)  // Wait for scene change
 
 Every failing test is GOOD - it shows us what needs work.  
 Every passing test is GREAT - it validates implementation.
+
+**Constraint:** PRD and other design documentation is always the source of truth. If during any discovery phase or the direction given below it is discovered that we would deviate from design, we must evaluate:
+
+ - Does the deviation improve or degrade from the design?
+ - If a positive deviation is acceptable and desirable, it needs to be evaluated by additional criteria:
+   > Does it exceed the design or otherwise add a feature?
+   > If it adds a feature, does it make sense for this phase of the launch?
+ - In any case of positive or negative changes between code and design, we will output a full evaluation for the developer to evaluate, who holds the final say for:
+   > Final vision and direction of the game.
+   > Decision to adjust the code to align with design
+   > Decision to adjust the design to align with code
+   > Decision to adopt now or defer deviations to a later stage of development
 
 **By the end of this session, we'll have:**
 ✅ Complete UI validation  
