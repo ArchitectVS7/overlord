@@ -112,7 +112,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(title);
 
@@ -131,14 +131,14 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Planet:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
     this.planetInfoText = this.scene.add.text(PADDING, startY + 22, '', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.planetInfoText);
   }
@@ -149,7 +149,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Troop Count:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
@@ -157,7 +157,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.troopCountText);
 
@@ -183,7 +183,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       const text = this.scene.add.text(buttonWidth / 2, 15, value.toString(), {
         fontSize: '12px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       text.setOrigin(0.5);
       container.add(text);
@@ -208,7 +208,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Equipment Level:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
@@ -219,7 +219,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const levels = [
       { level: EquipmentLevel.Basic, label: 'Basic' },
       { level: EquipmentLevel.Standard, label: 'Standard' },
-      { level: EquipmentLevel.Advanced, label: 'Advanced' }
+      { level: EquipmentLevel.Advanced, label: 'Advanced' },
     ];
     const buttonWidth = (PANEL_WIDTH - PADDING * 2 - 20) / 3;
 
@@ -237,7 +237,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       const text = this.scene.add.text(buttonWidth / 2, 15, item.label, {
         fontSize: '11px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       text.setOrigin(0.5);
       container.add(text);
@@ -262,7 +262,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const label = this.scene.add.text(PADDING, startY, 'Weapon Level:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
@@ -274,7 +274,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       { level: WeaponLevel.Pistol, label: 'Pistol' },
       { level: WeaponLevel.Rifle, label: 'Rifle' },
       { level: WeaponLevel.AssaultRifle, label: 'Assault' },
-      { level: WeaponLevel.Plasma, label: 'Plasma' }
+      { level: WeaponLevel.Plasma, label: 'Plasma' },
     ];
     const buttonWidth = (PANEL_WIDTH - PADDING * 2 - 30) / 4;
 
@@ -292,7 +292,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       const text = this.scene.add.text(buttonWidth / 2, 15, item.label, {
         fontSize: '11px',
         fontFamily: 'Arial',
-        color: LABEL_COLOR
+        color: LABEL_COLOR,
       });
       text.setOrigin(0.5);
       container.add(text);
@@ -317,7 +317,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const costLabel = this.scene.add.text(PADDING, startY, 'Total Cost:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(costLabel);
 
@@ -325,14 +325,14 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.costText);
 
     const strengthLabel = this.scene.add.text(PADDING, startY + 55, 'Estimated Strength:', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(strengthLabel);
 
@@ -340,7 +340,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.strengthText);
   }
@@ -361,7 +361,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       fontSize: '15px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5);
     this.commissionButton.add(text);
@@ -389,7 +389,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
       fontFamily: 'Arial',
-      color: '#999999'
+      color: '#999999',
     });
     closeText.setOrigin(0.5);
     closeContainer.add(closeText);
@@ -402,7 +402,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   }
 
   public show(planet: PlanetEntity, onClose?: () => void, platoonCount: number = 0): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.planet = planet;
     this.closeCallback = onClose || null;
@@ -420,7 +420,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     this.setAlpha(0);
@@ -428,14 +428,14 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 100,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     this.updateUI();
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -450,7 +450,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 
@@ -495,7 +495,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
       this.troopCount,
       this.equipmentLevel,
       this.weaponLevel,
-      100 // Assume fully trained for preview
+      100, // Assume fully trained for preview
     );
   }
 
@@ -508,7 +508,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   }
 
   public getPopulationAfterCommission(): number {
-    if (!this.planet) return 0;
+    if (!this.planet) {return 0;}
     return this.planet.population - this.troopCount;
   }
 
@@ -517,8 +517,8 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   }
 
   public isCommissionEnabled(): boolean {
-    if (!this.planet) return false;
-    if (this.isAtCapacity()) return false;
+    if (!this.planet) {return false;}
+    if (this.isAtCapacity()) {return false;}
 
     const cost = this.getTotalCost();
     const hasCredits = this.planet.resources.credits >= cost;
@@ -528,7 +528,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   }
 
   public confirmCommission(): void {
-    if (!this.planet || !this.isCommissionEnabled()) return;
+    if (!this.planet || !this.isCommissionEnabled()) {return;}
 
     // If PlatoonSystem is provided, use it directly
     if (this.platoonSystem) {
@@ -537,7 +537,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
         FactionType.Player,
         this.troopCount,
         this.equipmentLevel,
-        this.weaponLevel
+        this.weaponLevel,
       );
       this.lastCommissionResult = result;
 
@@ -569,13 +569,13 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   }
 
   private updatePlanetInfo(): void {
-    if (!this.planet) return;
+    if (!this.planet) {return;}
 
     const popAfter = this.getPopulationAfterCommission();
     this.planetInfoText.setText(
       `${this.planet.name}\n` +
       `Platoons: ${this.platoonCount}/${MAX_PLATOONS_PER_PLANET}\n` +
-      `Population: ${this.planet.population.toLocaleString()} → ${popAfter.toLocaleString()}`
+      `Population: ${this.planet.population.toLocaleString()} → ${popAfter.toLocaleString()}`,
     );
   }
 
@@ -587,7 +587,7 @@ export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
     const cost = this.getTotalCost();
     this.costText.setText(`${cost.toLocaleString()} Credits`);
 
-    if (!this.planet) return;
+    if (!this.planet) {return;}
 
     const canAfford = this.planet.resources.credits >= cost;
     this.costText.setColor(canAfford ? TEXT_COLOR : ERROR_COLOR);

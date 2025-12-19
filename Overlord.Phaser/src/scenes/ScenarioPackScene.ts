@@ -28,19 +28,19 @@ const DEFAULT_PACK: ScenarioPack = {
     name: 'Earth Federation',
     leader: 'Admiral Chen',
     lore: 'The original Earth forces, seeking to expand their galactic influence through diplomacy and strength.',
-    colorTheme: 0x4488ff
+    colorTheme: 0x4488ff,
   },
   aiConfig: {
     personality: AIPersonality.Balanced,
-    difficulty: AIDifficulty.Normal
+    difficulty: AIDifficulty.Normal,
   },
   galaxyTemplate: {
     planetCount: { min: 4, max: 6 },
     planetTypes: [PlanetType.Volcanic, PlanetType.Desert, PlanetType.Tropical, PlanetType.Metropolis],
-    resourceAbundance: 'standard'
+    resourceAbundance: 'standard',
   },
   isDefault: true,
-  featured: true
+  featured: true,
 };
 
 /**
@@ -55,18 +55,18 @@ const AGGRESSIVE_PACK: ScenarioPack = {
     name: 'Martian Dominion',
     leader: 'Commander Kratos',
     lore: 'A militaristic faction from Mars, forged in the fires of conquest and driven by an unquenchable thirst for expansion.',
-    colorTheme: 0xff4444
+    colorTheme: 0xff4444,
   },
   aiConfig: {
     personality: AIPersonality.Aggressive,
-    difficulty: AIDifficulty.Hard
+    difficulty: AIDifficulty.Hard,
   },
   galaxyTemplate: {
     planetCount: { min: 3, max: 5 },
     planetTypes: [PlanetType.Volcanic, PlanetType.Desert],
-    resourceAbundance: 'scarce'
+    resourceAbundance: 'scarce',
   },
-  featured: false
+  featured: false,
 };
 
 /**
@@ -81,18 +81,18 @@ const ECONOMIC_PACK: ScenarioPack = {
     name: 'Trade Consortium',
     leader: 'Magistrate Midas',
     lore: 'A coalition of wealthy merchant houses who believe that credits speak louder than weapons.',
-    colorTheme: 0xffcc00
+    colorTheme: 0xffcc00,
   },
   aiConfig: {
     personality: AIPersonality.Economic,
-    difficulty: AIDifficulty.Normal
+    difficulty: AIDifficulty.Normal,
   },
   galaxyTemplate: {
     planetCount: { min: 5, max: 8 },
     planetTypes: [PlanetType.Tropical, PlanetType.Metropolis],
-    resourceAbundance: 'rich'
+    resourceAbundance: 'rich',
   },
-  featured: false
+  featured: false,
 };
 
 export class ScenarioPackScene extends Phaser.Scene {
@@ -126,8 +126,8 @@ export class ScenarioPackScene extends Phaser.Scene {
       {
         fontSize: '42px',
         color: '#ffffff',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.titleText.setOrigin(0.5, 0);
     this.titleText.setScrollFactor(0);
@@ -139,8 +139,8 @@ export class ScenarioPackScene extends Phaser.Scene {
       'Choose your challenge',
       {
         fontSize: '16px',
-        color: '#aaaaaa'
-      }
+        color: '#aaaaaa',
+      },
     );
     subtitleText.setOrigin(0.5, 0);
     subtitleText.setScrollFactor(0);
@@ -207,7 +207,7 @@ export class ScenarioPackScene extends Phaser.Scene {
    */
   private showPackDetail(packId: string): void {
     const pack = this.packManager.getPackById(packId);
-    if (!pack) return;
+    if (!pack) {return;}
 
     const activePack = this.packManager.getActivePack();
 
@@ -229,8 +229,8 @@ export class ScenarioPackScene extends Phaser.Scene {
       '← Back to Menu',
       {
         fontSize: '18px',
-        color: '#4488ff'
-      }
+        color: '#4488ff',
+      },
     );
     backButton.setScrollFactor(0);
     backButton.setInteractive({ useHandCursor: true });

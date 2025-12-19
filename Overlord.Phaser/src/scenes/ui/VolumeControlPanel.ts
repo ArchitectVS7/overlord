@@ -24,7 +24,7 @@ const COLORS = {
   TEXT: '#ffffff',
   TEXT_LABEL: '#aaaacc',
   MUTE_ACTIVE: 0xff4444,
-  MUTE_INACTIVE: 0x444466
+  MUTE_INACTIVE: 0x444466,
 };
 
 /**
@@ -100,7 +100,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
     this.titleText = this.scene.add.text(PANEL_WIDTH / 2, 20, 'Audio Settings', {
       fontSize: '24px',
       color: COLORS.TEXT,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.titleText.setOrigin(0.5, 0.5);
     this.add(this.titleText);
@@ -120,7 +120,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
         this.masterValueLabel = valueLabel;
       },
       () => this.audioManager.getMasterVolume(),
-      (value) => this.setMasterVolume(value)
+      (value) => this.setMasterVolume(value),
     );
 
     // SFX Volume
@@ -134,7 +134,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
         this.sfxValueLabel = valueLabel;
       },
       () => this.audioManager.getSfxVolume(),
-      (value) => this.setSfxVolume(value)
+      (value) => this.setSfxVolume(value),
     );
 
     // Music Volume
@@ -148,7 +148,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
         this.musicValueLabel = valueLabel;
       },
       () => this.audioManager.getMusicVolume(),
-      (value) => this.setMusicVolume(value)
+      (value) => this.setMusicVolume(value),
     );
   }
 
@@ -162,14 +162,14 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
       valueLabel: Phaser.GameObjects.Text
     ) => void,
     getValue: () => number,
-    setValue: (value: number) => void
+    setValue: (value: number) => void,
   ): void {
     const sliderX = (PANEL_WIDTH - SLIDER_WIDTH) / 2;
 
     // Label
     const label = this.scene.add.text(sliderX, y - 15, labelText, {
       fontSize: '14px',
-      color: COLORS.TEXT_LABEL
+      color: COLORS.TEXT_LABEL,
     });
     this.add(label);
 
@@ -178,7 +178,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
       sliderX + SLIDER_WIDTH / 2,
       y + SLIDER_HEIGHT / 2,
       SLIDER_WIDTH,
-      SLIDER_HEIGHT
+      SLIDER_HEIGHT,
     );
     track.setFillStyle(COLORS.SLIDER_TRACK);
     track.setOrigin(0.5, 0.5);
@@ -191,7 +191,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
       sliderX,
       y + SLIDER_HEIGHT / 2,
       fillWidth,
-      SLIDER_HEIGHT - 4
+      SLIDER_HEIGHT - 4,
     );
     fill.setFillStyle(COLORS.SLIDER_FILL);
     fill.setOrigin(0, 0.5);
@@ -204,8 +204,8 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
       `${getValue()}%`,
       {
         fontSize: '14px',
-        color: COLORS.TEXT
-      }
+        color: COLORS.TEXT,
+      },
     );
     valueLabel.setOrigin(0, 0.5);
     this.add(valueLabel);
@@ -229,10 +229,10 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
       buttonX,
       buttonY,
       120,
-      40
+      40,
     );
     this.muteButton.setFillStyle(
-      this.audioManager.isMuted() ? COLORS.MUTE_ACTIVE : COLORS.MUTE_INACTIVE
+      this.audioManager.isMuted() ? COLORS.MUTE_ACTIVE : COLORS.MUTE_INACTIVE,
     );
     this.muteButton.setOrigin(0.5, 0.5);
     this.muteButton.setInteractive({ useHandCursor: true });
@@ -241,7 +241,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
     // Mute label
     this.muteLabel = this.scene.add.text(buttonX, buttonY, 'Mute All', {
       fontSize: '16px',
-      color: COLORS.TEXT
+      color: COLORS.TEXT,
     });
     this.muteLabel.setOrigin(0.5, 0.5);
     this.add(this.muteLabel);
@@ -253,8 +253,8 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
       this.audioManager.isMuted() ? 'Muted' : '',
       {
         fontSize: '14px',
-        color: '#ff4444'
-      }
+        color: '#ff4444',
+      },
     );
     this.muteIndicator.setOrigin(0.5, 0.5);
     this.add(this.muteIndicator);
@@ -310,7 +310,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
     const fillWidth = (value / 100) * SLIDER_WIDTH;
     fill.width = fillWidth;
     fill.setFillStyle(
-      this.audioManager.isMuted() ? COLORS.SLIDER_FILL_MUTED : COLORS.SLIDER_FILL
+      this.audioManager.isMuted() ? COLORS.SLIDER_FILL_MUTED : COLORS.SLIDER_FILL,
     );
   }
 

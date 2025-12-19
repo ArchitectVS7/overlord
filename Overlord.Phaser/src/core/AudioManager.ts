@@ -143,7 +143,7 @@ export class AudioManager {
    * @returns Effective volume (0-100)
    */
   public getEffectiveSfxVolume(): number {
-    if (this.muted) return 0;
+    if (this.muted) {return 0;}
     return Math.round((this.masterVolume * this.sfxVolume) / 100);
   }
 
@@ -152,7 +152,7 @@ export class AudioManager {
    * @returns Effective volume (0-100)
    */
   public getEffectiveMusicVolume(): number {
-    if (this.muted) return 0;
+    if (this.muted) {return 0;}
     return Math.round((this.masterVolume * this.musicVolume) / 100);
   }
 
@@ -252,7 +252,7 @@ export class AudioManager {
       masterVolume: this.masterVolume,
       sfxVolume: this.sfxVolume,
       musicVolume: this.musicVolume,
-      isMuted: this.muted
+      isMuted: this.muted,
     };
   }
 

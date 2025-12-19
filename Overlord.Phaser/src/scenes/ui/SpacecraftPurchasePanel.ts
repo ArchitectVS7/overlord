@@ -58,7 +58,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     CraftType.BattleCruiser,
     CraftType.CargoCruiser,
     CraftType.SolarSatellite,
-    CraftType.AtmosphereProcessor
+    CraftType.AtmosphereProcessor,
   ];
 
   // Callbacks
@@ -112,7 +112,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
@@ -120,7 +120,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     this.fleetCountText = this.scene.add.text(PADDING, 50, 'Fleet: 0/32', {
       fontSize: '13px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.fleetCountText);
 
@@ -145,7 +145,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
       fontFamily: 'Arial',
-      color: '#999999'
+      color: '#999999',
     });
     closeText.setOrigin(0.5);
     closeContainer.add(closeText);
@@ -158,7 +158,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
   }
 
   public show(planet: PlanetEntity, onClose?: () => void, currentFleetCount?: number): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.planet = planet;
     this.closeCallback = onClose || null;
@@ -171,7 +171,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     this.setAlpha(0);
@@ -179,14 +179,14 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 100,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     this.updateUI();
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -201,7 +201,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 
@@ -235,24 +235,24 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
   }
 
   public canAfford(craftType: CraftType): boolean {
-    if (!this.planet) return false;
+    if (!this.planet) {return false;}
 
     // Check fleet limit
-    if (this.fleetCount >= MAX_FLEET_LIMIT) return false;
+    if (this.fleetCount >= MAX_FLEET_LIMIT) {return false;}
 
     // Check resources
     const cost = CraftCosts.getCost(craftType);
-    if (!this.planet.resources.canAfford(cost)) return false;
+    if (!this.planet.resources.canAfford(cost)) {return false;}
 
     // Check crew requirements
     const crewRequired = CraftCrewRequirements.getCrewRequired(craftType);
-    if (this.planet.population < crewRequired) return false;
+    if (this.planet.population < crewRequired) {return false;}
 
     return true;
   }
 
   public handlePurchase(craftType: CraftType): void {
-    if (!this.planet || !this.canAfford(craftType)) return;
+    if (!this.planet || !this.canAfford(craftType)) {return;}
 
     // If CraftSystem is provided, call it directly
     if (this.craftSystem) {
@@ -282,7 +282,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     // Clear existing cards
     this.craftCardsContainer.removeAll(true);
 
-    if (!this.planet) return;
+    if (!this.planet) {return;}
 
     // Create card for each craft type
     this.availableCraftTypes.forEach((craftType, index) => {
@@ -306,7 +306,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.craftCardsContainer.add(nameText);
 
@@ -316,7 +316,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
       `Cost: ${cost.credits.toLocaleString()}cr, ${cost.minerals.toLocaleString()}min, ${cost.fuel.toLocaleString()}fuel`, {
       fontSize: '11px',
       fontFamily: 'Arial',
-      color: canAfford ? LABEL_COLOR : WARNING_COLOR
+      color: canAfford ? LABEL_COLOR : WARNING_COLOR,
     });
     this.craftCardsContainer.add(costText);
 
@@ -325,7 +325,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const crewText = this.scene.add.text(10, y + 44, `Crew: ${crew} population`, {
       fontSize: '11px',
       fontFamily: 'Arial',
-      color: this.planet && this.planet.population >= crew ? LABEL_COLOR : WARNING_COLOR
+      color: this.planet && this.planet.population >= crew ? LABEL_COLOR : WARNING_COLOR,
     });
     this.craftCardsContainer.add(crewText);
 
@@ -333,7 +333,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const capText = this.scene.add.text(10, y + 60, this.getCraftCapabilities(craftType), {
       fontSize: '10px',
       fontFamily: 'Arial',
-      color: SUCCESS_COLOR
+      color: SUCCESS_COLOR,
     });
     this.craftCardsContainer.add(capText);
 
@@ -354,7 +354,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const buttonText = this.scene.add.text(x + buttonWidth / 2, y + BUTTON_HEIGHT / 2, 'Purchase', {
       fontSize: '12px',
       fontFamily: 'Arial',
-      color: enabled ? TEXT_COLOR : DISABLED_COLOR
+      color: enabled ? TEXT_COLOR : DISABLED_COLOR,
     });
     buttonText.setOrigin(0.5);
     this.craftCardsContainer.add(buttonText);

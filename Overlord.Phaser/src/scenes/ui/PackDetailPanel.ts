@@ -89,14 +89,14 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     this.titleText = this.scene.add.text(0, 0, '', {
       fontSize: '24px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
     // Version
     this.versionText = this.scene.add.text(0, 32, '', {
       fontSize: '12px',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.versionText);
 
@@ -104,7 +104,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     this.descriptionText = this.scene.add.text(0, 55, '', {
       fontSize: '14px',
       color: TEXT_COLOR,
-      wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.descriptionText);
 
@@ -112,20 +112,20 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     const factionLabel = this.scene.add.text(0, 110, 'FACTION', {
       fontSize: '11px',
       color: LABEL_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(factionLabel);
 
     this.factionNameText = this.scene.add.text(0, 128, '', {
       fontSize: '16px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.factionNameText);
 
     this.leaderText = this.scene.add.text(0, 150, '', {
       fontSize: '14px',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.leaderText);
 
@@ -133,7 +133,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
       fontSize: '13px',
       color: LORE_COLOR,
       fontStyle: 'italic',
-      wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.loreText);
 
@@ -141,25 +141,25 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     const configLabel = this.scene.add.text(0, 270, 'CONFIGURATION', {
       fontSize: '11px',
       color: LABEL_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(configLabel);
 
     this.difficultyText = this.scene.add.text(0, 290, '', {
       fontSize: '14px',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.difficultyText);
 
     this.personalityText = this.scene.add.text(0, 312, '', {
       fontSize: '14px',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.personalityText);
 
     this.planetCountText = this.scene.add.text(0, 334, '', {
       fontSize: '14px',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.contentContainer.add(this.planetCountText);
 
@@ -167,7 +167,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     this.statusText = this.scene.add.text(0, 380, '', {
       fontSize: '14px',
       color: ACTIVE_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.statusText);
 
@@ -175,7 +175,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     this.requirementsText = this.scene.add.text(0, 400, '', {
       fontSize: '12px',
       color: LOCKED_COLOR,
-      wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.requirementsText);
 
@@ -184,7 +184,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
       PANEL_WIDTH / 2 - BUTTON_WIDTH - 10,
       PANEL_HEIGHT - PADDING - BUTTON_HEIGHT - 20,
       'Select Pack',
-      () => this.selectPack()
+      () => this.selectPack(),
     );
     this.add(this.selectButton);
 
@@ -193,7 +193,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
       PANEL_WIDTH / 2 + 10,
       PANEL_HEIGHT - PADDING - BUTTON_HEIGHT - 20,
       'Back',
-      () => this.goBack()
+      () => this.goBack(),
     );
     this.add(this.backButton);
   }
@@ -209,7 +209,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
     const text = this.scene.add.text(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2, label, {
       fontSize: '16px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5, 0.5);
     container.add(text);
@@ -252,7 +252,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
    * Update the display with pack data
    */
   private updateDisplay(): void {
-    if (!this.pack) return;
+    if (!this.pack) {return;}
 
     this.titleText.setText(this.pack.name);
     this.versionText.setText(`Version ${this.pack.version}`);
@@ -337,7 +337,7 @@ export class PackDetailPanel extends Phaser.GameObjects.Container {
       name: this.pack.name,
       leader: this.pack.faction.leader,
       difficulty: this.pack.aiConfig.difficulty,
-      personality: this.pack.aiConfig.personality
+      personality: this.pack.aiConfig.personality,
     };
   }
 

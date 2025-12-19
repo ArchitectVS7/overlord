@@ -73,7 +73,7 @@ export class TutorialStepPanel {
     this.stepText = this.scene.add.text(PADDING, PADDING, '', {
       fontSize: '16px',
       color: STEP_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.container.add(this.stepText);
 
@@ -85,8 +85,8 @@ export class TutorialStepPanel {
       {
         fontSize: '20px',
         color: TEXT_COLOR,
-        wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
-      }
+        wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
+      },
     );
     this.container.add(this.instructionText);
 
@@ -98,8 +98,8 @@ export class TutorialStepPanel {
       {
         fontSize: '24px',
         color: COMPLETE_COLOR,
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.completionText.setOrigin(0.5);
     this.completionText.setVisible(false);
@@ -112,8 +112,8 @@ export class TutorialStepPanel {
       'Skip Tutorial',
       {
         fontSize: '14px',
-        color: '#666666'
-      }
+        color: '#666666',
+      },
     );
     this.skipButton.setOrigin(1, 1);
     this.skipButton.setInteractive({ useHandCursor: true });
@@ -169,9 +169,9 @@ export class TutorialStepPanel {
             this.instructionText.setVisible(true);
             this.completionText.setVisible(false);
             this.onCompletionDone?.();
-          }
+          },
         });
-      }
+      },
     });
   }
 

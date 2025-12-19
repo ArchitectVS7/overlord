@@ -51,7 +51,7 @@ export class AdminUIEditorController {
     defaultY: number,
     width: number = 200,
     height: number = 100,
-    centered: boolean = true
+    centered: boolean = true,
   ): void {
     const panel: DraggablePanel = {
       container,
@@ -145,7 +145,7 @@ export class AdminUIEditorController {
     const offsetY = panel.centered ? -panel.height / 2 : 0;
     container.setInteractive(
       new Phaser.Geom.Rectangle(offsetX, offsetY, panel.width, panel.height),
-      Phaser.Geom.Rectangle.Contains
+      Phaser.Geom.Rectangle.Contains,
     );
     this.scene.input.setDraggable(container, true);
 
@@ -189,7 +189,7 @@ export class AdminUIEditorController {
       panel.container.x - offsetX,
       panel.container.y - offsetY,
       panel.width,
-      panel.height
+      panel.height,
     );
     graphics.setDepth(9999);
     graphics.setScrollFactor(0);
@@ -212,7 +212,7 @@ export class AdminUIEditorController {
         panel.container.x - offsetX,
         panel.container.y - offsetY,
         panel.width,
-        panel.height
+        panel.height,
       );
     }
   }
@@ -247,7 +247,7 @@ export class AdminUIEditorController {
         panel.container.x - offsetX,
         panel.container.y - offsetY,
         panel.width,
-        panel.height
+        panel.height,
       );
     }
   }
@@ -259,7 +259,7 @@ export class AdminUIEditorController {
     panel: DraggablePanel,
     _pointer: Phaser.Input.Pointer,
     dragX: number,
-    dragY: number
+    dragY: number,
   ): void {
     const camera = this.scene.cameras.main;
 
@@ -287,7 +287,7 @@ export class AdminUIEditorController {
       panel.container.x,
       panel.container.y,
       panel.originalX,
-      panel.originalY
+      panel.originalY,
     );
 
     // Hide position overlay
@@ -305,7 +305,7 @@ export class AdminUIEditorController {
         panel.container.x - offsetX,
         panel.container.y - offsetY,
         panel.width,
-        panel.height
+        panel.height,
       );
     }
   }
@@ -375,7 +375,7 @@ export class AdminUIEditorController {
     x: number,
     y: number,
     defaultX: number,
-    defaultY: number
+    defaultY: number,
   ): void {
     const position: PanelPosition = {
       sceneName: this.sceneName,

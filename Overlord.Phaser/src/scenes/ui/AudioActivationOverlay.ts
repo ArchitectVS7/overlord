@@ -18,7 +18,7 @@ const COLORS = {
   BOX_BORDER: 0x4a4a6a,
   TEXT: '#ffffff',
   TEXT_SECONDARY: '#aaaacc',
-  ICON: '#4488ff'
+  ICON: '#4488ff',
 };
 
 /**
@@ -71,7 +71,7 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
       centerX,
       centerY,
       width,
-      height
+      height,
     );
     this.backgroundOverlay.setFillStyle(COLORS.OVERLAY, COLORS.OVERLAY_ALPHA);
     this.backgroundOverlay.setOrigin(0.5, 0.5);
@@ -87,7 +87,7 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
       centerY - boxHeight / 2,
       boxWidth,
       boxHeight,
-      15
+      15,
     );
     this.messageBox.lineStyle(2, COLORS.BOX_BORDER);
     this.messageBox.strokeRoundedRect(
@@ -95,13 +95,13 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
       centerY - boxHeight / 2,
       boxWidth,
       boxHeight,
-      15
+      15,
     );
     this.add(this.messageBox);
 
     // Speaker icon (using text emoji)
     this.iconText = this.scene.add.text(centerX, centerY - 50, '🔊', {
-      fontSize: '48px'
+      fontSize: '48px',
     });
     this.iconText.setOrigin(0.5, 0.5);
     this.add(this.iconText);
@@ -114,8 +114,8 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
       {
         fontSize: '18px',
         color: COLORS.TEXT,
-        align: 'center'
-      }
+        align: 'center',
+      },
     );
     this.messageText.setOrigin(0.5, 0.5);
     this.add(this.messageText);
@@ -128,8 +128,8 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
       {
         fontSize: '14px',
         color: COLORS.TEXT_SECONDARY,
-        align: 'center'
-      }
+        align: 'center',
+      },
     );
     this.subText.setOrigin(0.5, 0.5);
     this.add(this.subText);
@@ -139,7 +139,7 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
       centerX,
       centerY,
       width,
-      height
+      height,
     );
     this.interactiveRegion.setFillStyle(0x000000, 0);
     this.interactiveRegion.setOrigin(0.5, 0.5);
@@ -183,7 +183,7 @@ export class AudioActivationOverlay extends Phaser.GameObjects.Container {
    * Activate audio and hide overlay
    */
   public activate(): void {
-    if (this.activated) return;
+    if (this.activated) {return;}
 
     this.activated = true;
     this.audioManager.activate();

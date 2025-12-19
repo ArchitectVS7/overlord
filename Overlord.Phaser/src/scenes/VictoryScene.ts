@@ -3,6 +3,7 @@ import { GameState } from '@core/GameState';
 import { FactionType, VictoryResult } from '@core/models/Enums';
 import { SaveSystem, SaveData } from '@core/SaveSystem';
 import { getSaveService } from '@services/SaveService';
+import { getUserStatisticsService } from '@services/UserStatisticsService';
 
 /**
  * Victory campaign statistics for display
@@ -43,6 +44,9 @@ export class VictoryScene extends Phaser.Scene {
 
     // Calculate statistics
     this.statistics = this.calculateStatistics();
+
+    // Story 10-7: Record victory in user statistics
+    this.recordVictoryStats();
 
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
@@ -149,7 +153,7 @@ export class VictoryScene extends Phaser.Scene {
     }
 
     const playerPlanets = this.gameState.planets.filter(
-      p => p.owner === FactionType.Player
+      p => p.owner === FactionType.Player,
     );
 
     return {
@@ -162,10 +166,10 @@ export class VictoryScene extends Phaser.Scene {
       finalFood: this.gameState.playerFaction.resources.food,
       finalEnergy: this.gameState.playerFaction.resources.energy,
       totalPlatoons: this.gameState.platoons.filter(
-        p => p.owner === FactionType.Player
+        p => p.owner === FactionType.Player,
       ).length,
       totalCraft: this.gameState.craft.filter(
-        c => c.owner === FactionType.Player
+        c => c.owner === FactionType.Player,
       ).length,
     };
   }
@@ -204,7 +208,7 @@ export class VictoryScene extends Phaser.Scene {
       centerX,
       y,
       'Planets Controlled:',
-      `${stats.planetsConquered} / ${stats.totalPlanets}`
+      `${stats.planetsConquered} / ${stats.totalPlanets}`,
     );
     y += lineHeight;
 
@@ -249,7 +253,7 @@ export class VictoryScene extends Phaser.Scene {
     y: number,
     label: string,
     value: string,
-    valueColor: string = '#ffffff'
+    valueColor: string = '#ffffff',
   ): void {
     // Label on left
     this.add
@@ -316,7 +320,7 @@ export class VictoryScene extends Phaser.Scene {
       const saveData: SaveData = saveSystem.createSaveData(
         '0.4.0-supabase',
         0,
-        `Victory - Turn ${this.gameState.currentTurn}`
+        `Victory - Turn ${this.gameState.currentTurn}`,
       );
       saveData.victoryStatus = VictoryResult.PlayerVictory;
 
@@ -381,5 +385,31 @@ export class VictoryScene extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut',
     });
+  }
+
+  /**
+   * Story 10-7: Record victory statistics
+   */
+  private async recordVictoryStats(): Promise<void> {
+    const statsService = getUserStatisticsService();
+
+    try {
+      // Record campaign won
+      await statsService.recordCampaignWon();
+
+      // Record planets conquered from this campaign
+      if (this.statistics) {
+        for (let i = 0; i < this.statistics.planetsConquered; i++) {
+          await statsService.recordPlanetConquered();
+        }
+      }
+
+      // Stop playtime tracking (started in GalaxyMapScene)
+      await statsService.stopPlaytimeTracking();
+
+      console.log('Victory statistics recorded');
+    } catch (error) {
+      console.warn('Failed to record victory statistics:', error);
+    }
   }
 }

@@ -67,7 +67,7 @@ export class PlatoonSystem {
     troopCount: number,
     equipment: EquipmentLevel,
     weapon: WeaponLevel,
-    name?: string
+    name?: string,
   ): number {
     // Validate planet exists
     const planet = this.gameState.planetLookup.get(planetID);
@@ -158,7 +158,7 @@ export class PlatoonSystem {
    */
   public updateTraining(): void {
     const trainingPlatoons = this.gameState.platoons.filter(
-      p => p.isTraining && p.planetID === PlatoonSystem.StarbasePlanetID
+      p => p.isTraining && p.planetID === PlatoonSystem.StarbasePlanetID,
     );
 
     for (const platoon of trainingPlatoons) {
@@ -185,7 +185,7 @@ export class PlatoonSystem {
       platoon.troopCount,
       platoon.equipment,
       platoon.weapon,
-      platoon.trainingLevel
+      platoon.trainingLevel,
     );
   }
 
@@ -196,7 +196,7 @@ export class PlatoonSystem {
     troopCount: number,
     equipment: EquipmentLevel,
     weapon: WeaponLevel,
-    trainingLevel: number = 100
+    trainingLevel: number = 100,
   ): number {
     return PlatoonModifiers.calculateMilitaryStrength(troopCount, equipment, weapon, trainingLevel);
   }
@@ -259,7 +259,7 @@ export class PlatoonSystem {
     planetID: number,
     troopCount: number,
     equipment: EquipmentLevel,
-    weapon: WeaponLevel
+    weapon: WeaponLevel,
   ): boolean {
     const planet = this.gameState.planetLookup.get(planetID);
     if (!planet) {

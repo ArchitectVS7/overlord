@@ -87,7 +87,7 @@ export class NavigationSystem {
     if (sourcePlanet.resources.fuel < NavigationSystem.FuelCostPerJump) {
       this.onMovementFailed?.(
         craftID,
-        `Insufficient fuel (need ${NavigationSystem.FuelCostPerJump}, have ${sourcePlanet.resources.fuel})`
+        `Insufficient fuel (need ${NavigationSystem.FuelCostPerJump}, have ${sourcePlanet.resources.fuel})`,
       );
       return false;
     }
@@ -121,7 +121,7 @@ export class NavigationSystem {
         const battle = this.combatSystem.initiateBattle(
           destinationPlanetID,
           craft.owner,
-          craft.carriedPlatoonIDs
+          craft.carriedPlatoonIDs,
         );
 
         if (battle) {
@@ -154,7 +154,7 @@ export class NavigationSystem {
    */
   public getPlayerShipsAtPlanet(planetID: number): CraftEntity[] {
     return this.gameState.craft.filter(
-      c => c.planetID === planetID && c.owner === FactionType.Player
+      c => c.planetID === planetID && c.owner === FactionType.Player,
     );
   }
 

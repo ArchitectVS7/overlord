@@ -120,7 +120,7 @@ export class ScenarioManager {
       scenarioId,
       completed: true,
       completedDate: new Date(),
-      attempts: (this.completions.get(scenarioId)?.attempts || 0) + 1
+      attempts: (this.completions.get(scenarioId)?.attempts || 0) + 1,
     };
 
     this.completions.set(scenarioId, completion);
@@ -145,7 +145,7 @@ export class ScenarioManager {
         'easy': 0,
         'medium': 100,
         'hard': 200,
-        'expert': 250
+        'expert': 250,
       };
       return difficultyPriority[scenario.difficulty];
     }
@@ -155,7 +155,7 @@ export class ScenarioManager {
       'easy': 300,
       'medium': 400,
       'hard': 500,
-      'expert': 600
+      'expert': 600,
     };
     return difficultyPriority[scenario.difficulty];
   }

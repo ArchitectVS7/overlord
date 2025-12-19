@@ -112,8 +112,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       {
         fontSize: '32px',
         color: '#ffffff',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     titleText.setOrigin(0.5, 0);
     titleText.setScrollFactor(0);
@@ -145,7 +145,7 @@ export class ScenarioGameScene extends Phaser.Scene {
       delay: 500,
       callback: this.onConditionCheck,
       callbackScope: this,
-      loop: true
+      loop: true,
     });
   }
 
@@ -161,7 +161,7 @@ export class ScenarioGameScene extends Phaser.Scene {
     this.tutorialStepPanel = new TutorialStepPanel(this);
 
     // Initialize tutorial if scenario has steps
-    if (!this.scenario) return;
+    if (!this.scenario) {return;}
 
     const hasTutorial = this.tutorialManager.initialize(this.scenario);
 
@@ -199,7 +199,7 @@ export class ScenarioGameScene extends Phaser.Scene {
     this.tutorialStepPanel.showStep(
       step,
       this.tutorialManager.getCurrentStepIndex() + 1,
-      this.tutorialManager.getStepCount()
+      this.tutorialManager.getStepCount(),
     );
 
     // Apply highlight if specified
@@ -263,7 +263,7 @@ export class ScenarioGameScene extends Phaser.Scene {
    * @param defeatReason Defeat reason (for defeat)
    */
   public showResults(isVictory: boolean, conditionMet?: string, defeatReason?: string): void {
-    if (!this.scenario) return;
+    if (!this.scenario) {return;}
 
     // Pause gameplay
     this.scenarioPaused = true;
@@ -274,7 +274,7 @@ export class ScenarioGameScene extends Phaser.Scene {
     // Get star targets from scenario or use defaults
     const targets: StarTargets = {
       threeStarTime: (this.scenario as any).starTargets?.threeStarTime ?? 120,
-      twoStarTime: (this.scenario as any).starTargets?.twoStarTime ?? 240
+      twoStarTime: (this.scenario as any).starTargets?.twoStarTime ?? 240,
     };
 
     // Create results object
@@ -285,7 +285,7 @@ export class ScenarioGameScene extends Phaser.Scene {
       targets,
       conditionMet,
       defeatReason,
-      1 // attempts (to be tracked in Story 1-6)
+      1, // attempts (to be tracked in Story 1-6)
     );
 
     // Store results for later use
@@ -314,7 +314,7 @@ export class ScenarioGameScene extends Phaser.Scene {
       completionService.markCompleted(
         this.lastResults.scenarioId,
         this.lastResults.completionTime,
-        this.lastResults.starRating
+        this.lastResults.starRating,
       );
     }
 
@@ -371,7 +371,7 @@ export class ScenarioGameScene extends Phaser.Scene {
     const results = this.victorySystem.evaluateAll(
       this.scenario.victoryConditions,
       this.gameState,
-      startTurn
+      startTurn,
     );
 
     if (results.allMet) {
@@ -421,7 +421,7 @@ export class ScenarioGameScene extends Phaser.Scene {
    * Create basic HUD elements
    */
   private createHUD(): void {
-    if (!this.gameState) return;
+    if (!this.gameState) {return;}
 
     // Turn counter
     const turnText = this.add.text(
@@ -430,8 +430,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       `Turn: ${this.gameState.currentTurn}`,
       {
         fontSize: '18px',
-        color: '#ffffff'
-      }
+        color: '#ffffff',
+      },
     );
     turnText.setScrollFactor(0);
 
@@ -443,8 +443,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       `Credits: ${resources.credits} | Minerals: ${resources.minerals}`,
       {
         fontSize: '14px',
-        color: '#aaaaaa'
-      }
+        color: '#aaaaaa',
+      },
     );
     resourceText.setScrollFactor(0);
 
@@ -455,8 +455,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       'Press O for Objectives',
       {
         fontSize: '14px',
-        color: '#666666'
-      }
+        color: '#666666',
+      },
     );
     helpText.setOrigin(1, 0);
     helpText.setScrollFactor(0);
@@ -466,13 +466,13 @@ export class ScenarioGameScene extends Phaser.Scene {
    * Update objectives progress display
    */
   private updateObjectivesProgress(): void {
-    if (!this.gameState || !this.scenario) return;
+    if (!this.gameState || !this.scenario) {return;}
 
     const startTurn = this.gameState.scenarioStartTurn ?? 1;
     const results = this.victorySystem.evaluateAll(
       this.scenario.victoryConditions,
       this.gameState,
-      startTurn
+      startTurn,
     );
 
     this.objectivesPanel.updateProgress(results.conditions);
@@ -501,8 +501,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       {
         fontSize: '32px',
         color: '#ff4444',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.errorText.setOrigin(0.5);
 
@@ -512,8 +512,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       message,
       {
         fontSize: '18px',
-        color: '#ffffff'
-      }
+        color: '#ffffff',
+      },
     );
     detailText.setOrigin(0.5);
 
@@ -524,8 +524,8 @@ export class ScenarioGameScene extends Phaser.Scene {
       'Return to Menu',
       {
         fontSize: '20px',
-        color: '#4488ff'
-      }
+        color: '#4488ff',
+      },
     );
     returnButton.setOrigin(0.5);
     returnButton.setInteractive({ useHandCursor: true });

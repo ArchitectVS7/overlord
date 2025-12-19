@@ -10,7 +10,7 @@ import {
   ScenarioPack,
   PackDisplayData,
   UnlockRequirement,
-  createPackDisplayData
+  createPackDisplayData,
 } from './models/ScenarioPackModels';
 
 const STORAGE_KEY = 'overlord_active_pack';
@@ -141,7 +141,7 @@ export class ScenarioPackManager {
 
     // Check if all requirements are met
     return !pack.unlockRequirements.every(req =>
-      this.isRequirementMet(req)
+      this.isRequirementMet(req),
     );
   }
 
@@ -209,8 +209,8 @@ export class ScenarioPackManager {
       createPackDisplayData(
         pack,
         this.isPackLocked(pack.id),
-        activePack?.id === pack.id
-      )
+        activePack?.id === pack.id,
+      ),
     );
   }
 

@@ -30,11 +30,14 @@ import { NavigationSystem } from '@core/NavigationSystem';
 import { CombatSystem } from '@core/CombatSystem';
 import { AIDecisionSystem } from '@core/AIDecisionSystem';
 import { AudioManager } from '@core/AudioManager';
+import { SaveSystem } from '@core/SaveSystem';
 import { VolumeControlPanel } from './ui/VolumeControlPanel';
+import { SaveGamePanel } from './ui/SaveGamePanel';
 import { AdminEditModeIndicator } from './ui/AdminEditModeIndicator';
 import { AdminUIEditorController } from '@services/AdminUIEditorController';
 import { getAdminModeService } from '@services/AdminModeService';
 import { getUIPanelPositionService } from '@services/UIPanelPositionService';
+import { getSaveService } from '@services/SaveService';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -66,6 +69,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private combatSystem!: CombatSystem;
   private aiDecisionSystem!: AIDecisionSystem;
   private volumeControlPanel!: VolumeControlPanel;
+  private saveGamePanel!: SaveGamePanel;
   private adminEditIndicator!: AdminEditModeIndicator;
   private adminUIEditor!: AdminUIEditorController;
   private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
@@ -109,7 +113,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.inputSystem = new InputSystem({
       enableKeyboard: true,
       enableMouse: true,
-      enableFocusWrap: true
+      enableFocusWrap: true,
     });
 
     // Initialize input manager (Phaser integration)
@@ -117,7 +121,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       hoverTint: 0xaaaaaa,
       focusBorderColor: 0xffff00,
       focusBorderWidth: 3,
-      hoverCursor: 'pointer'
+      hoverCursor: 'pointer',
     });
 
     // Validate state
@@ -174,7 +178,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.cameras.main.width - 120,
       95,
       this.gameState,
-      this.phaseProcessor
+      this.phaseProcessor,
     );
     this.resourceHUD.setScrollFactor(0);
     this.resourceHUD.setDepth(500);
@@ -183,7 +187,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.buildingMenuPanel = new BuildingMenuPanel(
       this,
       this.gameState,
-      this.phaseProcessor.getBuildingSystem()
+      this.phaseProcessor.getBuildingSystem(),
     );
 
     // Wire up PlanetInfoPanel Build button to BuildingMenuPanel
@@ -258,10 +262,10 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.platoonDetailsPanel.onLoadRequest = (platoonID) => {
       // Get the planet where this platoon is located
       const platoon = this.gameState.platoonLookup.get(platoonID);
-      if (!platoon || platoon.planetID < 0) return;
+      if (!platoon || platoon.planetID < 0) {return;}
 
       const planet = this.gameState.planetLookup.get(platoon.planetID);
-      if (!planet) return;
+      if (!planet) {return;}
 
       // Find Battle Cruisers at this planet
       const cruisers = this.entitySystem.getCraftAtPlanet(planet.id).filter(c => c.type === 'BattleCruiser');
@@ -298,11 +302,11 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.planetInfoPanel.onNavigateClick = (planet) => {
       // Get spacecraft at this planet
       const craft = this.entitySystem.getCraftAtPlanet(planet.id);
-      if (craft.length === 0) return;
+      if (craft.length === 0) {return;}
 
       // For prototype, navigate first available craft
       const firstCraft = craft[0];
-      if (firstCraft.inTransit) return;
+      if (firstCraft.inTransit) {return;}
 
       this.planetInfoPanel.hide();
       this.spacecraftNavigationPanel.show(firstCraft, this.galaxy.planets, () => {
@@ -337,7 +341,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       aiResourceSystem,
       aiBuildingSystem,
       this.craftSystem,
-      this.platoonSystem
+      this.platoonSystem,
     );
 
     // Set opponent info panel - Story 7-2
@@ -359,7 +363,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       if (planet) {
         this.notificationManager.showNotification(
           `AI constructed ${buildingType} on ${planet.name}`,
-          'warning'
+          'warning',
         );
       }
     };
@@ -369,7 +373,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       if (planet) {
         this.notificationManager.showNotification(
           `Enemy fleet detected near ${planet.name}!`,
-          'danger'
+          'danger',
         );
       }
     };
@@ -377,7 +381,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up PlanetInfoPanel Invade button to InvasionPanel
     this.planetInfoPanel.onInvadeClick = (planet) => {
       // Only allow invading AI-owned planets
-      if (planet.owner !== FactionType.AI) return;
+      if (planet.owner !== FactionType.AI) {return;}
 
       // Get player cruisers with loaded platoons at this planet (nearby for invasion)
       const playerCraft = Array.from(this.gameState.craftLookup.values())
@@ -421,9 +425,9 @@ export class GalaxyMapScene extends Phaser.Scene {
         resourcesCaptured: victory ? {
           credits: Math.floor(planet.population * 10),
           minerals: Math.floor(planet.population * 5),
-          fuel: Math.floor(planet.population * 2)
+          fuel: Math.floor(planet.population * 2),
         } : undefined,
-        defeatReason: victory ? undefined : 'Superior enemy defenses overwhelmed your forces'
+        defeatReason: victory ? undefined : 'Superior enemy defenses overwhelmed your forces',
       }, () => {
         // On close callback
         if (victory) {
@@ -460,7 +464,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     incomeSystem.onLowMoraleIncomePenalty = (_planetID, planetName, penaltyPercent) => {
       this.showIncomeWarningNotification(
         `⚠️ Low morale on ${planetName} reducing income by ${penaltyPercent}%`,
-        'warning'
+        'warning',
       );
     };
 
@@ -469,7 +473,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       if (faction === FactionType.Player) {
         this.showIncomeWarningNotification(
           '⚠️ No planets owned - no income generated!',
-          'critical'
+          'critical',
         );
       }
     };
@@ -481,10 +485,20 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.volumeControlPanel = new VolumeControlPanel(this);
     this.volumeControlPanel.setPosition(
       this.cameras.main.width / 2 - 200,
-      this.cameras.main.height / 2 - 175
+      this.cameras.main.height / 2 - 175,
     );
     this.volumeControlPanel.setScrollFactor(0);
     this.volumeControlPanel.setDepth(1500);
+
+    // Create Save Game Panel - Story 10-3
+    this.saveGamePanel = new SaveGamePanel(this);
+    this.saveGamePanel.setPosition(
+      this.cameras.main.width / 2 - 250,
+      this.cameras.main.height / 2 - 225,
+    );
+    this.saveGamePanel.setScrollFactor(0);
+    this.saveGamePanel.setDepth(1500);
+    this.wireUpSavePanel();
 
     // Initialize Admin UI Editor
     this.setupAdminUIEditor();
@@ -529,7 +543,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       minX: minX - padding,
       maxX: maxX + padding,
       minY: minY - padding,
-      maxY: maxY + padding
+      maxY: maxY + padding,
     };
   }
 
@@ -537,46 +551,46 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Escape - Pause Menu
     this.inputManager.registerShortcut({
       key: 'Escape',
-      action: 'pause'
+      action: 'pause',
     });
 
     // H - Help
     this.inputManager.registerShortcut({
       key: 'h',
-      action: 'help'
+      action: 'help',
     });
 
     // O - Objectives
     this.inputManager.registerShortcut({
       key: 'o',
-      action: 'objectives'
+      action: 'objectives',
     });
 
     // M - Main Menu
     this.inputManager.registerShortcut({
       key: 'm',
-      action: 'mainMenu'
+      action: 'mainMenu',
     });
 
     // Ctrl+S - Save
     this.inputManager.registerShortcut({
       key: 's',
       ctrl: true,
-      action: 'save'
+      action: 'save',
     });
 
     // Ctrl+M - Mute Toggle
     this.inputManager.registerShortcut({
       key: 'm',
       ctrl: true,
-      action: 'mute'
+      action: 'mute',
     });
 
     // Ctrl+, - Audio Settings (Story 12-3)
     this.inputManager.registerShortcut({
       key: ',',
       ctrl: true,
-      action: 'audioSettings'
+      action: 'audioSettings',
     });
   }
 
@@ -597,7 +611,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       },
       onHoverChanged: (_elementId) => {
         // Hover visuals handled by InputManager
-      }
+      },
     });
   }
 
@@ -626,9 +640,9 @@ export class GalaxyMapScene extends Phaser.Scene {
         break;
       case 'save':
         console.log('Save game (Ctrl+S pressed)');
-        // TODO: Save game
+        this.saveGamePanel.show();
         break;
-      case 'mute':
+      case 'mute': {
         const audioManager = AudioManager.getInstance();
         audioManager.toggleMute();
         const muteState = audioManager.isMuted() ? 'muted' : 'unmuted';
@@ -638,6 +652,7 @@ export class GalaxyMapScene extends Phaser.Scene {
           this.notificationManager.showNotification(`Audio ${muteState}`, 'info');
         }
         break;
+      }
       case 'audioSettings':
         // Toggle audio settings panel
         if (this.volumeControlPanel.visible) {
@@ -760,7 +775,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       color: '#00ff00',
       fontFamily: 'monospace',
       backgroundColor: '#000000',
-      padding: { x: 5, y: 5 }
+      padding: { x: 5, y: 5 },
     });
     debugText.setScrollFactor(0);
 
@@ -781,8 +796,8 @@ export class GalaxyMapScene extends Phaser.Scene {
         '',
         'Planet List:',
         ...this.galaxy.planets.map(p =>
-          `- ${p.name} (${p.owner}) at ${p.position.toString()}`
-        )
+          `- ${p.name} (${p.owner}) at ${p.position.toString()}`,
+        ),
       ]);
     };
 
@@ -790,7 +805,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 100,
       callback: updateDebug,
-      loop: true
+      loop: true,
     });
 
     updateDebug();
@@ -817,7 +832,7 @@ export class GalaxyMapScene extends Phaser.Scene {
         'H: Help overlay',
         'O: Objectives',
         'M: Main menu',
-        'Ctrl+S: Save game'
+        'Ctrl+S: Save game',
       ].join('\n'),
       {
         fontSize: '12px',
@@ -825,8 +840,8 @@ export class GalaxyMapScene extends Phaser.Scene {
         fontFamily: 'monospace',
         backgroundColor: '#000000',
         padding: { x: 5, y: 5 },
-        align: 'right'
-      }
+        align: 'right',
+      },
     );
     controlsText.setOrigin(1, 0);
     controlsText.setScrollFactor(0);
@@ -850,8 +865,8 @@ export class GalaxyMapScene extends Phaser.Scene {
       {
         fontSize: '14px',
         color: '#ffffff',
-        fontFamily: 'Arial'
-      }
+        fontFamily: 'Arial',
+      },
     );
     buttonText.setOrigin(0.5);
     buttonText.setScrollFactor(0);
@@ -910,7 +925,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     const currentPlanetId = parseInt(currentId, 10);
     const currentPlanet = this.galaxy.planets.find(p => p.id === currentPlanetId);
-    if (!currentPlanet) return;
+    if (!currentPlanet) {return;}
 
     const cx = currentPlanet.position.x;
     const cy = currentPlanet.position.z;
@@ -919,7 +934,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     let bestDistance = Infinity;
 
     for (const planet of this.galaxy.planets) {
-      if (planet.id === currentPlanetId) continue;
+      if (planet.id === currentPlanetId) {continue;}
 
       const px = planet.position.x;
       const py = planet.position.z;
@@ -996,6 +1011,76 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   /**
+   * Wire up Save Game Panel callbacks - Story 10-3
+   */
+  private wireUpSavePanel(): void {
+    this.saveGamePanel.onSaveRequested = async (slotName: string, saveName: string) => {
+      this.saveGamePanel.setLoading(true);
+
+      try {
+        // Create SaveData from GameState
+        const saveSystem = new SaveSystem(this.gameState);
+        // TODO: Implement proper playtime tracking
+        const playtime = 0;
+        const saveData = saveSystem.createSaveData('0.1.0', playtime, saveName);
+
+        const saveService = getSaveService();
+        await saveService.saveGame(saveData, slotName, saveName);
+
+        this.saveGamePanel.showSuccess('Game saved successfully!');
+        this.notificationManager.showNotification('Game saved', 'info');
+
+        // Auto-close after delay
+        this.time.delayedCall(1500, () => {
+          this.saveGamePanel.hide();
+        });
+      } catch (error) {
+        console.error('Save failed:', error);
+        const message = error instanceof Error ? error.message : 'Save failed';
+        this.saveGamePanel.showError(message);
+        this.notificationManager.showNotification('Save failed', 'danger');
+      } finally {
+        this.saveGamePanel.setLoading(false);
+      }
+    };
+
+    this.saveGamePanel.onClose = () => {
+      // No special cleanup needed
+    };
+
+    // Setup auto-save on turn end
+    this.setupAutoSave();
+  }
+
+  /**
+   * Setup auto-save functionality - Story 10-3
+   * Saves to 'autosave' slot at the end of each turn
+   */
+  private setupAutoSave(): void {
+    const originalOnTurnEnded = this.turnSystem.onTurnEnded;
+
+    this.turnSystem.onTurnEnded = async (turn: number) => {
+      // Chain with original callback
+      originalOnTurnEnded?.(turn);
+
+      // Auto-save to autosave slot
+      try {
+        const saveSystem = new SaveSystem(this.gameState);
+        const saveData = saveSystem.createSaveData('0.1.0', 0, `Auto-save Turn ${turn}`);
+
+        const saveService = getSaveService();
+        await saveService.saveGame(saveData, 'autosave', `Auto-save Turn ${turn}`);
+
+        console.log(`Auto-saved at turn ${turn}`);
+        this.notificationManager.showNotification('Auto-saved', 'info');
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+        // Don't interrupt gameplay for auto-save failures
+      }
+    };
+  }
+
+  /**
    * Gets display name for a building type (Story 4-3)
    */
   private getBuildingDisplayName(buildingType: string): string {
@@ -1030,7 +1115,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private showBuildingCompletedNotification(
     buildingName: string,
     planetName: string,
-    buildingType: string
+    buildingType: string,
   ): void {
     const benefit = this.getBuildingBenefitDescription(buildingType);
     const message = benefit
@@ -1047,8 +1132,8 @@ export class GalaxyMapScene extends Phaser.Scene {
         color: '#00ff00',
         fontFamily: 'monospace',
         backgroundColor: 'rgba(0, 50, 0, 0.9)',
-        padding: { x: 15, y: 10 }
-      }
+        padding: { x: 15, y: 10 },
+      },
     );
     notification.setOrigin(0.5);
     notification.setScrollFactor(0);
@@ -1060,7 +1145,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       alpha: 0,
       duration: 500,
       delay: 3000,
-      onComplete: () => notification.destroy()
+      onComplete: () => notification.destroy(),
     });
 
     // Make notification dismissible by click
@@ -1078,7 +1163,7 @@ export class GalaxyMapScene extends Phaser.Scene {
    */
   private showIncomeWarningNotification(
     message: string,
-    severity: 'warning' | 'critical'
+    severity: 'warning' | 'critical',
   ): void {
     const color = severity === 'critical' ? '#ff4444' : '#ffcc00';
     const bgColor = severity === 'critical' ? 'rgba(80, 0, 0, 0.9)' : 'rgba(80, 60, 0, 0.9)';
@@ -1093,8 +1178,8 @@ export class GalaxyMapScene extends Phaser.Scene {
         color: color,
         fontFamily: 'monospace',
         backgroundColor: bgColor,
-        padding: { x: 15, y: 8 }
-      }
+        padding: { x: 15, y: 8 },
+      },
     );
     notification.setOrigin(0.5);
     notification.setScrollFactor(0);
@@ -1106,7 +1191,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       alpha: 0,
       duration: 500,
       delay: 4000,
-      onComplete: () => notification.destroy()
+      onComplete: () => notification.destroy(),
     });
 
     // Make notification dismissible by click
@@ -1165,7 +1250,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.cameras.main.width - 120,
       95,
       220,
-      160
+      160,
     );
 
     // OpponentInfoPanel - positioned at top-left below TurnHUD
@@ -1195,7 +1280,7 @@ export class GalaxyMapScene extends Phaser.Scene {
       callback: () => {
         if (adminService.isEditModeActive()) {
           this.adminEditIndicator.updateChangesCount(
-            this.adminUIEditor.getPendingChangesCount()
+            this.adminUIEditor.getPendingChangesCount(),
           );
         }
       },

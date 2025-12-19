@@ -111,7 +111,7 @@ export class BombardmentSystem {
       s =>
         s.type !== BuildingType.DockingBay &&
         s.type !== BuildingType.OrbitalDefense &&
-        s.status === BuildingStatus.Active
+        s.status === BuildingStatus.Active,
     );
 
     if (vulnerableStructures.length === 0) {
@@ -180,7 +180,7 @@ export class BombardmentSystem {
         c.planetID === planetID &&
         c.owner === faction &&
         c.type === CraftType.BattleCruiser &&
-        !c.isDeployed
+        !c.isDeployed,
     );
   }
 }

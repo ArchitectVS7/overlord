@@ -2,9 +2,11 @@ import Phaser from 'phaser';
 import { AudioManager } from '@core/AudioManager';
 import { AudioActivationOverlay } from './ui/AudioActivationOverlay';
 import { LoadGamePanel } from './ui/LoadGamePanel';
+import { StatisticsPanel } from './ui/StatisticsPanel';
 import { getAuthService } from '@services/AuthService';
 import { getSaveService } from '@services/SaveService';
 import { getUserProfileService } from '@services/UserProfileService';
+import { getGuestModeService } from '@services/GuestModeService';
 import { AdminEditModeIndicator } from './ui/AdminEditModeIndicator';
 import { AdminUIEditorController } from '@services/AdminUIEditorController';
 import { getAdminModeService } from '@services/AdminModeService';
@@ -18,6 +20,7 @@ import { getUIPanelPositionService } from '@services/UIPanelPositionService';
 export class MainMenuScene extends Phaser.Scene {
   private audioActivationOverlay?: AudioActivationOverlay;
   private loadGamePanel?: LoadGamePanel;
+  private statisticsPanel?: StatisticsPanel;
   private userGreeting?: Phaser.GameObjects.Text;
   private logoutButton?: Phaser.GameObjects.Text;
   private adminEditIndicator?: AdminEditModeIndicator;
@@ -81,8 +84,16 @@ export class MainMenuScene extends Phaser.Scene {
       this.scene.start('FlashConflictsScene');
     });
 
+    // Statistics button (Story 10-7)
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 3, 'STATISTICS', true, () => {
+      this.showStatisticsPanel();
+    });
+
     // Create load game panel
     this.createLoadGamePanel(width, height);
+
+    // Create statistics panel (Story 10-7)
+    this.createStatisticsPanel();
 
     // Create user display (if authenticated)
     this.createUserDisplay(width);
@@ -119,21 +130,35 @@ export class MainMenuScene extends Phaser.Scene {
 
   private createUserDisplay(width: number): void {
     const authService = getAuthService();
+    const guestService = getGuestModeService();
     const user = authService.getCurrentUser();
+    const isGuest = guestService.isGuestMode();
 
-    if (user) {
-      // Get username from profile service or fall back to email
-      const profileService = getUserProfileService();
-      const displayName = profileService.getUsername() || user.email || 'Player';
+    if (user || isGuest) {
+      // Get display name
+      let displayName: string;
+      if (isGuest) {
+        displayName = guestService.getGuestUsername() || 'Guest';
+      } else {
+        const profileService = getUserProfileService();
+        displayName = profileService.getUsername() || user?.email || 'Player';
+      }
 
-      this.userGreeting = this.add.text(width - 20, 20, `Welcome, ${displayName}`, {
+      // Show guest indicator if in guest mode
+      const greetingText = isGuest
+        ? `Welcome, ${displayName} (Guest)`
+        : `Welcome, ${displayName}`;
+
+      this.userGreeting = this.add.text(width - 20, 20, greetingText, {
         fontSize: '14px',
-        color: '#00ff00',
+        color: isGuest ? '#ffaa00' : '#00ff00',
         fontFamily: 'monospace',
       });
       this.userGreeting.setOrigin(1, 0);
 
-      this.logoutButton = this.add.text(width - 20, 45, '[LOGOUT]', {
+      // Show sign in button for guests, logout for authenticated users
+      const buttonText = isGuest ? '[SIGN IN]' : '[LOGOUT]';
+      this.logoutButton = this.add.text(width - 20, 45, buttonText, {
         fontSize: '12px',
         color: '#888888',
         fontFamily: 'monospace',
@@ -142,7 +167,7 @@ export class MainMenuScene extends Phaser.Scene {
       this.logoutButton.setInteractive({ useHandCursor: true });
 
       this.logoutButton.on('pointerover', () => {
-        this.logoutButton?.setColor('#ff4444');
+        this.logoutButton?.setColor(isGuest ? '#00ff00' : '#ff4444');
       });
 
       this.logoutButton.on('pointerout', () => {
@@ -150,13 +175,42 @@ export class MainMenuScene extends Phaser.Scene {
       });
 
       this.logoutButton.on('pointerdown', () => {
-        this.handleLogout();
+        if (isGuest) {
+          this.handleGuestSignIn();
+        } else {
+          this.handleLogout();
+        }
       });
+
+      // Show note for guests about local saves
+      if (isGuest) {
+        const guestNote = this.add.text(width - 20, 65, 'Saves stored locally only', {
+          fontSize: '10px',
+          color: '#666666',
+          fontFamily: 'monospace',
+        });
+        guestNote.setOrigin(1, 0);
+      }
     }
+  }
+
+  private handleGuestSignIn(): void {
+    // Exit guest mode and go to auth scene
+    const guestService = getGuestModeService();
+    guestService.exitGuestMode();
+    this.scene.start('AuthScene');
   }
 
   private showLoadGamePanel(): void {
     this.loadGamePanel?.show();
+  }
+
+  private createStatisticsPanel(): void {
+    this.statisticsPanel = new StatisticsPanel(this);
+  }
+
+  private showStatisticsPanel(): void {
+    this.statisticsPanel?.show();
   }
 
   private async handleLoadGame(slotName: string): Promise<void> {
@@ -223,7 +277,7 @@ export class MainMenuScene extends Phaser.Scene {
     y: number,
     text: string,
     enabled: boolean,
-    onClick?: () => void
+    onClick?: () => void,
   ): Phaser.GameObjects.Text {
     const button = this.add
       .text(x, y, text, {
@@ -266,7 +320,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Create the edit mode indicator with callbacks
     this.adminEditIndicator = new AdminEditModeIndicator(this, {
       onSaveAll: async () => {
-        if (!this.adminUIEditor) return;
+        if (!this.adminUIEditor) {return;}
         const positions = this.adminUIEditor.getPendingChanges();
         if (positions.length > 0) {
           const result = await positionService.saveAllPositions(positions);
@@ -298,7 +352,7 @@ export class MainMenuScene extends Phaser.Scene {
         width / 2 - 300,
         height / 2 - 250,
         600,
-        500
+        500,
       );
     }
 
@@ -332,7 +386,7 @@ export class MainMenuScene extends Phaser.Scene {
       callback: () => {
         if (adminService.isEditModeActive() && this.adminUIEditor && this.adminEditIndicator) {
           this.adminEditIndicator.updateChangesCount(
-            this.adminUIEditor.getPendingChangesCount()
+            this.adminUIEditor.getPendingChangesCount(),
           );
         }
       },

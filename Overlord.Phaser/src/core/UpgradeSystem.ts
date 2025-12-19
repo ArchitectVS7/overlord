@@ -164,7 +164,7 @@ export class UpgradeSystem {
 
     // Get all Battle Cruisers owned by this faction for future upgrade
     const battleCruisers = this.gameState.craft.filter(
-      c => c.owner === faction && c.type === CraftType.BattleCruiser
+      c => c.owner === faction && c.type === CraftType.BattleCruiser,
     );
 
     // Future combat system will apply weapon tier to these craft

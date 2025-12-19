@@ -139,7 +139,7 @@ export function difficultyToDisplayString(difficulty: AIDifficulty): 'easy' | 'n
 export function createPackDisplayData(
   pack: ScenarioPack,
   isLocked: boolean,
-  isActive: boolean
+  isActive: boolean,
 ): PackDisplayData {
   return {
     id: pack.id,
@@ -151,6 +151,6 @@ export function createPackDisplayData(
     resourceAbundance: pack.galaxyTemplate.resourceAbundance,
     colorTheme: pack.faction.colorTheme,
     isLocked,
-    isActive
+    isActive,
   };
 }

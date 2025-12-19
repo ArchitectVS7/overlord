@@ -106,7 +106,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
@@ -114,7 +114,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
     this.cargoStatusText = this.scene.add.text(PADDING, 50, 'Cargo: 0/4 platoons', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.cargoStatusText);
 
@@ -123,7 +123,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(availableLabel);
 
@@ -134,7 +134,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       fontSize: '12px',
       fontFamily: 'Arial',
       color: LABEL_COLOR,
-      fontStyle: 'italic'
+      fontStyle: 'italic',
     });
     this.availableEmptyText.setVisible(false);
     this.contentContainer.add(this.availableEmptyText);
@@ -144,7 +144,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       fontSize: '14px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(loadedLabel);
 
@@ -155,7 +155,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       fontSize: '12px',
       fontFamily: 'Arial',
       color: LABEL_COLOR,
-      fontStyle: 'italic'
+      fontStyle: 'italic',
     });
     this.loadedEmptyText.setVisible(false);
     this.contentContainer.add(this.loadedEmptyText);
@@ -177,7 +177,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
       fontFamily: 'Arial',
-      color: '#999999'
+      color: '#999999',
     });
     closeText.setOrigin(0.5);
     closeContainer.add(closeText);
@@ -190,7 +190,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
   }
 
   public show(craft: CraftEntity, _planet: PlanetEntity, platoons: PlatoonEntity[], onClose?: () => void): void {
-    if (this.isVisible) return;
+    if (this.isVisible) {return;}
 
     this.craft = craft;
     this.allPlatoons = platoons;
@@ -203,7 +203,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
     const camera = this.scene.cameras.main;
     this.setPosition(
       (camera.width - PANEL_WIDTH) / 2,
-      (camera.height - PANEL_HEIGHT) / 2
+      (camera.height - PANEL_HEIGHT) / 2,
     );
 
     this.setAlpha(0);
@@ -211,14 +211,14 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       targets: this,
       alpha: 1,
       duration: 100,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     this.updateUI();
   }
 
   public hide(): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.isVisible = false;
     this.backdrop.setVisible(false);
@@ -233,7 +233,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
         if (this.closeCallback) {
           this.closeCallback();
         }
-      }
+      },
     });
   }
 
@@ -254,16 +254,16 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
   }
 
   public getAvailablePlatoons(): PlatoonEntity[] {
-    if (!this.craft) return [];
+    if (!this.craft) {return [];}
     return this.allPlatoons.filter(p =>
-      !this.craft!.carriedPlatoonIDs.includes(p.id) && p.planetID >= 0
+      !this.craft!.carriedPlatoonIDs.includes(p.id) && p.planetID >= 0,
     );
   }
 
   public getLoadedPlatoons(): PlatoonEntity[] {
-    if (!this.craft) return [];
+    if (!this.craft) {return [];}
     return this.allPlatoons.filter(p =>
-      this.craft!.carriedPlatoonIDs.includes(p.id)
+      this.craft!.carriedPlatoonIDs.includes(p.id),
     );
   }
 
@@ -288,10 +288,10 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
   }
 
   public handleLoad(platoonID: number): void {
-    if (!this.craft || this.isCargoBayFull()) return;
+    if (!this.craft || this.isCargoBayFull()) {return;}
 
     const platoon = this.allPlatoons.find(p => p.id === platoonID);
-    if (!platoon || this.craft.carriedPlatoonIDs.includes(platoonID)) return;
+    if (!platoon || this.craft.carriedPlatoonIDs.includes(platoonID)) {return;}
 
     // If CraftSystem is provided, call it directly
     if (this.craftSystem) {
@@ -308,9 +308,9 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
   }
 
   public handleUnload(platoonID: number): void {
-    if (!this.craft) return;
+    if (!this.craft) {return;}
 
-    if (!this.craft.carriedPlatoonIDs.includes(platoonID)) return;
+    if (!this.craft.carriedPlatoonIDs.includes(platoonID)) {return;}
 
     // If CraftSystem is provided, call it directly
     if (this.craftSystem) {
@@ -333,7 +333,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
   }
 
   private updateUI(): void {
-    if (!this.craft) return;
+    if (!this.craft) {return;}
 
     // Update cargo status
     const cargoCount = this.getCargoCount();
@@ -383,7 +383,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
       fontSize: '13px',
       fontFamily: 'Arial',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     container.add(nameText);
 
@@ -391,7 +391,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
     const troopText = this.scene.add.text(8, y + 24, `${platoon.troopCount} troops`, {
       fontSize: '11px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     container.add(troopText);
 
@@ -399,7 +399,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
     const equipText = this.scene.add.text(8, y + 40, `${platoon.equipment} / ${platoon.weapon}`, {
       fontSize: '10px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     container.add(equipText);
 
@@ -417,7 +417,7 @@ export class PlatoonLoadingPanel extends Phaser.GameObjects.Container {
     const buttonText = this.scene.add.text(buttonX + 25, buttonY + BUTTON_HEIGHT / 2, buttonLabel, {
       fontSize: '11px',
       fontFamily: 'Arial',
-      color: canAct ? TEXT_COLOR : '#666666'
+      color: canAct ? TEXT_COLOR : '#666666',
     });
     buttonText.setOrigin(0.5);
     container.add(buttonText);

@@ -39,7 +39,7 @@ const DIFFICULTY_COLORS: Record<string, number> = {
   easy: 0x44aa44,    // Green
   medium: 0xaaaa44,  // Yellow
   hard: 0xaa6644,    // Orange
-  expert: 0xaa4444   // Red
+  expert: 0xaa4444,   // Red
 };
 
 // Difficulty order for sorting
@@ -47,7 +47,7 @@ const DIFFICULTY_ORDER: Record<string, number> = {
   easy: 0,
   medium: 1,
   hard: 2,
-  expert: 3
+  expert: 3,
 };
 
 interface CompletionData {
@@ -132,7 +132,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     this.titleText = this.scene.add.text(0, 0, 'Select Flash Conflict', {
       fontSize: '24px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
@@ -143,8 +143,8 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
       'X',
       {
         fontSize: '24px',
-        color: TEXT_COLOR
-      }
+        color: TEXT_COLOR,
+      },
     );
     closeButton.setInteractive({ useHandCursor: true });
     closeButton.on('pointerdown', () => this.hide());
@@ -162,7 +162,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
       x + PADDING,
       y + PADDING + 50,
       PANEL_WIDTH - PADDING * 2,
-      maskHeight
+      maskHeight,
     );
     const mask = this.scrollMask.createGeometryMask();
     this.cardsContainer.setMask(mask);
@@ -267,7 +267,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     const badgeText = this.scene.add.text(50, 22, scenario.type.toUpperCase(), {
       fontSize: '12px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     badgeText.setOrigin(0.5, 0.5);
     container.add(badgeText);
@@ -276,7 +276,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     const nameText = this.scene.add.text(100, 15, scenario.name, {
       fontSize: '18px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     container.add(nameText);
 
@@ -287,8 +287,8 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
       `${scenario.difficulty} | ${scenario.duration}`,
       {
         fontSize: '14px',
-        color: LABEL_COLOR
-      }
+        color: LABEL_COLOR,
+      },
     );
     container.add(infoText);
 
@@ -304,7 +304,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
       const completedText = this.scene.add.text(cardWidth - 90, 22, 'DONE', {
         fontSize: '12px',
         color: TEXT_COLOR,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       });
       completedText.setOrigin(0.5, 0.5);
       container.add(completedText);
@@ -316,7 +316,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
         const starColor = i < completion.starRating ? STAR_COLOR_FILLED : STAR_COLOR_EMPTY;
         const starText = this.scene.add.text(starX, starY, '★', {
           fontSize: '16px',
-          color: starColor
+          color: starColor,
         });
         container.add(starText);
       }
@@ -325,7 +325,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     return {
       scenario,
       container,
-      type: scenario.type
+      type: scenario.type,
     };
   }
 
@@ -333,7 +333,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
    * Handle scroll wheel
    */
   private handleScroll(_pointer: any, _gameObjects: any[], _deltaX: number, deltaY: number): void {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {return;}
 
     this.scrollY += deltaY * 0.5;
     this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, this.maxScrollY);
@@ -419,7 +419,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
    */
   isScenarioUnlocked(scenarioId: string): boolean {
     const scenario = this.scenarios.find(s => s.id === scenarioId);
-    if (!scenario) return false;
+    if (!scenario) {return false;}
 
     // No prerequisites means always unlocked
     if (!scenario.prerequisites || scenario.prerequisites.length === 0) {

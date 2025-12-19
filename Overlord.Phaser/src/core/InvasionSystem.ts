@@ -53,7 +53,7 @@ export class InvasionSystem {
   public invadePlanet(
     planetID: number,
     attackerFaction: FactionType,
-    aggressionPercent: number = 100
+    aggressionPercent: number = 100,
   ): InvasionResult | null {
     // Get planet
     const planet = this.gameState.planetLookup.get(planetID);
@@ -209,7 +209,7 @@ export class InvasionSystem {
 
     // Get Battle Cruisers in orbit
     const battleCruisers = this.gameState.craft.filter(
-      c => c.planetID === planetID && c.owner === faction && c.type === CraftType.BattleCruiser && !c.isDeployed
+      c => c.planetID === planetID && c.owner === faction && c.type === CraftType.BattleCruiser && !c.isDeployed,
     );
 
     // Get all platoons aboard these ships

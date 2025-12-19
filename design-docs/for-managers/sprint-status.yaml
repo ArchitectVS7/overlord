@@ -1,0 +1,237 @@
+# generated: 2025-12-09
+# project: Overlord
+# project_key: overlord
+# tracking_system: file-system
+# story_location: C:\dev\GIT\Overlord\design-docs\artifacts\sprint-artifacts
+
+# ORCHESTRATOR METADATA
+# ======================
+epic_order: [6, 7, 1, 8, 9, 10, 12]
+
+# Stories requiring human input (skip during autonomous execution)
+human_input_required:
+  # COMPLETED: 8-1-tactical-scenario-content-and-variety - Scenario content created
+  # COMPLETED: 10-1-user-account-creation - Supabase configured
+  - 12-1-sound-effects-for-game-actions            # Audio assets needed
+  - 12-2-background-music-during-gameplay          # Music assets needed
+
+epic_metadata:
+  11:
+    name: "input"
+    description: "Input System Foundation"
+  5:
+    name: "military"
+    description: "Military Forces & Movement"
+  6:
+    name: "combat"
+    description: "Combat & Planetary Invasion"
+  7:
+    name: "ai"
+    description: "AI Opponent System"
+  1:
+    name: "tutorials"
+    description: "Player Onboarding & Tutorials"
+  8:
+    name: "scenarios"
+    description: "Quick-Play Tactical Scenarios"
+  9:
+    name: "packs"
+    description: "Scenario Pack System"
+  10:
+    name: "accounts"
+    description: "User Accounts & Cross-Device Persistence"
+  12:
+    name: "audio"
+    description: "Audio & Atmospheric Immersion"
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Implementation Tags (in comments):
+#   - [CORE-DONE] = Core TypeScript logic complete, needs Phaser UI
+#   - [CORE-PARTIAL] = Some core logic exists, needs completion + UI
+#   - [GREENFIELD] = No existing implementation, start from scratch
+#
+# RECOMMENDED EPIC ORDER:
+# ======================
+# Phase A - Core Gameplay Loop (Must complete first):
+#   1. Epic 11 (Stories 11-1, 11-3 only) - Input system foundation
+#   2. Epic 3 - Planet selection enables all interaction
+#   3. Epic 2 - Campaign setup and turn flow
+#   4. Epic 4 - Economy management
+#   5. Epic 5 - Military forces
+#   6. Epic 6 - Combat resolution
+#   7. Epic 7 - AI opponent (already done, just needs UI notifications)
+#
+# Phase B - Onboarding & Content:
+#   8. Epic 1 - Flash Conflicts (tutorials)
+#   9. Epic 8 - Tactical Scenarios (quick-play)
+#   10. Epic 9 - Scenario Packs (content variety)
+#
+# Phase C - Polish & Platform:
+#   11. Epic 10 - User accounts & cloud saves
+#   12. Epic 11 (remaining) - Full accessibility
+#   13. Epic 12 - Audio & immersion
+
+generated: 2025-12-09
+project: Overlord
+project_key: overlord
+tracking_system: file-system
+story_location: C:\dev\GIT\Overlord\design-docs\artifacts\sprint-artifacts
+
+development_status:
+  # =============================================================================
+  # EPIC 11: Accessible User Interface (RECOMMENDED START - Input Foundation)
+  # Priority: CRITICAL - Nothing works without input handling
+  # Phase A: Stories 11-1 and 11-3 COMPLETE (v0.1.0-input)
+  # COMPLETE: All 8 stories done
+  # =============================================================================
+  epic-11: done
+  11-1-mouse-and-keyboard-input-support: done              # [GREENFIELD] InputSystem implemented
+  11-2-touch-gesture-support-for-mobile: done          # [GREENFIELD] Touch handling - Commit c1ecb71
+  11-3-galaxy-map-pan-and-zoom-controls: done             # [CORE-PARTIAL] CameraController implemented
+  11-4-keyboard-shortcuts-system: done                        # [GREENFIELD] Commit 93c54b6 (21 tests)
+  11-5-ui-scale-customization: done                       # [GREENFIELD] Commit dd3085b (33 tests)
+  11-6-high-contrast-mode-for-accessibility: done         # [GREENFIELD] AccessibilitySettings + SettingsPanel toggle (34 tests)
+  11-7-keyboard-only-navigation-compliance: done          # [GREENFIELD] FocusTrapManager + InputSystem focus trap (39 tests)
+  11-8-help-overlays-and-tutorials: done                  # [CORE-DONE] HelpOverlay already implemented (11 tests)
+  epic-11-retrospective: optional
+
+  # =============================================================================
+  # EPIC 3: Galaxy Exploration & Planet Discovery
+  # Priority: HIGH - Enables core gameplay interaction
+  # COMPLETE: v0.2.0-planets (2025-12-10)
+  # =============================================================================
+  epic-3: done
+  3-1-galaxy-generation-and-visualization: done           # [CORE-PARTIAL] Commit d46d1e4, code review 0817c5c
+  3-2-planet-selection-and-highlighting: done             # [GREENFIELD] Commit bd21212
+  3-3-planet-information-panel: done                      # [CORE-PARTIAL] Commit 34b8677, code review e232a63
+  epic-3-retrospective: optional
+
+  # =============================================================================
+  # EPIC 2: Campaign Setup & Core Loop
+  # Priority: HIGH - Game flow foundation
+  # COMPLETE: v0.3.0-campaign (2025-12-10)
+  # =============================================================================
+  epic-2: done
+  2-1-campaign-creation-and-configuration: done           # [CORE-PARTIAL] Commit 9b61ad0 (36 tests)
+  2-2-turn-system-and-phase-management: done              # [CORE-DONE] Commit edd8cb3 (24 tests)
+  2-3-turn-phase-processing: done                         # [CORE-PARTIAL] Commit 4299a70 (17 tests)
+  2-4-victory-condition-detection: done                   # [CORE-DONE] Commit 3bf787c (11 tests)
+  2-5-defeat-condition-detection: done                    # [CORE-DONE] Commit 159fe93 (12 tests)
+  epic-2-retrospective: optional
+
+  # =============================================================================
+  # EPIC 4: Planetary Economy & Infrastructure
+  # Priority: MEDIUM - Core gameplay mechanics
+  # COMPLETE: v0.4.0-economy (2025-12-10)
+  # =============================================================================
+  epic-4: done
+  4-1-resource-display-and-management: done               # [CORE-DONE] Commit 208a602 (43 tests)
+  4-2-building-construction-queue: done                   # [CORE-PARTIAL] Commit ae2e8cb (24 tests)
+  4-3-building-construction-progress-tracking: done       # [CORE-DONE] Commit 928c667 (6 tests)
+  4-4-automated-resource-income-processing: done          # [CORE-DONE] Commit f4b8f5e (29 tests)
+  epic-4-retrospective: optional
+
+  # =============================================================================
+  # EPIC 5: Military Forces & Movement
+  # Priority: MEDIUM - Combat preparation
+  # COMPLETE: v0.5.0-military (2025-12-11)
+  # =============================================================================
+  epic-5: done
+  5-1-platoon-commissioning-with-equipment-configuration: done  # Chunks A-D complete, 45 tests, all 9 issues fixed
+  5-2-platoon-details-and-management: done                # 21 tests, all 8 AC done, code review fixes applied
+  5-3-spacecraft-purchase-and-types: done                  # [CORE-DONE] SpacecraftPurchasePanel + 18 tests
+  5-4-loading-platoons-onto-battle-cruisers: done         # [CORE-DONE] PlatoonLoadingPanel + 21 tests
+  5-5-spacecraft-navigation-between-planets: done          # [CORE-DONE] SpacecraftNavigationPanel + 18 tests
+  epic-5-retrospective: optional
+
+  # =============================================================================
+  # EPIC 6: Combat & Planetary Invasion
+  # Priority: MEDIUM - Core combat mechanics
+  # =============================================================================
+  epic-6: done                                            # v0.6.0-combat All 3 stories complete
+  6-1-initiate-planetary-invasion: done                   # InvasionPanel + 24 tests, integrated with GalaxyMapScene
+  6-2-combat-aggression-configuration: done               # Code review: 4 minor issues, all ACs verified, APPROVED
+  6-3-combat-resolution-and-battle-results: done           # Code review: 5 minor issues, APPROVED
+  epic-6-retrospective: optional
+
+  # =============================================================================
+  # EPIC 7: AI Opponent System
+  # Priority: MEDIUM - Already implemented, just needs visibility
+  # =============================================================================
+  epic-7: done                                            # v0.7.0-ai All 2 stories complete
+  7-1-ai-strategic-decision-making: done                 # Code review: 3 minor issues, APPROVED
+  7-2-ai-personality-and-difficulty-adaptation: done      # Code review: 4 minor issues, 100% coverage, APPROVED
+  epic-7-retrospective: optional
+
+  # =============================================================================
+  # EPIC 1: Player Onboarding & Tutorials
+  # Priority: HIGH (Phase B) - Critical for new players
+  # =============================================================================
+  epic-1: done                                            # v0.8.0-onboarding All 6 stories complete
+  1-1-flash-conflicts-menu-access: done                   # FlashConflictsScene minimal impl for 1-2 integration
+  1-2-scenario-selection-interface: done                  # Code review: 19 tests passing, mock issue noted for followup
+  1-3-scenario-initialization-and-victory-conditions: done      # ScenarioInitializer, VictoryConditionSystem, ObjectivesPanel - 44 tests
+  1-4-tutorial-step-guidance-system: done                  # TutorialManager, ActionDetector, Highlight, StepPanel - 106 tests
+  1-5-scenario-completion-and-results-display: done       # ScenarioResultsPanel, StarRatingSystem, ScenarioCompletionService - 55 tests
+  1-6-scenario-completion-history-tracking: done          # ScenarioDetailPanel best time/stars display - 8 tests
+  epic-1-retrospective: optional
+
+  # =============================================================================
+  # EPIC 8: Quick-Play Tactical Scenarios
+  # Priority: MEDIUM (Phase B) - Content variety
+  # COMPLETE: v0.10.0-tactical (2025-12-18)
+  # =============================================================================
+  epic-8: done
+  8-1-tactical-scenario-content-and-variety: done         # 6 tactical scenarios, VictoryConditionSystem extended, difficulty filtering
+  epic-8-retrospective: optional
+
+  # =============================================================================
+  # EPIC 9: Scenario Pack System
+  # Priority: LOW (Phase B) - Content extensibility
+  # =============================================================================
+  epic-9: done                                            # v0.9.0-packs All 3 stories complete
+  9-1-scenario-pack-browsing-and-selection: done          # ScenarioPackManager, PackListPanel, PackDetailPanel, ScenarioPackScene - 52 tests
+  9-2-scenario-pack-switching-and-configuration-loading: done      # PackConfigLoader, PackSwitchDialog - 23 tests
+  9-3-scenario-pack-metadata-display: done                # PackMetadataHelper - 18 tests
+  epic-9-retrospective: optional
+
+  # =============================================================================
+  # EPIC 10: User Accounts & Cross-Device Persistence
+  # Priority: LOW (Phase C) - Polish feature
+  # COMPLETE: All 7 stories done (2025-12-18)
+  # =============================================================================
+  epic-10: done
+  10-1-user-account-creation: done                        # AuthService, RegisterPanel, guest mode - full Supabase integration
+  10-2-user-login: done                                   # LoginPanel, ForgotPasswordPanel, session persistence
+  10-3-save-campaign-progress: done                       # SaveService, SaveGamePanel, OfflineSaveQueue - cloud/local hybrid
+  10-4-load-previously-saved-campaigns: done              # LoadGamePanel, cloud sync, delete functionality
+  10-5-cross-device-save-synchronization: done            # Offline queue, auto-sync on reconnect
+  10-6-user-settings-persistence: done                    # UserProfileService local + cloud sync, BootScene initialization (19 tests)
+  10-7-user-statistics-tracking: done                     # UserStatisticsService, StatisticsPanel, VictoryScene/DefeatScene integration (26 tests)
+  epic-10-retrospective: optional
+
+  # =============================================================================
+  # EPIC 12: Audio & Atmospheric Immersion
+  # Priority: LOW (Phase C) - Polish feature
+  # Infrastructure complete (12-3 through 12-5), awaiting audio assets (12-1, 12-2)
+  # =============================================================================
+  epic-12: in-progress                                   # Infrastructure stories done, asset stories pending
+  12-1-sound-effects-for-game-actions: drafted            # [GREENFIELD] AudioSystem - HUMAN INPUT
+  12-2-background-music-during-gameplay: drafted          # [GREENFIELD] Music playback - HUMAN INPUT
+  12-3-independent-volume-controls: done                  # AudioManager + VolumeControlPanel + Scene Integration (69 tests)
+  12-4-mute-audio-toggle: done                            # Mute toggle with Ctrl+M, auto-refresh, label toggle
+  12-5-user-activation-for-browser-audio-compliance: done     # AudioActivationOverlay - 18 tests, MainMenuScene integration
+  epic-12-retrospective: optional

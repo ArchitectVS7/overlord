@@ -3,6 +3,7 @@ import { GameState } from '@core/GameState';
 import { FactionType, VictoryResult } from '@core/models/Enums';
 import { SaveSystem, SaveData } from '@core/SaveSystem';
 import { getSaveService } from '@services/SaveService';
+import { getUserStatisticsService } from '@services/UserStatisticsService';
 
 /**
  * Defeat campaign statistics for display
@@ -44,6 +45,9 @@ export class DefeatScene extends Phaser.Scene {
 
     // Calculate statistics
     this.statistics = this.calculateStatistics();
+
+    // Story 10-7: Record defeat in user statistics
+    this.recordDefeatStats();
 
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
@@ -180,7 +184,7 @@ export class DefeatScene extends Phaser.Scene {
 
     // Count AI-controlled planets (these were lost by the player)
     const aiPlanets = this.gameState.planets.filter(
-      p => p.owner === FactionType.AI
+      p => p.owner === FactionType.AI,
     );
 
     return {
@@ -193,10 +197,10 @@ export class DefeatScene extends Phaser.Scene {
       finalFood: this.gameState.playerFaction.resources.food,
       finalEnergy: this.gameState.playerFaction.resources.energy,
       totalPlatoons: this.gameState.platoons.filter(
-        p => p.owner === FactionType.Player
+        p => p.owner === FactionType.Player,
       ).length,
       totalCraft: this.gameState.craft.filter(
-        c => c.owner === FactionType.Player
+        c => c.owner === FactionType.Player,
       ).length,
     };
   }
@@ -235,7 +239,7 @@ export class DefeatScene extends Phaser.Scene {
       centerX,
       y,
       'Planets Lost to AI:',
-      `${stats.planetsLost} / ${stats.totalPlanets}`
+      `${stats.planetsLost} / ${stats.totalPlanets}`,
     );
     y += lineHeight;
 
@@ -280,7 +284,7 @@ export class DefeatScene extends Phaser.Scene {
     y: number,
     label: string,
     value: string,
-    valueColor: string = '#ffffff'
+    valueColor: string = '#ffffff',
   ): void {
     // Label on left
     this.add
@@ -367,7 +371,7 @@ export class DefeatScene extends Phaser.Scene {
       const saveData: SaveData = saveSystem.createSaveData(
         '0.4.0-supabase',
         0,
-        `Defeat - Turn ${this.gameState.currentTurn}`
+        `Defeat - Turn ${this.gameState.currentTurn}`,
       );
       saveData.victoryStatus = VictoryResult.AIVictory;
 
@@ -418,5 +422,31 @@ export class DefeatScene extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut',
     });
+  }
+
+  /**
+   * Story 10-7: Record defeat statistics
+   */
+  private async recordDefeatStats(): Promise<void> {
+    const statsService = getUserStatisticsService();
+
+    try {
+      // Record campaign lost
+      await statsService.recordCampaignLost();
+
+      // Record planets lost from this campaign
+      if (this.statistics) {
+        for (let i = 0; i < this.statistics.planetsLost; i++) {
+          await statsService.recordPlanetLost();
+        }
+      }
+
+      // Stop playtime tracking (started in GalaxyMapScene)
+      await statsService.stopPlaytimeTracking();
+
+      console.log('Defeat statistics recorded');
+    } catch (error) {
+      console.warn('Failed to record defeat statistics:', error);
+    }
   }
 }

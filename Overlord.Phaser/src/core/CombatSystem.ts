@@ -52,7 +52,7 @@ export class CombatSystem {
   public initiateBattle(
     planetID: number,
     attackerFaction: FactionType,
-    attackingPlatoonIDs: number[]
+    attackingPlatoonIDs: number[],
   ): Battle | null {
     // Get planet
     const planet = this.gameState.planetLookup.get(planetID);
@@ -104,7 +104,7 @@ export class CombatSystem {
 
     // Calculate military strengths
     let attackerStrength = this.calculateStrength(attackers);
-    let defenderStrength = this.calculateStrength(defenders);
+    const defenderStrength = this.calculateStrength(defenders);
 
     // Apply aggression modifier (0.8 to 1.2)
     const aggressionMod = 0.8 + (aggressionPercent / 100) * 0.4;
@@ -119,14 +119,14 @@ export class CombatSystem {
       attackerStrength,
       defenderStrength,
       attackerWins,
-      aggressionPercent
+      aggressionPercent,
     );
     const defenderCasualties = this.calculateCasualties(
       defenders,
       defenderStrength,
       attackerStrength,
       !attackerWins,
-      50
+      50,
     ); // AI uses 50%
 
     // Apply casualties
@@ -210,7 +210,7 @@ export class CombatSystem {
     ownStrength: number,
     enemyStrength: number,
     isWinner: boolean,
-    aggressionPercent: number
+    aggressionPercent: number,
   ): Map<number, number> {
     const casualties = new Map<number, number>();
 

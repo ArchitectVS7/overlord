@@ -1,7 +1,7 @@
 # Story 10-4: Load Previously Saved Campaigns
 
 **Epic:** 10 - User Accounts & Cross-Device Persistence
-**Status:** drafted
+**Status:** done
 **Complexity:** Medium
 **Implementation Tag:** [CORE-DONE] - LoadSystem works, needs UI + cloud
 

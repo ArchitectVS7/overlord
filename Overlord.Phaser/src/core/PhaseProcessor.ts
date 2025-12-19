@@ -94,7 +94,7 @@ export class PhaseProcessor {
           return {
             success: false,
             processingTimeMs: performance.now() - startTime,
-            error: `Unknown phase: ${phase}`
+            error: `Unknown phase: ${phase}`,
           };
       }
     } catch (error) {
@@ -103,7 +103,7 @@ export class PhaseProcessor {
       return {
         success: false,
         processingTimeMs: performance.now() - startTime,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -136,7 +136,7 @@ export class PhaseProcessor {
         success: true,
         processingTimeMs: processingTime,
         playerIncome,
-        aiIncome
+        aiIncome,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during income processing';
@@ -146,7 +146,7 @@ export class PhaseProcessor {
         processingTimeMs: performance.now() - startTime,
         error: errorMessage,
         playerIncome: new ResourceDelta(),
-        aiIncome: new ResourceDelta()
+        aiIncome: new ResourceDelta(),
       };
     }
   }
@@ -160,7 +160,7 @@ export class PhaseProcessor {
     // Player manually performs actions (build, purchase, navigate)
     return {
       success: true,
-      processingTimeMs: 0
+      processingTimeMs: 0,
     };
   }
 
@@ -185,7 +185,7 @@ export class PhaseProcessor {
 
       return {
         success: true,
-        processingTimeMs: processingTime
+        processingTimeMs: processingTime,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during combat processing';
@@ -193,7 +193,7 @@ export class PhaseProcessor {
       return {
         success: false,
         processingTimeMs: performance.now() - startTime,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -256,7 +256,7 @@ export class PhaseProcessor {
         success: true,
         processingTimeMs: processingTime,
         buildingsCompleted,
-        populationGrowth: totalPopulationGrowth
+        populationGrowth: totalPopulationGrowth,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during end phase processing';
@@ -266,7 +266,7 @@ export class PhaseProcessor {
         processingTimeMs: performance.now() - startTime,
         error: errorMessage,
         buildingsCompleted: 0,
-        populationGrowth: 0
+        populationGrowth: 0,
       };
     }
   }

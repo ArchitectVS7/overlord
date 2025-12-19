@@ -56,7 +56,7 @@ export class PlanetEntity {
    */
   public canBuildSurfaceStructure(): boolean {
     const surfaceStructures = this.structures.filter(
-      s => s.type === BuildingType.MiningStation || s.type === BuildingType.HorticulturalStation
+      s => s.type === BuildingType.MiningStation || s.type === BuildingType.HorticulturalStation,
     ).length;
     return surfaceStructures < 5;
   }

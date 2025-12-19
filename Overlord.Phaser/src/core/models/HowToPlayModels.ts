@@ -405,7 +405,7 @@ export class HowToPlayLoader {
    */
   public static async getSection(
     categoryId: string,
-    sectionId: string
+    sectionId: string,
   ): Promise<HowToPlaySection | null> {
     const content = await this.loadCategory(categoryId);
     return content.sections.find(s => s.sectionId === sectionId) || null;

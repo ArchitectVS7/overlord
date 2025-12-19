@@ -103,7 +103,7 @@ export class TutorialHighlight {
       camera.width,
       camera.height,
       BACKDROP_COLOR,
-      BACKDROP_ALPHA
+      BACKDROP_ALPHA,
     );
     this.backdrop.setOrigin(0, 0);
     this.backdrop.setDepth(HIGHLIGHT_DEPTH - 1);
@@ -121,7 +121,7 @@ export class TutorialHighlight {
       bounds.y - PADDING,
       bounds.width + PADDING * 2,
       bounds.height + PADDING * 2,
-      8
+      8,
     );
 
     if (pulsate) {
@@ -234,7 +234,7 @@ export class TutorialHighlight {
       x: target.x,
       y: target.y,
       width: target.displayWidth ?? target.width ?? 100,
-      height: target.displayHeight ?? target.height ?? 50
+      height: target.displayHeight ?? target.height ?? 50,
     };
   }
 
@@ -242,7 +242,7 @@ export class TutorialHighlight {
    * Draw glow effect
    */
   private drawGlow(bounds: { x: number; y: number; width: number; height: number }): void {
-    if (!this.glowGraphics) return;
+    if (!this.glowGraphics) {return;}
 
     // Outer glow
     this.glowGraphics.lineStyle(6, GLOW_COLOR, 0.3);
@@ -251,7 +251,7 @@ export class TutorialHighlight {
       bounds.y - PADDING - 3,
       bounds.width + (PADDING + 3) * 2,
       bounds.height + (PADDING + 3) * 2,
-      12
+      12,
     );
 
     // Inner glow
@@ -261,7 +261,7 @@ export class TutorialHighlight {
       bounds.y - PADDING,
       bounds.width + PADDING * 2,
       bounds.height + PADDING * 2,
-      8
+      8,
     );
   }
 
@@ -269,7 +269,7 @@ export class TutorialHighlight {
    * Draw arrow pointing down
    */
   private drawArrow(x: number, y: number): void {
-    if (!this.arrowGraphics) return;
+    if (!this.arrowGraphics) {return;}
 
     this.arrowGraphics.fillStyle(ARROW_COLOR, 1);
 
@@ -292,7 +292,7 @@ export class TutorialHighlight {
       duration: 600,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
     this.activeTweens.push(tween);
   }
@@ -307,7 +307,7 @@ export class TutorialHighlight {
       duration: 400,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
     this.activeTweens.push(tween);
   }

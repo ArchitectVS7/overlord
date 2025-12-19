@@ -42,7 +42,7 @@ export enum SortOption {
 const DIFFICULTY_ORDER: Record<string, number> = {
   'easy': 0,
   'normal': 1,
-  'hard': 2
+  'hard': 2,
 };
 
 /**
@@ -91,8 +91,8 @@ export class PackMetadataHelper {
 
     // First sort by active status (active first)
     sorted.sort((a, b) => {
-      if (a.isActive && !b.isActive) return -1;
-      if (!a.isActive && b.isActive) return 1;
+      if (a.isActive && !b.isActive) {return -1;}
+      if (!a.isActive && b.isActive) {return 1;}
       return 0;
     });
 

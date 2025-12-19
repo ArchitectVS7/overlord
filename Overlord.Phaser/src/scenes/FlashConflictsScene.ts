@@ -40,8 +40,8 @@ export class FlashConflictsScene extends Phaser.Scene {
       {
         fontSize: '48px',
         color: '#ffffff',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.titleText.setOrigin(0.5, 0);
     this.titleText.setScrollFactor(0);
@@ -100,7 +100,7 @@ export class FlashConflictsScene extends Phaser.Scene {
       if (completion) {
         completionData.set(scenario.id, {
           completed: completion.completed,
-          starRating: completion.starRating
+          starRating: completion.starRating,
         });
       }
     }

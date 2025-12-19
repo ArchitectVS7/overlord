@@ -114,7 +114,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.titleText = this.scene.add.text(0, 0, '', {
       fontSize: '24px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.titleText);
 
@@ -125,8 +125,8 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
       'X',
       {
         fontSize: '24px',
-        color: TEXT_COLOR
-      }
+        color: TEXT_COLOR,
+      },
     );
     closeButton.setInteractive({ useHandCursor: true });
     closeButton.on('pointerdown', () => this.hide());
@@ -136,7 +136,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.descriptionText = this.scene.add.text(0, 60, '', {
       fontSize: '16px',
       color: TEXT_COLOR,
-      wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.descriptionText);
 
@@ -144,7 +144,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.victoryText = this.scene.add.text(0, 160, '', {
       fontSize: '14px',
       color: LABEL_COLOR,
-      wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.victoryText);
 
@@ -152,7 +152,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.prerequisitesText = this.scene.add.text(0, 260, '', {
       fontSize: '14px',
       color: LABEL_COLOR,
-      wordWrap: { width: PANEL_WIDTH - PADDING * 2 }
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.prerequisitesText);
 
@@ -160,14 +160,14 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.completionText = this.scene.add.text(0, 320, '', {
       fontSize: '14px',
       color: SUCCESS_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.contentContainer.add(this.completionText);
 
     // Best time (Story 1-6)
     this.bestTimeText = this.scene.add.text(0, 350, '', {
       fontSize: '14px',
-      color: LABEL_COLOR
+      color: LABEL_COLOR,
     });
     this.contentContainer.add(this.bestTimeText);
 
@@ -180,7 +180,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
       PANEL_WIDTH / 2 - BUTTON_WIDTH - 10,
       PANEL_HEIGHT - PADDING - BUTTON_HEIGHT - 20,
       'Start Scenario',
-      () => this.startScenario()
+      () => this.startScenario(),
     );
     this.add(this.startButton);
 
@@ -189,7 +189,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
       PANEL_WIDTH / 2 + 10,
       PANEL_HEIGHT - PADDING - BUTTON_HEIGHT - 20,
       'Back to List',
-      () => this.handleBack()
+      () => this.handleBack(),
     );
     this.add(this.backButton);
   }
@@ -205,7 +205,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     const text = this.scene.add.text(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2, label, {
       fontSize: '16px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     text.setOrigin(0.5, 0.5);
     container.add(text);
@@ -244,7 +244,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Update the panel display with scenario data
    */
   private updateDisplay(): void {
-    if (!this.scenario) return;
+    if (!this.scenario) {return;}
 
     // Title
     this.titleText.setText(this.scenario.name);
@@ -278,7 +278,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Format victory conditions for display
    */
   private formatVictoryConditions(): string {
-    if (!this.scenario) return '';
+    if (!this.scenario) {return '';}
 
     return this.scenario.victoryConditions.map(vc => {
       switch (vc.type) {
@@ -287,7 +287,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
         case 'capture_planet':
           return `• Capture ${vc.count} planet(s)`;
         case 'defeat_enemy':
-          return `• Defeat all enemy forces`;
+          return '• Defeat all enemy forces';
         case 'survive_turns':
           return `• Survive ${vc.turns} turns`;
         default:
@@ -300,7 +300,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Format prerequisites for display
    */
   private formatPrerequisites(): string {
-    if (!this.scenario) return '';
+    if (!this.scenario) {return '';}
 
     if (this.scenario.prerequisites.length === 0) {
       return 'Prerequisites: None';
@@ -322,7 +322,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Update start button enabled/disabled state
    */
   private updateStartButton(): void {
-    if (!this.scenario) return;
+    if (!this.scenario) {return;}
 
     const canStart = this.manager.checkPrerequisites(this.scenario.id);
     const bg = this.startButton.getData('bg') as Phaser.GameObjects.Graphics;
@@ -345,10 +345,10 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Start the scenario
    */
   startScenario(): void {
-    if (!this.scenario) return;
+    if (!this.scenario) {return;}
 
     const canStart = this.manager.checkPrerequisites(this.scenario.id);
-    if (!canStart) return;
+    if (!canStart) {return;}
 
     if (this.onStartScenario) {
       this.onStartScenario(this.scenario);
@@ -392,7 +392,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Check if prerequisites are met for testing
    */
   arePrerequisitesMet(): boolean {
-    if (!this.scenario) return false;
+    if (!this.scenario) {return false;}
     return this.manager.checkPrerequisites(this.scenario.id);
   }
 
@@ -400,7 +400,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
    * Check if scenario is completed for testing
    */
   isCompleted(): boolean {
-    if (!this.scenario) return false;
+    if (!this.scenario) {return false;}
     return this.manager.getCompletion(this.scenario.id)?.completed === true;
   }
 
@@ -465,7 +465,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
       const starColor = i < this.completionDetails.starRating ? STAR_COLOR_FILLED : STAR_COLOR_EMPTY;
       const starText = this.scene.add.text(starX, 0, '★', {
         fontSize: '20px',
-        color: starColor
+        color: starColor,
       });
       this.starRatingContainer.add(starText);
     }

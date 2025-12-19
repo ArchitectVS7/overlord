@@ -27,7 +27,7 @@ export class InputManager {
   constructor(
     scene: Phaser.Scene,
     inputSystem: InputSystem,
-    visualConfig: Partial<VisualConfig> = {}
+    visualConfig: Partial<VisualConfig> = {},
   ) {
     this.scene = scene;
     this.inputSystem = inputSystem;
@@ -38,7 +38,7 @@ export class InputManager {
       focusBorderWidth: 3,
       defaultCursor: 'default',
       hoverCursor: 'pointer',
-      ...visualConfig
+      ...visualConfig,
     };
 
     this.setupKeyboardListeners();
@@ -83,9 +83,9 @@ export class InputManager {
         {
           ctrl: event.ctrlKey || event.metaKey,
           shift: event.shiftKey,
-          alt: event.altKey
+          alt: event.altKey,
         },
-        Date.now()
+        Date.now(),
       );
 
       // Prevent browser default behavior for registered shortcuts
@@ -103,7 +103,7 @@ export class InputManager {
       },
       onHoverChanged: (elementId) => {
         this.updateHoverVisuals(elementId);
-      }
+      },
     });
   }
 
@@ -113,12 +113,12 @@ export class InputManager {
   public registerInteractive(
     id: string,
     gameObject: Phaser.GameObjects.GameObject,
-    order: number = 0
+    order: number = 0,
   ): void {
     this.inputSystem.registerFocusableElement({
       id,
       order,
-      enabled: true
+      enabled: true,
     });
 
     this.interactiveObjects.set(id, gameObject);
@@ -217,7 +217,7 @@ export class InputManager {
     focusGraphic.lineStyle(
       this.visualConfig.focusBorderWidth,
       this.visualConfig.focusBorderColor,
-      1
+      1,
     );
 
     const bounds = this.getObjectBounds(obj);
@@ -226,7 +226,7 @@ export class InputManager {
         bounds.x - this.visualConfig.focusBorderWidth,
         bounds.y - this.visualConfig.focusBorderWidth,
         bounds.width + this.visualConfig.focusBorderWidth * 2,
-        bounds.height + this.visualConfig.focusBorderWidth * 2
+        bounds.height + this.visualConfig.focusBorderWidth * 2,
       );
     }
   }

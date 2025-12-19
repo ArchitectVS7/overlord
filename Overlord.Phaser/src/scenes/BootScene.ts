@@ -3,6 +3,8 @@ import { checkEnvironmentVariables, testDatabaseConnection } from '@services/Sup
 import { getAuthService } from '@services/AuthService';
 import { getAdminModeService } from '@services/AdminModeService';
 import { getUIPanelPositionService } from '@services/UIPanelPositionService';
+import { getUserProfileService } from '@services/UserProfileService';
+import { getGuestModeService } from '@services/GuestModeService';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -46,6 +48,13 @@ export class BootScene extends Phaser.Scene {
 
     // Determine next scene based on Supabase availability and auth status
     setTimeout(async () => {
+      // Initialize guest mode service (restores existing guest session)
+      const guestService = getGuestModeService();
+      guestService.initialize();
+
+      // Initialize user profile service
+      const profileService = getUserProfileService();
+
       if (supabaseReady) {
         // Initialize auth service and check if already authenticated
         const authService = getAuthService();
@@ -59,12 +68,21 @@ export class BootScene extends Phaser.Scene {
         const positionService = getUIPanelPositionService();
         await positionService.refreshCache();
 
+        // Apply user settings (audio, UI preferences)
+        // Story 10-6: Settings are loaded from cloud for auth users, localStorage for guests
+        await profileService.applyAllSettings();
+        console.log('User settings applied');
+
         if (authService.isAuthenticated()) {
           // Already logged in - go to main menu
           console.log('User authenticated, proceeding to main menu');
           if (adminService.isAdmin()) {
             console.log('  User has admin privileges');
           }
+          this.scene.start('MainMenuScene');
+        } else if (guestService.isGuestMode()) {
+          // Existing guest session - go to main menu
+          console.log('Guest session restored, proceeding to main menu');
           this.scene.start('MainMenuScene');
         } else {
           // Not logged in - go to auth scene
@@ -75,6 +93,11 @@ export class BootScene extends Phaser.Scene {
         // Supabase not available - skip auth, go directly to main menu
         // (will work with localStorage only)
         console.log('Supabase unavailable, proceeding without authentication');
+
+        // Still apply local settings for offline mode
+        await profileService.applyAllSettings();
+        console.log('Local settings applied');
+
         this.scene.start('MainMenuScene');
       }
     }, 100);

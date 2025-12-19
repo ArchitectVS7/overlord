@@ -1,7 +1,7 @@
 # Story 10-3: Save Campaign Progress
 
 **Epic:** 10 - User Accounts & Cross-Device Persistence
-**Status:** drafted
+**Status:** done
 **Complexity:** Medium
 **Implementation Tag:** [CORE-DONE] - SaveSystem works, needs UI + cloud
 

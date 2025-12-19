@@ -13,7 +13,7 @@ import {
   BuildingStatus,
   CraftType,
   EquipmentLevel,
-  WeaponLevel
+  WeaponLevel,
 } from './models/Enums';
 import { AIPersonalityConfig, AIAssessment } from './models/AIModels';
 import { PlatoonCosts } from './models/PlatoonModels';
@@ -70,7 +70,7 @@ export class AIDecisionSystem {
     platoonSystem: PlatoonSystem,
     personality: AIPersonality = AIPersonality.Balanced,
     difficulty: AIDifficulty = AIDifficulty.Normal,
-    randomFunc?: () => number
+    randomFunc?: () => number,
   ) {
     if (!gameState) {
       throw new Error('gameState cannot be null or undefined');
@@ -175,7 +175,7 @@ export class AIDecisionSystem {
     const assessment = new AIAssessment();
 
     // Calculate military strengths
-    let playerMilitary = this.calculateMilitaryStrength(FactionType.Player);
+    const playerMilitary = this.calculateMilitaryStrength(FactionType.Player);
     let aiMilitary = this.calculateMilitaryStrength(FactionType.AI);
 
     // Apply difficulty modifiers to AI strength
@@ -304,7 +304,7 @@ export class AIDecisionSystem {
     for (const planet of aiPlanets) {
       // Check for player craft in orbit
       const playerCraft = this.gameState.craft.filter(
-        c => c.planetID === planet.id && c.owner === FactionType.Player
+        c => c.planetID === planet.id && c.owner === FactionType.Player,
       );
 
       if (playerCraft.some(c => c.type === CraftType.BattleCruiser)) {
@@ -456,7 +456,7 @@ export class AIDecisionSystem {
 
     // Get AI Battle Cruisers with platoons
     const battleCruisers = this.gameState.craft.filter(
-      c => c.owner === FactionType.AI && c.type === CraftType.BattleCruiser && c.carriedPlatoonIDs.length > 0
+      c => c.owner === FactionType.AI && c.type === CraftType.BattleCruiser && c.carriedPlatoonIDs.length > 0,
     );
 
     if (battleCruisers.length < 2) {
@@ -505,7 +505,7 @@ export class AIDecisionSystem {
     const planet = this.gameState.planetLookup.get(planetID);
     if (planet) {
       const hasOrbitalDefense = planet.structures.some(
-        s => s.type === BuildingType.OrbitalDefense && s.status === BuildingStatus.Active
+        s => s.type === BuildingType.OrbitalDefense && s.status === BuildingStatus.Active,
       );
       if (hasOrbitalDefense) {
         strength = Math.floor(strength * 1.2); // +20% defense bonus

@@ -6,6 +6,7 @@
 
 import Phaser from 'phaser';
 import { getSaveService, CloudSaveMetadata } from '@services/SaveService';
+import { ConfirmationDialog } from './ConfirmationDialog';
 
 const PANEL_WIDTH = 600;
 const PANEL_HEIGHT = 500;
@@ -42,6 +43,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
 
   private saveSlots: SaveSlotItem[] = [];
   private selectedSlot: CloudSaveMetadata | null = null;
+  private confirmationDialog!: ConfirmationDialog;
 
   /**
    * Callback fired when a save is selected for loading
@@ -69,8 +71,23 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
     this.createCloseButton();
     this.createLoadingText();
     this.createNoSavesText();
+    this.createConfirmationDialog();
 
     scene.add.existing(this as unknown as Phaser.GameObjects.GameObject);
+  }
+
+  private createConfirmationDialog(): void {
+    this.confirmationDialog = new ConfirmationDialog(this.scene);
+  }
+
+  /**
+   * Show delete confirmation before removing a save
+   */
+  private showDeleteConfirmation(save: CloudSaveMetadata): void {
+    const displayName = save.saveName || save.slotName;
+    this.confirmationDialog.showDeleteConfirmation(displayName, () => {
+      this.onDeleteSelected?.(save.slotName);
+    });
   }
 
   /**
@@ -209,7 +226,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
     save: CloudSaveMetadata,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): SaveSlotItem {
     // Container for this slot
     const container = this.scene.add.container(x, y);
@@ -220,7 +237,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
       SLOT_HEIGHT / 2,
       width,
       SLOT_HEIGHT,
-      COLORS.SLOT_BG
+      COLORS.SLOT_BG,
     );
     background.setStrokeStyle(1, COLORS.BORDER);
     background.setInteractive({ useHandCursor: true });
@@ -315,7 +332,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
       SLOT_HEIGHT / 2,
       60,
       30,
-      COLORS.BUTTON_DANGER
+      COLORS.BUTTON_DANGER,
     );
     deleteButton.setStrokeStyle(1, 0xff4444);
     deleteButton.setInteractive({ useHandCursor: true });
@@ -323,7 +340,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
     deleteButton.on('pointerover', () => deleteButton.setFillStyle(COLORS.BUTTON_DANGER_HOVER));
     deleteButton.on('pointerout', () => deleteButton.setFillStyle(COLORS.BUTTON_DANGER));
     deleteButton.on('pointerdown', () => {
-      this.onDeleteSelected?.(save.slotName);
+      this.showDeleteConfirmation(save);
     });
 
     container.add(deleteButton);
@@ -398,6 +415,7 @@ export class LoadGamePanel extends Phaser.GameObjects.Container {
    */
   public destroy(fromScene?: boolean): void {
     this.clearSlots();
+    this.confirmationDialog?.destroy();
     super.destroy(fromScene);
   }
 }

@@ -1,7 +1,7 @@
 # Story 10-5: Cross-Device Save Synchronization
 
 **Epic:** 10 - User Accounts & Cross-Device Persistence
-**Status:** drafted
+**Status:** done
 **Complexity:** Medium
 **Implementation Tag:** [GREENFIELD] - Supabase integration
 

@@ -24,7 +24,7 @@ export class StarFieldRenderer {
       maxSize: 1,
       minAlpha: 0.2,
       maxAlpha: 0.4,
-      depth: -30
+      depth: -30,
     });
 
     // Layer 2: Mid-ground stars (medium brightness)
@@ -34,7 +34,7 @@ export class StarFieldRenderer {
       maxSize: 2,
       minAlpha: 0.4,
       maxAlpha: 0.7,
-      depth: -20
+      depth: -20,
     });
 
     // Layer 3: Foreground stars (largest, brightest, least dense)
@@ -44,7 +44,7 @@ export class StarFieldRenderer {
       maxSize: 2,
       minAlpha: 0.7,
       maxAlpha: 1.0,
-      depth: -10
+      depth: -10,
     });
   }
 
@@ -61,7 +61,7 @@ export class StarFieldRenderer {
       minAlpha: number;
       maxAlpha: number;
       depth: number;
-    }
+    },
   ): void {
     const graphics = this.scene.add.graphics();
     graphics.setDepth(config.depth);

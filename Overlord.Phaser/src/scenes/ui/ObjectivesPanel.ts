@@ -87,7 +87,7 @@ export class ObjectivesPanel {
     this.titleText = this.scene.add.text(PANEL_WIDTH / 2, PADDING, 'OBJECTIVES', {
       fontSize: '28px',
       color: TEXT_COLOR,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
     });
     this.titleText.setOrigin(0.5, 0);
     this.container.add(this.titleText);
@@ -100,8 +100,8 @@ export class ObjectivesPanel {
       {
         fontSize: '20px',
         color: '#44ff44',
-        fontStyle: 'bold'
-      }
+        fontStyle: 'bold',
+      },
     );
     this.continueButton.setOrigin(0.5, 0);
     this.continueButton.setInteractive({ useHandCursor: true });
@@ -145,7 +145,7 @@ export class ObjectivesPanel {
         PADDING,
         startY + i * ROW_HEIGHT,
         PANEL_WIDTH - PADDING * 2,
-        condition
+        condition,
       );
       this.objectiveRows.push(row);
     }
@@ -239,7 +239,7 @@ class ObjectiveRow {
     x: number,
     y: number,
     width: number,
-    condition: VictoryCondition
+    condition: VictoryCondition,
   ) {
     this.progressWidth = width - 60;
 
@@ -250,7 +250,7 @@ class ObjectiveRow {
     // Status icon (checkmark or circle)
     this.statusIcon = scene.add.text(0, 0, '○', {
       fontSize: '24px',
-      color: INCOMPLETE_COLOR
+      color: INCOMPLETE_COLOR,
     });
     this.container.add(this.statusIcon);
 
@@ -258,7 +258,7 @@ class ObjectiveRow {
     const description = this.getConditionDescription(condition);
     this.descriptionText = scene.add.text(35, 0, description, {
       fontSize: '18px',
-      color: TEXT_COLOR
+      color: TEXT_COLOR,
     });
     this.container.add(this.descriptionText);
 
@@ -276,9 +276,10 @@ class ObjectiveRow {
     switch (condition.type) {
       case 'defeat_enemy':
         return 'Defeat all enemies';
-      case 'build_structure':
+      case 'build_structure': {
         const count = condition.count ?? 1;
         return `Build ${count} ${condition.target}`;
+      }
       case 'capture_planet':
         if (condition.target) {
           return `Capture ${condition.target}`;

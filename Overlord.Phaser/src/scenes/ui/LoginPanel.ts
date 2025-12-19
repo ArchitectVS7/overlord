@@ -40,14 +40,23 @@ export class LoginPanel extends Phaser.GameObjects.Container {
   // DOM input elements
   private emailInput!: HTMLInputElement;
   private passwordInput!: HTMLInputElement;
+  private rememberMeCheckbox!: HTMLInputElement;
   private inputContainer!: HTMLDivElement;
+
+  // Forgot password link
+  private forgotPasswordText!: Phaser.GameObjects.Text;
 
   private isLoading = false;
 
   /**
    * Callback fired when login is attempted
    */
-  public onLoginAttempt?: (email: string, password: string) => void;
+  public onLoginAttempt?: (email: string, password: string, rememberMe: boolean) => void;
+
+  /**
+   * Callback fired when forgot password is clicked
+   */
+  public onForgotPasswordClick?: () => void;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -57,6 +66,7 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     this.createBackground();
     this.createTitle();
     this.createLabels();
+    this.createForgotPasswordLink();
     this.createButton();
     this.createErrorText();
     this.createLoadingText();
@@ -162,6 +172,32 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     this.add(this.passwordLabel);
   }
 
+  private createForgotPasswordLink(): void {
+    this.forgotPasswordText = this.scene.add.text(PANEL_WIDTH - 30, 192, 'Forgot Password?', {
+      fontSize: '12px',
+      color: COLORS.TEXT_SECONDARY,
+      fontFamily: 'monospace',
+    });
+    this.forgotPasswordText.setOrigin(1, 0);
+    this.forgotPasswordText.setInteractive({ useHandCursor: true });
+
+    this.forgotPasswordText.on('pointerover', () => {
+      this.forgotPasswordText.setColor(COLORS.TEXT);
+    });
+
+    this.forgotPasswordText.on('pointerout', () => {
+      this.forgotPasswordText.setColor(COLORS.TEXT_SECONDARY);
+    });
+
+    this.forgotPasswordText.on('pointerdown', () => {
+      if (!this.isLoading) {
+        this.onForgotPasswordClick?.();
+      }
+    });
+
+    this.add(this.forgotPasswordText);
+  }
+
   private createButton(): void {
     const buttonWidth = PANEL_WIDTH - 60;
     const buttonHeight = 45;
@@ -172,7 +208,7 @@ export class LoginPanel extends Phaser.GameObjects.Container {
       buttonY,
       buttonWidth,
       buttonHeight,
-      COLORS.BUTTON_BG
+      COLORS.BUTTON_BG,
     );
     this.loginButton.setStrokeStyle(2, COLORS.BORDER);
     this.loginButton.setInteractive({ useHandCursor: true });
@@ -263,6 +299,10 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     this.passwordInput.type = 'password';
     this.inputContainer.appendChild(this.passwordInput);
 
+    // Remember me checkbox
+    const checkboxContainer = this.createRememberMeCheckbox(195);
+    this.inputContainer.appendChild(checkboxContainer);
+
     // Add Enter key handler
     this.passwordInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !this.isLoading) {
@@ -271,6 +311,44 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     });
 
     document.body.appendChild(this.inputContainer);
+  }
+
+  private createRememberMeCheckbox(top: number): HTMLDivElement {
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: absolute;
+      left: 30px;
+      top: ${top}px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    `;
+
+    this.rememberMeCheckbox = document.createElement('input');
+    this.rememberMeCheckbox.type = 'checkbox';
+    this.rememberMeCheckbox.id = 'remember-me';
+    this.rememberMeCheckbox.style.cssText = `
+      width: 16px;
+      height: 16px;
+      accent-color: ${COLORS.TEXT};
+      cursor: pointer;
+    `;
+
+    const label = document.createElement('label');
+    label.htmlFor = 'remember-me';
+    label.textContent = 'Remember me';
+    label.style.cssText = `
+      font-size: 12px;
+      font-family: monospace;
+      color: ${COLORS.TEXT_SECONDARY};
+      cursor: pointer;
+    `;
+
+    container.appendChild(this.rememberMeCheckbox);
+    container.appendChild(label);
+
+    return container;
   }
 
   private createInput(name: string, placeholder: string, top: number): HTMLInputElement {
@@ -320,6 +398,7 @@ export class LoginPanel extends Phaser.GameObjects.Container {
   private handleLogin(): void {
     const email = this.emailInput?.value?.trim() ?? '';
     const password = this.passwordInput?.value ?? '';
+    const rememberMe = this.rememberMeCheckbox?.checked ?? false;
 
     this.clearError();
 
@@ -335,7 +414,7 @@ export class LoginPanel extends Phaser.GameObjects.Container {
     }
 
     // Trigger callback
-    this.onLoginAttempt?.(email, password);
+    this.onLoginAttempt?.(email, password, rememberMe);
   }
 
   /**
