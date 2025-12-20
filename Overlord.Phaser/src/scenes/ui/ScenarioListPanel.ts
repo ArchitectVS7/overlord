@@ -12,6 +12,7 @@
 
 import Phaser from 'phaser';
 import { Scenario } from '@core/models/ScenarioModels';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 600;
@@ -21,18 +22,18 @@ const CARD_HEIGHT = 80;
 const CARD_SPACING = 10;
 const MAX_VISIBLE_CARDS = 5;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const CARD_BG_COLOR = 0x2a2a3e;
-const CARD_HOVER_COLOR = 0x3a3a4e;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const TUTORIAL_BADGE_COLOR = 0x44aa44;
-const TACTICAL_BADGE_COLOR = 0xaa4444;
-const COMPLETED_BADGE_COLOR = 0x44aaff;
-const STAR_COLOR_FILLED = '#ffcc00';
-const STAR_COLOR_EMPTY = '#444444';
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const CARD_BG_COLOR = THEME_COLORS.PANEL_BG_DARK;
+const CARD_HOVER_COLOR = THEME_COLORS.BUTTON_SECONDARY_HOVER;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const TUTORIAL_BADGE_COLOR = THEME_COLORS.SUCCESS;
+const TACTICAL_BADGE_COLOR = THEME_COLORS.DANGER;
+const COMPLETED_BADGE_COLOR = THEME_COLORS.PRIMARY;
+const STAR_COLOR_FILLED = TEXT_COLORS.CREDITS;
+const STAR_COLOR_EMPTY = TEXT_COLORS.MUTED;
 
 // Difficulty colors (Story 8-1)
 const DIFFICULTY_COLORS: Record<string, number> = {

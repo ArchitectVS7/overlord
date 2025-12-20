@@ -14,6 +14,7 @@ import Phaser from 'phaser';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { CraftEntity } from '@core/models/CraftEntity';
 import { NavigationSystem } from '@core/NavigationSystem';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 500;
@@ -22,15 +23,15 @@ const PADDING = 20;
 const BUTTON_HEIGHT = 36;
 const DESTINATION_ITEM_HEIGHT = 40;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const SUCCESS_COLOR = '#44aa44';
-const WARNING_COLOR = '#ff9900';
-const SELECTED_COLOR = 0x3a5a7a;
-const DISABLED_COLOR = '#666666';
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const SUCCESS_COLOR = TEXT_COLORS.SUCCESS;
+const WARNING_COLOR = TEXT_COLORS.WARNING;
+const SELECTED_COLOR = THEME_COLORS.BUTTON_SECONDARY_HOVER;
+const DISABLED_COLOR = TEXT_COLORS.MUTED;
 
 // Fuel cost per jump (from NavigationSystem)
 const FUEL_COST_PER_JUMP = 10;
@@ -105,7 +106,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     // Title
     this.titleText = this.scene.add.text(PADDING, PADDING, 'Navigate Spacecraft', {
       fontSize: '20px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: SUCCESS_COLOR,
       fontStyle: 'bold',
     });
@@ -114,7 +115,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     // Current location
     this.currentLocationText = this.scene.add.text(PADDING, 50, 'Currently at: -', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     this.contentContainer.add(this.currentLocationText);
@@ -122,7 +123,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     // Fuel status
     this.fuelStatusText = this.scene.add.text(PADDING, 75, 'Fuel Available: -', {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(this.fuelStatusText);
@@ -130,14 +131,14 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     // Navigation info section
     this.fuelCostText = this.scene.add.text(PANEL_WIDTH - PADDING - 150, 50, 'Fuel Cost: 10', {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(this.fuelCostText);
 
     this.travelTimeText = this.scene.add.text(PANEL_WIDTH - PADDING - 150, 70, 'Travel Time: Instant', {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(this.travelTimeText);
@@ -145,7 +146,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
     // Destinations section header
     const destLabel = this.scene.add.text(PADDING, 105, 'Select Destination', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
       fontStyle: 'bold',
     });
@@ -176,7 +177,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
 
     const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, 'NAVIGATE', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
       fontStyle: 'bold',
     });
@@ -206,7 +207,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
 
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#999999',
     });
     closeText.setOrigin(0.5);
@@ -376,7 +377,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       // Planet name
       const nameText = this.scene.add.text(10, y + 10, planet.name, {
         fontSize: '14px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: isReachable ? TEXT_COLOR : DISABLED_COLOR,
         fontStyle: isSelected ? 'bold' : 'normal',
       });
@@ -385,7 +386,7 @@ export class SpacecraftNavigationPanel extends Phaser.GameObjects.Container {
       // Owner indicator
       const ownerText = this.scene.add.text(PANEL_WIDTH - PADDING * 2 - 100, y + 10, this.getOwnerLabel(planet), {
         fontSize: '12px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: isReachable ? LABEL_COLOR : DISABLED_COLOR,
       });
       this.destinationListContainer.add(ownerText);

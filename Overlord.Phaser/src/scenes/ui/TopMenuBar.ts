@@ -7,17 +7,18 @@
 import Phaser from 'phaser';
 import { AudioManager } from '../../core/AudioManager';
 import { HelpPanel } from './HelpPanel';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS, HUD, PANEL } from '@config/UITheme';
 
-const BAR_HEIGHT = 32;
-const BAR_DEPTH = 1000;
+const BAR_HEIGHT = HUD.MENU_BAR.height;
+const BAR_DEPTH = PANEL.DEPTH_NOTIFICATION; // High depth for menu bar
 
 const COLORS = {
-  BAR_BG: 0x1a1a2e,
-  BAR_BORDER: 0x2a2a4e,
-  ICON_DEFAULT: '#888888',
-  ICON_HOVER: '#ffffff',
-  ICON_ACTIVE: '#00bfff',
-  ICON_MUTED: '#ff4444',
+  BAR_BG: THEME_COLORS.PANEL_BG,
+  BAR_BORDER: THEME_COLORS.BORDER_SUBTLE,
+  ICON_DEFAULT: TEXT_COLORS.SECONDARY,
+  ICON_HOVER: TEXT_COLORS.PRIMARY,
+  ICON_ACTIVE: TEXT_COLORS.ACCENT,
+  ICON_MUTED: TEXT_COLORS.DANGER,
 };
 
 export interface TopMenuBarOptions {
@@ -104,7 +105,7 @@ export class TopMenuBar {
     this.homeButton = this.scene.add.text(iconX, iconY, '🏠 HOME', {
       fontSize: '14px',
       color: COLORS.ICON_DEFAULT,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     });
     this.homeButton.setOrigin(0, 0.5);
     this.homeButton.setScrollFactor(0);
@@ -135,7 +136,7 @@ export class TopMenuBar {
     this.helpButton = this.scene.add.text(iconX, iconY, '❓ HELP', {
       fontSize: '14px',
       color: COLORS.ICON_DEFAULT,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     });
     this.helpButton.setOrigin(0, 0.5);
     this.helpButton.setScrollFactor(0);
@@ -170,7 +171,7 @@ export class TopMenuBar {
     this.resetCameraButton = this.scene.add.text(iconX, iconY, '🎯 RESET', {
       fontSize: '14px',
       color: COLORS.ICON_DEFAULT,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     });
     this.resetCameraButton.setOrigin(0, 0.5);
     this.resetCameraButton.setScrollFactor(0);

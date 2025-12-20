@@ -14,20 +14,14 @@ import { FactionType, BuildingType, BuildingStatus } from '@core/models/Enums';
 import { BuildingCosts, Structure } from '@core/models/BuildingModels';
 import { BuildingSystem } from '@core/BuildingSystem';
 import { OWNER_COLORS } from '../../config/VisualConfig';
+import { COLORS, TEXT_COLORS, FONTS, PANEL, RESOURCE_COLORS, BUTTON } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 280;
 const PANEL_HEIGHT = 500; // Increased for construction section + platoons button
-const PADDING = 15;
+const PADDING = PANEL.PADDING;
 const HEADER_HEIGHT = 60;
-const BUTTON_HEIGHT = 36;
-
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_WIDTH = 3;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const DISABLED_COLOR = '#666666';
+const BUTTON_HEIGHT = BUTTON.HEIGHT;
 
 export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;
@@ -94,7 +88,10 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.backdrop.setVisible(false);
 
     // Click on backdrop closes panel (AC5 requirement)
-    this.backdrop.on('pointerdown', () => this.hide());
+    this.backdrop.on('pointerdown', () => {
+      console.log('BACKDROP CLICKED - closing panel');
+      this.hide();
+    });
   }
 
   /**
@@ -103,8 +100,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private createPanel(): void {
     // Background
     this.background = this.scene.add.graphics();
-    this.background.fillStyle(BG_COLOR, 0.95);
-    this.background.fillRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.background.fillStyle(COLORS.PANEL_BG, PANEL.BG_ALPHA);
+    this.background.fillRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL.BORDER_RADIUS);
     this.add(this.background);
 
     // Border (will be colored by owner)
@@ -137,26 +134,26 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private createHeader(): void {
     // Planet name
     this.nameText = this.scene.add.text(0, 0, 'Planet Name', {
-      fontSize: '18px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_HEADER,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(this.nameText);
 
     // Planet type
     this.typeText = this.scene.add.text(0, 26, 'Type: Unknown', {
-      fontSize: '13px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.typeText);
 
     // Owner indicator
     this.ownerText = this.scene.add.text(0, 44, 'Owner: Unknown', {
-      fontSize: '13px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.ownerText);
   }
@@ -166,32 +163,32 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
     this.contentContainer.add(divider);
 
     // Stats header
     const statsLabel = this.scene.add.text(0, startY, 'Stats', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(statsLabel);
 
     // Population
     this.populationText = this.scene.add.text(0, startY + 22, 'Population: 0 / 0', {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.populationText);
 
     // Morale
     this.moraleText = this.scene.add.text(0, startY + 44, 'Morale: 0%', {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.moraleText);
   }
@@ -201,32 +198,32 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
     this.contentContainer.add(divider);
 
     // Resources header
     const resourcesLabel = this.scene.add.text(0, startY, 'Resources (stockpile)', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(resourcesLabel);
 
-    // Resource types with colors
+    // Resource types with colors (from centralized theme)
     const resources = [
-      { name: 'Credits', color: '#ffd700' },
-      { name: 'Minerals', color: '#c0c0c0' },
-      { name: 'Fuel', color: '#ff6600' },
-      { name: 'Food', color: '#00cc00' },
-      { name: 'Energy', color: '#00ccff' },
+      { name: 'Credits', color: RESOURCE_COLORS.credits },
+      { name: 'Minerals', color: RESOURCE_COLORS.minerals },
+      { name: 'Fuel', color: RESOURCE_COLORS.fuel },
+      { name: 'Food', color: RESOURCE_COLORS.food },
+      { name: 'Energy', color: RESOURCE_COLORS.energy },
     ];
 
     resources.forEach((res, i) => {
       const text = this.scene.add.text(0, startY + 22 + i * 18, `${res.name}: ---`, {
-        fontSize: '12px',
-        fontFamily: 'Arial',
+        fontSize: FONTS.SIZE_SMALL,
+        fontFamily: FONTS.PRIMARY,
         color: res.color,
       });
       this.contentContainer.add(text);
@@ -247,30 +244,30 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, -5, PANEL_WIDTH - PADDING * 2, -5);
     this.constructionContainer.add(divider);
 
     // Section header
     const headerText = this.scene.add.text(0, 0, 'Construction', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.constructionContainer.add(headerText);
 
     // Building name under construction
     this.constructionText = this.scene.add.text(0, 22, 'Building: None', {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: '#ff9900', // Orange for construction
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.WARNING, // Orange for construction
     });
     this.constructionContainer.add(this.constructionText);
 
     // Progress bar background
     const progressBarBg = this.scene.add.graphics();
-    progressBarBg.fillStyle(0x333333, 1);
+    progressBarBg.fillStyle(COLORS.BUTTON_DISABLED, 1);
     progressBarBg.fillRoundedRect(0, 42, PANEL_WIDTH - PADDING * 2, 16, 4);
     this.constructionContainer.add(progressBarBg);
 
@@ -280,9 +277,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Turns remaining text
     this.constructionTurnsText = this.scene.add.text(0, 62, 'Completes in: 0 turns', {
-      fontSize: '11px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_TINY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.constructionContainer.add(this.constructionTurnsText);
 
@@ -295,15 +292,15 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
     this.contentContainer.add(divider);
 
     // Actions header
     const actionsLabel = this.scene.add.text(0, startY, 'Actions', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(actionsLabel);
@@ -332,15 +329,15 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Button background
     const bg = this.scene.add.graphics();
-    bg.fillStyle(disabled ? 0x333333 : 0x4a4a6a, 1);
-    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    bg.fillStyle(disabled ? COLORS.BUTTON_DISABLED : COLORS.BUTTON_SECONDARY, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
     buttonContainer.add(bg);
 
     // Button text
     const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, label, {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: disabled ? DISABLED_COLOR : TEXT_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: disabled ? TEXT_COLORS.MUTED : TEXT_COLORS.PRIMARY,
     });
     text.setOrigin(0.5);
     buttonContainer.add(text);
@@ -432,8 +429,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     // Update border color
     const ownerColor = OWNER_COLORS[this.planet.owner] || OWNER_COLORS.Neutral;
     this.borderGraphics.clear();
-    this.borderGraphics.lineStyle(BORDER_WIDTH, ownerColor, 1);
-    this.borderGraphics.strokeRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.borderGraphics.lineStyle(PANEL.BORDER_WIDTH, ownerColor, 1);
+    this.borderGraphics.strokeRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL.BORDER_RADIUS);
 
     // Update stats
     this.populationText.setText(
@@ -627,24 +624,27 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Update appearance to enabled state
     bg.clear();
-    bg.fillStyle(0x4a4a6a, 1);
-    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
-    text.setColor(TEXT_COLOR);
+    bg.fillStyle(COLORS.BUTTON_SECONDARY, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
+    text.setColor(TEXT_COLORS.PRIMARY);
 
     // Remove old listeners and add new ones
     zone.removeAllListeners();
     zone.setInteractive({ useHandCursor: true });
 
-    zone.on('pointerdown', onClick);
+    zone.on('pointerdown', () => {
+      console.log('BUTTON CLICKED:', buttonContainer.getData('label'));
+      onClick();
+    });
     zone.on('pointerover', () => {
       bg.clear();
-      bg.fillStyle(0x5a5a7a, 1);
-      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      bg.fillStyle(COLORS.BUTTON_SECONDARY_HOVER, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
     });
     zone.on('pointerout', () => {
       bg.clear();
-      bg.fillStyle(0x4a4a6a, 1);
-      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      bg.fillStyle(COLORS.BUTTON_SECONDARY, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
     });
 
     buttonContainer.setData('disabled', false);

@@ -5,6 +5,7 @@ import { PhaseProcessor } from '@core/PhaseProcessor';
 import { SaveSystem } from '@core/SaveSystem';
 import { TurnPhase } from '@core/models/Enums';
 import { ResourceDelta } from '@core/models/ResourceModels';
+import { COLORS, TEXT_COLORS, FONTS, HUD, PANEL, BUTTON } from '@config/UITheme';
 
 /**
  * Configuration options for TurnHUD
@@ -80,44 +81,50 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     this.setupPhaseProcessorEvents();
 
     // Background panel
-    this.background = scene.add.rectangle(0, 0, 280, 100, 0x000000, 0.7);
-    this.background.setStrokeStyle(2, 0x00bfff);
+    this.background = scene.add.rectangle(
+      0, 0,
+      HUD.TURN_HUD.width,
+      HUD.TURN_HUD.height,
+      COLORS.PANEL_BG,
+      HUD.TURN_HUD.bgAlpha,
+    );
+    this.background.setStrokeStyle(PANEL.BORDER_WIDTH, COLORS.BORDER_PRIMARY);
     this.add(this.background);
 
     // Turn number text (top of HUD)
     this.turnText = scene.add.text(0, -35, '', {
-      fontSize: '24px',
-      color: '#00bfff',
-      fontFamily: 'monospace',
+      fontSize: FONTS.SIZE_TITLE,
+      color: TEXT_COLORS.ACCENT,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0.5);
     this.add(this.turnText);
 
     // Phase text
     this.phaseText = scene.add.text(0, -5, '', {
-      fontSize: '18px',
-      color: '#ffff00',
-      fontFamily: 'monospace',
+      fontSize: FONTS.SIZE_HEADER,
+      color: TEXT_COLORS.WARNING, // Yellow for phase indicator
+      fontFamily: FONTS.PRIMARY,
     }).setOrigin(0.5);
     this.add(this.phaseText);
 
     // End Turn button (only visible in Action phase)
     this.endTurnButton = scene.add.text(0, 30, 'END TURN [Space]', {
-      fontSize: '16px',
-      color: '#ffffff',
-      fontFamily: 'monospace',
-      backgroundColor: '#002244',
-      padding: { x: 15, y: 6 },
+      fontSize: FONTS.SIZE_BODY,
+      color: TEXT_COLORS.PRIMARY,
+      fontFamily: FONTS.PRIMARY,
+      backgroundColor: `#${BUTTON.PRIMARY.bg.toString(16).padStart(6, '0')}`,
+      padding: { x: BUTTON.PADDING_X, y: BUTTON.PADDING_Y },
     })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
     this.endTurnButton.on('pointerover', () => {
-      this.endTurnButton.setStyle({ backgroundColor: '#003366' });
+      this.endTurnButton.setStyle({ backgroundColor: `#${BUTTON.PRIMARY.bgHover.toString(16).padStart(6, '0')}` });
     });
 
     this.endTurnButton.on('pointerout', () => {
-      this.endTurnButton.setStyle({ backgroundColor: '#002244' });
+      this.endTurnButton.setStyle({ backgroundColor: `#${BUTTON.PRIMARY.bg.toString(16).padStart(6, '0')}` });
     });
 
     this.endTurnButton.on('pointerdown', () => {
@@ -129,15 +136,15 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     // Phase notification text (centered on screen, initially hidden)
     this.notificationText = scene.add.text(scene.cameras.main.width / 2, scene.cameras.main.height / 2, '', {
       fontSize: '48px',
-      color: '#ffffff',
-      fontFamily: 'monospace',
+      color: TEXT_COLORS.PRIMARY,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
       padding: { x: 30, y: 15 },
     })
       .setOrigin(0.5)
       .setAlpha(0)
-      .setDepth(1000); // Above other elements
+      .setDepth(PANEL.DEPTH_NOTIFICATION);
 
     // Don't add notification to container - it's positioned globally
     scene.add.existing(this.notificationText);
@@ -298,15 +305,15 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     // Create new notification text
     const notification = this.scene.add.text(width / 2, notificationY, message, {
       fontSize: '32px',
-      color: '#ffffff',
-      fontFamily: 'monospace',
+      color: TEXT_COLORS.PRIMARY,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
       padding: { x: 20, y: 10 },
     })
       .setOrigin(0.5)
       .setAlpha(0)
-      .setDepth(1000 + stackIndex);
+      .setDepth(PANEL.DEPTH_NOTIFICATION + stackIndex);
 
     // Add to stack
     this.notificationStack.push(notification);

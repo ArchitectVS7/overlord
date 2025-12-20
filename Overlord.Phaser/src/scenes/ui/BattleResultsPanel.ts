@@ -11,6 +11,7 @@
  */
 
 import Phaser from 'phaser';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 // Panel dimensions
 const PANEL_WIDTH = 420;
@@ -18,12 +19,12 @@ const PANEL_HEIGHT = 380;
 const PADDING = 20;
 const BUTTON_HEIGHT = 36;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const VICTORY_COLOR = 0x22aa44;
-const DEFEAT_COLOR = 0xcc4444;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const VICTORY_COLOR = THEME_COLORS.SUCCESS;
+const DEFEAT_COLOR = THEME_COLORS.DANGER;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
 
 export interface BattleResultData {
   victory: boolean;
@@ -122,7 +123,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     // Victory header
     const header = this.scene.add.text(PANEL_WIDTH / 2, yPos, '⚔️ VICTORY! ⚔️', {
       fontSize: '24px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#22aa44',
       fontStyle: 'bold',
     });
@@ -133,7 +134,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     // Planet conquered
     const planetText = this.scene.add.text(PANEL_WIDTH / 2, yPos, `${data.planetName} Conquered!`, {
       fontSize: '18px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     planetText.setOrigin(0.5, 0);
@@ -143,7 +144,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     // Casualties section
     const casualtyLabel = this.scene.add.text(PADDING, yPos, 'Battle Casualties:', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(casualtyLabel);
@@ -151,7 +152,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
 
     const yourLosses = this.scene.add.text(PADDING, yPos, `Your losses: ${data.attackerCasualties} troops`, {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     this.contentContainer.add(yourLosses);
@@ -159,7 +160,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
 
     const enemyLosses = this.scene.add.text(PADDING, yPos, `Enemy losses: ${data.defenderCasualties} troops`, {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#66ff66',
     });
     this.contentContainer.add(enemyLosses);
@@ -169,7 +170,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     if (data.resourcesCaptured) {
       const resourceLabel = this.scene.add.text(PADDING, yPos, 'Resources Captured:', {
         fontSize: '14px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: LABEL_COLOR,
       });
       this.contentContainer.add(resourceLabel);
@@ -181,7 +182,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
         `Minerals: ${resources.minerals.toLocaleString()}\n` +
         `Fuel: ${resources.fuel.toLocaleString()}`, {
         fontSize: '13px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: '#ffdd88',
       });
       this.contentContainer.add(resourceText);
@@ -198,7 +199,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     // Defeat header
     const header = this.scene.add.text(PANEL_WIDTH / 2, yPos, '☠️ DEFEAT ☠️', {
       fontSize: '24px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#cc4444',
       fontStyle: 'bold',
     });
@@ -209,7 +210,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     // Invasion failed
     const planetText = this.scene.add.text(PANEL_WIDTH / 2, yPos, `Invasion of ${data.planetName} Failed`, {
       fontSize: '18px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     planetText.setOrigin(0.5, 0);
@@ -219,7 +220,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     // Casualties section
     const casualtyLabel = this.scene.add.text(PADDING, yPos, 'Battle Casualties:', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(casualtyLabel);
@@ -227,7 +228,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
 
     const yourLosses = this.scene.add.text(PADDING, yPos, `Your losses: ${data.attackerCasualties} troops`, {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#ff6666',
     });
     this.contentContainer.add(yourLosses);
@@ -235,7 +236,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
 
     const enemyLosses = this.scene.add.text(PADDING, yPos, `Enemy losses: ${data.defenderCasualties} troops`, {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     this.contentContainer.add(enemyLosses);
@@ -245,7 +246,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     if (data.defeatReason) {
       const reasonLabel = this.scene.add.text(PADDING, yPos, 'Defeat Reason:', {
         fontSize: '14px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: LABEL_COLOR,
       });
       this.contentContainer.add(reasonLabel);
@@ -253,7 +254,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
 
       const reasonText = this.scene.add.text(PADDING, yPos, data.defeatReason, {
         fontSize: '13px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: TEXT_COLOR,
         wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
       });
@@ -280,7 +281,7 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
 
     const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, 'CONTINUE', {
       fontSize: '15px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
       fontStyle: 'bold',
     });

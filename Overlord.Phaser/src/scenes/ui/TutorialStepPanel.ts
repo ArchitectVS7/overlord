@@ -12,16 +12,17 @@
 
 import Phaser from 'phaser';
 import { TutorialStep } from '@core/models/TutorialModels';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel styling constants
 const PANEL_WIDTH = 450;
 const PANEL_HEIGHT = 140;
 const PADDING = 20;
-const BG_COLOR = 0x1a2a3a;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const STEP_COLOR = '#88bbff';
-const COMPLETE_COLOR = '#44ff44';
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const STEP_COLOR = TEXT_COLORS.ACCENT;
+const COMPLETE_COLOR = TEXT_COLORS.SUCCESS;
 const PANEL_DEPTH = 1600;
 
 /**

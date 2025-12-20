@@ -6,24 +6,25 @@
  */
 
 import Phaser from 'phaser';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS, BUTTON } from '@config/UITheme';
 
 const DIALOG_WIDTH = 400;
 const DIALOG_HEIGHT = 180;
 
 const COLORS = {
-  OVERLAY: 0x000000,
-  BACKGROUND: 0x1a1a2e,
-  BORDER: 0x00bfff,
-  TEXT: '#00bfff',
-  TEXT_SECONDARY: '#aaaaaa',
-  BUTTON_CONFIRM: 0x002244,
-  BUTTON_CONFIRM_HOVER: 0x003366,
-  BUTTON_CANCEL: 0x1a1a2e,
-  BUTTON_CANCEL_HOVER: 0x2a2a4e,
-  BUTTON_DANGER: 0x330000,
-  BUTTON_DANGER_HOVER: 0x550000,
-  BUTTON_TEXT: '#00bfff',
-  BUTTON_TEXT_DANGER: '#ff4444',
+  OVERLAY: THEME_COLORS.OVERLAY,
+  BACKGROUND: THEME_COLORS.PANEL_BG,
+  BORDER: THEME_COLORS.BORDER_PRIMARY,
+  TEXT: TEXT_COLORS.ACCENT,
+  TEXT_SECONDARY: TEXT_COLORS.SECONDARY,
+  BUTTON_CONFIRM: BUTTON.PRIMARY.bg,
+  BUTTON_CONFIRM_HOVER: BUTTON.PRIMARY.bgHover,
+  BUTTON_CANCEL: THEME_COLORS.PANEL_BG,
+  BUTTON_CANCEL_HOVER: THEME_COLORS.BUTTON_SECONDARY_HOVER,
+  BUTTON_DANGER: BUTTON.DANGER.bg,
+  BUTTON_DANGER_HOVER: BUTTON.DANGER.bgHover,
+  BUTTON_TEXT: TEXT_COLORS.ACCENT,
+  BUTTON_TEXT_DANGER: TEXT_COLORS.DANGER,
 };
 
 export interface ConfirmationDialogOptions {
@@ -69,6 +70,7 @@ export class ConfirmationDialog extends Phaser.GameObjects.Container {
     this.setPosition(0, 0);
     this.setVisible(false);
     this.setDepth(2000); // Above other panels
+    this.setScrollFactor(0); // Fixed to camera
 
     this.createOverlay(width, height);
     this.createBackground(width, height);
@@ -173,7 +175,7 @@ export class ConfirmationDialog extends Phaser.GameObjects.Container {
     this.titleText = this.scene.add.text(width / 2, this.getDialogY() + 30, '', {
       fontSize: '22px',
       color: COLORS.TEXT,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     });
     this.titleText.setOrigin(0.5, 0.5);
@@ -184,7 +186,7 @@ export class ConfirmationDialog extends Phaser.GameObjects.Container {
     this.messageText = this.scene.add.text(width / 2, this.getDialogY() + 75, '', {
       fontSize: '14px',
       color: COLORS.TEXT_SECONDARY,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       align: 'center',
       wordWrap: { width: DIALOG_WIDTH - 40 },
     });
@@ -229,7 +231,7 @@ export class ConfirmationDialog extends Phaser.GameObjects.Container {
     this.cancelButtonText = this.scene.add.text(cancelX, buttonY, 'CANCEL', {
       fontSize: '14px',
       color: COLORS.TEXT_SECONDARY,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     });
     this.cancelButtonText.setOrigin(0.5, 0.5);
@@ -271,7 +273,7 @@ export class ConfirmationDialog extends Phaser.GameObjects.Container {
     this.confirmButtonText = this.scene.add.text(confirmX, buttonY, 'CONFIRM', {
       fontSize: '14px',
       color: COLORS.BUTTON_TEXT,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     });
     this.confirmButtonText.setOrigin(0.5, 0.5);

@@ -4,7 +4,7 @@ import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
 import { TurnSystem } from '@core/TurnSystem';
 import { PhaseProcessor } from '@core/PhaseProcessor';
-import { Difficulty, FactionType, VictoryResult } from '@core/models/Enums';
+import { Difficulty, FactionType, TurnPhase, VictoryResult } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
@@ -213,8 +213,10 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up PlanetInfoPanel Build button to BuildingMenuPanel
     this.planetInfoPanel.onBuildClick = (planet) => {
+      console.log('BUILD CLICK - planet:', planet.name);
       this.planetInfoPanel.hide();
       this.buildingMenuPanel.show(planet);
+      console.log('BUILD CLICK - buildingMenuPanel visible:', this.buildingMenuPanel.visible);
     };
 
     // Wire up building completion to refresh ResourceHUD
@@ -542,6 +544,17 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Auto-select player's home planet (AC5: Default Selection)
     this.autoSelectHomePlanet();
+
+    // Process Income phase if starting in Income (e.g., new campaign)
+    // This handles the case where CampaignInitializer sets phase to Income
+    // but doesn't trigger the phase processing through TurnSystem
+    if (this.gameState.currentPhase === TurnPhase.Income) {
+      // Small delay to ensure TurnHUD is ready to show notifications
+      this.time.delayedCall(100, () => {
+        this.turnSystem.processIncomePhase();
+        this.turnSystem.advancePhase(); // Move to Action phase
+      });
+    }
   }
 
   private calculateGalaxyBounds(): { minX: number; maxX: number; minY: number; maxY: number } {

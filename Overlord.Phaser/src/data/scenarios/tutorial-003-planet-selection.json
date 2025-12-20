@@ -1,0 +1,124 @@
+{
+  "id": "tutorial-003-planet-selection",
+  "name": "First Command",
+  "type": "tutorial",
+  "difficulty": "easy",
+  "duration": "2-3 min",
+  "description": "Learn to select planets and view their vital information. This is your first step as a galactic commander.",
+  "prerequisites": [],
+
+  "story": {
+    "briefing": "Commander, welcome to your new posting. The galaxy awaits your leadership. Before you can manage your empire, you must first learn to survey your domain. Your homeworld, Alpha Prime, holds the key to your success.",
+    "objective": "Select your homeworld and review its status report.",
+    "victory": "Excellent work, Commander! You've successfully accessed your planet's vital statistics. You now understand how to inspect any world under your control."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "ui_interaction",
+      "target": "planet_info_panel_opened"
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 10000,
+      "minerals": 5000,
+      "fuel": 3000,
+      "food": 2000,
+      "energy": 1000
+    },
+    "aiPlanets": [],
+    "aiEnabled": false
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Welcome, Commander! This is your galaxy. The blue planet is your homeworld, Alpha Prime. Click on it to view its information.",
+      "highlight": "planet-1",
+      "action": {
+        "type": "select_planet",
+        "target": "planet-1"
+      }
+    },
+    {
+      "step": 2,
+      "text": "The Planet Info Panel shows vital statistics: population, morale, and resource stockpiles. This is essential for managing your empire.",
+      "highlight": "planet-info-panel",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 3,
+      "text": "Notice the action buttons: Build, Commission, Platoons, Spacecraft, and Navigate. These allow you to develop and defend your worlds.",
+      "highlight": "planet-info-panel-actions",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 1,
+    "twoStarTurns": 2
+  },
+
+  "clickByClickRecipe": {
+    "title": "Planet Selection - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "Locate Your Planet",
+        "instruction": "Find the blue circle on the galaxy map - this is your homeworld (Alpha Prime)",
+        "expectedResult": "You can see a planet with a blue border indicating player ownership"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Click the Planet",
+        "instruction": "Left-click on the blue planet circle",
+        "expectedResult": "A cyan selection ring appears around the planet"
+      },
+      {
+        "stepNumber": 3,
+        "action": "View Info Panel",
+        "instruction": "Observe the Planet Info Panel that slides in from the right",
+        "expectedResult": "Panel displays planet name, type, owner, population, morale, and resources"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Review Statistics",
+        "instruction": "Read through the Stats section showing Population and Morale",
+        "expectedResult": "You can see current population count and morale percentage"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Check Resources",
+        "instruction": "Look at the Resources section showing your stockpiles",
+        "expectedResult": "Five resource types displayed: Credits (gold), Minerals (silver), Fuel (orange), Food (green), Energy (blue)"
+      },
+      {
+        "stepNumber": 6,
+        "action": "Close Panel (Optional)",
+        "instruction": "Click the X button or click outside the panel to close it",
+        "expectedResult": "Panel slides out and the selection ring disappears"
+      }
+    ],
+    "keyboardAlternative": {
+      "description": "You can also use keyboard navigation",
+      "steps": [
+        "Press TAB to cycle through planets",
+        "Press ENTER to select the focused planet",
+        "Press ESC to close the info panel"
+      ]
+    }
+  }
+}

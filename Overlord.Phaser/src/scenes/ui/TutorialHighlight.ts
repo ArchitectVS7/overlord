@@ -11,11 +11,12 @@
 
 import Phaser from 'phaser';
 import { HighlightConfig } from '@core/models/TutorialModels';
+import { COLORS as THEME_COLORS } from '@config/UITheme';
 
 // Constants
 const GLOW_COLOR = 0xffff00;
 const GLOW_ALPHA = 0.8;
-const BACKDROP_COLOR = 0x000000;
+const BACKDROP_COLOR = THEME_COLORS.OVERLAY;
 const BACKDROP_ALPHA = 0.6;
 const ARROW_COLOR = 0xffff00;
 const HIGHLIGHT_DEPTH = 1500;

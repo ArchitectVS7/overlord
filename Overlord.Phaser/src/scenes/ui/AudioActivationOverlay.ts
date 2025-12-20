@@ -8,17 +8,18 @@
 
 import Phaser from 'phaser';
 import { AudioManager } from '../../core/AudioManager';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 const OVERLAY_DEPTH = 2000;
 
 const COLORS = {
-  OVERLAY: 0x000000,
+  OVERLAY: THEME_COLORS.OVERLAY,
   OVERLAY_ALPHA: 0.7,
-  BOX_BG: 0x1a1a2e,
-  BOX_BORDER: 0x4a4a6a,
-  TEXT: '#ffffff',
-  TEXT_SECONDARY: '#aaaacc',
-  ICON: '#4488ff',
+  BOX_BG: THEME_COLORS.PANEL_BG,
+  BOX_BORDER: THEME_COLORS.BORDER_SUBTLE,
+  TEXT: TEXT_COLORS.PRIMARY,
+  TEXT_SECONDARY: TEXT_COLORS.SECONDARY,
+  ICON: TEXT_COLORS.ACCENT,
 };
 
 /**

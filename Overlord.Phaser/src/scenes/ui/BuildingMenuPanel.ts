@@ -4,6 +4,7 @@ import { BuildingSystem } from '@core/BuildingSystem';
 import { BuildingType } from '@core/models/Enums';
 import { BuildingCosts } from '@core/models/BuildingModels';
 import { PlanetEntity } from '@core/models/PlanetEntity';
+import { COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 /**
  * Building information for display
@@ -80,18 +81,18 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     },
   ];
 
-  // Colors
-  private static readonly COLORS = {
-    panelBg: 0x1a1a2e,
-    panelBorder: 0x00bfff,
-    title: '#00bfff',
-    available: '#ffffff',
-    unavailable: '#666666',
-    cost: '#ffff00',
-    constructing: '#ff9900',
-    hover: 0x2a2a4e,
-    button: 0x0a0a1e,
-    buttonBorder: 0x0088cc,
+  // Colors (from centralized theme)
+  private static readonly THEME = {
+    panelBg: COLORS.PANEL_BG,
+    panelBorder: COLORS.BORDER_PRIMARY,
+    title: TEXT_COLORS.ACCENT,
+    available: TEXT_COLORS.PRIMARY,
+    unavailable: TEXT_COLORS.MUTED,
+    cost: TEXT_COLORS.CREDITS,
+    constructing: TEXT_COLORS.WARNING,
+    hover: COLORS.BUTTON_SECONDARY_HOVER,
+    button: COLORS.BUTTON_PRIMARY,
+    buttonBorder: COLORS.BORDER_PRIMARY,
   };
 
   constructor(
@@ -106,6 +107,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.createUI();
     this.setVisible(false);
     this.setDepth(1100);
+    this.setScrollFactor(0); // Fixed to camera - essential for panned views
 
     scene.add.existing(this);
   }
@@ -127,15 +129,15 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.add(this.backdrop);
 
     // Main panel
-    this.panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, BuildingMenuPanel.COLORS.panelBg, 0.95);
-    this.panel.setStrokeStyle(2, BuildingMenuPanel.COLORS.panelBorder);
+    this.panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, BuildingMenuPanel.THEME.panelBg, 0.95);
+    this.panel.setStrokeStyle(2, BuildingMenuPanel.THEME.panelBorder);
     this.add(this.panel);
 
     // Title
     this.titleText = this.scene.add.text(panelX, panelY - panelHeight / 2 + 25, 'BUILD MENU', {
       fontSize: '20px',
-      color: BuildingMenuPanel.COLORS.title,
-      fontFamily: 'monospace',
+      color: BuildingMenuPanel.THEME.title,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0.5);
     this.add(this.titleText);
@@ -144,7 +146,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.closeButton = this.scene.add.text(panelX + panelWidth / 2 - 25, panelY - panelHeight / 2 + 25, 'X', {
       fontSize: '20px',
       color: '#ff0000',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
@@ -215,8 +217,8 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
         `Construction in progress: ${this.getBuildingName(constructing[0].type)}`,
         {
           fontSize: '14px',
-          color: BuildingMenuPanel.COLORS.constructing,
-          fontFamily: 'monospace',
+          color: BuildingMenuPanel.THEME.constructing,
+          fontFamily: FONTS.PRIMARY,
           fontStyle: 'italic',
         },
       ).setOrigin(0.5);
@@ -269,15 +271,15 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const isAvailable = canAfford && canBuild && !hasConstructionInProgress;
 
     // Button background
-    const bg = this.scene.add.rectangle(0, 0, width, height, BuildingMenuPanel.COLORS.button, 0.9);
-    bg.setStrokeStyle(1, isAvailable ? BuildingMenuPanel.COLORS.buttonBorder : 0x444444);
+    const bg = this.scene.add.rectangle(0, 0, width, height, BuildingMenuPanel.THEME.button, 0.9);
+    bg.setStrokeStyle(1, isAvailable ? BuildingMenuPanel.THEME.buttonBorder : 0x444444);
     container.add(bg);
 
     // Building name
     const nameText = this.scene.add.text(-width / 2 + 15, -height / 2 + 10, buildingInfo.name, {
       fontSize: '14px',
-      color: isAvailable ? BuildingMenuPanel.COLORS.available : BuildingMenuPanel.COLORS.unavailable,
-      fontFamily: 'monospace',
+      color: isAvailable ? BuildingMenuPanel.THEME.available : BuildingMenuPanel.THEME.unavailable,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     });
     container.add(nameText);
@@ -286,7 +288,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const descText = this.scene.add.text(-width / 2 + 15, -height / 2 + 28, buildingInfo.description, {
       fontSize: '11px',
       color: isAvailable ? '#aaaaaa' : '#555555',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     });
     container.add(descText);
 
@@ -294,8 +296,8 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const costStr = `Cost: ${buildingInfo.cost.credits.toLocaleString()} Cr, ${buildingInfo.cost.minerals.toLocaleString()} Min, ${buildingInfo.cost.fuel.toLocaleString()} Fuel`;
     const costText = this.scene.add.text(-width / 2 + 15, -height / 2 + 45, costStr, {
       fontSize: '10px',
-      color: canAfford ? BuildingMenuPanel.COLORS.cost : '#ff4444',
-      fontFamily: 'monospace',
+      color: canAfford ? BuildingMenuPanel.THEME.cost : '#ff4444',
+      fontFamily: FONTS.PRIMARY,
     });
     container.add(costText);
 
@@ -303,7 +305,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const timeText = this.scene.add.text(width / 2 - 15, -height / 2 + 10, `${buildingInfo.constructionTime} turns`, {
       fontSize: '11px',
       color: isAvailable ? '#88ff88' : '#555555',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     }).setOrigin(1, 0);
     container.add(timeText);
 
@@ -321,7 +323,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
       const reasonText = this.scene.add.text(width / 2 - 15, height / 2 - 15, reason, {
         fontSize: '10px',
         color: '#ff6666',
-        fontFamily: 'monospace',
+        fontFamily: FONTS.PRIMARY,
         fontStyle: 'italic',
       }).setOrigin(1, 1);
       container.add(reasonText);
@@ -331,10 +333,10 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     if (isAvailable) {
       bg.setInteractive({ useHandCursor: true });
       bg.on('pointerover', () => {
-        bg.setFillStyle(BuildingMenuPanel.COLORS.hover);
+        bg.setFillStyle(BuildingMenuPanel.THEME.hover);
       });
       bg.on('pointerout', () => {
-        bg.setFillStyle(BuildingMenuPanel.COLORS.button);
+        bg.setFillStyle(BuildingMenuPanel.THEME.button);
       });
       bg.on('pointerdown', () => {
         this.selectBuilding(buildingInfo.type, planet);
@@ -401,7 +403,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const errorText = this.scene.add.text(width / 2, height / 2 + 200, message, {
       fontSize: '16px',
       color: '#ff0000',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: { x: 15, y: 8 },
     }).setOrigin(0.5).setDepth(1200);
@@ -423,7 +425,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const notification = this.scene.add.text(width / 2, height - 100, message, {
       fontSize: '16px',
       color: '#00bfff',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: { x: 15, y: 8 },
     }).setOrigin(0.5).setDepth(1200);

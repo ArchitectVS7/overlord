@@ -14,6 +14,7 @@
 import Phaser from 'phaser';
 import { Scenario } from '@core/models/ScenarioModels';
 import { ScenarioManager } from '@core/ScenarioManager';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 500;
@@ -22,17 +23,17 @@ const PADDING = 20;
 const BUTTON_HEIGHT = 40;
 const BUTTON_WIDTH = 180;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const SUCCESS_COLOR = '#44aa44';
-const BUTTON_BG_COLOR = 0x4488ff;
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const SUCCESS_COLOR = TEXT_COLORS.SUCCESS;
+const BUTTON_BG_COLOR = THEME_COLORS.BORDER_PRIMARY;
 const BUTTON_HOVER_COLOR = 0x5599ff;
-const BUTTON_DISABLED_COLOR = 0x333344;
-const STAR_COLOR_FILLED = '#ffcc00';
-const STAR_COLOR_EMPTY = '#444444';
+const BUTTON_DISABLED_COLOR = THEME_COLORS.PANEL_BG_DARK;
+const STAR_COLOR_FILLED = TEXT_COLORS.CREDITS;
+const STAR_COLOR_EMPTY = TEXT_COLORS.MUTED;
 
 interface CompletionDetails {
   bestTimeSeconds: number;
