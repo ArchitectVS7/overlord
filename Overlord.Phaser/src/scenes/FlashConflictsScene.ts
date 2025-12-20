@@ -123,12 +123,11 @@ export class FlashConflictsScene extends Phaser.Scene {
   }
 
   /**
-   * Start a scenario
+   * Start a tactical scenario
    */
   private startScenario(scenario: Scenario): void {
     console.log(`Starting scenario: ${scenario.id}`);
-    // TODO: Implement scenario initialization in Story 1-3
-    // For now, just hide the detail panel
-    this.detailPanel.hide();
+    // Launch the ScenarioGameScene with the selected scenario
+    this.scene.start('ScenarioGameScene', { scenario });
   }
 }

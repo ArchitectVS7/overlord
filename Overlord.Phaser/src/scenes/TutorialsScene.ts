@@ -120,11 +120,11 @@ export class TutorialsScene extends Phaser.Scene {
   }
 
   /**
-   * Start a scenario
+   * Start a tutorial scenario
    */
   private startScenario(scenario: Scenario): void {
     console.log(`Starting tutorial: ${scenario.id}`);
-    // TODO: Implement scenario initialization
-    this.detailPanel.hide();
+    // Launch the ScenarioGameScene with the selected tutorial
+    this.scene.start('ScenarioGameScene', { scenario });
   }
 }
