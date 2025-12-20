@@ -21,11 +21,13 @@ import { TutorialActionDetector } from '@core/TutorialActionDetector';
 import { StarRatingSystem, ScenarioResults, StarTargets } from '@core/StarRatingSystem';
 import { getCompletionService } from '@core/ScenarioCompletionService';
 import { PlanetEntity } from '@core/models/PlanetEntity';
+import { BuildingSystem } from '@core/BuildingSystem';
 import { ObjectivesPanel } from './ui/ObjectivesPanel';
 import { TutorialHighlight } from './ui/TutorialHighlight';
 import { TutorialStepPanel } from './ui/TutorialStepPanel';
 import { ScenarioResultsPanel } from './ui/ScenarioResultsPanel';
 import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
+import { BuildingMenuPanel } from './ui/BuildingMenuPanel';
 import { PlanetRenderer } from './renderers/PlanetRenderer';
 
 /**
@@ -72,6 +74,10 @@ export class ScenarioGameScene extends Phaser.Scene {
   private turnText!: Phaser.GameObjects.Text;
   private phaseText!: Phaser.GameObjects.Text;
   private endTurnButton!: Phaser.GameObjects.Container;
+
+  // Building system for construction
+  private buildingSystem!: BuildingSystem;
+  private buildingMenuPanel!: BuildingMenuPanel;
 
   constructor() {
     super({ key: 'ScenarioGameScene' });
@@ -774,11 +780,45 @@ export class ScenarioGameScene extends Phaser.Scene {
   }
 
   /**
-   * Create and configure PlanetInfoPanel
+   * Create and configure PlanetInfoPanel with BuildingSystem
    */
   private createPlanetInfoPanel(): void {
-    // PlanetInfoPanel with optional BuildingSystem (undefined for tutorials)
-    this.planetInfoPanel = new PlanetInfoPanel(this, undefined);
+    if (!this.gameState) return;
+
+    // Create BuildingSystem for construction functionality
+    this.buildingSystem = new BuildingSystem(this.gameState);
+
+    // Create PlanetInfoPanel with BuildingSystem
+    this.planetInfoPanel = new PlanetInfoPanel(this, this.buildingSystem);
+
+    // Create BuildingMenuPanel
+    this.buildingMenuPanel = new BuildingMenuPanel(
+      this,
+      this.gameState,
+      this.buildingSystem,
+    );
+
+    // Wire up Build button to open BuildingMenuPanel
+    this.planetInfoPanel.onBuildClick = (planet) => {
+      console.log('Build clicked for planet:', planet.name);
+      this.planetInfoPanel.hide();
+      this.buildingMenuPanel.show(planet);
+
+      // Report to tutorial system
+      if (this.tutorialActionDetector) {
+        this.tutorialActionDetector.reportMenuOpen('build');
+      }
+    };
+
+    // Wire up building selection to report to tutorial and check victory
+    this.buildingMenuPanel.onBuildingSelected = () => {
+      // Report construction start to tutorial system
+      if (this.tutorialActionDetector) {
+        this.tutorialActionDetector.reportConstructionStart('building');
+      }
+      // Check victory conditions after building
+      this.checkVictoryConditions();
+    };
   }
 
   /**
