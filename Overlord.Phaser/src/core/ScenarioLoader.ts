@@ -57,6 +57,28 @@ export async function loadAllScenarios(manager: ScenarioManager): Promise<void> 
 }
 
 /**
+ * Load only tutorial scenarios into the ScenarioManager
+ */
+export async function loadTutorialScenarios(manager: ScenarioManager): Promise<void> {
+  const tutorials = ALL_SCENARIOS.filter(s => s.type === 'tutorial');
+  for (const scenario of tutorials) {
+    await manager.loadScenario(scenario);
+  }
+  console.log(`Loaded ${tutorials.length} tutorial scenarios into ScenarioManager`);
+}
+
+/**
+ * Load only tactical scenarios into the ScenarioManager
+ */
+export async function loadTacticalScenarios(manager: ScenarioManager): Promise<void> {
+  const tactical = ALL_SCENARIOS.filter(s => s.type === 'tactical');
+  for (const scenario of tactical) {
+    await manager.loadScenario(scenario);
+  }
+  console.log(`Loaded ${tactical.length} tactical scenarios into ScenarioManager`);
+}
+
+/**
  * Get all tutorial scenarios (without loading into manager)
  */
 export function getTutorialScenarios(): Scenario[] {

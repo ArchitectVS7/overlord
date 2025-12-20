@@ -35,13 +35,13 @@ test.describe('Tutorial T03: Planet Selection - First Command', () => {
     expect(isMainMenu).toBe(true);
   });
 
-  test('should navigate to Flash Conflicts scene', async ({ page }) => {
-    // Click Flash Conflicts button (positioned in center, third button)
+  test('should navigate to Tutorials scene', async ({ page }) => {
+    // Click Tutorials button (positioned in center, third button)
     const canvas = await getPhaserCanvas(page);
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas not found');
 
-    // Flash Conflicts is at centerX, buttonY + buttonSpacing * 2
+    // Tutorials is at centerX, buttonY + buttonSpacing * 2
     // Based on MainMenuScene: buttonY = height * 0.45, buttonSpacing = 70
     const centerX = box.width / 2;
     const buttonY = box.height * 0.45 + 70 * 2;
@@ -49,16 +49,16 @@ test.describe('Tutorial T03: Planet Selection - First Command', () => {
     await clickCanvasAt(page, centerX, buttonY);
     await page.waitForTimeout(500);
 
-    // Wait for FlashConflictsScene to become active
-    await waitForScene(page, 'FlashConflictsScene', 5000);
+    // Wait for TutorialsScene to become active
+    await waitForScene(page, 'TutorialsScene', 5000);
 
-    await page.screenshot({ path: 'test-results/tutorial-003-step-02-flash-conflicts.png' });
+    await page.screenshot({ path: 'test-results/tutorial-003-step-02-tutorials.png' });
 
-    const isFlashConflicts = await page.evaluate(() => {
+    const isTutorials = await page.evaluate(() => {
       const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
-      return game?.scene?.isActive?.('FlashConflictsScene') === true;
+      return game?.scene?.isActive?.('TutorialsScene') === true;
     });
-    expect(isFlashConflicts).toBe(true);
+    expect(isTutorials).toBe(true);
   });
 
   test('should show planet info panel when planet is clicked in GalaxyMapScene', async ({ page }) => {
