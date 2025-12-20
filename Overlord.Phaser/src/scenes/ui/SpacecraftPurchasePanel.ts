@@ -16,6 +16,7 @@ import { CraftType, FactionType } from '@core/models/Enums';
 import { CraftCosts, CraftCrewRequirements, CraftSpecs } from '@core/models/CraftModels';
 import { ResourceCost } from '@core/models/ResourceModels';
 import { CraftSystem } from '@core/CraftSystem';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 480;
@@ -24,14 +25,14 @@ const PADDING = 20;
 const CARD_HEIGHT = 90;
 const BUTTON_HEIGHT = 32;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const SUCCESS_COLOR = '#44aa44';
-const WARNING_COLOR = '#ff9900';
-const DISABLED_COLOR = '#666666';
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const SUCCESS_COLOR = TEXT_COLORS.SUCCESS;
+const WARNING_COLOR = TEXT_COLORS.WARNING;
+const DISABLED_COLOR = TEXT_COLORS.MUTED;
 
 // Fleet limit constant
 const MAX_FLEET_LIMIT = 32;
@@ -116,7 +117,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     // Title
     this.titleText = this.scene.add.text(PADDING, PADDING, 'Purchase Spacecraft', {
       fontSize: '20px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: SUCCESS_COLOR,
       fontStyle: 'bold',
     });
@@ -125,7 +126,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     // Fleet count display
     this.fleetCountText = this.scene.add.text(PADDING, 50, 'Fleet: 0/32', {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(this.fleetCountText);
@@ -150,7 +151,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
 
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#999999',
     });
     closeText.setOrigin(0.5);
@@ -310,7 +311,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     // Craft name
     const nameText = this.scene.add.text(10, y + 8, this.getCraftDisplayName(craftType), {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
       fontStyle: 'bold',
     });
@@ -321,7 +322,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const costText = this.scene.add.text(10, y + 28,
       `Cost: ${cost.credits.toLocaleString()}cr, ${cost.minerals.toLocaleString()}min, ${cost.fuel.toLocaleString()}fuel`, {
       fontSize: '11px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: canAfford ? LABEL_COLOR : WARNING_COLOR,
     });
     this.craftCardsContainer.add(costText);
@@ -330,7 +331,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     const crew = CraftCrewRequirements.getCrewRequired(craftType);
     const crewText = this.scene.add.text(10, y + 44, `Crew: ${crew} population`, {
       fontSize: '11px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: this.planet && this.planet.population >= crew ? LABEL_COLOR : WARNING_COLOR,
     });
     this.craftCardsContainer.add(crewText);
@@ -338,7 +339,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
     // Capabilities
     const capText = this.scene.add.text(10, y + 60, this.getCraftCapabilities(craftType), {
       fontSize: '10px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: SUCCESS_COLOR,
     });
     this.craftCardsContainer.add(capText);
@@ -359,7 +360,7 @@ export class SpacecraftPurchasePanel extends Phaser.GameObjects.Container {
 
     const buttonText = this.scene.add.text(x + buttonWidth / 2, y + BUTTON_HEIGHT / 2, 'Purchase', {
       fontSize: '12px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: enabled ? TEXT_COLOR : DISABLED_COLOR,
     });
     buttonText.setOrigin(0.5);

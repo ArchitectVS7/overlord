@@ -11,6 +11,7 @@ import {
   getUserStatisticsService,
   UserStatistics,
 } from '../../services/UserStatisticsService';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 const PANEL_WIDTH = 500;
 const PANEL_HEIGHT = 450;
@@ -18,13 +19,13 @@ const PADDING = 30;
 const LINE_HEIGHT = 32;
 
 const COLORS = {
-  BACKGROUND: 0x1a1a2e,
-  BORDER: 0x4a4a6a,
-  SECTION_BG: 0x252545,
-  TEXT: '#ffffff',
-  TEXT_LABEL: '#aaaacc',
-  TEXT_VALUE: '#88ff88',
-  TEXT_HIGHLIGHT: '#ffcc44',
+  BACKGROUND: THEME_COLORS.PANEL_BG,
+  BORDER: THEME_COLORS.BORDER_SUBTLE,
+  SECTION_BG: THEME_COLORS.PANEL_BG_DARK,
+  TEXT: TEXT_COLORS.PRIMARY,
+  TEXT_LABEL: TEXT_COLORS.SECONDARY,
+  TEXT_VALUE: TEXT_COLORS.SUCCESS,
+  TEXT_HIGHLIGHT: TEXT_COLORS.CREDITS,
   CLOSE_BUTTON: 0x664444,
   CLOSE_HOVER: 0x884444,
 };
@@ -75,7 +76,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
   private createTitle(): void {
     this.titleText = this.scene.add.text(PANEL_WIDTH / 2, 25, 'Player Statistics', {
       fontSize: '24px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: COLORS.TEXT,
     });
     this.titleText.setOrigin(0.5, 0.5);
@@ -104,7 +105,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
       'Close',
       {
         fontSize: '14px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: COLORS.TEXT,
       }
     );
@@ -133,7 +134,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
       'Loading statistics...',
       {
         fontSize: '16px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: COLORS.TEXT_LABEL,
       }
     );
@@ -232,7 +233,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
   private addSectionHeader(title: string, y: number): number {
     const header = this.scene.add.text(PADDING, y, title, {
       fontSize: '16px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: COLORS.TEXT_HIGHLIGHT,
       fontStyle: 'bold',
     });
@@ -252,7 +253,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
   ): number {
     const labelText = this.scene.add.text(PADDING + 20, y, label, {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: COLORS.TEXT_LABEL,
     });
     this.add(labelText);
@@ -260,7 +261,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
 
     const valueText = this.scene.add.text(PANEL_WIDTH - PADDING - 20, y, value, {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: valueColor,
     });
     valueText.setOrigin(1, 0);
@@ -276,7 +277,7 @@ export class StatisticsPanel extends Phaser.GameObjects.Container {
   private displayError(message: string): void {
     const errorText = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT / 2, message, {
       fontSize: '16px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#ff6666',
     });
     errorText.setOrigin(0.5, 0.5);

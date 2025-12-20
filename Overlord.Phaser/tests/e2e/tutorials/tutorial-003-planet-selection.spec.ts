@@ -1,8 +1,13 @@
 /**
- * E2E Test: Tutorial T03 - Planet Selection
+ * E2E Test: Tutorial T03 - Planet Selection (First Command)
  *
- * Validates the "First Command" tutorial which teaches players
- * to select planets and view the Planet Info Panel.
+ * Tests the complete player journey through the first tutorial:
+ * 1. Navigate to Tutorials menu from Main Menu
+ * 2. Select the "First Command" tutorial from the list
+ * 3. Click Start Scenario
+ * 4. Complete tutorial by clicking on the planet
+ *
+ * All interactions are done via actual UI clicks, not programmatic callbacks.
  *
  * @see design-docs/tutorials/TUTORIAL-ELEMENTS-LIST.md
  * @see design-docs/tutorials/TUTORIAL-METHODOLOGY.md
@@ -16,265 +21,303 @@ import {
   getPhaserCanvas,
 } from '../helpers/phaser-helpers';
 
-test.describe('Tutorial T03: Planet Selection - First Command', () => {
+// Screen coordinates for 1024x768 canvas
+const CANVAS_WIDTH = 1024;
+const CANVAS_HEIGHT = 768;
+
+// Main Menu button positions
+const MAIN_MENU = {
+  CENTER_X: CANVAS_WIDTH / 2, // 512
+  BUTTON_Y: CANVAS_HEIGHT * 0.45, // 345.6
+  BUTTON_SPACING: 70,
+  // TUTORIALS is the 3rd button (index 2)
+  TUTORIALS_Y: CANVAS_HEIGHT * 0.45 + 70 * 2, // 485.6
+};
+
+// ScenarioListPanel positions (600x500 panel, centered)
+const SCENARIO_LIST = {
+  PANEL_WIDTH: 600,
+  PANEL_HEIGHT: 500,
+  PANEL_X: (CANVAS_WIDTH - 600) / 2, // 212
+  PANEL_Y: (CANVAS_HEIGHT - 500) / 2, // 134
+  PADDING: 20,
+  CARD_START_Y: 50, // relative to content
+  CARD_HEIGHT: 80,
+  CARD_SPACING: 10,
+  // First card center Y position: panel_y + padding + cards_offset + half_card
+  FIRST_CARD_Y: (CANVAS_HEIGHT - 500) / 2 + 20 + 50 + 40, // ~244
+};
+
+// ScenarioDetailPanel positions (500x520 panel, centered)
+const SCENARIO_DETAIL = {
+  PANEL_WIDTH: 500,
+  PANEL_HEIGHT: 520,
+  PANEL_X: (CANVAS_WIDTH - 500) / 2, // 262
+  PANEL_Y: (CANVAS_HEIGHT - 520) / 2, // 124
+  PADDING: 20,
+  BUTTON_HEIGHT: 40,
+  BUTTON_WIDTH: 180,
+  // Start button center: panel_x + panel_width/2 - button_width - 10 + button_width/2
+  START_BUTTON_X: (CANVAS_WIDTH - 500) / 2 + 500 / 2 - 180 - 10 + 90, // ~352
+  START_BUTTON_Y: (CANVAS_HEIGHT - 520) / 2 + 520 - 20 - 40 - 20 + 20, // ~584
+};
+
+// ScenarioGameScene positions
+const GAME_SCENE = {
+  // Player planet is centered at (512, 384) in ScenarioInitializer
+  PLANET_X: 512,
+  PLANET_Y: 384,
+};
+
+test.describe('Tutorial T03: Planet Selection - First Command (Click Journey)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await waitForPhaserGame(page);
     await waitForScene(page, 'MainMenuScene');
+    await page.waitForTimeout(500); // Let menu fully render
   });
 
-  test('should display Flash Conflicts button on main menu', async ({ page }) => {
-    // Screenshot: Main menu with Flash Conflicts visible
-    await page.screenshot({ path: 'test-results/tutorial-003-step-01-main-menu.png' });
-
-    // Verify game has loaded
-    const isMainMenu = await page.evaluate(() => {
-      const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
-      return game?.scene?.isActive?.('MainMenuScene') === true;
-    });
-    expect(isMainMenu).toBe(true);
-  });
-
-  test('should navigate to Flash Conflicts scene', async ({ page }) => {
-    // Click Flash Conflicts button (positioned in center, third button)
+  test('complete full tutorial journey via UI clicks', async ({ page }) => {
     const canvas = await getPhaserCanvas(page);
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas not found');
 
-    // Flash Conflicts is at centerX, buttonY + buttonSpacing * 2
-    // Based on MainMenuScene: buttonY = height * 0.45, buttonSpacing = 70
-    const centerX = box.width / 2;
-    const buttonY = box.height * 0.45 + 70 * 2;
-
-    await clickCanvasAt(page, centerX, buttonY);
-    await page.waitForTimeout(500);
-
-    // Wait for FlashConflictsScene to become active
-    await waitForScene(page, 'FlashConflictsScene', 5000);
-
-    await page.screenshot({ path: 'test-results/tutorial-003-step-02-flash-conflicts.png' });
-
-    const isFlashConflicts = await page.evaluate(() => {
-      const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
-      return game?.scene?.isActive?.('FlashConflictsScene') === true;
-    });
-    expect(isFlashConflicts).toBe(true);
-  });
-
-  test('should show planet info panel when planet is clicked in GalaxyMapScene', async ({ page }) => {
-    // For this test, we'll navigate directly to GalaxyMapScene via New Campaign
-    // This validates the core mechanic the tutorial teaches
-
-    const canvas = await getPhaserCanvas(page);
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // Click New Campaign button (first button at centerX, buttonY)
-    const centerX = box.width / 2;
-    const newCampaignY = box.height * 0.45;
-    await clickCanvasAt(page, centerX, newCampaignY);
-    await page.waitForTimeout(500);
-
-    // Wait for CampaignConfigScene
-    await waitForScene(page, 'CampaignConfigScene', 5000);
-    await page.screenshot({ path: 'test-results/tutorial-003-step-03-campaign-config.png' });
-
-    // Click Start button to begin game (positioned at bottom of config screen)
-    // Start button is at centerX, height * 0.85
-    const startY = box.height * 0.85;
-    await clickCanvasAt(page, centerX, startY);
+    // ========== STEP 1: Click TUTORIALS button in main menu ==========
+    console.log(`Step 1: Clicking TUTORIALS at (${MAIN_MENU.CENTER_X}, ${MAIN_MENU.TUTORIALS_Y})`);
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, MAIN_MENU.TUTORIALS_Y);
     await page.waitForTimeout(1000);
 
-    // Wait for GalaxyMapScene to load
-    await waitForScene(page, 'GalaxyMapScene', 10000);
-    await page.waitForTimeout(2000); // Allow scene to fully render
+    // Verify TutorialsScene is active
+    await waitForScene(page, 'TutorialsScene', 5000);
+    await page.screenshot({ path: 'test-results/t03-journey-01-tutorials-scene.png' });
 
-    await page.screenshot({ path: 'test-results/tutorial-003-step-04-galaxy-map.png' });
-
-    // Verify GalaxyMapScene is active
-    const isGalaxyMap = await page.evaluate(() => {
+    const isTutorialsScene = await page.evaluate(() => {
       const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
-      return game?.scene?.isActive?.('GalaxyMapScene') === true;
+      return game?.scene?.isActive?.('TutorialsScene') === true;
     });
-    expect(isGalaxyMap).toBe(true);
+    expect(isTutorialsScene).toBe(true);
 
-    // Get planet position from game state
-    const planetInfo = await page.evaluate(() => {
+    // ========== STEP 2: Click first tutorial card (First Command / T03) ==========
+    console.log(`Step 2: Clicking first tutorial card at (${MAIN_MENU.CENTER_X}, ${SCENARIO_LIST.FIRST_CARD_Y})`);
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, SCENARIO_LIST.FIRST_CARD_Y);
+    await page.waitForTimeout(500);
+
+    await page.screenshot({ path: 'test-results/t03-journey-02-detail-panel.png' });
+
+    // Verify detail panel is visible
+    const isDetailVisible = await page.evaluate(() => {
       const game = (window as unknown as {
         game?: {
           scene?: {
             getScene?: (name: string) => {
-              galaxy?: { planets?: Array<{ id: number; position: { x: number; z: number } }> };
+              detailPanel?: { visible?: boolean };
             } | null;
           };
         };
       }).game;
-      const scene = game?.scene?.getScene?.('GalaxyMapScene');
-      const planets = scene?.galaxy?.planets;
-      if (planets && planets.length > 0) {
-        const firstPlanet = planets[0];
-        return {
-          x: firstPlanet.position.x,
-          y: firstPlanet.position.z,
-          id: firstPlanet.id,
-        };
-      }
-      return null;
+      const scene = game?.scene?.getScene?.('TutorialsScene');
+      return scene?.detailPanel?.visible === true;
     });
+    expect(isDetailVisible).toBe(true);
 
-    // If we got planet coordinates, click on the planet
-    if (planetInfo) {
-      // Get camera scroll position to calculate screen coordinates
-      const cameraOffset = await page.evaluate(() => {
-        const game = (window as unknown as {
-          game?: {
-            scene?: {
-              getScene?: (name: string) => {
-                cameras?: { main?: { scrollX: number; scrollY: number } };
-              } | null;
-            };
-          };
-        }).game;
-        const scene = game?.scene?.getScene?.('GalaxyMapScene');
-        return {
-          scrollX: scene?.cameras?.main?.scrollX || 0,
-          scrollY: scene?.cameras?.main?.scrollY || 0,
-        };
-      });
-
-      // Calculate screen position (world position - camera scroll)
-      const screenX = planetInfo.x - cameraOffset.scrollX;
-      const screenY = planetInfo.y - cameraOffset.scrollY;
-
-      // Click on the planet
-      await clickCanvasAt(page, screenX, screenY);
-      await page.waitForTimeout(500);
-
-      await page.screenshot({ path: 'test-results/tutorial-003-step-05-planet-selected.png' });
-
-      // Verify planet info panel is now visible
-      const isPanelVisible = await page.evaluate(() => {
-        const game = (window as unknown as {
-          game?: {
-            scene?: {
-              getScene?: (name: string) => {
-                planetInfoPanel?: { getIsVisible?: () => boolean };
-              } | null;
-            };
-          };
-        }).game;
-        const scene = game?.scene?.getScene?.('GalaxyMapScene');
-        return scene?.planetInfoPanel?.getIsVisible?.() === true;
-      });
-
-      expect(isPanelVisible).toBe(true);
-    }
-  });
-
-  test('should close planet info panel when clicking outside', async ({ page }) => {
-    // Navigate to GalaxyMapScene and select a planet first
-    const canvas = await getPhaserCanvas(page);
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // Quick navigation to galaxy map
-    const centerX = box.width / 2;
-    await clickCanvasAt(page, centerX, box.height * 0.45);
-    await page.waitForTimeout(500);
-    await waitForScene(page, 'CampaignConfigScene', 5000);
-    await clickCanvasAt(page, centerX, box.height * 0.85);
-    await page.waitForTimeout(1000);
-    await waitForScene(page, 'GalaxyMapScene', 10000);
+    // ========== STEP 3: Click Start Scenario button ==========
+    console.log(`Step 3: Clicking Start Scenario at (${SCENARIO_DETAIL.START_BUTTON_X}, ${SCENARIO_DETAIL.START_BUTTON_Y})`);
+    await clickCanvasAt(page, SCENARIO_DETAIL.START_BUTTON_X, SCENARIO_DETAIL.START_BUTTON_Y);
     await page.waitForTimeout(2000);
 
-    // Get planet and click to open panel
-    const planetInfo = await page.evaluate(() => {
+    // Verify ScenarioGameScene is active
+    await waitForScene(page, 'ScenarioGameScene', 10000);
+    await page.screenshot({ path: 'test-results/t03-journey-03-game-scene.png' });
+
+    const isGameScene = await page.evaluate(() => {
+      const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
+      return game?.scene?.isActive?.('ScenarioGameScene') === true;
+    });
+    expect(isGameScene).toBe(true);
+
+    // ========== STEP 4: Dismiss objectives panel ==========
+    // Wait for objectives panel to appear and click to continue
+    await page.waitForTimeout(1500);
+    console.log('Step 4: Dismissing objectives panel');
+    await clickCanvasAt(page, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    await page.waitForTimeout(1000);
+
+    await page.screenshot({ path: 'test-results/t03-journey-04-objectives-dismissed.png' });
+
+    // ========== STEP 5: Click on the player planet ==========
+    console.log(`Step 5: Clicking planet at (${GAME_SCENE.PLANET_X}, ${GAME_SCENE.PLANET_Y})`);
+    await clickCanvasAt(page, GAME_SCENE.PLANET_X, GAME_SCENE.PLANET_Y);
+    await page.waitForTimeout(500);
+
+    await page.screenshot({ path: 'test-results/t03-journey-05-planet-clicked.png' });
+
+    // Verify planet info panel opened
+    const isPanelVisible = await page.evaluate(() => {
       const game = (window as unknown as {
         game?: {
           scene?: {
             getScene?: (name: string) => {
-              galaxy?: { planets?: Array<{ position: { x: number; z: number } }> };
-              cameras?: { main?: { scrollX: number; scrollY: number } };
+              planetInfoPanel?: { visible?: boolean; isVisible?: boolean };
             } | null;
           };
         };
       }).game;
-      const scene = game?.scene?.getScene?.('GalaxyMapScene');
-      const planets = scene?.galaxy?.planets;
-      if (planets && planets.length > 0) {
-        return {
-          x: planets[0].position.x - (scene?.cameras?.main?.scrollX || 0),
-          y: planets[0].position.z - (scene?.cameras?.main?.scrollY || 0),
-        };
-      }
-      return null;
+      const scene = game?.scene?.getScene?.('ScenarioGameScene');
+      return scene?.planetInfoPanel?.visible === true || scene?.planetInfoPanel?.isVisible === true;
     });
+    expect(isPanelVisible).toBe(true);
 
-    if (planetInfo) {
-      // Click planet to open panel
-      await clickCanvasAt(page, planetInfo.x, planetInfo.y);
-      await page.waitForTimeout(500);
+    // ========== STEP 6: Verify victory condition triggered ==========
+    await page.waitForTimeout(2000);
+    await page.screenshot({ path: 'test-results/t03-journey-06-complete.png' });
 
-      // Verify panel is open
-      let isPanelVisible = await page.evaluate(() => {
-        const game = (window as unknown as {
-          game?: {
-            scene?: {
-              getScene?: (name: string) => {
-                planetInfoPanel?: { getIsVisible?: () => boolean };
-              } | null;
-            };
+    // Check if victory was achieved (ui_interaction: planet_info_panel_opened)
+    const isVictoryAchieved = await page.evaluate(() => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              victoryConditionSystem?: { isVictoryAchieved?: () => boolean };
+            } | null;
           };
-        }).game;
-        const scene = game?.scene?.getScene?.('GalaxyMapScene');
-        return scene?.planetInfoPanel?.getIsVisible?.() === true;
-      });
-      expect(isPanelVisible).toBe(true);
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('ScenarioGameScene');
+      return scene?.victoryConditionSystem?.isVictoryAchieved?.() === true;
+    });
+    expect(isVictoryAchieved).toBe(true);
 
-      // Click somewhere else (far left of screen) to close panel
-      await clickCanvasAt(page, 50, box.height / 2);
-      await page.waitForTimeout(300);
+    console.log('Tutorial T03 completed successfully via UI clicks!');
+  });
 
-      await page.screenshot({ path: 'test-results/tutorial-003-step-06-panel-closed.png' });
+  test('navigate from main menu to tutorials scene', async ({ page }) => {
+    // Click TUTORIALS button
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, MAIN_MENU.TUTORIALS_Y);
+    await page.waitForTimeout(1000);
 
-      // Verify panel is closed
-      isPanelVisible = await page.evaluate(() => {
-        const game = (window as unknown as {
-          game?: {
-            scene?: {
-              getScene?: (name: string) => {
-                planetInfoPanel?: { getIsVisible?: () => boolean };
-              } | null;
-            };
+    // Verify TutorialsScene is active
+    const isTutorialsScene = await page.evaluate(() => {
+      const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
+      return game?.scene?.isActive?.('TutorialsScene') === true;
+    });
+    expect(isTutorialsScene).toBe(true);
+
+    await page.screenshot({ path: 'test-results/t03-nav-tutorials.png' });
+  });
+
+  test('tutorial list shows First Command as first entry', async ({ page }) => {
+    // Navigate to tutorials
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, MAIN_MENU.TUTORIALS_Y);
+    await waitForScene(page, 'TutorialsScene', 5000);
+    await page.waitForTimeout(500);
+
+    // Verify the list panel is visible and has scenarios
+    const scenarioCount = await page.evaluate(() => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              listPanel?: { getScenarioCards?: () => unknown[] };
+            } | null;
           };
-        }).game;
-        const scene = game?.scene?.getScene?.('GalaxyMapScene');
-        return scene?.planetInfoPanel?.getIsVisible?.() === true;
-      });
-      expect(isPanelVisible).toBe(false);
-    }
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('TutorialsScene');
+      return scene?.listPanel?.getScenarioCards?.()?.length ?? 0;
+    });
+    expect(scenarioCount).toBeGreaterThan(0);
+
+    await page.screenshot({ path: 'test-results/t03-list-visible.png' });
+  });
+
+  test('clicking tutorial card opens detail panel', async ({ page }) => {
+    // Navigate to tutorials
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, MAIN_MENU.TUTORIALS_Y);
+    await waitForScene(page, 'TutorialsScene', 5000);
+    await page.waitForTimeout(500);
+
+    // Click first tutorial card
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, SCENARIO_LIST.FIRST_CARD_Y);
+    await page.waitForTimeout(500);
+
+    // Verify detail panel is visible
+    const isDetailVisible = await page.evaluate(() => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              detailPanel?: { visible?: boolean };
+            } | null;
+          };
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('TutorialsScene');
+      return scene?.detailPanel?.visible === true;
+    });
+    expect(isDetailVisible).toBe(true);
+
+    await page.screenshot({ path: 'test-results/t03-detail-visible.png' });
+  });
+
+  test('clicking Start Scenario launches ScenarioGameScene', async ({ page }) => {
+    // Navigate to tutorials
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, MAIN_MENU.TUTORIALS_Y);
+    await waitForScene(page, 'TutorialsScene', 5000);
+    await page.waitForTimeout(500);
+
+    // Click first tutorial card
+    await clickCanvasAt(page, MAIN_MENU.CENTER_X, SCENARIO_LIST.FIRST_CARD_Y);
+    await page.waitForTimeout(500);
+
+    // Click Start Scenario button
+    await clickCanvasAt(page, SCENARIO_DETAIL.START_BUTTON_X, SCENARIO_DETAIL.START_BUTTON_Y);
+    await page.waitForTimeout(2000);
+
+    // Verify ScenarioGameScene is active
+    await waitForScene(page, 'ScenarioGameScene', 10000);
+
+    const isGameScene = await page.evaluate(() => {
+      const game = (window as unknown as { game?: { scene?: { isActive?: (name: string) => boolean } } }).game;
+      return game?.scene?.isActive?.('ScenarioGameScene') === true;
+    });
+    expect(isGameScene).toBe(true);
+
+    await page.screenshot({ path: 'test-results/t03-game-scene-launched.png' });
   });
 });
 
 /**
+ * Click Coordinates Reference (1024x768 canvas):
+ *
+ * Main Menu:
+ * - TUTORIALS button: (512, 485.6)
+ *
+ * TutorialsScene - ScenarioListPanel (600x500 centered):
+ * - Panel top-left: (212, 134)
+ * - First card center: (512, ~244)
+ *
+ * ScenarioDetailPanel (500x520 centered):
+ * - Panel top-left: (262, 124)
+ * - Start button center: (~352, ~584)
+ *
+ * ScenarioGameScene:
+ * - Player planet (centered): (512, 384)
+ *
  * Design Alignment Review: T03 - Planet Selection
  *
  * PRD Requirements:
  * - [x] FR9: Players can select planets to view detailed information
- * - [x] FR10: Players can view planet attributes (type, owner, population, morale, resources)
- * - [x] NFR-P3: UI responds within 100ms (panel animation is 100ms)
- * - [x] NFR-A1: Keyboard navigable (Tab to cycle, Enter to select, Esc to close)
+ * - [x] FR10: Players can view planet attributes
+ * - [x] NFR-P3: UI responds within 100ms
  *
  * Scenario Schema:
  * - [x] JSON validates against ScenarioModels.ts interface
- * - [x] All required fields present (id, name, type, difficulty, description, etc.)
- * - [x] tutorialSteps properly structured with TutorialStep interface
+ * - [x] tutorialSteps properly structured
  *
  * UI Elements Verified:
- * - [x] Planet renders with owner color coding (blue for player)
- * - [x] Selection ring appears on click (cyan)
- * - [x] PlanetInfoPanel slides in from right
- * - [x] Panel displays: name, type, owner, population, morale, resources
- * - [x] Close button (X) works
- * - [x] Click-outside-to-close works
+ * - [x] TUTORIALS button navigates to TutorialsScene
+ * - [x] Tutorial cards are clickable and open detail panel
+ * - [x] Start Scenario button launches ScenarioGameScene
+ * - [x] Planet is clickable and opens PlanetInfoPanel
+ * - [x] Victory condition triggers on panel open
  */

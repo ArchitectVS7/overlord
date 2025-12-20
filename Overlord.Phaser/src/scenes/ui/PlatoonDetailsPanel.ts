@@ -15,6 +15,7 @@ import Phaser from 'phaser';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { PlatoonEntity } from '@core/models/PlatoonEntity';
 import { PlatoonSystem } from '@core/PlatoonSystem';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 400;
@@ -22,13 +23,13 @@ const PANEL_HEIGHT = 480;
 const PADDING = 20;
 const BUTTON_HEIGHT = 36;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const SUCCESS_COLOR = '#44aa44';
-const WARNING_COLOR = '#ff9900';
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const SUCCESS_COLOR = TEXT_COLORS.SUCCESS;
+const WARNING_COLOR = TEXT_COLORS.WARNING;
 
 export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;
@@ -105,7 +106,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     // Title
     this.titleText = this.scene.add.text(PADDING, PADDING, 'Garrisoned Platoons', {
       fontSize: '20px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: SUCCESS_COLOR,
       fontStyle: 'bold',
     });
@@ -118,7 +119,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     // Empty state message
     this.emptyStateText = this.scene.add.text(PADDING, 80, 'No platoons garrisoned', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
       fontStyle: 'italic',
     });
@@ -151,7 +152,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
 
     const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, 'DISBAND PLATOON', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
       fontStyle: 'bold',
     });
@@ -181,7 +182,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
 
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#999999',
     });
     closeText.setOrigin(0.5);
@@ -367,7 +368,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       // Platoon name
       const nameText = this.scene.add.text(10, y + 6, platoon.name || `Platoon ${platoon.id}`, {
         fontSize: '13px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: TEXT_COLOR,
       });
       this.platoonListContainer.add(nameText);
@@ -381,7 +382,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
         : `${platoon.troopCount} troops`;
       const troopText = this.scene.add.text(140, y + 6, troopDisplay, {
         fontSize: '12px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: casualties > 0 ? WARNING_COLOR : LABEL_COLOR,
       });
       this.platoonListContainer.add(troopText);
@@ -390,7 +391,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       const equipWeapon = `${platoon.equipment}/${platoon.weapon}`;
       const equipText = this.scene.add.text(250, y + 6, equipWeapon, {
         fontSize: '10px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: LABEL_COLOR,
       });
       this.platoonListContainer.add(equipText);
@@ -399,7 +400,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
       if (platoon.isTraining) {
         const trainingText = this.scene.add.text(10, y + 18, `⏳ Training ${platoon.trainingLevel}%`, {
           fontSize: '10px',
-          fontFamily: 'Arial',
+          fontFamily: FONTS.PRIMARY,
           color: WARNING_COLOR,
         });
         this.platoonListContainer.add(trainingText);
@@ -437,7 +438,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     y += 10;
     const headerText = this.scene.add.text(0, y, 'Selected Platoon Details', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
       fontStyle: 'bold',
     });
@@ -464,7 +465,7 @@ export class PlatoonDetailsPanel extends Phaser.GameObjects.Container {
     details.forEach((detail, i) => {
       const text = this.scene.add.text(0, y + i * 20, detail, {
         fontSize: '12px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: LABEL_COLOR,
       });
       this.detailsContainer.add(text);

@@ -101,7 +101,7 @@ if (!gameState.validate()) {
 ```
 
 **Validation Rules:**
-- Maximum 6 planets
+- Maximum 6 planets (Proottype early - this is NOT a constraint for full game. Original game had more planets per level, for four enemies.)
 - Turn number must be positive
 - No duplicate entity IDs
 - All faction-owned planet IDs must exist in planet array

@@ -110,13 +110,25 @@ export class ScenarioCompletionService {
 
   /**
    * Load completions from localStorage
+   * Handles both array format (legacy) and object format (current)
    */
   private loadFromStorage(): void {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        const completions: ScenarioCompletion[] = JSON.parse(data);
-        completions.forEach(c => this.completions.set(c.scenarioId, c));
+        const parsed = JSON.parse(data);
+
+        // Handle both array format (legacy) and object format (current)
+        if (Array.isArray(parsed)) {
+          // Legacy array format
+          const completions: ScenarioCompletion[] = parsed;
+          completions.forEach(c => this.completions.set(c.scenarioId, c));
+        } else {
+          // Object format with scenarioId as keys
+          Object.entries(parsed).forEach(([id, completion]) => {
+            this.completions.set(id, completion as ScenarioCompletion);
+          });
+        }
       }
     } catch (e) {
       // Storage unavailable or corrupted, start fresh
@@ -126,11 +138,16 @@ export class ScenarioCompletionService {
 
   /**
    * Save completions to localStorage
+   * Saves as an object with scenarioId as keys (compatible with ScenarioManager)
    */
   private saveToStorage(): void {
     try {
-      const data = JSON.stringify(this.getAllCompletions());
-      localStorage.setItem(STORAGE_KEY, data);
+      // Convert Map to object with scenarioId as keys (for ScenarioManager compatibility)
+      const data: Record<string, ScenarioCompletion> = {};
+      this.completions.forEach((completion, id) => {
+        data[id] = completion;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
       // Storage unavailable or full
       console.warn('Failed to save scenario completions to localStorage:', e);

@@ -4,6 +4,7 @@ import { BuildingSystem } from '@core/BuildingSystem';
 import { BuildingType, BuildingStatus } from '@core/models/Enums';
 import { BuildingCosts, Structure } from '@core/models/BuildingModels';
 import { PlanetEntity } from '@core/models/PlanetEntity';
+import { COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 /**
  * Building information for display
@@ -33,6 +34,10 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   // UI elements
   private backdrop!: Phaser.GameObjects.Rectangle;
   private panel!: Phaser.GameObjects.Rectangle;
+
+  // Fullscreen zone for click-outside detection (added to scene, not container)
+  private clickOutsideZone: Phaser.GameObjects.Zone | null = null;
+
   private titleText!: Phaser.GameObjects.Text;
   private closeButton!: Phaser.GameObjects.Text;
   private buildingButtons: Phaser.GameObjects.Container[] = [];
@@ -41,6 +46,13 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   public onBuildingSelected?: (buildingType: BuildingType, planetId: number) => void;
   public onBuildingScrap?: (buildingType: BuildingType, planetId: number) => void;
   public onClose?: () => void;
+
+  // Panel dimensions for hit testing
+  private static readonly PANEL_WIDTH = 400;
+  private static readonly PANEL_HEIGHT = 450;
+
+  // Custom visibility flag for scene-level input handling
+  private isMenuVisible: boolean = false;
 
   // Existing buildings display
   private existingBuildingsContainer: Phaser.GameObjects.Container[] = [];
@@ -84,18 +96,18 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     },
   ];
 
-  // Colors
-  private static readonly COLORS = {
-    panelBg: 0x1a1a2e,
-    panelBorder: 0x00bfff,
-    title: '#00bfff',
-    available: '#ffffff',
-    unavailable: '#666666',
-    cost: '#ffff00',
-    constructing: '#ff9900',
-    hover: 0x2a2a4e,
-    button: 0x0a0a1e,
-    buttonBorder: 0x0088cc,
+  // Colors (from centralized theme)
+  private static readonly THEME = {
+    panelBg: COLORS.PANEL_BG,
+    panelBorder: COLORS.BORDER_PRIMARY,
+    title: TEXT_COLORS.ACCENT,
+    available: TEXT_COLORS.PRIMARY,
+    unavailable: TEXT_COLORS.MUTED,
+    cost: TEXT_COLORS.CREDITS,
+    constructing: TEXT_COLORS.WARNING,
+    hover: COLORS.BUTTON_SECONDARY_HOVER,
+    button: COLORS.BUTTON_PRIMARY,
+    buttonBorder: COLORS.BORDER_PRIMARY,
   };
 
   constructor(
@@ -110,6 +122,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.createUI();
     this.setVisible(false);
     this.setDepth(1100);
+    this.setScrollFactor(0); // Fixed to camera - essential for panned views
 
     scene.add.existing(this);
   }
@@ -124,10 +137,8 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const panelX = width / 2;
     const panelY = height / 2;
 
-    // Fullscreen backdrop for click-outside-to-close
+    // Fullscreen backdrop (visual dimming only - click handling via scene-level input)
     this.backdrop = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.5);
-    this.backdrop.setInteractive();
-    this.backdrop.on('pointerdown', () => this.hide());
     this.add(this.backdrop);
 
     // Hit blocker - prevents clicks from reaching the backdrop behind the panel
@@ -136,15 +147,15 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.add(hitBlocker);
 
     // Main panel
-    this.panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, BuildingMenuPanel.COLORS.panelBg, 0.95);
-    this.panel.setStrokeStyle(2, BuildingMenuPanel.COLORS.panelBorder);
+    this.panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, BuildingMenuPanel.THEME.panelBg, 0.95);
+    this.panel.setStrokeStyle(2, BuildingMenuPanel.THEME.panelBorder);
     this.add(this.panel);
 
     // Title
     this.titleText = this.scene.add.text(panelX, panelY - panelHeight / 2 + 25, 'BUILD MENU', {
       fontSize: '20px',
-      color: BuildingMenuPanel.COLORS.title,
-      fontFamily: 'monospace',
+      color: BuildingMenuPanel.THEME.title,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0.5);
     this.add(this.titleText);
@@ -153,7 +164,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     this.closeButton = this.scene.add.text(panelX + panelWidth / 2 - 25, panelY - panelHeight / 2 + 25, 'X', {
       fontSize: '20px',
       color: '#ff0000',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
@@ -224,14 +235,16 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
         `Construction in progress: ${this.getBuildingName(constructing[0].type)}`,
         {
           fontSize: '14px',
-          color: BuildingMenuPanel.COLORS.constructing,
-          fontFamily: 'monospace',
+          color: BuildingMenuPanel.THEME.constructing,
+          fontFamily: FONTS.PRIMARY,
           fontStyle: 'italic',
         },
       ).setOrigin(0.5);
       this.add(constructionMsg);
       this.buildingButtons.push(constructionMsg as unknown as Phaser.GameObjects.Container);
     }
+
+    this.isMenuVisible = true;
 
     // Clear existing buildings containers
     for (const container of this.existingBuildingsContainer) {
@@ -252,7 +265,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
         'EXISTING BUILDINGS (Click SCRAP for 50% refund)',
         {
           fontSize: '12px',
-          color: BuildingMenuPanel.COLORS.title,
+          color: BuildingMenuPanel.THEME.title,
           fontFamily: 'monospace',
           fontStyle: 'bold',
         },
@@ -276,6 +289,13 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     }
 
     this.setVisible(true);
+
+    // Create fullscreen zone for click-outside-to-close
+    // This zone is added directly to the scene (not the container) to avoid scrollFactor issues
+    this.destroyClickOutsideZone(); // Clean up any existing
+    this.scene.time.delayedCall(50, () => {
+      this.createClickOutsideZone();
+    });
 
     // Show animation (100ms per NFR-P3)
     this.setAlpha(0);
@@ -320,15 +340,15 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const isAvailable = canAfford && canBuild && !hasConstructionInProgress;
 
     // Button background
-    const bg = this.scene.add.rectangle(0, 0, width, height, BuildingMenuPanel.COLORS.button, 0.9);
-    bg.setStrokeStyle(1, isAvailable ? BuildingMenuPanel.COLORS.buttonBorder : 0x444444);
+    const bg = this.scene.add.rectangle(0, 0, width, height, BuildingMenuPanel.THEME.button, 0.9);
+    bg.setStrokeStyle(1, isAvailable ? BuildingMenuPanel.THEME.buttonBorder : 0x444444);
     container.add(bg);
 
     // Building name
     const nameText = this.scene.add.text(-width / 2 + 15, -height / 2 + 10, buildingInfo.name, {
       fontSize: '14px',
-      color: isAvailable ? BuildingMenuPanel.COLORS.available : BuildingMenuPanel.COLORS.unavailable,
-      fontFamily: 'monospace',
+      color: isAvailable ? BuildingMenuPanel.THEME.available : BuildingMenuPanel.THEME.unavailable,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     });
     container.add(nameText);
@@ -337,7 +357,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const descText = this.scene.add.text(-width / 2 + 15, -height / 2 + 28, buildingInfo.description, {
       fontSize: '11px',
       color: isAvailable ? '#aaaaaa' : '#555555',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     });
     container.add(descText);
 
@@ -345,8 +365,8 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const costStr = `Cost: ${buildingInfo.cost.credits.toLocaleString()} Cr, ${buildingInfo.cost.minerals.toLocaleString()} Min, ${buildingInfo.cost.fuel.toLocaleString()} Fuel`;
     const costText = this.scene.add.text(-width / 2 + 15, -height / 2 + 45, costStr, {
       fontSize: '10px',
-      color: canAfford ? BuildingMenuPanel.COLORS.cost : '#ff4444',
-      fontFamily: 'monospace',
+      color: canAfford ? BuildingMenuPanel.THEME.cost : '#ff4444',
+      fontFamily: FONTS.PRIMARY,
     });
     container.add(costText);
 
@@ -354,7 +374,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const timeText = this.scene.add.text(width / 2 - 15, -height / 2 + 10, `${buildingInfo.constructionTime} turns`, {
       fontSize: '11px',
       color: isAvailable ? '#88ff88' : '#555555',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     }).setOrigin(1, 0);
     container.add(timeText);
 
@@ -372,7 +392,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
       const reasonText = this.scene.add.text(width / 2 - 15, height / 2 - 15, reason, {
         fontSize: '10px',
         color: '#ff6666',
-        fontFamily: 'monospace',
+        fontFamily: FONTS.PRIMARY,
         fontStyle: 'italic',
       }).setOrigin(1, 1);
       container.add(reasonText);
@@ -382,10 +402,10 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     if (isAvailable) {
       bg.setInteractive({ useHandCursor: true });
       bg.on('pointerover', () => {
-        bg.setFillStyle(BuildingMenuPanel.COLORS.hover);
+        bg.setFillStyle(BuildingMenuPanel.THEME.hover);
       });
       bg.on('pointerout', () => {
-        bg.setFillStyle(BuildingMenuPanel.COLORS.button);
+        bg.setFillStyle(BuildingMenuPanel.THEME.button);
       });
       bg.on('pointerdown', () => {
         this.selectBuilding(buildingInfo.type, planet);
@@ -416,7 +436,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     // Building name
     const nameText = this.scene.add.text(-width / 2 + 15, 0, this.getBuildingName(building.type), {
       fontSize: '12px',
-      color: BuildingMenuPanel.COLORS.available,
+      color: BuildingMenuPanel.THEME.available,
       fontFamily: 'monospace',
     }).setOrigin(0, 0.5);
     container.add(nameText);
@@ -550,7 +570,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const errorText = this.scene.add.text(width / 2, height / 2 + 200, message, {
       fontSize: '16px',
       color: '#ff0000',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: { x: 15, y: 8 },
     }).setOrigin(0.5).setDepth(1200);
@@ -572,7 +592,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const notification = this.scene.add.text(width / 2, height - 100, message, {
       fontSize: '16px',
       color: '#00bfff',
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: { x: 15, y: 8 },
     }).setOrigin(0.5).setDepth(1200);
@@ -590,6 +610,12 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
    * Hides the building menu.
    */
   public hide(): void {
+    if (!this.isMenuVisible) return;
+    this.isMenuVisible = false;
+
+    // Remove click-outside zone
+    this.destroyClickOutsideZone();
+
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
@@ -606,17 +632,73 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
    * Checks if the menu is visible.
    */
   public isOpen(): boolean {
-    return this.visible;
+    return this.isMenuVisible;
   }
 
   /**
    * Clean up resources.
    */
   public destroy(): void {
+    this.destroyClickOutsideZone();
     for (const btn of this.buildingButtons) {
       btn.destroy();
     }
     this.buildingButtons = [];
     super.destroy();
+  }
+
+  /**
+   * Creates a fullscreen zone for click-outside-to-close detection.
+   * This zone is added directly to the scene (not this container) and positioned
+   * at the camera's world position to work correctly with Phaser's input system.
+   */
+  private createClickOutsideZone(): void {
+    if (this.clickOutsideZone) return;
+
+    const camera = this.scene.cameras.main;
+    const { width, height, scrollX, scrollY } = camera;
+
+    // Create zone in WORLD coordinates at camera center
+    // This ensures proper hit testing since Phaser converts screen coords to world coords
+    const worldCenterX = scrollX + width / 2;
+    const worldCenterY = scrollY + height / 2;
+
+    this.clickOutsideZone = this.scene.add.zone(worldCenterX, worldCenterY, width, height);
+    this.clickOutsideZone.setDepth(1099); // Just below BuildingMenuPanel (1100)
+    this.clickOutsideZone.setInteractive();
+
+    this.clickOutsideZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (!this.isMenuVisible) return;
+
+      // Use screen coordinates for panel bounds check (panel is fixed to screen)
+      const screenX = pointer.x;
+      const screenY = pointer.y;
+
+      // Panel is centered on screen
+      const panelX = width / 2;
+      const panelY = height / 2;
+      const halfWidth = BuildingMenuPanel.PANEL_WIDTH / 2;
+      const halfHeight = BuildingMenuPanel.PANEL_HEIGHT / 2;
+
+      const isInsidePanel =
+        screenX >= panelX - halfWidth &&
+        screenX <= panelX + halfWidth &&
+        screenY >= panelY - halfHeight &&
+        screenY <= panelY + halfHeight;
+
+      if (!isInsidePanel) {
+        this.hide();
+      }
+    });
+  }
+
+  /**
+   * Destroys the click-outside zone.
+   */
+  private destroyClickOutsideZone(): void {
+    if (this.clickOutsideZone) {
+      this.clickOutsideZone.destroy();
+      this.clickOutsideZone = null;
+    }
   }
 }

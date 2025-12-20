@@ -183,14 +183,24 @@ export class ScenarioInitializer {
     planet.owner = owner;
     planet.type = PlanetType.Tropical;
 
-    // Generate simple positions in a grid pattern
-    const angle = (index / 6) * Math.PI * 2;
-    const radius = 100 + (index * 30);
-    planet.position = new Position3D(
-      Math.cos(angle) * radius,
-      Math.sin(angle) * radius,
-      0,
-    );
+    // Center of screen (1024x768) for first planet, spread others around it
+    // Note: Position3D uses x for screen X, z for screen Y (see PlanetRenderer)
+    const centerX = 512;
+    const centerY = 384;
+
+    if (index === 0) {
+      // First planet at center
+      planet.position = new Position3D(centerX, 0, centerY);
+    } else {
+      // Other planets spread around center
+      const angle = ((index - 1) / 6) * Math.PI * 2;
+      const radius = 150 + (index * 50);
+      planet.position = new Position3D(
+        centerX + Math.cos(angle) * radius,
+        0,
+        centerY + Math.sin(angle) * radius,
+      );
+    }
 
     // Initialize with basic resources
     planet.population = owner === FactionType.Player ? 10000 : 8000;

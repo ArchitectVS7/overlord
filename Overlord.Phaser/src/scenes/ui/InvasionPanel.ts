@@ -16,6 +16,7 @@ import { PlanetEntity } from '@core/models/PlanetEntity';
 import { CraftEntity } from '@core/models/CraftEntity';
 import { PlatoonEntity } from '@core/models/PlatoonEntity';
 import { CraftType, FactionType } from '@core/models/Enums';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 480;
@@ -23,14 +24,14 @@ const PANEL_HEIGHT = 420;
 const PADDING = 20;
 const BUTTON_HEIGHT = 36;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0xcc4444;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const ERROR_COLOR = '#cc0000';
-const WARNING_COLOR = '#ffaa00';
-const DISABLED_COLOR = '#666666';
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.DANGER;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const ERROR_COLOR = TEXT_COLORS.DANGER;
+const WARNING_COLOR = TEXT_COLORS.WARNING;
+const DISABLED_COLOR = TEXT_COLORS.MUTED;
 
 export interface TargetInfo {
   id: number;
@@ -109,7 +110,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     // Title
     const title = this.scene.add.text(PADDING, PADDING, '⚔️ Planetary Invasion', {
       fontSize: '20px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: ERROR_COLOR,
       fontStyle: 'bold',
     });
@@ -127,14 +128,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
     const label = this.scene.add.text(PADDING, startY, 'Target:', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
     this.targetInfoText = this.scene.add.text(PADDING, startY + 22, '', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     this.contentContainer.add(this.targetInfoText);
@@ -145,14 +146,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
     const label = this.scene.add.text(PADDING, startY, 'Invasion Force:', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
     this.forceInfoText = this.scene.add.text(PADDING, startY + 22, '', {
       fontSize: '13px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: TEXT_COLOR,
     });
     this.contentContainer.add(this.forceInfoText);
@@ -163,14 +164,14 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
     const label = this.scene.add.text(PADDING, startY, 'Combat Strategy:', {
       fontSize: '14px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(label);
 
     this.aggressionText = this.scene.add.text(PADDING, startY + 22, '', {
       fontSize: '15px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: WARNING_COLOR,
       fontStyle: 'bold',
     });
@@ -182,7 +183,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
     // Casualty estimate
     this.casualtyText = this.scene.add.text(PADDING, startY + 100, '', {
       fontSize: '12px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: LABEL_COLOR,
     });
     this.contentContainer.add(this.casualtyText);
@@ -217,7 +218,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
       const label = this.scene.add.text(tickX, y + 20, tick.label, {
         fontSize: '9px',
-        fontFamily: 'Arial',
+        fontFamily: FONTS.PRIMARY,
         color: LABEL_COLOR,
         align: 'center',
       });
@@ -266,7 +267,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
     const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, '⚔️ LAUNCH INVASION', {
       fontSize: '15px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: DISABLED_COLOR,
       fontStyle: 'bold',
     });
@@ -295,7 +296,7 @@ export class InvasionPanel extends Phaser.GameObjects.Container {
 
     const closeText = this.scene.add.text(0, 0, '×', {
       fontSize: '28px',
-      fontFamily: 'Arial',
+      fontFamily: FONTS.PRIMARY,
       color: '#999999',
     });
     closeText.setOrigin(0.5);

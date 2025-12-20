@@ -16,22 +16,23 @@ import { PlanetEntity } from '@core/models/PlanetEntity';
 import { EquipmentLevel, WeaponLevel, FactionType } from '@core/models/Enums';
 import { PlatoonCosts, PlatoonModifiers } from '@core/models/PlatoonModels';
 import { PlatoonSystem } from '@core/PlatoonSystem';
+import { COLORS, TEXT_COLORS, PANEL, BUTTON } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 480;
 const PANEL_HEIGHT = 560;
-const PADDING = 20;
-const BUTTON_HEIGHT = 36;
+const PADDING = PANEL.PADDING;
+const BUTTON_HEIGHT = BUTTON.HEIGHT;
 const MAX_PLATOONS_PER_PLANET = 24;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x44aa44;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const ERROR_COLOR = '#cc0000';
-const SUCCESS_COLOR = '#44aa44';
-const DISABLED_COLOR = '#666666';
+// Colors (from centralized theme)
+const BG_COLOR = COLORS.PANEL_BG;
+const BORDER_COLOR = COLORS.SUCCESS;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const ERROR_COLOR = TEXT_COLORS.DANGER;
+const SUCCESS_COLOR = TEXT_COLORS.SUCCESS;
+const DISABLED_COLOR = TEXT_COLORS.MUTED;
 
 export class PlatoonCommissionPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;

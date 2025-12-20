@@ -4,6 +4,7 @@
  */
 
 import Phaser from 'phaser';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 export class OpponentInfoPanel extends Phaser.GameObjects.Container {
   private static readonly PANEL_WIDTH = 240;
@@ -21,9 +22,9 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
 
     // Background
     this.background = scene.add.graphics();
-    this.background.fillStyle(0x2a1a1a, 0.9);
+    this.background.fillStyle(THEME_COLORS.PANEL_BG, 0.9);
     this.background.fillRoundedRect(0, 0, OpponentInfoPanel.PANEL_WIDTH, OpponentInfoPanel.PANEL_HEIGHT, 8);
-    this.background.lineStyle(2, 0x8a4444, 1);
+    this.background.lineStyle(2, THEME_COLORS.DANGER, 1);
     this.background.strokeRoundedRect(0, 0, OpponentInfoPanel.PANEL_WIDTH, OpponentInfoPanel.PANEL_HEIGHT, 8);
     this.add(this.background);
 
@@ -34,8 +35,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
       '🛡️ OPPONENT',
       {
         fontSize: '12px',
-        fontFamily: 'Arial',
-        color: '#cc6666',
+        fontFamily: FONTS.PRIMARY,
+        color: TEXT_COLORS.DANGER,
         fontStyle: 'bold',
       },
     );
@@ -49,8 +50,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
       'AI Commander',
       {
         fontSize: '14px',
-        fontFamily: 'Arial',
-        color: '#ffffff',
+        fontFamily: FONTS.PRIMARY,
+        color: TEXT_COLORS.PRIMARY,
         fontStyle: 'bold',
       },
     );
@@ -63,8 +64,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
       'Personality: Balanced',
       {
         fontSize: '11px',
-        fontFamily: 'Arial',
-        color: '#aaaaaa',
+        fontFamily: FONTS.PRIMARY,
+        color: TEXT_COLORS.SECONDARY,
       },
     );
     this.add(this.personalityText);
@@ -76,8 +77,8 @@ export class OpponentInfoPanel extends Phaser.GameObjects.Container {
       'Difficulty: Normal',
       {
         fontSize: '11px',
-        fontFamily: 'Arial',
-        color: '#aaaaaa',
+        fontFamily: FONTS.PRIMARY,
+        color: TEXT_COLORS.SECONDARY,
       },
     );
     this.add(this.difficultyText);

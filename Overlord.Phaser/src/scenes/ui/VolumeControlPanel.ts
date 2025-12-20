@@ -7,6 +7,7 @@
 
 import Phaser from 'phaser';
 import { AudioManager, VolumeType } from '../../core/AudioManager';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 const PANEL_WIDTH = 400;
 const PANEL_HEIGHT = 350;
@@ -16,15 +17,15 @@ const SLIDER_PADDING = 50;
 const TITLE_HEIGHT = 40;
 
 const COLORS = {
-  BACKGROUND: 0x1a1a2e,
-  BORDER: 0x4a4a6a,
-  SLIDER_TRACK: 0x3a3a5a,
-  SLIDER_FILL: 0x4488ff,
-  SLIDER_FILL_MUTED: 0x555555,
-  TEXT: '#ffffff',
-  TEXT_LABEL: '#aaaacc',
-  MUTE_ACTIVE: 0xff4444,
-  MUTE_INACTIVE: 0x444466,
+  BACKGROUND: THEME_COLORS.PANEL_BG,
+  BORDER: THEME_COLORS.BORDER_SUBTLE,
+  SLIDER_TRACK: THEME_COLORS.PANEL_BG_DARK,
+  SLIDER_FILL: THEME_COLORS.BORDER_PRIMARY,
+  SLIDER_FILL_MUTED: THEME_COLORS.BUTTON_SECONDARY_HOVER,
+  TEXT: TEXT_COLORS.PRIMARY,
+  TEXT_LABEL: TEXT_COLORS.SECONDARY,
+  MUTE_ACTIVE: THEME_COLORS.DANGER,
+  MUTE_INACTIVE: THEME_COLORS.PANEL_BG_DARK,
 };
 
 /**
@@ -67,6 +68,7 @@ export class VolumeControlPanel extends Phaser.GameObjects.Container {
 
     this.audioManager = AudioManager.getInstance();
     this.setVisible(false);
+    this.setScrollFactor(0); // Fixed to camera
 
     this.createBackground();
     this.createTitle();

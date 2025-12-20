@@ -13,6 +13,7 @@
 import Phaser from 'phaser';
 import { VictoryCondition } from '@core/models/ScenarioModels';
 import { ConditionResult } from '@core/VictoryConditionSystem';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 500;
@@ -20,14 +21,14 @@ const PANEL_HEIGHT = 400;
 const PADDING = 20;
 const ROW_HEIGHT = 50;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const COMPLETE_COLOR = '#44ff44';
-const INCOMPLETE_COLOR = '#ffaa44';
-const PROGRESS_BG_COLOR = 0x2a2a3e;
-const PROGRESS_FILL_COLOR = 0x4488ff;
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const COMPLETE_COLOR = TEXT_COLORS.SUCCESS;
+const INCOMPLETE_COLOR = TEXT_COLORS.WARNING;
+const PROGRESS_BG_COLOR = THEME_COLORS.PANEL_BG_DARK;
+const PROGRESS_FILL_COLOR = THEME_COLORS.BORDER_PRIMARY;
 
 /**
  * UI panel for displaying scenario objectives

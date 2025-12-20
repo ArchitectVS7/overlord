@@ -4,6 +4,7 @@
  */
 
 import Phaser from 'phaser';
+import { COLORS as THEME_COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
 export class NotificationToast extends Phaser.GameObjects.Container {
   private static readonly TOAST_WIDTH = 320;
@@ -20,7 +21,7 @@ export class NotificationToast extends Phaser.GameObjects.Container {
 
     // Background with style color
     this.background = scene.add.graphics();
-    const bgColor = style === 'danger' ? 0x884444 : style === 'warning' ? 0x886644 : 0x444488;
+    const bgColor = style === 'danger' ? THEME_COLORS.DANGER : style === 'warning' ? 0x886644 : 0x444488;
     this.background.fillStyle(bgColor, 0.9);
     this.background.fillRoundedRect(0, 0, NotificationToast.TOAST_WIDTH, NotificationToast.TOAST_HEIGHT, 8);
     this.background.lineStyle(2, 0xffffff, 0.3);
@@ -34,8 +35,8 @@ export class NotificationToast extends Phaser.GameObjects.Container {
       message,
       {
         fontSize: '13px',
-        fontFamily: 'Arial',
-        color: '#ffffff',
+        fontFamily: FONTS.PRIMARY,
+        color: TEXT_COLORS.PRIMARY,
         wordWrap: { width: NotificationToast.TOAST_WIDTH - NotificationToast.PADDING * 2 },
       },
     );

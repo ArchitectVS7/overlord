@@ -1,0 +1,149 @@
+{
+  "id": "tutorial-005-turn-advancement",
+  "name": "The Passage of Time",
+  "type": "tutorial",
+  "difficulty": "easy",
+  "duration": "2-3 min",
+  "description": "Learn how turns work and how to advance through the game phases. Master the rhythm of galactic command.",
+  "prerequisites": ["tutorial-003-planet-selection"],
+
+  "story": {
+    "briefing": "Commander, time in the galaxy flows in turns. Each turn consists of four phases: Income, Action, Combat, and End. Understanding this cycle is crucial to effective command. Your empire's growth depends on it.",
+    "objective": "Complete two full turns by pressing SPACE to end each Action phase.",
+    "victory": "Outstanding, Commander! You've mastered the turn cycle. Income arrives automatically, you control the Action phase, and Combat resolves on its own. This rhythm will guide your conquest."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "turn_reached",
+      "target": 3
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 10000,
+      "minerals": 5000,
+      "fuel": 3000,
+      "food": 2000,
+      "energy": 1000
+    },
+    "aiPlanets": [],
+    "aiEnabled": false
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Welcome back, Commander! Notice the Turn HUD in the top-left corner. It shows 'Turn 1 - Action Phase'. This is where you make decisions.",
+      "highlight": "turn-hud",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 2,
+      "text": "See the 'END TURN [Space]' button? When you're ready to advance, press SPACE or click this button. Try it now!",
+      "highlight": "end-turn-button",
+      "action": {
+        "type": "end_turn"
+      }
+    },
+    {
+      "step": 3,
+      "text": "You're now in the Combat Phase. Since there are no enemies, it passes quickly. Watch as the phases progress automatically.",
+      "highlight": "turn-hud",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 4,
+      "text": "The End Phase processes AI actions and checks victory conditions. Since AI is disabled, this is brief.",
+      "highlight": "turn-hud",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 5,
+      "text": "Turn 2 begins with the Income Phase! Watch your resources increase as production is calculated. Income happens automatically every turn.",
+      "highlight": "resource-hud",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 6,
+      "text": "You're back in the Action Phase. End one more turn to complete this tutorial. Press SPACE now!",
+      "highlight": "end-turn-button",
+      "action": {
+        "type": "end_turn"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 3,
+    "twoStarTurns": 5
+  },
+
+  "clickByClickRecipe": {
+    "title": "Turn Advancement - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "Locate Turn HUD",
+        "instruction": "Find the Turn HUD in the top-left corner of the galaxy map",
+        "expectedResult": "You see 'Turn 1' and 'Action Phase' displayed"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Find End Turn Button",
+        "instruction": "Look for the 'END TURN [Space]' button below the turn counter",
+        "expectedResult": "The button is visible and clickable during Action phase"
+      },
+      {
+        "stepNumber": 3,
+        "action": "End Turn 1",
+        "instruction": "Press SPACE on your keyboard OR click the END TURN button",
+        "expectedResult": "Phase changes to 'Combat Phase' then auto-advances"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Watch Phase Progression",
+        "instruction": "Observe as Combat -> End -> Income phases pass automatically",
+        "expectedResult": "Notifications appear for each phase transition"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Notice Income",
+        "instruction": "Watch the resource panel during Income phase",
+        "expectedResult": "Resources increase based on your production"
+      },
+      {
+        "stepNumber": 6,
+        "action": "End Turn 2",
+        "instruction": "Press SPACE again to end Turn 2",
+        "expectedResult": "Tutorial completes when Turn 3 begins"
+      }
+    ],
+    "keyboardAlternative": {
+      "description": "Keyboard controls for turn management",
+      "steps": [
+        "SPACE - End turn (during Action phase only)",
+        "ENTER - Also ends turn (alternative)",
+        "Note: Other phases advance automatically"
+      ]
+    }
+  }
+}

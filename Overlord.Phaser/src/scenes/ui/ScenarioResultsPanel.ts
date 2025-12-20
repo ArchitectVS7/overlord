@@ -12,17 +12,18 @@
 
 import Phaser from 'phaser';
 import { ScenarioResults, StarRatingSystem } from '@core/StarRatingSystem';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel styling constants
 const PANEL_WIDTH = 500;
 const PANEL_HEIGHT = 380;
 const PADDING = 30;
-const BG_COLOR = 0x1a2a3a;
-const BORDER_COLOR_VICTORY = 0x44ff44;
-const BORDER_COLOR_DEFEAT = 0xff4444;
-const TEXT_COLOR = '#ffffff';
-const STAR_COLOR_FILLED = '#ffcc00';
-const STAR_COLOR_EMPTY = '#444444';
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR_VICTORY = THEME_COLORS.SUCCESS;
+const BORDER_COLOR_DEFEAT = THEME_COLORS.DANGER;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const STAR_COLOR_FILLED = TEXT_COLORS.CREDITS;
+const STAR_COLOR_EMPTY = TEXT_COLORS.MUTED;
 const PANEL_DEPTH = 1700;
 
 /**

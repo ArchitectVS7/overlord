@@ -49,7 +49,11 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Use the saved auth state from global setup
+        storageState: path.resolve(__dirname, './tests/e2e/.auth/admin.json'),
+      },
     },
     // Uncomment to add more browsers
     // {

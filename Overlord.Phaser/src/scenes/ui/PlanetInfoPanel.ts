@@ -15,20 +15,14 @@ import { BuildingCosts, Structure } from '@core/models/BuildingModels';
 import { BuildingSystem } from '@core/BuildingSystem';
 import { TaxationSystem } from '@core/TaxationSystem';
 import { OWNER_COLORS } from '../../config/VisualConfig';
+import { COLORS, TEXT_COLORS, FONTS, PANEL, RESOURCE_COLORS, BUTTON } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 280;
-const PANEL_HEIGHT = 560; // Increased for tax slider section
-const PADDING = 15;
+const PANEL_HEIGHT = 560; // Increased for construction section + platoons button + tax slider
+const PADDING = PANEL.PADDING;
 const HEADER_HEIGHT = 60;
-const BUTTON_HEIGHT = 36;
-
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_WIDTH = 3;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const DISABLED_COLOR = '#666666';
+const BUTTON_HEIGHT = BUTTON.HEIGHT;
 
 export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private background!: Phaser.GameObjects.Graphics;
@@ -37,7 +31,6 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private planet: PlanetEntity | null = null;
   private isVisible: boolean = false;
   private closeCallback: (() => void) | null = null;
-  private backdrop!: Phaser.GameObjects.Rectangle; // Fullscreen backdrop for click-outside-to-close
 
   // Text elements for updating
   private nameText!: Phaser.GameObjects.Text;
@@ -105,19 +98,127 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Creates a fullscreen backdrop for click-outside-to-close functionality (AC5)
+   * Sets up click-outside-to-close functionality (AC5) using scene-level input.
+   * This approach avoids creating an interactive backdrop that could intercept
+   * button clicks within the panel.
    */
   private createBackdrop(): void {
-    const camera = this.scene.cameras.main;
-    this.backdrop = this.scene.add.rectangle(0, 0, camera.width, camera.height, 0x000000, 0);
-    this.backdrop.setOrigin(0, 0);
-    this.backdrop.setInteractive({ useHandCursor: false });
-    this.backdrop.setScrollFactor(0);
-    this.backdrop.setDepth(999); // Just below panel
-    this.backdrop.setVisible(false);
+    // We'll use a scene-level pointerdown handler instead of a backdrop rectangle
+    // This is set up in show() and cleaned up in hide()
+  }
 
-    // Click on backdrop closes panel (AC5 requirement)
-    this.backdrop.on('pointerdown', () => this.hide());
+  /**
+   * Handles scene-level pointer events for click-outside-to-close and button clicks.
+   * Because the panel uses scrollFactor(0), zones inside nested containers don't receive
+   * input correctly (Phaser converts screen coords to world coords for hit testing).
+   * We handle all input at the scene level using screen coordinates directly.
+   */
+  private onScenePointerDown = (pointer: Phaser.Input.Pointer): void => {
+    if (!this.isVisible) return;
+
+    // Get pointer screen position
+    const screenX = pointer.x;
+    const screenY = pointer.y;
+
+    // Check if click is inside the panel bounds
+    const panelX = this.x;
+    const panelY = this.y;
+    const isInsidePanel = screenX >= panelX &&
+                          screenX <= panelX + PANEL_WIDTH &&
+                          screenY >= panelY &&
+                          screenY <= panelY + PANEL_HEIGHT;
+
+    if (!isInsidePanel) {
+      console.log('CLICK OUTSIDE PANEL - closing');
+      this.hide();
+      return;
+    }
+
+    // Check if click is on a button
+    const clickedButton = this.getClickedButton(screenX, screenY);
+    if (clickedButton) {
+      console.log('BUTTON CLICKED via scene handler:', clickedButton);
+      this.handleButtonClick(clickedButton);
+    }
+  };
+
+  /**
+   * Determines which button (if any) was clicked at the given screen position
+   */
+  private getClickedButton(screenX: number, screenY: number): string | null {
+    const panelX = this.x;
+    const panelY = this.y;
+    const buttonWidth = 115;
+    const buttonHeight = BUTTON_HEIGHT;
+
+    // Button positions relative to panel (content starts at PADDING)
+    const startY = HEADER_HEIGHT + 280 + 25; // Same as in createActionButtons
+    const buttonConfigs = [
+      { label: 'Build', x: 0, y: startY },
+      { label: 'Commission', x: 125, y: startY },
+      { label: 'Platoons', x: 0, y: startY + 42 },
+      { label: 'Spacecraft', x: 125, y: startY + 42 },
+      { label: 'Navigate', x: 0, y: startY + 84 },
+      { label: 'Invade', x: 125, y: startY + 84 },
+    ];
+
+    for (const btn of buttonConfigs) {
+      // Calculate button screen position
+      const btnScreenX = panelX + PADDING + btn.x;
+      const btnScreenY = panelY + PADDING + btn.y;
+
+      // Check if click is within button bounds
+      if (screenX >= btnScreenX && screenX <= btnScreenX + buttonWidth &&
+          screenY >= btnScreenY && screenY <= btnScreenY + buttonHeight) {
+        // Check if button is disabled
+        const buttonContainer = this.actionButtons.find(b => b.getData('label') === btn.label);
+        if (buttonContainer && !buttonContainer.getData('disabled') && buttonContainer.visible) {
+          return btn.label;
+        }
+      }
+    }
+
+    // Check close button (at top-right)
+    const closeX = panelX + PANEL_WIDTH - 25;
+    const closeY = panelY + 15;
+    const closeRadius = 22; // Half of 44px touch target
+    const distToClose = Math.sqrt(Math.pow(screenX - closeX, 2) + Math.pow(screenY - closeY, 2));
+    if (distToClose <= closeRadius) {
+      return 'Close';
+    }
+
+    return null;
+  }
+
+  /**
+   * Handles button click based on button label
+   */
+  private handleButtonClick(buttonLabel: string): void {
+    if (!this.planet) return;
+
+    switch (buttonLabel) {
+      case 'Build':
+        if (this.onBuildClick) this.onBuildClick(this.planet);
+        break;
+      case 'Commission':
+        if (this.onCommissionClick) this.onCommissionClick(this.planet);
+        break;
+      case 'Platoons':
+        if (this.onPlatoonsClick) this.onPlatoonsClick(this.planet);
+        break;
+      case 'Spacecraft':
+        if (this.onSpacecraftClick) this.onSpacecraftClick(this.planet);
+        break;
+      case 'Navigate':
+        if (this.onNavigateClick) this.onNavigateClick(this.planet);
+        break;
+      case 'Invade':
+        if (this.onInvadeClick) this.onInvadeClick(this.planet);
+        break;
+      case 'Close':
+        this.hide();
+        break;
+    }
   }
 
   /**
@@ -133,8 +234,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Background
     this.background = this.scene.add.graphics();
-    this.background.fillStyle(BG_COLOR, 0.95);
-    this.background.fillRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.background.fillStyle(COLORS.PANEL_BG, PANEL.BG_ALPHA);
+    this.background.fillRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL.BORDER_RADIUS);
     this.add(this.background);
 
     // Border (will be colored by owner)
@@ -170,26 +271,26 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private createHeader(): void {
     // Planet name
     this.nameText = this.scene.add.text(0, 0, 'Planet Name', {
-      fontSize: '18px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_HEADER,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(this.nameText);
 
     // Planet type
     this.typeText = this.scene.add.text(0, 26, 'Type: Unknown', {
-      fontSize: '13px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.typeText);
 
     // Owner indicator
     this.ownerText = this.scene.add.text(0, 44, 'Owner: Unknown', {
-      fontSize: '13px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.ownerText);
   }
@@ -199,32 +300,32 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
     this.contentContainer.add(divider);
 
     // Stats header
     const statsLabel = this.scene.add.text(0, startY, 'Stats', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(statsLabel);
 
     // Population
     this.populationText = this.scene.add.text(0, startY + 22, 'Population: 0 / 0', {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.populationText);
 
     // Morale
     this.moraleText = this.scene.add.text(0, startY + 44, 'Morale: 0%', {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.contentContainer.add(this.moraleText);
   }
@@ -234,32 +335,32 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
     this.contentContainer.add(divider);
 
     // Resources header
     const resourcesLabel = this.scene.add.text(0, startY, 'Resources (stockpile)', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(resourcesLabel);
 
-    // Resource types with colors
+    // Resource types with colors (from centralized theme)
     const resources = [
-      { name: 'Credits', color: '#ffd700' },
-      { name: 'Minerals', color: '#c0c0c0' },
-      { name: 'Fuel', color: '#ff6600' },
-      { name: 'Food', color: '#00cc00' },
-      { name: 'Energy', color: '#00ccff' },
+      { name: 'Credits', color: RESOURCE_COLORS.credits },
+      { name: 'Minerals', color: RESOURCE_COLORS.minerals },
+      { name: 'Fuel', color: RESOURCE_COLORS.fuel },
+      { name: 'Food', color: RESOURCE_COLORS.food },
+      { name: 'Energy', color: RESOURCE_COLORS.energy },
     ];
 
     resources.forEach((res, i) => {
       const text = this.scene.add.text(0, startY + 22 + i * 18, `${res.name}: ---`, {
-        fontSize: '12px',
-        fontFamily: 'Arial',
+        fontSize: FONTS.SIZE_SMALL,
+        fontFamily: FONTS.PRIMARY,
         color: res.color,
       });
       this.contentContainer.add(text);
@@ -287,7 +388,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     const headerText = this.scene.add.text(0, 0, 'Tax Rate', {
       fontSize: '14px',
       fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.taxContainer.add(headerText);
@@ -336,7 +437,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.taxRevenueText = this.scene.add.text(0, 58, 'Revenue: 0 credits/turn', {
       fontSize: '11px',
       fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.taxContainer.add(this.taxRevenueText);
 
@@ -402,30 +503,30 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, -5, PANEL_WIDTH - PADDING * 2, -5);
     this.constructionContainer.add(divider);
 
     // Section header
     const headerText = this.scene.add.text(0, 0, 'Construction', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.constructionContainer.add(headerText);
 
     // Building name under construction
     this.constructionText = this.scene.add.text(0, 22, 'Building: None', {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: '#ff9900', // Orange for construction
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.WARNING, // Orange for construction
     });
     this.constructionContainer.add(this.constructionText);
 
     // Progress bar background
     const progressBarBg = this.scene.add.graphics();
-    progressBarBg.fillStyle(0x333333, 1);
+    progressBarBg.fillStyle(COLORS.BUTTON_DISABLED, 1);
     progressBarBg.fillRoundedRect(0, 42, PANEL_WIDTH - PADDING * 2, 16, 4);
     this.constructionContainer.add(progressBarBg);
 
@@ -435,9 +536,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Turns remaining text
     this.constructionTurnsText = this.scene.add.text(0, 62, 'Completes in: 0 turns', {
-      fontSize: '11px',
-      fontFamily: 'Arial',
-      color: LABEL_COLOR,
+      fontSize: FONTS.SIZE_TINY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.SECONDARY,
     });
     this.constructionContainer.add(this.constructionTurnsText);
 
@@ -450,15 +551,15 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Section divider
     const divider = this.scene.add.graphics();
-    divider.lineStyle(1, 0x444444, 1);
+    divider.lineStyle(1, COLORS.DIVIDER, 1);
     divider.lineBetween(0, startY - 5, PANEL_WIDTH - PADDING * 2, startY - 5);
     this.contentContainer.add(divider);
 
     // Actions header
     const actionsLabel = this.scene.add.text(0, startY, 'Actions', {
-      fontSize: '14px',
-      fontFamily: 'Arial',
-      color: TEXT_COLOR,
+      fontSize: FONTS.SIZE_BODY,
+      fontFamily: FONTS.PRIMARY,
+      color: TEXT_COLORS.PRIMARY,
       fontStyle: 'bold',
     });
     this.contentContainer.add(actionsLabel);
@@ -488,15 +589,15 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Button background
     const bg = this.scene.add.graphics();
-    bg.fillStyle(disabled ? 0x333333 : 0x4a4a6a, 1);
-    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+    bg.fillStyle(disabled ? COLORS.BUTTON_DISABLED : COLORS.BUTTON_SECONDARY, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
     buttonContainer.add(bg);
 
     // Button text
     const text = this.scene.add.text(buttonWidth / 2, BUTTON_HEIGHT / 2, label, {
-      fontSize: '12px',
-      fontFamily: 'Arial',
-      color: disabled ? DISABLED_COLOR : TEXT_COLOR,
+      fontSize: FONTS.SIZE_SMALL,
+      fontFamily: FONTS.PRIMARY,
+      color: disabled ? TEXT_COLORS.MUTED : TEXT_COLORS.PRIMARY,
     });
     text.setOrigin(0.5);
     buttonContainer.add(text);
@@ -588,8 +689,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     // Update border color
     const ownerColor = OWNER_COLORS[this.planet.owner] || OWNER_COLORS.Neutral;
     this.borderGraphics.clear();
-    this.borderGraphics.lineStyle(BORDER_WIDTH, ownerColor, 1);
-    this.borderGraphics.strokeRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, 8);
+    this.borderGraphics.lineStyle(PANEL.BORDER_WIDTH, ownerColor, 1);
+    this.borderGraphics.strokeRoundedRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL.BORDER_RADIUS);
 
     // Update stats
     this.populationText.setText(
@@ -862,24 +963,27 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
 
     // Update appearance to enabled state
     bg.clear();
-    bg.fillStyle(0x4a4a6a, 1);
-    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
-    text.setColor(TEXT_COLOR);
+    bg.fillStyle(COLORS.BUTTON_SECONDARY, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
+    text.setColor(TEXT_COLORS.PRIMARY);
 
     // Remove old listeners and add new ones
     zone.removeAllListeners();
     zone.setInteractive({ useHandCursor: true });
 
-    zone.on('pointerdown', onClick);
+    zone.on('pointerdown', () => {
+      console.log('BUTTON CLICKED:', buttonContainer.getData('label'));
+      onClick();
+    });
     zone.on('pointerover', () => {
       bg.clear();
-      bg.fillStyle(0x5a5a7a, 1);
-      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      bg.fillStyle(COLORS.BUTTON_SECONDARY_HOVER, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
     });
     zone.on('pointerout', () => {
       bg.clear();
-      bg.fillStyle(0x4a4a6a, 1);
-      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, 4);
+      bg.fillStyle(COLORS.BUTTON_SECONDARY, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, BUTTON_HEIGHT, BUTTON.BORDER_RADIUS);
     });
 
     buttonContainer.setData('disabled', false);
@@ -909,7 +1013,12 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.closeCallback = onClose || null;
     this.isVisible = true;
     this.setVisible(true);
-    this.backdrop.setVisible(true); // Show backdrop for click-outside-to-close
+
+    // Set up scene-level click-outside-to-close handler
+    // Use a small delay to avoid the current click being detected
+    this.scene.time.delayedCall(50, () => {
+      this.scene.input.on('pointerdown', this.onScenePointerDown);
+    });
 
     // Position on right side of screen
     const camera = this.scene.cameras.main;
@@ -937,7 +1046,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     if (!this.isVisible) {return;}
 
     this.isVisible = false;
-    this.backdrop.setVisible(false); // Hide backdrop
+
+    // Remove scene-level click-outside-to-close handler
+    this.scene.input.off('pointerdown', this.onScenePointerDown);
 
     this.scene.tweens.add({
       targets: this,
@@ -967,11 +1078,10 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   public destroy(): void {
     // Stop any running tweens to prevent memory leaks
     this.scene.tweens.killTweensOf(this);
+    // Remove scene input listener if still attached
+    this.scene.input.off('pointerdown', this.onScenePointerDown);
     this.resourceTexts = [];
     this.actionButtons = [];
-    if (this.backdrop) {
-      this.backdrop.destroy();
-    }
     super.destroy();
   }
 }

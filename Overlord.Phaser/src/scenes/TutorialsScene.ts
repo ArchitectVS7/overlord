@@ -1,30 +1,28 @@
 /**
- * FlashConflictsScene - Entry point for Flash Conflicts tutorials and tactical scenarios
+ * TutorialsScene - Entry point for tutorial scenarios
  *
- * Story 1-1: Flash Conflicts Menu Access (MINIMAL IMPLEMENTATION for Story 1-2)
- * Story 1-2: Scenario Selection Interface (FULL INTEGRATION)
- *
- * This is a minimal scene created to support Story 1-2 integration.
- * Full implementation of FlashConflictsScene will be completed in Story 1-1.
+ * Displays the list of available tutorials for players to learn game mechanics.
+ * This scene is identical in function to FlashConflictsScene but shows only
+ * tutorial-type scenarios.
  */
 
 import Phaser from 'phaser';
 import { ScenarioManager } from '@core/ScenarioManager';
-import { loadTacticalScenarios } from '@core/ScenarioLoader';
+import { loadTutorialScenarios } from '@core/ScenarioLoader';
 import { getCompletionService } from '@core/ScenarioCompletionService';
 import { ScenarioListPanel } from './ui/ScenarioListPanel';
 import { ScenarioDetailPanel } from './ui/ScenarioDetailPanel';
 import { Scenario } from '@core/models/ScenarioModels';
 import { TopMenuBar } from './ui/TopMenuBar';
 
-export class FlashConflictsScene extends Phaser.Scene {
+export class TutorialsScene extends Phaser.Scene {
   private scenarioManager!: ScenarioManager;
   private listPanel!: ScenarioListPanel;
   private detailPanel!: ScenarioDetailPanel;
   private titleText!: Phaser.GameObjects.Text;
 
   constructor() {
-    super({ key: 'FlashConflictsScene' });
+    super({ key: 'TutorialsScene' });
   }
 
   create(): void {
@@ -41,7 +39,7 @@ export class FlashConflictsScene extends Phaser.Scene {
     this.titleText = this.add.text(
       this.cameras.main.centerX,
       TopMenuBar.getHeight() + 20,
-      'Flash Conflicts',
+      'Tutorials',
       {
         fontSize: '48px',
         color: '#00bfff',
@@ -52,13 +50,13 @@ export class FlashConflictsScene extends Phaser.Scene {
     this.titleText.setScrollFactor(0);
 
     // Create scenario list panel
-    this.listPanel = new ScenarioListPanel(this);
+    this.listPanel = new ScenarioListPanel(this, 'Select Tutorial');
     this.listPanel.onScenarioSelected = (scenario: Scenario) => {
       this.showScenarioDetail(scenario);
     };
     this.listPanel.onClose = () => {
-      // Return to main menu (placeholder)
-      console.log('Return to main menu');
+      // Return to main menu
+      this.scene.start('MainMenuScene');
     };
 
     // Create scenario detail panel
@@ -76,17 +74,17 @@ export class FlashConflictsScene extends Phaser.Scene {
   }
 
   /**
-   * Load tactical scenarios from JSON files
+   * Load tutorial scenarios from JSON files
    */
   private async loadScenarios(): Promise<void> {
-    // Load only tactical scenarios (expansion mini-missions)
-    await loadTacticalScenarios(this.scenarioManager);
+    // Load only tutorial scenarios
+    await loadTutorialScenarios(this.scenarioManager);
 
     // Get all scenarios and show list
     const scenarios = this.scenarioManager.getScenarios();
     this.listPanel.setScenarios(scenarios);
 
-    // Load completion data (Story 1-5)
+    // Load completion data
     this.loadCompletionData(scenarios);
 
     this.listPanel.show();
@@ -94,7 +92,6 @@ export class FlashConflictsScene extends Phaser.Scene {
 
   /**
    * Load completion data for scenarios
-   * Story 1-5: Scenario Completion and Results Display
    */
   private loadCompletionData(scenarios: Scenario[]): void {
     const completionService = getCompletionService();
@@ -123,11 +120,11 @@ export class FlashConflictsScene extends Phaser.Scene {
   }
 
   /**
-   * Start a tactical scenario
+   * Start a tutorial scenario
    */
   private startScenario(scenario: Scenario): void {
-    console.log(`Starting scenario: ${scenario.id}`);
-    // Launch the ScenarioGameScene with the selected scenario
+    console.log(`Starting tutorial: ${scenario.id}`);
+    // Launch the ScenarioGameScene with the selected tutorial
     this.scene.start('ScenarioGameScene', { scenario });
   }
 }

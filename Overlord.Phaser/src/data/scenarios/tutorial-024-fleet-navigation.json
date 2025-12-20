@@ -1,0 +1,142 @@
+{
+  "id": "tutorial-024-fleet-navigation",
+  "name": "Charting a Course",
+  "type": "tutorial",
+  "difficulty": "easy",
+  "duration": "3-4 min",
+  "description": "Learn how to navigate your spacecraft between planets. Master the art of fleet movement to expand your empire.",
+  "prerequisites": ["tutorial-005-turn-advancement"],
+
+  "story": {
+    "briefing": "Commander, your Battle Cruiser awaits orders. Spacecraft can travel between planets, allowing you to project power across the galaxy. Today you will learn to navigate your fleet to a new destination.",
+    "objective": "Navigate your Battle Cruiser to another planet in the system.",
+    "victory": "Excellent navigation, Commander! Your Battle Cruiser has arrived at its destination. Remember: navigation costs 10 fuel per jump, and travel is instantaneous. Use this to position your forces strategically."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "move_ship",
+      "count": 1
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 10000,
+      "minerals": 5000,
+      "fuel": 100,
+      "food": 2000,
+      "energy": 1000
+    },
+    "playerCraft": [
+      {
+        "type": "BattleCruiser",
+        "planetId": "planet-1"
+      }
+    ],
+    "neutralPlanets": ["planet-2"],
+    "aiPlanets": [],
+    "aiEnabled": false
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Commander, you have a Battle Cruiser stationed at your home planet. Click on your planet to see its details.",
+      "highlight": "planet",
+      "action": {
+        "type": "click_planet",
+        "target": "planet-1"
+      }
+    },
+    {
+      "step": 2,
+      "text": "See the 'Navigate' button? This opens the Navigation Panel for any spacecraft at this planet. Click it now.",
+      "highlight": "navigate-button",
+      "action": {
+        "type": "click_button",
+        "target": "navigate"
+      }
+    },
+    {
+      "step": 3,
+      "text": "The Navigation Panel shows your spacecraft's current location and available fuel. Fuel is consumed from your planet's stockpile.",
+      "highlight": "fuel-status",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 4,
+      "text": "Each jump costs 10 fuel. Below you see the available destinations. Click on the neutral planet to select it.",
+      "highlight": "destination-list",
+      "action": {
+        "type": "select_destination",
+        "target": "planet-2"
+      }
+    },
+    {
+      "step": 5,
+      "text": "With your destination selected, click 'NAVIGATE' to send your Battle Cruiser on its way!",
+      "highlight": "navigate-button",
+      "action": {
+        "type": "click_button",
+        "target": "confirm-navigate"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 1,
+    "twoStarTurns": 3
+  },
+
+  "clickByClickRecipe": {
+    "title": "Fleet Navigation - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "Select Planet with Spacecraft",
+        "instruction": "Click your home planet where the Battle Cruiser is stationed",
+        "expectedResult": "Planet Info panel opens showing spacecraft section"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Open Navigation Panel",
+        "instruction": "Click the 'Navigate' button in the Planet Info panel",
+        "expectedResult": "Spacecraft Navigation panel opens"
+      },
+      {
+        "stepNumber": 3,
+        "action": "Review Fuel Status",
+        "instruction": "Check the 'Fuel Available' value in the panel",
+        "expectedResult": "Shows current fuel from planet's stockpile"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Select Destination",
+        "instruction": "Click on the neutral planet in the destination list",
+        "expectedResult": "Destination is highlighted, NAVIGATE button activates"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Navigate",
+        "instruction": "Click the 'NAVIGATE' button",
+        "expectedResult": "Spacecraft moves to destination, 10 fuel deducted"
+      }
+    ],
+    "notes": [
+      "Navigation costs 10 fuel per jump",
+      "Travel is instantaneous (no turn delay)",
+      "Fuel is taken from the departure planet",
+      "Cannot navigate if fuel is insufficient",
+      "Battle Cruisers can carry up to 4 platoons"
+    ]
+  }
+}

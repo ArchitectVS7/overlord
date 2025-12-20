@@ -14,25 +14,26 @@
 import Phaser from 'phaser';
 import { Scenario } from '@core/models/ScenarioModels';
 import { ScenarioManager } from '@core/ScenarioManager';
+import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel dimensions and styling
 const PANEL_WIDTH = 500;
-const PANEL_HEIGHT = 600;
+const PANEL_HEIGHT = 520;
 const PADDING = 20;
 const BUTTON_HEIGHT = 40;
 const BUTTON_WIDTH = 180;
 
-// Colors
-const BG_COLOR = 0x1a1a2e;
-const BORDER_COLOR = 0x4488ff;
-const TEXT_COLOR = '#ffffff';
-const LABEL_COLOR = '#aaaaaa';
-const SUCCESS_COLOR = '#44aa44';
-const BUTTON_BG_COLOR = 0x4488ff;
+// Colors - use theme
+const BG_COLOR = THEME_COLORS.PANEL_BG;
+const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
+const TEXT_COLOR = TEXT_COLORS.PRIMARY;
+const LABEL_COLOR = TEXT_COLORS.SECONDARY;
+const SUCCESS_COLOR = TEXT_COLORS.SUCCESS;
+const BUTTON_BG_COLOR = THEME_COLORS.BORDER_PRIMARY;
 const BUTTON_HOVER_COLOR = 0x5599ff;
-const BUTTON_DISABLED_COLOR = 0x333344;
-const STAR_COLOR_FILLED = '#ffcc00';
-const STAR_COLOR_EMPTY = '#444444';
+const BUTTON_DISABLED_COLOR = THEME_COLORS.PANEL_BG_DARK;
+const STAR_COLOR_FILLED = TEXT_COLORS.CREDITS;
+const STAR_COLOR_EMPTY = TEXT_COLORS.MUTED;
 
 interface CompletionDetails {
   bestTimeSeconds: number;
@@ -52,6 +53,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
   // UI elements
   private titleText!: Phaser.GameObjects.Text;
   private descriptionText!: Phaser.GameObjects.Text;
+  private objectiveText!: Phaser.GameObjects.Text;
   private victoryText!: Phaser.GameObjects.Text;
   private prerequisitesText!: Phaser.GameObjects.Text;
   private completionText!: Phaser.GameObjects.Text;
@@ -133,15 +135,24 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.contentContainer.add(closeButton);
 
     // Description
-    this.descriptionText = this.scene.add.text(0, 60, '', {
-      fontSize: '16px',
+    this.descriptionText = this.scene.add.text(0, 50, '', {
+      fontSize: '14px',
       color: TEXT_COLOR,
       wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
     });
     this.contentContainer.add(this.descriptionText);
 
+    // Objective (from story.objective)
+    this.objectiveText = this.scene.add.text(0, 120, '', {
+      fontSize: '16px',
+      color: '#ffcc00',
+      fontStyle: 'bold',
+      wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
+    });
+    this.contentContainer.add(this.objectiveText);
+
     // Victory conditions
-    this.victoryText = this.scene.add.text(0, 160, '', {
+    this.victoryText = this.scene.add.text(0, 180, '', {
       fontSize: '14px',
       color: LABEL_COLOR,
       wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
@@ -149,7 +160,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.contentContainer.add(this.victoryText);
 
     // Prerequisites
-    this.prerequisitesText = this.scene.add.text(0, 260, '', {
+    this.prerequisitesText = this.scene.add.text(0, 280, '', {
       fontSize: '14px',
       color: LABEL_COLOR,
       wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
@@ -157,7 +168,7 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.contentContainer.add(this.prerequisitesText);
 
     // Completion status
-    this.completionText = this.scene.add.text(0, 320, '', {
+    this.completionText = this.scene.add.text(0, 340, '', {
       fontSize: '14px',
       color: SUCCESS_COLOR,
       fontStyle: 'bold',
@@ -165,14 +176,14 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
     this.contentContainer.add(this.completionText);
 
     // Best time (Story 1-6)
-    this.bestTimeText = this.scene.add.text(0, 350, '', {
+    this.bestTimeText = this.scene.add.text(0, 370, '', {
       fontSize: '14px',
       color: LABEL_COLOR,
     });
     this.contentContainer.add(this.bestTimeText);
 
     // Star rating container (Story 1-6)
-    this.starRatingContainer = this.scene.add.container(0, 380);
+    this.starRatingContainer = this.scene.add.container(0, 400);
     this.contentContainer.add(this.starRatingContainer);
 
     // Start button
@@ -251,6 +262,15 @@ export class ScenarioDetailPanel extends Phaser.GameObjects.Container {
 
     // Description
     this.descriptionText.setText(this.scenario.description);
+
+    // Objective (from story.objective if available)
+    const objective = (this.scenario as any).story?.objective;
+    if (objective) {
+      this.objectiveText.setText(`OBJECTIVE: ${objective}`);
+      this.objectiveText.setVisible(true);
+    } else {
+      this.objectiveText.setVisible(false);
+    }
 
     // Victory conditions
     const victoryText = this.formatVictoryConditions();

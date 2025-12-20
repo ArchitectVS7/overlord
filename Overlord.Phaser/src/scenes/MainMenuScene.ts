@@ -72,18 +72,23 @@ export class MainMenuScene extends Phaser.Scene {
       this.showLoadGamePanel();
     });
 
-    // Flash Conflicts button (Story 1-1)
-    this.createMenuButton(centerX, buttonY + buttonSpacing * 2, 'FLASH CONFLICTS', true, () => {
+    // Tutorials button - learn game mechanics
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 2, 'TUTORIALS', true, () => {
+      this.scene.start('TutorialsScene');
+    });
+
+    // Flash Conflicts button - tactical mini-missions
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 3, 'FLASH CONFLICTS', true, () => {
       this.scene.start('FlashConflictsScene');
     });
 
     // Statistics button (Story 10-7)
-    this.createMenuButton(centerX, buttonY + buttonSpacing * 3, 'STATISTICS', true, () => {
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 4, 'STATISTICS', true, () => {
       this.showStatisticsPanel();
     });
 
     // How to Play button
-    this.createMenuButton(centerX, buttonY + buttonSpacing * 4, 'HOW TO PLAY', true, () => {
+    this.createMenuButton(centerX, buttonY + buttonSpacing * 5, 'HOW TO PLAY', true, () => {
       this.scene.start('HowToPlayScene');
     });
 

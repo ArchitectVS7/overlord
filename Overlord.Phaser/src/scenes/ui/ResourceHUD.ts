@@ -3,6 +3,7 @@ import { GameState } from '@core/GameState';
 import { ResourceDelta, ResourceLevel } from '@core/models/ResourceModels';
 import { PhaseProcessor } from '@core/PhaseProcessor';
 import { FactionType } from '@core/models/Enums';
+import { COLORS, TEXT_COLORS, RESOURCE_COLORS, FONTS, HUD, PANEL } from '@config/UITheme';
 
 /**
  * Configuration options for ResourceHUD
@@ -63,18 +64,18 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
   private readonly warningThreshold: number;
   private readonly criticalThreshold: number;
 
-  // Resource colors
-  private static readonly COLORS = {
-    credits: '#ffff00',    // Yellow/Gold
-    minerals: '#888888',   // Gray
-    fuel: '#ff6600',       // Orange
-    food: '#00bfff',       // Electric blue
-    energy: '#00ffff',     // Cyan
-    normal: '#ffffff',     // White (for amounts)
-    warning: '#ffaa00',    // Orange (warning)
-    critical: '#ff0000',   // Red (critical)
-    income: '#88ccff',     // Light blue (positive income)
-    negative: '#ff8888',   // Light red (negative income)
+  // Resource colors (from centralized theme)
+  private static readonly THEME_COLORS = {
+    credits: RESOURCE_COLORS.credits,
+    minerals: RESOURCE_COLORS.minerals,
+    fuel: RESOURCE_COLORS.fuel,
+    food: RESOURCE_COLORS.food,
+    energy: RESOURCE_COLORS.energy,
+    normal: TEXT_COLORS.PRIMARY,
+    warning: TEXT_COLORS.WARNING,
+    critical: TEXT_COLORS.DANGER,
+    income: TEXT_COLORS.INCOME_POSITIVE,
+    negative: TEXT_COLORS.INCOME_NEGATIVE,
   };
 
   constructor(
@@ -93,15 +94,21 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     this.criticalThreshold = config?.criticalThreshold ?? 100;
 
     // Create background panel
-    this.background = scene.add.rectangle(0, 0, 220, 160, 0x000000, 0.8);
-    this.background.setStrokeStyle(2, 0x00bfff);
+    this.background = scene.add.rectangle(
+      0, 0,
+      HUD.RESOURCE_HUD.width,
+      HUD.RESOURCE_HUD.height,
+      COLORS.PANEL_BG,
+      HUD.RESOURCE_HUD.bgAlpha,
+    );
+    this.background.setStrokeStyle(PANEL.BORDER_WIDTH, COLORS.BORDER_PRIMARY);
     this.add(this.background);
 
     // Create header
     const header = scene.add.text(0, -65, 'RESOURCES', {
-      fontSize: '14px',
-      color: '#00bfff',
-      fontFamily: 'monospace',
+      fontSize: FONTS.SIZE_BODY,
+      color: TEXT_COLORS.ACCENT,
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0.5);
     this.add(header);
@@ -136,27 +143,27 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     const incomeX = 85;
 
     // Credits
-    this.createResourceRow('Credits', ResourceHUD.COLORS.credits, startY, labelX, valueX, incomeX);
+    this.createResourceRow('Credits', ResourceHUD.THEME_COLORS.credits, startY, labelX, valueX, incomeX);
     this.creditsText = this.getResourceText('Credits');
     this.creditsIncomeText = this.getIncomeText('Credits');
 
     // Minerals
-    this.createResourceRow('Minerals', ResourceHUD.COLORS.minerals, startY + lineHeight, labelX, valueX, incomeX);
+    this.createResourceRow('Minerals', ResourceHUD.THEME_COLORS.minerals, startY + lineHeight, labelX, valueX, incomeX);
     this.mineralsText = this.getResourceText('Minerals');
     this.mineralsIncomeText = this.getIncomeText('Minerals');
 
     // Fuel
-    this.createResourceRow('Fuel', ResourceHUD.COLORS.fuel, startY + lineHeight * 2, labelX, valueX, incomeX);
+    this.createResourceRow('Fuel', ResourceHUD.THEME_COLORS.fuel, startY + lineHeight * 2, labelX, valueX, incomeX);
     this.fuelText = this.getResourceText('Fuel');
     this.fuelIncomeText = this.getIncomeText('Fuel');
 
     // Food
-    this.createResourceRow('Food', ResourceHUD.COLORS.food, startY + lineHeight * 3, labelX, valueX, incomeX);
+    this.createResourceRow('Food', ResourceHUD.THEME_COLORS.food, startY + lineHeight * 3, labelX, valueX, incomeX);
     this.foodText = this.getResourceText('Food');
     this.foodIncomeText = this.getIncomeText('Food');
 
     // Energy
-    this.createResourceRow('Energy', ResourceHUD.COLORS.energy, startY + lineHeight * 4, labelX, valueX, incomeX);
+    this.createResourceRow('Energy', ResourceHUD.THEME_COLORS.energy, startY + lineHeight * 4, labelX, valueX, incomeX);
     this.energyText = this.getResourceText('Energy');
     this.energyIncomeText = this.getIncomeText('Energy');
   }
@@ -174,26 +181,26 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
   ): void {
     // Label
     const label = this.scene.add.text(labelX, y, name, {
-      fontSize: '12px',
+      fontSize: FONTS.SIZE_SMALL,
       color: color,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
     }).setOrigin(0, 0.5);
     this.add(label);
 
     // Value
     const value = this.scene.add.text(valueX, y, '0', {
-      fontSize: '12px',
-      color: ResourceHUD.COLORS.normal,
-      fontFamily: 'monospace',
+      fontSize: FONTS.SIZE_SMALL,
+      color: ResourceHUD.THEME_COLORS.normal,
+      fontFamily: FONTS.PRIMARY,
     }).setOrigin(1, 0.5);
     value.setName(`resource_${name}`);
     this.add(value);
 
     // Income
     const income = this.scene.add.text(incomeX, y, '+0', {
-      fontSize: '11px',
-      color: ResourceHUD.COLORS.income,
-      fontFamily: 'monospace',
+      fontSize: FONTS.SIZE_TINY,
+      color: ResourceHUD.THEME_COLORS.income,
+      fontFamily: FONTS.PRIMARY,
     }).setOrigin(1, 0.5);
     income.setName(`income_${name}`);
     this.add(income);
@@ -272,13 +279,13 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
       this.scene.cameras.main.height - 80,
       summaryText,
       {
-        fontSize: '16px',
-        color: ResourceHUD.COLORS.income,
-        fontFamily: 'monospace',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: { x: 15, y: 8 },
+        fontSize: FONTS.SIZE_BODY,
+        color: ResourceHUD.THEME_COLORS.income,
+        fontFamily: FONTS.PRIMARY,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        padding: { x: 16, y: 8 },
       },
-    ).setOrigin(0.5).setDepth(1000);
+    ).setOrigin(0.5).setDepth(PANEL.DEPTH_NOTIFICATION);
 
     // Fade out after 3 seconds
     this.scene.tweens.add({
@@ -371,7 +378,7 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
     // Format income
     const incomeStr = income >= 0 ? `+${this.formatNumber(income)}` : this.formatNumber(income);
     incomeText.setText(incomeStr);
-    incomeText.setStyle({ color: income >= 0 ? ResourceHUD.COLORS.income : ResourceHUD.COLORS.negative });
+    incomeText.setStyle({ color: income >= 0 ? ResourceHUD.THEME_COLORS.income : ResourceHUD.THEME_COLORS.negative });
   }
 
   /**
@@ -394,12 +401,12 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
 
     // Create change text
     const changeStr = change > 0 ? `+${this.formatNumber(change)}` : this.formatNumber(change);
-    const color = change > 0 ? ResourceHUD.COLORS.income : ResourceHUD.COLORS.negative;
+    const color = change > 0 ? ResourceHUD.THEME_COLORS.income : ResourceHUD.THEME_COLORS.negative;
 
     const changeText = this.scene.add.text(targetText.x + 15, targetText.y, changeStr, {
-      fontSize: '11px',
+      fontSize: FONTS.SIZE_TINY,
       color: color,
-      fontFamily: 'monospace',
+      fontFamily: FONTS.PRIMARY,
       fontStyle: 'bold',
     }).setOrigin(0, 0.5);
     this.add(changeText);
@@ -437,11 +444,11 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
   private getLevelColor(level: ResourceLevel): string {
     switch (level) {
       case ResourceLevel.Critical:
-        return ResourceHUD.COLORS.critical;
+        return ResourceHUD.THEME_COLORS.critical;
       case ResourceLevel.Warning:
-        return ResourceHUD.COLORS.warning;
+        return ResourceHUD.THEME_COLORS.warning;
       default:
-        return ResourceHUD.COLORS.normal;
+        return ResourceHUD.THEME_COLORS.normal;
     }
   }
 
@@ -471,13 +478,13 @@ export class ResourceHUD extends Phaser.GameObjects.Container {
       this.scene.cameras.main.height / 2 + 50,
       `${resourceName}: ${message}`,
       {
-        fontSize: '20px',
-        color: ResourceHUD.COLORS.warning,
-        fontFamily: 'monospace',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: { x: 15, y: 8 },
+        fontSize: FONTS.SIZE_HEADER,
+        color: ResourceHUD.THEME_COLORS.warning,
+        fontFamily: FONTS.PRIMARY,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        padding: { x: 16, y: 8 },
       },
-    ).setOrigin(0.5).setDepth(1000);
+    ).setOrigin(0.5).setDepth(PANEL.DEPTH_NOTIFICATION);
 
     // Fade out after 2 seconds
     this.scene.tweens.add({
