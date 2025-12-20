@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { GameState } from '@core/GameState';
 import { BuildingSystem } from '@core/BuildingSystem';
-import { BuildingType } from '@core/models/Enums';
-import { BuildingCosts } from '@core/models/BuildingModels';
+import { BuildingType, BuildingStatus } from '@core/models/Enums';
+import { BuildingCosts, Structure } from '@core/models/BuildingModels';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { COLORS, TEXT_COLORS, FONTS } from '@config/UITheme';
 
@@ -44,6 +44,7 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
 
   // Callbacks
   public onBuildingSelected?: (buildingType: BuildingType, planetId: number) => void;
+  public onBuildingScrap?: (buildingType: BuildingType, planetId: number) => void;
   public onClose?: () => void;
 
   // Panel dimensions for hit testing
@@ -52,6 +53,9 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
 
   // Custom visibility flag for scene-level input handling
   private isMenuVisible: boolean = false;
+
+  // Existing buildings display
+  private existingBuildingsContainer: Phaser.GameObjects.Container[] = [];
 
   // Available buildings for construction (mapped from AC requirements to existing types)
   private static readonly BUILDINGS: BuildingInfo[] = [
@@ -129,13 +133,18 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   private createUI(): void {
     const { width, height } = this.scene.cameras.main;
     const panelWidth = 400;
-    const panelHeight = 450;
+    const panelHeight = 550; // Increased for existing buildings section
     const panelX = width / 2;
     const panelY = height / 2;
 
     // Fullscreen backdrop (visual dimming only - click handling via scene-level input)
     this.backdrop = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.5);
     this.add(this.backdrop);
+
+    // Hit blocker - prevents clicks from reaching the backdrop behind the panel
+    const hitBlocker = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, 0x000000, 0);
+    hitBlocker.setInteractive(); // Interactive but no handler - just blocks backdrop clicks
+    this.add(hitBlocker);
 
     // Main panel
     this.panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, BuildingMenuPanel.THEME.panelBg, 0.95);
@@ -236,6 +245,49 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     }
 
     this.isMenuVisible = true;
+
+    // Clear existing buildings containers
+    for (const container of this.existingBuildingsContainer) {
+      container.destroy();
+    }
+    this.existingBuildingsContainer = [];
+
+    // Show existing buildings with scrap option
+    const completedBuildings = planet.structures.filter(
+      s => s.status === BuildingStatus.Active,
+    );
+
+    if (completedBuildings.length > 0) {
+      // Section header
+      const existingLabel = this.scene.add.text(
+        panelX,
+        panelY + 200,
+        'EXISTING BUILDINGS (Click SCRAP for 50% refund)',
+        {
+          fontSize: '12px',
+          color: BuildingMenuPanel.THEME.title,
+          fontFamily: 'monospace',
+          fontStyle: 'bold',
+        },
+      ).setOrigin(0.5);
+      this.add(existingLabel);
+      this.existingBuildingsContainer.push(existingLabel as unknown as Phaser.GameObjects.Container);
+
+      // Create scrap buttons for each completed building
+      completedBuildings.forEach((building, index) => {
+        const buildingY = panelY + 225 + index * 35;
+        const buildingContainer = this.createExistingBuildingEntry(
+          panelX,
+          buildingY,
+          buttonWidth,
+          building,
+          planet,
+        );
+        this.existingBuildingsContainer.push(buildingContainer);
+        this.add(buildingContainer);
+      });
+    }
+
     this.setVisible(true);
 
     // Create fullscreen zone for click-outside-to-close
@@ -361,6 +413,104 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     }
 
     return container;
+  }
+
+  /**
+   * Creates an entry for an existing building with a scrap button.
+   */
+  private createExistingBuildingEntry(
+    x: number,
+    y: number,
+    width: number,
+    building: Structure,
+    planet: PlanetEntity,
+  ): Phaser.GameObjects.Container {
+    const container = this.scene.add.container(x, y);
+    const entryHeight = 30;
+
+    // Background
+    const bg = this.scene.add.rectangle(0, 0, width, entryHeight, 0x2a2a4e, 0.9);
+    bg.setStrokeStyle(1, 0x444466);
+    container.add(bg);
+
+    // Building name
+    const nameText = this.scene.add.text(-width / 2 + 15, 0, this.getBuildingName(building.type), {
+      fontSize: '12px',
+      color: BuildingMenuPanel.THEME.available,
+      fontFamily: 'monospace',
+    }).setOrigin(0, 0.5);
+    container.add(nameText);
+
+    // Calculate refund (50% of original cost)
+    const originalCost = BuildingCosts.getCost(building.type);
+    const refund = Math.floor(originalCost.credits / 2);
+
+    // Refund text
+    const refundText = this.scene.add.text(width / 2 - 100, 0, `+${refund.toLocaleString()} Cr`, {
+      fontSize: '10px',
+      color: '#00cc00',
+      fontFamily: 'monospace',
+    }).setOrigin(1, 0.5);
+    container.add(refundText);
+
+    // Scrap button
+    const scrapBtnWidth = 60;
+    const scrapBtnX = width / 2 - 45;
+    const scrapBg = this.scene.add.rectangle(scrapBtnX, 0, scrapBtnWidth, 22, 0xcc4444);
+    scrapBg.setStrokeStyle(1, 0xff6666);
+    container.add(scrapBg);
+
+    const scrapText = this.scene.add.text(scrapBtnX, 0, 'SCRAP', {
+      fontSize: '10px',
+      color: '#ffffff',
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    container.add(scrapText);
+
+    // Make scrap button interactive
+    scrapBg.setInteractive({ useHandCursor: true });
+    scrapBg.on('pointerover', () => {
+      scrapBg.setFillStyle(0xff5555);
+    });
+    scrapBg.on('pointerout', () => {
+      scrapBg.setFillStyle(0xcc4444);
+    });
+    scrapBg.on('pointerdown', () => {
+      this.scrapBuilding(building.type, planet, refund);
+    });
+
+    return container;
+  }
+
+  /**
+   * Handles scrapping a building.
+   */
+  private scrapBuilding(buildingType: BuildingType, planet: PlanetEntity, refund: number): void {
+    // Remove building from planet
+    const buildingIndex = planet.structures.findIndex(
+      s => s.type === buildingType && s.status === BuildingStatus.Active,
+    );
+
+    if (buildingIndex === -1) {
+      this.showError('Building not found');
+      return;
+    }
+
+    // Remove the building
+    planet.structures.splice(buildingIndex, 1);
+
+    // Refund credits to player faction
+    this.gameState.playerFaction.resources.credits += refund;
+
+    // Show notification
+    this.showNotification(`${this.getBuildingName(buildingType)} scrapped. Refund: ${refund.toLocaleString()} Cr`);
+
+    // Fire callback
+    this.onBuildingScrap?.(buildingType, planet.id);
+
+    // Refresh the panel
+    this.hide();
   }
 
   /**
