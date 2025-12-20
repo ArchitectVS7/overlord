@@ -20,10 +20,13 @@ import { TutorialManager } from '@core/TutorialManager';
 import { TutorialActionDetector } from '@core/TutorialActionDetector';
 import { StarRatingSystem, ScenarioResults, StarTargets } from '@core/StarRatingSystem';
 import { getCompletionService } from '@core/ScenarioCompletionService';
+import { PlanetEntity } from '@core/models/PlanetEntity';
 import { ObjectivesPanel } from './ui/ObjectivesPanel';
 import { TutorialHighlight } from './ui/TutorialHighlight';
 import { TutorialStepPanel } from './ui/TutorialStepPanel';
 import { ScenarioResultsPanel } from './ui/ScenarioResultsPanel';
+import { PlanetInfoPanel } from './ui/PlanetInfoPanel';
+import { PlanetRenderer } from './renderers/PlanetRenderer';
 
 /**
  * Data passed to this scene
@@ -57,6 +60,13 @@ export class ScenarioGameScene extends Phaser.Scene {
 
   // Error display
   private errorText?: Phaser.GameObjects.Text;
+
+  // Planet rendering
+  private planetRenderer!: PlanetRenderer;
+  private planetInfoPanel!: PlanetInfoPanel;
+  private planetContainers: Map<string, Phaser.GameObjects.Container> = new Map();
+  private selectedPlanetId: string | null = null;
+  private selectionGraphics!: Phaser.GameObjects.Graphics;
 
   constructor() {
     super({ key: 'ScenarioGameScene' });
@@ -140,6 +150,12 @@ export class ScenarioGameScene extends Phaser.Scene {
     // Create basic HUD
     this.createHUD();
 
+    // Render planets from game state
+    this.renderPlanets();
+
+    // Create Planet Info Panel
+    this.createPlanetInfoPanel();
+
     // Set up periodic victory/defeat condition checking (every 500ms to ensure <1s detection)
     this.conditionCheckTimer = this.time.addEvent({
       delay: 500,
@@ -152,42 +168,51 @@ export class ScenarioGameScene extends Phaser.Scene {
   /**
    * Initialize tutorial system if scenario has tutorial steps
    * Story 1-4: Tutorial Step Guidance System
+   * Note: Only creates components here. Actual tutorial start is deferred until
+   * objectives panel is dismissed (see startTutorial())
    */
   private initializeTutorialSystem(): void {
-    // Create tutorial components
+    // Create tutorial components (but don't start yet)
     this.tutorialManager = new TutorialManager();
     this.tutorialActionDetector = new TutorialActionDetector();
     this.tutorialHighlight = new TutorialHighlight(this);
     this.tutorialStepPanel = new TutorialStepPanel(this);
 
-    // Initialize tutorial if scenario has steps
-    if (!this.scenario) {return;}
+    // Wire up tutorial events (will be used when tutorial starts)
+    this.tutorialManager.onStepStarted = (step) => {
+      this.onTutorialStepStarted(step);
+    };
 
+    this.tutorialManager.onStepCompleted = () => {
+      this.onTutorialStepCompleted();
+    };
+
+    this.tutorialManager.onTutorialComplete = () => {
+      this.onTutorialComplete();
+    };
+
+    // Wire up action detector
+    this.tutorialActionDetector.onActionCompleted = () => {
+      this.tutorialManager.completeCurrentStep();
+    };
+
+    // Wire up skip button
+    this.tutorialStepPanel.onSkip = () => {
+      this.tutorialManager.skip();
+    };
+  }
+
+  /**
+   * Start the tutorial after objectives panel is dismissed
+   */
+  private startTutorial(): void {
+    if (!this.scenario) return;
+
+    // Initialize and start the tutorial
     const hasTutorial = this.tutorialManager.initialize(this.scenario);
 
     if (hasTutorial) {
-      // Wire up tutorial events
-      this.tutorialManager.onStepStarted = (step) => {
-        this.onTutorialStepStarted(step);
-      };
-
-      this.tutorialManager.onStepCompleted = () => {
-        this.onTutorialStepCompleted();
-      };
-
-      this.tutorialManager.onTutorialComplete = () => {
-        this.onTutorialComplete();
-      };
-
-      // Wire up action detector
-      this.tutorialActionDetector.onActionCompleted = () => {
-        this.tutorialManager.completeCurrentStep();
-      };
-
-      // Wire up skip button
-      this.tutorialStepPanel.onSkip = () => {
-        this.tutorialManager.skip();
-      };
+      console.log('Tutorial started with', this.tutorialManager.getStepCount(), 'steps');
     }
   }
 
@@ -318,8 +343,19 @@ export class ScenarioGameScene extends Phaser.Scene {
       );
     }
 
-    // Return to Flash Conflicts menu
-    this.scene.start('FlashConflictsScene');
+    // Return to appropriate menu based on scenario type
+    this.returnToMenu();
+  }
+
+  /**
+   * Return to the appropriate menu scene based on scenario type
+   */
+  private returnToMenu(): void {
+    if (this.scenario?.type === 'tutorial') {
+      this.scene.start('TutorialsScene');
+    } else {
+      this.scene.start('FlashConflictsScene');
+    }
   }
 
   /**
@@ -335,7 +371,7 @@ export class ScenarioGameScene extends Phaser.Scene {
    */
   private handleExit(): void {
     // Return to menu without recording completion
-    this.scene.start('FlashConflictsScene');
+    this.returnToMenu();
   }
 
   /**
@@ -484,6 +520,9 @@ export class ScenarioGameScene extends Phaser.Scene {
   private onObjectivesContinue(): void {
     // Objectives dismissed, gameplay begins
     console.log('Gameplay starting...');
+
+    // Start the tutorial now that objectives are dismissed
+    this.startTutorial();
   }
 
   /**
@@ -530,15 +569,121 @@ export class ScenarioGameScene extends Phaser.Scene {
     returnButton.setOrigin(0.5);
     returnButton.setInteractive({ useHandCursor: true });
     returnButton.on('pointerdown', () => {
-      this.scene.start('FlashConflictsScene');
+      this.returnToMenu();
     });
 
     // Auto-return after delay
     this.time.delayedCall(3000, () => {
       if (this.scene.isActive()) {
-        this.scene.start('FlashConflictsScene');
+        this.returnToMenu();
       }
     });
+  }
+
+  // ==================== Planet Rendering ====================
+
+  /**
+   * Render all planets from game state
+   */
+  private renderPlanets(): void {
+    if (!this.gameState) return;
+
+    // Create planet renderer
+    this.planetRenderer = new PlanetRenderer(this);
+
+    // Create selection graphics
+    this.selectionGraphics = this.add.graphics();
+    this.selectionGraphics.setDepth(50);
+
+    // Render each planet
+    for (const planet of this.gameState.planets) {
+      this.renderPlanet(planet);
+    }
+  }
+
+  /**
+   * Render a single planet
+   */
+  private renderPlanet(planet: PlanetEntity): void {
+    // Use PlanetRenderer to create the visual
+    const container = this.planetRenderer.renderPlanet(planet);
+    container.setDepth(10);
+
+    // Store reference
+    const planetIdStr = String(planet.id);
+    this.planetContainers.set(planetIdStr, container);
+
+    // Get hit area size
+    const hitSize = this.planetRenderer.getHitAreaSize(planet.type);
+
+    // Create interactive zone
+    const zone = this.add.zone(planet.position.x, planet.position.z, hitSize, hitSize);
+    zone.setInteractive({ useHandCursor: true });
+    zone.setData('planetId', planet.id);
+
+    // Handle click
+    zone.on('pointerdown', () => {
+      this.selectPlanet(planetIdStr);
+    });
+  }
+
+  /**
+   * Select a planet and show its info panel
+   */
+  private selectPlanet(planetId: string): void {
+    this.selectedPlanetId = planetId;
+    this.updateSelectionVisuals();
+
+    const planetIdNum = parseInt(planetId, 10);
+    const planet = this.gameState?.planets.find(p => p.id === planetIdNum);
+
+    if (planet) {
+      console.log(`Selected planet: ${planet.name}`);
+
+      // Show planet info panel with close callback
+      this.planetInfoPanel.setPlanet(planet);
+      this.planetInfoPanel.show(() => this.onPlanetInfoPanelClose());
+
+      // Track UI interaction for victory conditions
+      this.victorySystem.markUIInteractionComplete('planet_info_panel_opened');
+
+      // Report action to tutorial system
+      if (this.tutorialActionDetector) {
+        this.tutorialActionDetector.reportPlanetSelection(planet.name);
+      }
+    }
+  }
+
+  /**
+   * Update selection visuals
+   */
+  private updateSelectionVisuals(): void {
+    this.selectionGraphics.clear();
+
+    if (this.selectedPlanetId) {
+      const container = this.planetContainers.get(this.selectedPlanetId);
+      if (container) {
+        // Draw cyan selection ring
+        this.selectionGraphics.lineStyle(3, 0x00ffff, 1);
+        this.selectionGraphics.strokeCircle(container.x, container.y, 35);
+      }
+    }
+  }
+
+  /**
+   * Create and configure PlanetInfoPanel
+   */
+  private createPlanetInfoPanel(): void {
+    // PlanetInfoPanel with optional BuildingSystem (undefined for tutorials)
+    this.planetInfoPanel = new PlanetInfoPanel(this, undefined);
+  }
+
+  /**
+   * Called when planet info panel closes
+   */
+  private onPlanetInfoPanelClose(): void {
+    this.selectedPlanetId = null;
+    this.updateSelectionVisuals();
   }
 
   /**

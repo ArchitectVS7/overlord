@@ -62,6 +62,16 @@ export class VictoryConditionSystem {
         return this.evaluateResourceTarget(condition, gameState);
       case 'destroy_all_ships':
         return this.evaluateDestroyAllShips(condition, gameState);
+      case 'ui_interaction':
+        return this.evaluateUIInteraction(condition, gameState);
+      case 'turn_reached':
+        return this.evaluateTurnReached(condition, gameState);
+      case 'commission_platoon':
+        return this.evaluateCommissionPlatoon(condition, gameState);
+      case 'move_ship':
+        return this.evaluateMoveShip(condition, gameState);
+      case 'deploy_atmosphere_processor':
+        return this.evaluateDeployAtmosphereProcessor(condition, gameState);
       default:
         return {
           condition,
@@ -324,6 +334,156 @@ export class VictoryConditionSystem {
       description: allCaptured
         ? 'All planets captured!'
         : `Capture all planets (${playerPlanets}/${totalPlanets})`,
+    };
+  }
+
+  // ==================== Tutorial-specific conditions ====================
+
+  /**
+   * UI interaction tracking state
+   * Tracks which UI interactions have been completed during the scenario
+   */
+  private completedUIInteractions: Set<string> = new Set();
+
+  /**
+   * Mark a UI interaction as completed
+   * Called by UI components when the player performs the required action
+   */
+  public markUIInteractionComplete(target: string): void {
+    this.completedUIInteractions.add(target);
+  }
+
+  /**
+   * Check if a UI interaction has been completed
+   */
+  public isUIInteractionComplete(target: string): boolean {
+    return this.completedUIInteractions.has(target);
+  }
+
+  /**
+   * Reset UI interaction tracking (for new scenario)
+   */
+  public resetUIInteractions(): void {
+    this.completedUIInteractions.clear();
+  }
+
+  /**
+   * Evaluate ui_interaction condition
+   * Victory when specific UI action is performed (e.g., opening a panel)
+   */
+  private evaluateUIInteraction(
+    condition: VictoryCondition,
+    _gameState: GameState,
+  ): ConditionResult {
+    const target = condition.target as string ?? 'unknown';
+    const met = this.completedUIInteractions.has(target);
+
+    // Format target for display (convert snake_case to readable)
+    const displayTarget = target.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    return {
+      condition,
+      met,
+      progress: met ? 1 : 0,
+      description: met
+        ? `${displayTarget} ✓`
+        : displayTarget,
+    };
+  }
+
+  /**
+   * Evaluate turn_reached condition
+   * Victory when player reaches a specific turn
+   */
+  private evaluateTurnReached(
+    condition: VictoryCondition,
+    gameState: GameState,
+  ): ConditionResult {
+    const targetTurn = typeof condition.target === 'number' ? condition.target : 3;
+    const currentTurn = gameState.currentTurn;
+    const met = currentTurn >= targetTurn;
+    const progress = Math.min(1, currentTurn / targetTurn);
+
+    return {
+      condition,
+      met,
+      progress,
+      description: met
+        ? `Reached turn ${targetTurn}!`
+        : `Reach turn ${targetTurn} (currently turn ${currentTurn})`,
+    };
+  }
+
+  /**
+   * Evaluate commission_platoon condition
+   * Victory when player commissions N platoons
+   */
+  private evaluateCommissionPlatoon(
+    condition: VictoryCondition,
+    gameState: GameState,
+  ): ConditionResult {
+    const requiredCount = condition.count ?? 1;
+
+    // Count player platoons on player-owned planets or in player craft
+    const playerPlanetIds = new Set(gameState.playerFaction.ownedPlanetIDs);
+    const platoonCount = gameState.platoons.filter(p =>
+      playerPlanetIds.has(p.planetID) || p.planetID === -1, // on player planet or embarked
+    ).length;
+
+    const met = platoonCount >= requiredCount;
+    const progress = Math.min(1, platoonCount / requiredCount);
+
+    return {
+      condition,
+      met,
+      progress,
+      description: met
+        ? `Commissioned ${requiredCount} platoon(s)!`
+        : `Commission ${requiredCount} platoon(s) (${platoonCount}/${requiredCount})`,
+    };
+  }
+
+  /**
+   * Evaluate move_ship condition
+   * Victory when player moves a ship to another planet
+   */
+  private evaluateMoveShip(
+    condition: VictoryCondition,
+    _gameState: GameState,
+  ): ConditionResult {
+    const requiredCount = condition.count ?? 1;
+    // Track ship movements via UI interaction system
+    const movesMade = this.completedUIInteractions.has('ship_moved') ? 1 : 0;
+    const met = movesMade >= requiredCount;
+
+    return {
+      condition,
+      met,
+      progress: met ? 1 : 0,
+      description: met
+        ? `Moved ${requiredCount} ship(s)!`
+        : `Move ${requiredCount} ship(s) to another planet`,
+    };
+  }
+
+  /**
+   * Evaluate deploy_atmosphere_processor condition
+   * Victory when player deploys an atmosphere processor
+   */
+  private evaluateDeployAtmosphereProcessor(
+    condition: VictoryCondition,
+    _gameState: GameState,
+  ): ConditionResult {
+    // Track via UI interaction system
+    const deployed = this.completedUIInteractions.has('atmosphere_processor_deployed');
+
+    return {
+      condition,
+      met: deployed,
+      progress: deployed ? 1 : 0,
+      description: deployed
+        ? 'Atmosphere Processor deployed!'
+        : 'Deploy an Atmosphere Processor on a neutral planet',
     };
   }
 }
