@@ -85,6 +85,14 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   public create(): void {
+    // Ensure previous menu scenes are stopped to prevent UI overlap
+    const scenesToStop = ['MainMenuScene', 'CampaignConfigScene', 'AuthScene'];
+    scenesToStop.forEach(sceneKey => {
+      if (this.scene.isActive(sceneKey) || this.scene.isVisible(sceneKey)) {
+        this.scene.stop(sceneKey);
+      }
+    });
+
     // Try to get campaign-initialized state from registry (set by CampaignConfigScene)
     const registryGameState = this.registry.get('gameState') as GameState | undefined;
     const registryGalaxy = this.registry.get('galaxy') as Galaxy | undefined;

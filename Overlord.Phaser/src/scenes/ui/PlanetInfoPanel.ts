@@ -30,7 +30,6 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   private planet: PlanetEntity | null = null;
   private isVisible: boolean = false;
   private closeCallback: (() => void) | null = null;
-  private backdrop!: Phaser.GameObjects.Rectangle; // Fullscreen backdrop for click-outside-to-close
 
   // Text elements for updating
   private nameText!: Phaser.GameObjects.Text;
@@ -76,22 +75,127 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Creates a fullscreen backdrop for click-outside-to-close functionality (AC5)
+   * Sets up click-outside-to-close functionality (AC5) using scene-level input.
+   * This approach avoids creating an interactive backdrop that could intercept
+   * button clicks within the panel.
    */
   private createBackdrop(): void {
-    const camera = this.scene.cameras.main;
-    this.backdrop = this.scene.add.rectangle(0, 0, camera.width, camera.height, 0x000000, 0);
-    this.backdrop.setOrigin(0, 0);
-    this.backdrop.setInteractive({ useHandCursor: false });
-    this.backdrop.setScrollFactor(0);
-    this.backdrop.setDepth(999); // Just below panel
-    this.backdrop.setVisible(false);
+    // We'll use a scene-level pointerdown handler instead of a backdrop rectangle
+    // This is set up in show() and cleaned up in hide()
+  }
 
-    // Click on backdrop closes panel (AC5 requirement)
-    this.backdrop.on('pointerdown', () => {
-      console.log('BACKDROP CLICKED - closing panel');
+  /**
+   * Handles scene-level pointer events for click-outside-to-close and button clicks.
+   * Because the panel uses scrollFactor(0), zones inside nested containers don't receive
+   * input correctly (Phaser converts screen coords to world coords for hit testing).
+   * We handle all input at the scene level using screen coordinates directly.
+   */
+  private onScenePointerDown = (pointer: Phaser.Input.Pointer): void => {
+    if (!this.isVisible) return;
+
+    // Get pointer screen position
+    const screenX = pointer.x;
+    const screenY = pointer.y;
+
+    // Check if click is inside the panel bounds
+    const panelX = this.x;
+    const panelY = this.y;
+    const isInsidePanel = screenX >= panelX &&
+                          screenX <= panelX + PANEL_WIDTH &&
+                          screenY >= panelY &&
+                          screenY <= panelY + PANEL_HEIGHT;
+
+    if (!isInsidePanel) {
+      console.log('CLICK OUTSIDE PANEL - closing');
       this.hide();
-    });
+      return;
+    }
+
+    // Check if click is on a button
+    const clickedButton = this.getClickedButton(screenX, screenY);
+    if (clickedButton) {
+      console.log('BUTTON CLICKED via scene handler:', clickedButton);
+      this.handleButtonClick(clickedButton);
+    }
+  };
+
+  /**
+   * Determines which button (if any) was clicked at the given screen position
+   */
+  private getClickedButton(screenX: number, screenY: number): string | null {
+    const panelX = this.x;
+    const panelY = this.y;
+    const buttonWidth = 115;
+    const buttonHeight = BUTTON_HEIGHT;
+
+    // Button positions relative to panel (content starts at PADDING)
+    const startY = HEADER_HEIGHT + 280 + 25; // Same as in createActionButtons
+    const buttonConfigs = [
+      { label: 'Build', x: 0, y: startY },
+      { label: 'Commission', x: 125, y: startY },
+      { label: 'Platoons', x: 0, y: startY + 42 },
+      { label: 'Spacecraft', x: 125, y: startY + 42 },
+      { label: 'Navigate', x: 0, y: startY + 84 },
+      { label: 'Invade', x: 125, y: startY + 84 },
+    ];
+
+    for (const btn of buttonConfigs) {
+      // Calculate button screen position
+      const btnScreenX = panelX + PADDING + btn.x;
+      const btnScreenY = panelY + PADDING + btn.y;
+
+      // Check if click is within button bounds
+      if (screenX >= btnScreenX && screenX <= btnScreenX + buttonWidth &&
+          screenY >= btnScreenY && screenY <= btnScreenY + buttonHeight) {
+        // Check if button is disabled
+        const buttonContainer = this.actionButtons.find(b => b.getData('label') === btn.label);
+        if (buttonContainer && !buttonContainer.getData('disabled') && buttonContainer.visible) {
+          return btn.label;
+        }
+      }
+    }
+
+    // Check close button (at top-right)
+    const closeX = panelX + PANEL_WIDTH - 25;
+    const closeY = panelY + 15;
+    const closeRadius = 22; // Half of 44px touch target
+    const distToClose = Math.sqrt(Math.pow(screenX - closeX, 2) + Math.pow(screenY - closeY, 2));
+    if (distToClose <= closeRadius) {
+      return 'Close';
+    }
+
+    return null;
+  }
+
+  /**
+   * Handles button click based on button label
+   */
+  private handleButtonClick(buttonLabel: string): void {
+    if (!this.planet) return;
+
+    switch (buttonLabel) {
+      case 'Build':
+        if (this.onBuildClick) this.onBuildClick(this.planet);
+        break;
+      case 'Commission':
+        if (this.onCommissionClick) this.onCommissionClick(this.planet);
+        break;
+      case 'Platoons':
+        if (this.onPlatoonsClick) this.onPlatoonsClick(this.planet);
+        break;
+      case 'Spacecraft':
+        if (this.onSpacecraftClick) this.onSpacecraftClick(this.planet);
+        break;
+      case 'Navigate':
+        if (this.onNavigateClick) this.onNavigateClick(this.planet);
+        break;
+      case 'Invade':
+        if (this.onInvadeClick) this.onInvadeClick(this.planet);
+        break;
+      case 'Close':
+        this.hide();
+        break;
+    }
   }
 
   /**
@@ -674,7 +778,12 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.closeCallback = onClose || null;
     this.isVisible = true;
     this.setVisible(true);
-    this.backdrop.setVisible(true); // Show backdrop for click-outside-to-close
+
+    // Set up scene-level click-outside-to-close handler
+    // Use a small delay to avoid the current click being detected
+    this.scene.time.delayedCall(50, () => {
+      this.scene.input.on('pointerdown', this.onScenePointerDown);
+    });
 
     // Position on right side of screen
     const camera = this.scene.cameras.main;
@@ -702,7 +811,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     if (!this.isVisible) {return;}
 
     this.isVisible = false;
-    this.backdrop.setVisible(false); // Hide backdrop
+
+    // Remove scene-level click-outside-to-close handler
+    this.scene.input.off('pointerdown', this.onScenePointerDown);
 
     this.scene.tweens.add({
       targets: this,
@@ -732,11 +843,10 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   public destroy(): void {
     // Stop any running tweens to prevent memory leaks
     this.scene.tweens.killTweensOf(this);
+    // Remove scene input listener if still attached
+    this.scene.input.off('pointerdown', this.onScenePointerDown);
     this.resourceTexts = [];
     this.actionButtons = [];
-    if (this.backdrop) {
-      this.backdrop.destroy();
-    }
     super.destroy();
   }
 }
