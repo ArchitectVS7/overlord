@@ -141,3 +141,42 @@ The repository contains legacy C# projects (no longer actively developed):
 - **Build command:** `npm run build` (runs from `Overlord.Phaser/`)
 - **Output directory:** `Overlord.Phaser/dist/`
 - **Environment variables:** Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel dashboard
+
+---
+
+## Lessons Learned
+
+> **Instructions for Claude**: Continuously record lessons learned during development. When you encounter a non-obvious bug, discover a pattern, or solve a tricky problem, add it here. Keep entries atomic (one concept per entry) and concise for eventual export to other projects. Format: Problem → Root Cause → Solution → Files affected.
+
+### Phaser 3
+
+#### P001: scrollFactor(0) breaks input hit detection
+- **Problem**: UI containers/objects with `scrollFactor(0)` don't receive correct pointer events when camera is scrolled
+- **Root Cause**: Phaser converts screen coordinates to world coordinates for hit testing, but `scrollFactor(0)` objects render at fixed screen positions. When camera scrolls, the hit area is in the wrong world position.
+- **Solution**: For interactive elements in `scrollFactor(0)` containers, either:
+  1. Handle input at scene level using screen coordinates directly, OR
+  2. Create interactive zones in WORLD coordinates at camera position (e.g., `scrollX + width/2`)
+- **Files**: `BuildingMenuPanel.ts`, `PlanetInfoPanel.ts`
+
+#### P002: Click-outside handlers catch the opening click
+- **Problem**: Registering a "click outside to close" handler immediately when opening a panel catches the same click that opened it
+- **Root Cause**: The pointerdown event that triggers panel.show() continues propagating and is caught by the newly registered handler
+- **Solution**: Use `scene.time.delayedCall(50, ...)` before registering click-outside handlers
+- **Files**: `BuildingMenuPanel.ts:244`, `PlanetInfoPanel.ts:785`
+
+#### P003: Zone positioning for click-outside detection
+- **Problem**: Fullscreen zones for click-outside detection don't work when added to `scrollFactor(0)` containers
+- **Solution**: Add the zone directly to the scene (not the container) and position it at camera's world center: `scene.add.zone(scrollX + width/2, scrollY + height/2, width, height)`. Set depth just below the panel.
+- **Files**: `BuildingMenuPanel.ts:505-542`
+
+### TypeScript
+
+*(Add entries as discovered)*
+
+### Testing / Playwright
+
+*(Add entries as discovered)*
+
+### Supabase / Backend
+
+*(Add entries as discovered)*

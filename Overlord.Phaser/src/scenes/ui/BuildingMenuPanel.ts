@@ -34,6 +34,10 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   // UI elements
   private backdrop!: Phaser.GameObjects.Rectangle;
   private panel!: Phaser.GameObjects.Rectangle;
+
+  // Fullscreen zone for click-outside detection (added to scene, not container)
+  private clickOutsideZone: Phaser.GameObjects.Zone | null = null;
+
   private titleText!: Phaser.GameObjects.Text;
   private closeButton!: Phaser.GameObjects.Text;
   private buildingButtons: Phaser.GameObjects.Container[] = [];
@@ -41,6 +45,13 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
   // Callbacks
   public onBuildingSelected?: (buildingType: BuildingType, planetId: number) => void;
   public onClose?: () => void;
+
+  // Panel dimensions for hit testing
+  private static readonly PANEL_WIDTH = 400;
+  private static readonly PANEL_HEIGHT = 450;
+
+  // Custom visibility flag for scene-level input handling
+  private isMenuVisible: boolean = false;
 
   // Available buildings for construction (mapped from AC requirements to existing types)
   private static readonly BUILDINGS: BuildingInfo[] = [
@@ -122,10 +133,8 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
     const panelX = width / 2;
     const panelY = height / 2;
 
-    // Fullscreen backdrop for click-outside-to-close
+    // Fullscreen backdrop (visual dimming only - click handling via scene-level input)
     this.backdrop = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.5);
-    this.backdrop.setInteractive();
-    this.backdrop.on('pointerdown', () => this.hide());
     this.add(this.backdrop);
 
     // Main panel
@@ -226,7 +235,15 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
       this.buildingButtons.push(constructionMsg as unknown as Phaser.GameObjects.Container);
     }
 
+    this.isMenuVisible = true;
     this.setVisible(true);
+
+    // Create fullscreen zone for click-outside-to-close
+    // This zone is added directly to the scene (not the container) to avoid scrollFactor issues
+    this.destroyClickOutsideZone(); // Clean up any existing
+    this.scene.time.delayedCall(50, () => {
+      this.createClickOutsideZone();
+    });
 
     // Show animation (100ms per NFR-P3)
     this.setAlpha(0);
@@ -443,6 +460,12 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
    * Hides the building menu.
    */
   public hide(): void {
+    if (!this.isMenuVisible) return;
+    this.isMenuVisible = false;
+
+    // Remove click-outside zone
+    this.destroyClickOutsideZone();
+
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
@@ -459,17 +482,73 @@ export class BuildingMenuPanel extends Phaser.GameObjects.Container {
    * Checks if the menu is visible.
    */
   public isOpen(): boolean {
-    return this.visible;
+    return this.isMenuVisible;
   }
 
   /**
    * Clean up resources.
    */
   public destroy(): void {
+    this.destroyClickOutsideZone();
     for (const btn of this.buildingButtons) {
       btn.destroy();
     }
     this.buildingButtons = [];
     super.destroy();
+  }
+
+  /**
+   * Creates a fullscreen zone for click-outside-to-close detection.
+   * This zone is added directly to the scene (not this container) and positioned
+   * at the camera's world position to work correctly with Phaser's input system.
+   */
+  private createClickOutsideZone(): void {
+    if (this.clickOutsideZone) return;
+
+    const camera = this.scene.cameras.main;
+    const { width, height, scrollX, scrollY } = camera;
+
+    // Create zone in WORLD coordinates at camera center
+    // This ensures proper hit testing since Phaser converts screen coords to world coords
+    const worldCenterX = scrollX + width / 2;
+    const worldCenterY = scrollY + height / 2;
+
+    this.clickOutsideZone = this.scene.add.zone(worldCenterX, worldCenterY, width, height);
+    this.clickOutsideZone.setDepth(1099); // Just below BuildingMenuPanel (1100)
+    this.clickOutsideZone.setInteractive();
+
+    this.clickOutsideZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (!this.isMenuVisible) return;
+
+      // Use screen coordinates for panel bounds check (panel is fixed to screen)
+      const screenX = pointer.x;
+      const screenY = pointer.y;
+
+      // Panel is centered on screen
+      const panelX = width / 2;
+      const panelY = height / 2;
+      const halfWidth = BuildingMenuPanel.PANEL_WIDTH / 2;
+      const halfHeight = BuildingMenuPanel.PANEL_HEIGHT / 2;
+
+      const isInsidePanel =
+        screenX >= panelX - halfWidth &&
+        screenX <= panelX + halfWidth &&
+        screenY >= panelY - halfHeight &&
+        screenY <= panelY + halfHeight;
+
+      if (!isInsidePanel) {
+        this.hide();
+      }
+    });
+  }
+
+  /**
+   * Destroys the click-outside zone.
+   */
+  private destroyClickOutsideZone(): void {
+    if (this.clickOutsideZone) {
+      this.clickOutsideZone.destroy();
+      this.clickOutsideZone = null;
+    }
   }
 }
