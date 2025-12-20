@@ -1,0 +1,166 @@
+{
+  "id": "tutorial-025-colonization",
+  "name": "Claiming New Worlds",
+  "type": "tutorial",
+  "difficulty": "medium",
+  "duration": "5-7 min",
+  "description": "Learn how to colonize neutral planets using Atmosphere Processors. Expand your empire's borders.",
+  "prerequisites": ["tutorial-024-fleet-navigation"],
+
+  "story": {
+    "briefing": "Commander, expansion is the key to victory. Neutral planets await colonization. Atmosphere Processors can terraform hostile worlds, making them habitable for your people. This process takes 10 turns to complete.",
+    "objective": "Purchase an Atmosphere Processor, navigate it to a neutral planet, and deploy it to begin terraforming.",
+    "victory": "Excellent work, Commander! Terraforming has begun. The Atmosphere Processor will work for 10 turns to make this world habitable. Once complete, the planet will join your empire with full production capabilities."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "deploy_atmosphere_processor",
+      "count": 1
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 500000,
+      "minerals": 50000,
+      "fuel": 100,
+      "food": 20000,
+      "energy": 10000
+    },
+    "neutralPlanets": ["planet-2"],
+    "aiPlanets": [],
+    "aiEnabled": false
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Commander, to claim a neutral planet, you need an Atmosphere Processor. First, click on your home planet to open the Planet Info panel.",
+      "highlight": "planet",
+      "action": {
+        "type": "click_planet",
+        "target": "planet-1"
+      }
+    },
+    {
+      "step": 2,
+      "text": "Click the 'Spacecraft' button to open the Spacecraft Purchase panel. Here you can buy various types of craft.",
+      "highlight": "spacecraft-button",
+      "action": {
+        "type": "click_button",
+        "target": "spacecraft"
+      }
+    },
+    {
+      "step": 3,
+      "text": "Find the 'Atmosphere Processor' card. It shows the cost and terraforming duration (10 turns). Click 'BUY' to purchase one.",
+      "highlight": "atmosphere-processor-card",
+      "action": {
+        "type": "click_button",
+        "target": "buy-atmosphere-processor"
+      }
+    },
+    {
+      "step": 4,
+      "text": "Your Atmosphere Processor is now stationed at your planet. Open the Navigation panel to send it to the neutral planet.",
+      "highlight": "navigate-button",
+      "action": {
+        "type": "click_button",
+        "target": "navigate"
+      }
+    },
+    {
+      "step": 5,
+      "text": "Select the neutral planet as your destination, then click 'NAVIGATE' to send the Atmosphere Processor.",
+      "highlight": "destination-list",
+      "action": {
+        "type": "navigate_to",
+        "target": "planet-2"
+      }
+    },
+    {
+      "step": 6,
+      "text": "Your Atmosphere Processor has arrived! Click on the neutral planet to view it.",
+      "highlight": "planet-2",
+      "action": {
+        "type": "click_planet",
+        "target": "planet-2"
+      }
+    },
+    {
+      "step": 7,
+      "text": "With your Atmosphere Processor in orbit, you can deploy it to begin terraforming. Click 'Deploy' to start the 10-turn process.",
+      "highlight": "deploy-button",
+      "action": {
+        "type": "click_button",
+        "target": "deploy"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 3,
+    "twoStarTurns": 5
+  },
+
+  "clickByClickRecipe": {
+    "title": "Colonization - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "Open Planet Info",
+        "instruction": "Click your home planet to open the Planet Info panel",
+        "expectedResult": "Planet Info panel opens"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Open Spacecraft Panel",
+        "instruction": "Click the 'Spacecraft' button in the Planet Info panel",
+        "expectedResult": "Spacecraft Purchase panel opens showing available craft"
+      },
+      {
+        "stepNumber": 3,
+        "action": "Purchase Atmosphere Processor",
+        "instruction": "Find the Atmosphere Processor card and click 'BUY'",
+        "expectedResult": "Atmosphere Processor is purchased and appears at planet"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Open Navigation",
+        "instruction": "Click 'Navigate' to open the navigation panel for the new craft",
+        "expectedResult": "Spacecraft Navigation panel opens"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Navigate to Neutral Planet",
+        "instruction": "Select the neutral planet and click 'NAVIGATE'",
+        "expectedResult": "Atmosphere Processor moves to neutral planet"
+      },
+      {
+        "stepNumber": 6,
+        "action": "View Neutral Planet",
+        "instruction": "Click the neutral planet where your Atmosphere Processor arrived",
+        "expectedResult": "Planet Info shows your craft in orbit"
+      },
+      {
+        "stepNumber": 7,
+        "action": "Deploy Atmosphere Processor",
+        "instruction": "Click 'Deploy' to begin terraforming",
+        "expectedResult": "Terraforming begins (10 turn countdown)"
+      }
+    ],
+    "notes": [
+      "Atmosphere Processors cost 200,000 credits + 20,000 minerals",
+      "Terraforming takes 10 turns to complete",
+      "Once complete, the planet becomes fully colonized",
+      "Only neutral planets can be terraformed",
+      "Already-colonized planets cannot be terraformed"
+    ]
+  }
+}

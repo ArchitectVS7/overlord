@@ -1,0 +1,167 @@
+{
+  "id": "tutorial-019-commissioning-platoons",
+  "name": "Raising Your Army",
+  "type": "tutorial",
+  "difficulty": "easy",
+  "duration": "3-4 min",
+  "description": "Learn how to commission military platoons to defend your empire and conquer new worlds.",
+  "prerequisites": ["tutorial-005-turn-advancement"],
+
+  "story": {
+    "briefing": "Commander, an empire without soldiers is an empire waiting to fall. Your planets can provide troops, and with the right equipment, they become a formidable fighting force. Today you will commission your first platoon.",
+    "objective": "Commission one platoon with 100 troops, Standard equipment, and Rifle weapons.",
+    "victory": "Excellent work, Commander! Your first platoon stands ready. Remember: troop count affects size, equipment affects survivability, and weapons affect damage. Balance these to build the army you need."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "commission_platoon",
+      "count": 1
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 50000,
+      "minerals": 5000,
+      "fuel": 3000,
+      "food": 2000,
+      "energy": 1000
+    },
+    "aiPlanets": [],
+    "aiEnabled": false,
+    "planetPopulation": {
+      "planet-1": 50000
+    }
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Commander, it's time to raise your first military unit. Click on your home planet to open the Planet Info panel.",
+      "highlight": "planet",
+      "action": {
+        "type": "click_planet",
+        "target": "planet-1"
+      }
+    },
+    {
+      "step": 2,
+      "text": "See the 'Commission' button? This opens the Platoon Commission panel where you configure your new unit. Click it now.",
+      "highlight": "commission-button",
+      "action": {
+        "type": "click_button",
+        "target": "commission"
+      }
+    },
+    {
+      "step": 3,
+      "text": "The Platoon Commission panel shows your configuration options. First, set the troop count - this determines your platoon's size. Click '100' to set 100 troops.",
+      "highlight": "troop-count-selector",
+      "action": {
+        "type": "select_option",
+        "target": "troop-count-100"
+      }
+    },
+    {
+      "step": 4,
+      "text": "Equipment level affects your soldiers' armor and survival rate. Basic is cheap, Advanced is expensive but durable. Click 'Standard' for balanced protection.",
+      "highlight": "equipment-selector",
+      "action": {
+        "type": "select_option",
+        "target": "equipment-standard"
+      }
+    },
+    {
+      "step": 5,
+      "text": "Weapon level determines damage output. Pistols are weak, Plasma is devastating. Click 'Rifle' for good all-around firepower.",
+      "highlight": "weapon-selector",
+      "action": {
+        "type": "select_option",
+        "target": "weapon-rifle"
+      }
+    },
+    {
+      "step": 6,
+      "text": "Review the Total Cost and Estimated Strength. Your configuration costs credits from this planet's treasury. The strength preview shows combat effectiveness.",
+      "highlight": "cost-preview",
+      "action": {
+        "type": "click_button",
+        "target": "acknowledge"
+      }
+    },
+    {
+      "step": 7,
+      "text": "Everything looks good! Click 'COMMISSION PLATOON' to create your unit. The troops will be recruited from this planet's population.",
+      "highlight": "commission-button",
+      "action": {
+        "type": "click_button",
+        "target": "confirm-commission"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 1,
+    "twoStarTurns": 3
+  },
+
+  "clickByClickRecipe": {
+    "title": "Platoon Commissioning - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "Select Planet",
+        "instruction": "Click your home planet to open the Planet Info panel",
+        "expectedResult": "Planet Info panel opens showing planet details"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Open Commission Panel",
+        "instruction": "Click the 'Commission' button in the Planet Info panel",
+        "expectedResult": "Platoon Commission panel opens"
+      },
+      {
+        "stepNumber": 3,
+        "action": "Set Troop Count",
+        "instruction": "Click the '100' button to set 100 troops",
+        "expectedResult": "Troop count shows '100 troops'"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Select Equipment",
+        "instruction": "Click the 'Standard' equipment button",
+        "expectedResult": "Standard equipment is highlighted"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Select Weapon",
+        "instruction": "Click the 'Rifle' weapon button",
+        "expectedResult": "Rifle weapon is highlighted"
+      },
+      {
+        "stepNumber": 6,
+        "action": "Review Configuration",
+        "instruction": "Check the Total Cost and Estimated Strength values",
+        "expectedResult": "Cost shows credits, strength shows combat value"
+      },
+      {
+        "stepNumber": 7,
+        "action": "Commission Platoon",
+        "instruction": "Click the 'COMMISSION PLATOON' button",
+        "expectedResult": "Platoon is created, panel closes, population reduced"
+      }
+    ],
+    "notes": [
+      "Troops are recruited from the planet's population",
+      "Each planet can have up to 24 platoons",
+      "Equipment: Basic (cheap) < Standard < Advanced (expensive)",
+      "Weapons: Pistol < Rifle < Assault Rifle < Plasma"
+    ]
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "id": "tutorial-030-ground-invasion",
+  "name": "The Art of Conquest",
+  "type": "tutorial",
+  "difficulty": "medium",
+  "duration": "5-7 min",
+  "description": "Learn how to invade enemy planets with your ground forces. Master the art of planetary conquest.",
+  "prerequisites": ["tutorial-019-commissioning-platoons", "tutorial-024-fleet-navigation"],
+
+  "story": {
+    "briefing": "Commander, the time has come to expand by force. Enemy planets can be conquered through planetary invasion. Your platoons, embarked on Battle Cruisers, can assault enemy worlds. Choose your aggression level wisely - higher aggression means faster victory but more casualties.",
+    "objective": "Navigate your Battle Cruiser with platoons to an enemy planet and launch a ground invasion.",
+    "victory": "Victory, Commander! The planet is now under your control. Your troops fought bravely, and the enemy has been subdued. Remember: aggression affects casualties. Balanced strategies preserve your forces for future battles."
+  },
+
+  "victoryConditions": [
+    {
+      "type": "capture_planet",
+      "count": 1
+    }
+  ],
+
+  "defeatConditions": [],
+
+  "specialRules": [],
+
+  "initialState": {
+    "playerPlanets": ["planet-1"],
+    "playerResources": {
+      "credits": 100000,
+      "minerals": 50000,
+      "fuel": 100,
+      "food": 20000,
+      "energy": 10000
+    },
+    "playerCraft": [
+      {
+        "type": "BattleCruiser",
+        "planetId": "planet-1",
+        "embarkedPlatoons": 2
+      }
+    ],
+    "playerPlatoons": [
+      {
+        "troopCount": 100,
+        "equipment": "Standard",
+        "weapon": "Rifle",
+        "embarkedOnCraft": true
+      },
+      {
+        "troopCount": 100,
+        "equipment": "Standard",
+        "weapon": "Rifle",
+        "embarkedOnCraft": true
+      }
+    ],
+    "aiPlanets": ["planet-3"],
+    "aiDefenders": {
+      "planet-3": {
+        "population": 10000,
+        "platoons": 1
+      }
+    },
+    "neutralPlanets": ["planet-2"],
+    "aiEnabled": false
+  },
+
+  "tutorialSteps": [
+    {
+      "step": 1,
+      "text": "Commander, your Battle Cruiser has 2 platoons embarked and ready for combat. First, click on your home planet to see your fleet.",
+      "highlight": "planet",
+      "action": {
+        "type": "click_planet",
+        "target": "planet-1"
+      }
+    },
+    {
+      "step": 2,
+      "text": "Click 'Navigate' to open the navigation panel. We need to position your Battle Cruiser at the enemy planet.",
+      "highlight": "navigate-button",
+      "action": {
+        "type": "click_button",
+        "target": "navigate"
+      }
+    },
+    {
+      "step": 3,
+      "text": "Select the enemy planet (shown in red) as your destination, then click 'NAVIGATE'.",
+      "highlight": "destination-list",
+      "action": {
+        "type": "navigate_to",
+        "target": "planet-3"
+      }
+    },
+    {
+      "step": 4,
+      "text": "Your Battle Cruiser is now in orbit around the enemy planet. Click on the enemy planet to view invasion options.",
+      "highlight": "planet-3",
+      "action": {
+        "type": "click_planet",
+        "target": "planet-3"
+      }
+    },
+    {
+      "step": 5,
+      "text": "With your Battle Cruiser in orbit, the 'Invade' button is now available. Click it to open the Invasion Panel.",
+      "highlight": "invade-button",
+      "action": {
+        "type": "click_button",
+        "target": "invade"
+      }
+    },
+    {
+      "step": 6,
+      "text": "The Invasion Panel shows your force strength, target information, and the aggression slider. Higher aggression means faster conquest but more casualties. Adjust the slider to 'Balanced' (50%).",
+      "highlight": "aggression-slider",
+      "action": {
+        "type": "set_aggression",
+        "target": 50
+      }
+    },
+    {
+      "step": 7,
+      "text": "Everything is ready. Click 'LAUNCH INVASION' to begin the assault! Your platoons will land and engage the enemy.",
+      "highlight": "invade-button",
+      "action": {
+        "type": "click_button",
+        "target": "confirm-invade"
+      }
+    }
+  ],
+
+  "starTargets": {
+    "threeStarTurns": 2,
+    "twoStarTurns": 4
+  },
+
+  "clickByClickRecipe": {
+    "title": "Ground Invasion - Step by Step",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "action": "View Your Fleet",
+        "instruction": "Click your home planet to see your Battle Cruiser with embarked platoons",
+        "expectedResult": "Planet Info shows Battle Cruiser with 2 platoons"
+      },
+      {
+        "stepNumber": 2,
+        "action": "Open Navigation",
+        "instruction": "Click 'Navigate' to open the Spacecraft Navigation panel",
+        "expectedResult": "Navigation panel opens"
+      },
+      {
+        "stepNumber": 3,
+        "action": "Navigate to Enemy Planet",
+        "instruction": "Select the enemy planet and click 'NAVIGATE'",
+        "expectedResult": "Battle Cruiser moves to enemy planet"
+      },
+      {
+        "stepNumber": 4,
+        "action": "Select Enemy Planet",
+        "instruction": "Click the enemy planet to view it",
+        "expectedResult": "Planet Info shows enemy planet details"
+      },
+      {
+        "stepNumber": 5,
+        "action": "Open Invasion Panel",
+        "instruction": "Click the 'Invade' button",
+        "expectedResult": "Invasion Panel opens showing force and target info"
+      },
+      {
+        "stepNumber": 6,
+        "action": "Set Aggression",
+        "instruction": "Drag the aggression slider to 'Balanced' (50%)",
+        "expectedResult": "Aggression shows 'Balanced (50%)'"
+      },
+      {
+        "stepNumber": 7,
+        "action": "Launch Invasion",
+        "instruction": "Click 'LAUNCH INVASION'",
+        "expectedResult": "Battle resolves, planet ownership changes"
+      }
+    ],
+    "notes": [
+      "Platoons must be embarked on Battle Cruisers",
+      "Each Battle Cruiser can carry up to 4 platoons",
+      "Aggression: 0% = Minimal casualties, slow progress",
+      "Aggression: 100% = Maximum casualties, fast victory",
+      "Balanced (50%) is recommended for most situations"
+    ]
+  }
+}

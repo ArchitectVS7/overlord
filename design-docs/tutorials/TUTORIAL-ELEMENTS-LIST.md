@@ -23,9 +23,9 @@ This document identifies all discrete game mechanics that require dedicated tuto
 |----|---------|-------------|---------------|--------|
 | T01 | Main Menu Navigation | Understand menu options and navigation | Button clicks, navigation flow | Pending |
 | T02 | Galaxy Map Orientation | Read the galaxy map, identify planets, understand HUD | Planet colors, connections, resource bar | Pending |
-| **T03** | **Planet Selection** | **Click planets and view the info panel** | **Clicking, panel open/close** | **In Progress** |
+| **T03** | **Planet Selection** | **Click planets and view the info panel** | **Clicking, panel open/close** | **✅ Complete** |
 | T04 | Understanding Resources | Learn the 5 resource types and their purposes | Credits, Minerals, Fuel, Food, Energy | Pending |
-| T05 | Turn Advancement | End turn with SPACE, watch income phase execute | Turn cycle, automatic phases | Pending |
+| **T05** | **Turn Advancement** | **End turn with SPACE, watch income phase execute** | **Turn cycle, automatic phases** | **✅ Complete** |
 
 ---
 
@@ -33,7 +33,7 @@ This document identifies all discrete game mechanics that require dedicated tuto
 
 | ID | Element | Description | Key Mechanics | Status |
 |----|---------|-------------|---------------|--------|
-| **T06** | **Building Your First Structure** | **Complete build process from menu to confirmation** | **Build menu, costs, build times, confirmation** | **In Progress** |
+| **T06** | **Building Your First Structure** | **Complete build process from menu to confirmation** | **Build menu, costs, build times, confirmation** | **✅ Complete** |
 | T07 | Food Production | Build Horticultural Station, prevent starvation | Food consumption, population needs | Pending |
 | T08 | Mining Production | Build Mining Station, understand Mineral/Fuel output | Resource production, planet bonuses | Pending |
 | T09 | Tax Rate Management | Adjust taxes, understand morale tradeoffs | Slider control, morale effects | Pending |
@@ -60,7 +60,7 @@ This document identifies all discrete game mechanics that require dedicated tuto
 
 | ID | Element | Description | Key Mechanics | Status |
 |----|---------|-------------|---------------|--------|
-| T19 | Commissioning a Platoon | Create ground military unit | Troop count, equipment, weapons, training | Pending |
+| **T19** | **Commissioning a Platoon** | **Create ground military unit** | **Troop count, equipment, weapons, training** | **✅ Complete** |
 | T20 | Platoon Training | Wait for training (0%→100%), understand timing | 10-turn training, combat strength | Pending |
 | T21 | Equipment & Weapons Selection | Choose equipment tier and weapon type | Multipliers, cost/benefit | Pending |
 | T22 | Embarking Platoons | Load trained platoons onto Battle Cruiser | Transport capacity, embark/disembark | Pending |
@@ -72,8 +72,8 @@ This document identifies all discrete game mechanics that require dedicated tuto
 
 | ID | Element | Description | Key Mechanics | Status |
 |----|---------|-------------|---------------|--------|
-| T24 | Fleet Navigation | Send spacecraft to another planet | Destination selection, travel time, fuel | Pending |
-| T25 | Colonizing a Neutral Planet | Use Atmosphere Processor to claim new world | Colonization process, neutral targeting | Pending |
+| **T24** | **Fleet Navigation** | **Send spacecraft to another planet** | **Destination selection, travel time, fuel** | **✅ Complete** |
+| **T25** | **Colonizing a Neutral Planet** | **Use Atmosphere Processor to claim new world** | **Colonization process, neutral targeting** | **✅ Complete** |
 | T26 | Resource Transport | Load/unload cargo with Cargo Cruisers | Loading interface, transfer mechanics | Pending |
 | T27 | Multi-Planet Management | Manage economy across 2+ planets | Switching focus, supply lines | Pending |
 
@@ -85,7 +85,7 @@ This document identifies all discrete game mechanics that require dedicated tuto
 |----|---------|-------------|---------------|--------|
 | T28 | Space Combat Basics | Watch fleet vs fleet battle resolve | Attack/defense calculation, casualties | Pending |
 | T29 | Orbital Defense Combat | Fight against defended planet | Defense bonus, tougher battle | Pending |
-| T30 | Ground Invasion | Disembark platoons, capture enemy planet | Ground combat, resource capture | Pending |
+| **T30** | **Ground Invasion** | **Disembark platoons, capture enemy planet** | **Ground combat, resource capture** | **✅ Complete** |
 | T31 | Defending Against Invasion | Garrison platoons, repel enemy attack | Defense preparation, garrison strength | Pending |
 | T32 | Combat Strength Calculation | Understand what makes units powerful | Troops × Equipment × Weapons × Training | Pending |
 
@@ -119,15 +119,15 @@ This document identifies all discrete game mechanics that require dedicated tuto
 
 For iterative validation, tutorials should be built in this order:
 
-| Priority | Tutorial ID | Element | Rationale |
-|----------|-------------|---------|-----------|
-| 1 | T03 | Planet Selection | Simplest interaction, validates click mechanics |
-| 2 | T06 | Building a Structure | Core gameplay loop, tests build menu flow |
-| 3 | T05 | Turn Advancement | Validates turn cycle works |
-| 4 | T24 | Fleet Navigation | Tests spacecraft movement UI |
-| 5 | T25 | Colonizing a Planet | End-to-end expansion flow |
-| 6 | T19 | Commissioning Platoons | Military UI validation |
-| 7 | T30 | Ground Invasion | Combat system validation |
+| Priority | Tutorial ID | Element | Rationale | Status |
+|----------|-------------|---------|-----------|--------|
+| 1 | T03 | Planet Selection | Simplest interaction, validates click mechanics | ✅ Complete |
+| 2 | T06 | Building a Structure | Core gameplay loop, tests build menu flow | ✅ Complete |
+| 3 | T05 | Turn Advancement | Validates turn cycle works | ✅ Complete |
+| 4 | T24 | Fleet Navigation | Tests spacecraft movement UI | ✅ Complete |
+| 5 | T25 | Colonizing a Planet | End-to-end expansion flow | ✅ Complete |
+| 6 | T19 | Commissioning Platoons | Military UI validation | ✅ Complete |
+| 7 | T30 | Ground Invasion | Combat system validation | ✅ Complete |
 
 ---
 
@@ -157,6 +157,21 @@ Each tutorial element undergoes three-phase validation:
 | Phase | Tutorials Complete | E2E Tests Passing | Notes |
 |-------|-------------------|-------------------|-------|
 | Initial | 0/42 | 0/42 | Starting with T03, T06 |
+| Phase 1 | 7/42 | 33/33 | Priority tutorials complete (T03, T05, T06, T19, T24, T25, T30) |
+
+### Completed Tutorials (as of 2025-12-20)
+
+| ID | Name | Tests | E2E File |
+|----|------|-------|----------|
+| T03 | Planet Selection | 4 | `tutorial-003-planet-selection.spec.ts` |
+| T05 | Turn Advancement | 5 | `tutorial-005-turn-advancement.spec.ts` |
+| T06 | Building a Structure | 5 | `tutorial-006-building-structure.spec.ts` |
+| T19 | Commissioning Platoons | 5 | `tutorial-019-commissioning-platoons.spec.ts` |
+| T24 | Fleet Navigation | 5 | `tutorial-024-fleet-navigation.spec.ts` |
+| T25 | Colonization | 4 | `tutorial-025-colonization.spec.ts` |
+| T30 | Ground Invasion | 5 | `tutorial-030-ground-invasion.spec.ts` |
+
+**Total E2E Tests:** 33 passing
 
 ---
 

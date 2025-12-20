@@ -122,3 +122,192 @@ export async function isEditModeActive(page: Page): Promise<boolean> {
     return scene?.adminUIEditor?.isEditModeActive?.() === true;
   });
 }
+
+/**
+ * Wait for the game to reach Action Phase (when player can interact)
+ */
+export async function waitForActionPhase(page: Page, timeout = 30000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              gameState?: {
+                currentPhase?: string;
+              };
+            } | null;
+          };
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('GalaxyMapScene');
+      // TurnPhase is a string enum: 'Income' | 'Action' | 'Combat' | 'End'
+      return scene?.gameState?.currentPhase === 'Action';
+    },
+    { timeout }
+  );
+}
+
+/**
+ * Get player planet screen position and click on it
+ */
+export async function clickPlayerPlanet(page: Page): Promise<{ x: number; y: number } | null> {
+  // Get player planet position from game state
+  const planetScreenPos = await page.evaluate(() => {
+    const game = (window as unknown as {
+      game?: {
+        scene?: {
+          getScene?: (name: string) => {
+            galaxy?: {
+              planets?: Array<{
+                id: number;
+                owner: string;
+                position: { x: number; z: number };
+              }>;
+            };
+            cameras?: { main?: { scrollX: number; scrollY: number } };
+          } | null;
+        };
+      };
+    }).game;
+    const scene = game?.scene?.getScene?.('GalaxyMapScene');
+    const planets = scene?.galaxy?.planets;
+    if (!planets || planets.length === 0) return null;
+
+    // Find player planet (owner = 'Player' or check by faction)
+    const playerPlanet = planets.find((p) => p.owner === 'Player') || planets[0];
+    if (!playerPlanet) return null;
+
+    const scrollX = scene?.cameras?.main?.scrollX || 0;
+    const scrollY = scene?.cameras?.main?.scrollY || 0;
+
+    return {
+      x: playerPlanet.position.x - scrollX,
+      y: playerPlanet.position.z - scrollY,
+    };
+  });
+
+  if (planetScreenPos) {
+    await clickCanvasAt(page, planetScreenPos.x, planetScreenPos.y);
+    return planetScreenPos;
+  }
+  return null;
+}
+
+/**
+ * Wait for PlanetInfoPanel to be visible
+ */
+export async function waitForPlanetInfoPanel(page: Page, timeout = 5000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              planetInfoPanel?: { getIsVisible?: () => boolean };
+            } | null;
+          };
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('GalaxyMapScene');
+      return scene?.planetInfoPanel?.getIsVisible?.() === true;
+    },
+    { timeout }
+  );
+}
+
+/**
+ * Click on Commission button in PlanetInfoPanel
+ */
+export async function clickCommissionButton(page: Page): Promise<void> {
+  // Trigger the commission click callback programmatically
+  await page.evaluate(() => {
+    const game = (window as unknown as {
+      game?: {
+        scene?: {
+          getScene?: (name: string) => {
+            planetInfoPanel?: {
+              planet?: unknown;
+              onCommissionClick?: (planet: unknown) => void;
+            };
+          } | null;
+        };
+      };
+    }).game;
+    const scene = game?.scene?.getScene?.('GalaxyMapScene');
+    const panel = scene?.planetInfoPanel;
+    if (panel?.planet && panel?.onCommissionClick) {
+      panel.onCommissionClick(panel.planet);
+    }
+  });
+}
+
+/**
+ * Wait for PlatoonCommissionPanel to be visible
+ */
+export async function waitForPlatoonCommissionPanel(page: Page, timeout = 5000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              platoonCommissionPanel?: { getIsVisible?: () => boolean };
+            } | null;
+          };
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('GalaxyMapScene');
+      return scene?.platoonCommissionPanel?.getIsVisible?.() === true;
+    },
+    { timeout }
+  );
+}
+
+/**
+ * Click on Navigate button in PlanetInfoPanel
+ */
+export async function clickNavigateButton(page: Page): Promise<void> {
+  // Trigger the navigate click callback programmatically
+  await page.evaluate(() => {
+    const game = (window as unknown as {
+      game?: {
+        scene?: {
+          getScene?: (name: string) => {
+            planetInfoPanel?: {
+              planet?: unknown;
+              onNavigateClick?: (planet: unknown) => void;
+            };
+          } | null;
+        };
+      };
+    }).game;
+    const scene = game?.scene?.getScene?.('GalaxyMapScene');
+    const panel = scene?.planetInfoPanel;
+    if (panel?.planet && panel?.onNavigateClick) {
+      panel.onNavigateClick(panel.planet);
+    }
+  });
+}
+
+/**
+ * Wait for SpacecraftNavigationPanel to be visible
+ */
+export async function waitForSpacecraftNavigationPanel(page: Page, timeout = 5000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const game = (window as unknown as {
+        game?: {
+          scene?: {
+            getScene?: (name: string) => {
+              spacecraftNavigationPanel?: { getIsVisible?: () => boolean };
+            } | null;
+          };
+        };
+      }).game;
+      const scene = game?.scene?.getScene?.('GalaxyMapScene');
+      return scene?.spacecraftNavigationPanel?.getIsVisible?.() === true;
+    },
+    { timeout }
+  );
+}
