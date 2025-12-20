@@ -5,6 +5,34 @@ import { TutorialStep } from './TutorialModels';
 export type { TutorialStep } from './TutorialModels';
 
 /**
+ * Story content for scenarios
+ */
+export interface ScenarioStory {
+  briefing: string;
+  objective: string;
+  victory: string;
+}
+
+/**
+ * Click-by-click recipe step for tutorials
+ */
+export interface RecipeStep {
+  stepNumber: number;
+  action: string;
+  instruction: string;
+  expectedResult: string;
+}
+
+/**
+ * Click-by-click recipe for tutorials
+ */
+export interface ClickByClickRecipe {
+  title: string;
+  steps: RecipeStep[];
+  notes?: string[];
+}
+
+/**
  * Core scenario structure for Flash Conflicts
  */
 export interface Scenario {
@@ -15,12 +43,14 @@ export interface Scenario {
   duration: string;
   description: string;
   prerequisites: string[];
+  story?: ScenarioStory;
   victoryConditions: VictoryCondition[];
   defeatConditions?: DefeatCondition[];
   specialRules?: SpecialRule[];
   initialState: ScenarioInitialState;
   tutorialSteps?: TutorialStep[];
   starTargets?: StarTargets;
+  clickByClickRecipe?: ClickByClickRecipe;
 }
 
 /**
@@ -33,10 +63,14 @@ export interface Scenario {
  * - resource_target: Reach a specific resource amount
  * - destroy_all_ships: Destroy all enemy spacecraft
  * - ui_interaction: Complete a specific UI interaction (for tutorials)
+ * - turn_reached: Reach a specific turn number
+ * - commission_platoon: Commission a platoon
+ * - move_ship: Move a spacecraft to another planet
+ * - deploy_atmosphere_processor: Deploy an atmosphere processor
  */
 export interface VictoryCondition {
-  type: 'build_structure' | 'capture_planet' | 'capture_all_planets' | 'defeat_enemy' | 'survive_turns' | 'resource_target' | 'destroy_all_ships' | 'ui_interaction';
-  target?: string;
+  type: 'build_structure' | 'capture_planet' | 'capture_all_planets' | 'defeat_enemy' | 'survive_turns' | 'resource_target' | 'destroy_all_ships' | 'ui_interaction' | 'turn_reached' | 'commission_platoon' | 'move_ship' | 'deploy_atmosphere_processor';
+  target?: string | number;
   count?: number;
   turns?: number;
   turnsLimit?: number;
@@ -93,6 +127,9 @@ export interface ScenarioInitialState {
   aiEnabled: boolean;
   aiPersonality?: AIPersonality;
   aiDifficulty?: AIDifficulty;
+  neutralPlanets?: string[];
+  planetPopulation?: Record<string, number>;
+  aiDefenders?: Record<string, AIDefender>;
 }
 
 /**
@@ -100,17 +137,29 @@ export interface ScenarioInitialState {
  */
 export interface CraftState {
   type: string;
-  planet: string;
+  planet?: string;
+  planetId?: string;
+  embarkedPlatoons?: number;
 }
 
 /**
  * Initial platoon state for scenario
  */
 export interface PlatoonState {
-  troops: number;
+  troops?: number;
+  troopCount?: number;
   equipment: string;
   weapon: string;
-  planet: string;
+  planet?: string;
+  embarkedOnCraft?: boolean;
+}
+
+/**
+ * AI defender state for a planet
+ */
+export interface AIDefender {
+  population: number;
+  platoons: number;
 }
 
 /**

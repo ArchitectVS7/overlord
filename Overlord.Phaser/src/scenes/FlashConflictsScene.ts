@@ -10,6 +10,7 @@
 
 import Phaser from 'phaser';
 import { ScenarioManager } from '@core/ScenarioManager';
+import { loadAllScenarios } from '@core/ScenarioLoader';
 import { getCompletionService } from '@core/ScenarioCompletionService';
 import { ScenarioListPanel } from './ui/ScenarioListPanel';
 import { ScenarioDetailPanel } from './ui/ScenarioDetailPanel';
@@ -75,11 +76,11 @@ export class FlashConflictsScene extends Phaser.Scene {
   }
 
   /**
-   * Load available scenarios
+   * Load available scenarios from JSON files
    */
   private async loadScenarios(): Promise<void> {
-    // In full implementation, this will load from JSON files
-    // For now, we'll wait for Task 6 to create the sample scenario
+    // Load all scenarios from JSON files
+    await loadAllScenarios(this.scenarioManager);
 
     // Get all scenarios and show list
     const scenarios = this.scenarioManager.getScenarios();
