@@ -50,7 +50,7 @@ export class TutorialsScene extends Phaser.Scene {
     this.titleText.setScrollFactor(0);
 
     // Create scenario list panel
-    this.listPanel = new ScenarioListPanel(this);
+    this.listPanel = new ScenarioListPanel(this, 'Select Tutorial');
     this.listPanel.onScenarioSelected = (scenario: Scenario) => {
       this.showScenarioDetail(scenario);
     };

@@ -80,15 +80,17 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
   // UI elements
   private titleText!: Phaser.GameObjects.Text;
   private scrollMask!: Phaser.GameObjects.Graphics;
+  private panelTitle: string;
 
   // Callbacks
   public onScenarioSelected?: (scenario: Scenario) => void;
   public onClose?: () => void;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, title: string = 'Select Flash Conflict') {
     super(scene, 0, 0);
     scene.add.existing(this);
 
+    this.panelTitle = title;
     this.createBackdrop();
     this.createPanel();
     this.setVisible(false);
@@ -104,7 +106,12 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     this.backdrop.setScrollFactor(0);
     this.backdrop.setDepth(1199);
     this.backdrop.setVisible(false);
-    this.backdrop.on('pointerdown', () => this.hide());
+    this.backdrop.on('pointerdown', () => {
+      this.hide();
+      if (this.onClose) {
+        this.onClose();
+      }
+    });
   }
 
   private createPanel(): void {
@@ -130,7 +137,7 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
     this.add(this.contentContainer);
 
     // Title
-    this.titleText = this.scene.add.text(0, 0, 'Select Flash Conflict', {
+    this.titleText = this.scene.add.text(0, 0, this.panelTitle, {
       fontSize: '24px',
       color: TEXT_COLOR,
       fontStyle: 'bold',
@@ -148,7 +155,12 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
       },
     );
     closeButton.setInteractive({ useHandCursor: true });
-    closeButton.on('pointerdown', () => this.hide());
+    closeButton.on('pointerdown', () => {
+      this.hide();
+      if (this.onClose) {
+        this.onClose();
+      }
+    });
     this.contentContainer.add(closeButton);
 
     // Cards container with mask for scrolling
@@ -362,16 +374,12 @@ export class ScenarioListPanel extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Hide the panel
+   * Hide the panel (does not trigger onClose callback)
    */
   hide(): void {
     this.isVisible = false;
     this.setVisible(false);
     this.backdrop.setVisible(false);
-
-    if (this.onClose) {
-      this.onClose();
-    }
   }
 
   /**
