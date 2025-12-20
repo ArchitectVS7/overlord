@@ -15,8 +15,8 @@ import { TutorialStep } from '@core/models/TutorialModels';
 import { COLORS as THEME_COLORS, TEXT_COLORS } from '@config/UITheme';
 
 // Panel styling constants
-const PANEL_WIDTH = 450;
-const PANEL_HEIGHT = 140;
+const PANEL_WIDTH = 500;
+const PANEL_HEIGHT = 180;
 const PADDING = 20;
 const BG_COLOR = THEME_COLORS.PANEL_BG;
 const BORDER_COLOR = THEME_COLORS.BORDER_PRIMARY;
@@ -84,9 +84,10 @@ export class TutorialStepPanel {
       PADDING + 30,
       '',
       {
-        fontSize: '20px',
+        fontSize: '18px',
         color: TEXT_COLOR,
         wordWrap: { width: PANEL_WIDTH - PADDING * 2 },
+        lineSpacing: 4,
       },
     );
     this.container.add(this.instructionText);

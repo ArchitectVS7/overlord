@@ -68,6 +68,11 @@ export class ScenarioGameScene extends Phaser.Scene {
   private selectedPlanetId: string | null = null;
   private selectionGraphics!: Phaser.GameObjects.Graphics;
 
+  // HUD elements for turn management
+  private turnText!: Phaser.GameObjects.Text;
+  private phaseText!: Phaser.GameObjects.Text;
+  private endTurnButton!: Phaser.GameObjects.Container;
+
   constructor() {
     super({ key: 'ScenarioGameScene' });
   }
@@ -227,12 +232,9 @@ export class ScenarioGameScene extends Phaser.Scene {
       this.tutorialManager.getStepCount(),
     );
 
-    // Apply highlight if specified
-    if (step.highlight) {
-      // In full implementation, look up element by ID
-      // For now, show a default highlight
-      this.tutorialHighlight.showGlow({ x: 400, y: 300, width: 100, height: 50 }, true);
-    }
+    // Clear any previous highlight - don't show placeholder rectangles
+    // Full element lookup would require a registry of UI elements by ID
+    this.tutorialHighlight.clear();
 
     // Watch for the required action
     this.tutorialActionDetector.watchFor(step.action);
@@ -451,6 +453,40 @@ export class ScenarioGameScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-O', () => {
       this.objectivesPanel.toggle();
     });
+
+    // SPACE key ends turn (during Action phase)
+    this.input.keyboard?.on('keydown-SPACE', () => {
+      this.advanceTurn();
+    });
+  }
+
+  /**
+   * Advance the turn (called when SPACE pressed or END TURN clicked)
+   */
+  private advanceTurn(): void {
+    if (this.scenarioPaused || !this.gameState) return;
+
+    // Advance the turn
+    this.gameState.currentTurn++;
+    this.updateTurnDisplay();
+
+    // Check victory conditions
+    this.checkVictoryConditions();
+
+    // Report action to tutorial system for end_turn actions
+    if (this.tutorialActionDetector) {
+      this.tutorialActionDetector.reportTurnEnd();
+    }
+
+    console.log(`Advanced to Turn ${this.gameState.currentTurn}`);
+  }
+
+  /**
+   * Update the turn display in HUD
+   */
+  private updateTurnDisplay(): void {
+    if (!this.gameState) return;
+    this.turnText?.setText(`Turn: ${this.gameState.currentTurn}`);
   }
 
   /**
@@ -460,7 +496,7 @@ export class ScenarioGameScene extends Phaser.Scene {
     if (!this.gameState) {return;}
 
     // Turn counter
-    const turnText = this.add.text(
+    this.turnText = this.add.text(
       20,
       20,
       `Turn: ${this.gameState.currentTurn}`,
@@ -469,13 +505,25 @@ export class ScenarioGameScene extends Phaser.Scene {
         color: '#ffffff',
       },
     );
-    turnText.setScrollFactor(0);
+    this.turnText.setScrollFactor(0);
+
+    // Phase indicator
+    this.phaseText = this.add.text(
+      20,
+      45,
+      'Action Phase',
+      {
+        fontSize: '14px',
+        color: '#88ff88',
+      },
+    );
+    this.phaseText.setScrollFactor(0);
 
     // Resources display
     const resources = this.gameState.playerFaction.resources;
     const resourceText = this.add.text(
       20,
-      50,
+      70,
       `Credits: ${resources.credits} | Minerals: ${resources.minerals}`,
       {
         fontSize: '14px',
@@ -484,11 +532,14 @@ export class ScenarioGameScene extends Phaser.Scene {
     );
     resourceText.setScrollFactor(0);
 
+    // END TURN button
+    this.createEndTurnButton();
+
     // Help text
     const helpText = this.add.text(
       this.cameras.main.width - 20,
       20,
-      'Press O for Objectives',
+      'Press O for Objectives | SPACE to End Turn',
       {
         fontSize: '14px',
         color: '#666666',
@@ -496,6 +547,58 @@ export class ScenarioGameScene extends Phaser.Scene {
     );
     helpText.setOrigin(1, 0);
     helpText.setScrollFactor(0);
+  }
+
+  /**
+   * Create the END TURN button
+   */
+  private createEndTurnButton(): void {
+    const buttonWidth = 150;
+    const buttonHeight = 40;
+    const x = this.cameras.main.width - buttonWidth - 20;
+    const y = this.cameras.main.height - buttonHeight - 20;
+
+    this.endTurnButton = this.add.container(x, y);
+    this.endTurnButton.setScrollFactor(0);
+    this.endTurnButton.setDepth(100);
+
+    // Button background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x2255aa, 1);
+    bg.fillRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    bg.lineStyle(2, 0x4488ff, 1);
+    bg.strokeRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    this.endTurnButton.add(bg);
+
+    // Button text
+    const text = this.add.text(buttonWidth / 2, buttonHeight / 2, 'END TURN [Space]', {
+      fontSize: '14px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    });
+    text.setOrigin(0.5);
+    this.endTurnButton.add(text);
+
+    // Interactive zone
+    const zone = this.add.zone(x + buttonWidth / 2, y + buttonHeight / 2, buttonWidth, buttonHeight);
+    zone.setInteractive({ useHandCursor: true });
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x3366cc, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+      bg.lineStyle(2, 0x66aaff, 1);
+      bg.strokeRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.fillStyle(0x2255aa, 1);
+      bg.fillRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+      bg.lineStyle(2, 0x4488ff, 1);
+      bg.strokeRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    });
+    zone.on('pointerdown', () => {
+      this.advanceTurn();
+    });
   }
 
   /**
