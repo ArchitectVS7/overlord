@@ -175,6 +175,7 @@ describe('VictoryScene', () => {
         start: jest.fn(),
       };
       const mockRegistry = {
+        get: jest.fn(),
         remove: jest.fn(),
       };
 

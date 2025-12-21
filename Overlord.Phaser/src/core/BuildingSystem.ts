@@ -1,5 +1,5 @@
 import { GameState } from './GameState';
-import { BuildingType, BuildingStatus } from './models/Enums';
+import { BuildingType, BuildingStatus, FactionType } from './models/Enums';
 import { Structure, BuildingCosts } from './models/BuildingModels';
 import { ResourceDelta } from './models/ResourceModels';
 
@@ -69,13 +69,23 @@ export class BuildingSystem {
     const cost = BuildingCosts.getCost(buildingType);
     const constructionTime = BuildingCosts.getConstructionTime(buildingType);
 
+    // Determine faction resource pool
+    let factionResources;
+    if (planet.owner === FactionType.Player) {
+      factionResources = this.gameState.playerFaction.resources;
+    } else if (planet.owner === FactionType.AI) {
+      factionResources = this.gameState.aiFaction.resources;
+    } else {
+      return false; // Cannot build on neutral/other planets
+    }
+
     // Validate resources
-    if (!planet.resources.canAfford(cost)) {
+    if (!factionResources.canAfford(cost)) {
       return false; // Insufficient resources
     }
 
     // Deduct cost
-    planet.resources.subtract(cost);
+    factionResources.subtract(cost);
 
     // Create building entity
     const building = new Structure();

@@ -25,7 +25,9 @@ export interface TopMenuBarOptions {
   showHome?: boolean;
   showHelp?: boolean;
   showResetCamera?: boolean;
+  showResearch?: boolean;
   onResetCamera?: () => void;
+  onResearch?: () => void;
 }
 
 /**
@@ -40,6 +42,7 @@ export class TopMenuBar {
   private homeButton!: Phaser.GameObjects.Text;
   private helpButton!: Phaser.GameObjects.Text;
   private resetCameraButton!: Phaser.GameObjects.Text;
+  private researchButton!: Phaser.GameObjects.Text;
   private speakerIcon!: Phaser.GameObjects.Text;
   private helpPanel!: HelpPanel;
   private options: TopMenuBarOptions;
@@ -65,6 +68,9 @@ export class TopMenuBar {
     }
     if (this.options.showResetCamera) {
       this.createResetCameraButton();
+    }
+    if (this.options.showResearch) {
+      this.createResearchButton();
     }
     this.createSpeakerIcon();
   }
@@ -191,6 +197,40 @@ export class TopMenuBar {
 
     this.resetCameraButton.on('pointerout', () => {
       this.resetCameraButton.setColor(COLORS.ICON_DEFAULT);
+    });
+  }
+
+  private createResearchButton(): void {
+    // Position after other buttons
+    let iconX = 15;
+    if (this.options.showHome) iconX += 95;
+    if (this.options.showHelp) iconX += 80;
+    if (this.options.showResetCamera) iconX += 90;
+    const iconY = BAR_HEIGHT / 2;
+
+    this.researchButton = this.scene.add.text(iconX, iconY, '🔬 RESEARCH', {
+      fontSize: '14px',
+      color: COLORS.ICON_DEFAULT,
+      fontFamily: FONTS.PRIMARY,
+    });
+    this.researchButton.setOrigin(0, 0.5);
+    this.researchButton.setScrollFactor(0);
+    this.researchButton.setDepth(BAR_DEPTH + 1);
+    this.researchButton.setInteractive({ useHandCursor: true });
+    this.elements.push(this.researchButton);
+
+    // Click handler - call onResearch callback
+    this.researchButton.on('pointerdown', () => {
+      this.options.onResearch?.();
+    });
+
+    // Hover effects
+    this.researchButton.on('pointerover', () => {
+      this.researchButton.setColor(COLORS.ICON_HOVER);
+    });
+
+    this.researchButton.on('pointerout', () => {
+      this.researchButton.setColor(COLORS.ICON_DEFAULT);
     });
   }
 

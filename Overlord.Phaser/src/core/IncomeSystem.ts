@@ -10,7 +10,6 @@ import { PlanetEntity } from './models/PlanetEntity';
  */
 export class IncomeSystem {
   private readonly gameState: GameState;
-  private readonly resourceSystem: ResourceSystem;
 
   /**
    * Event fired when income is calculated for a planet.
@@ -50,16 +49,17 @@ export class IncomeSystem {
   public static readonly MiningCrewRequired: number = 15;
   public static readonly SolarSatelliteCrewRequired: number = 5;
 
-  constructor(gameState: GameState, resourceSystem: ResourceSystem) {
+  constructor(gameState: GameState, _resourceSystem: ResourceSystem) {
     if (!gameState) {
       throw new Error('gameState cannot be null or undefined');
     }
-    if (!resourceSystem) {
+    if (!_resourceSystem) {
       throw new Error('resourceSystem cannot be null or undefined');
     }
 
     this.gameState = gameState;
-    this.resourceSystem = resourceSystem;
+    // Note: resourceSystem parameter kept for API compatibility but income is now
+    // aggregated to Faction level in PhaseProcessor rather than per-planet
   }
 
   /**
@@ -87,8 +87,7 @@ export class IncomeSystem {
       totalIncome.energy += planetIncome.energy;
       totalIncome.credits += planetIncome.credits;
 
-      // Add income to planet resources
-      this.resourceSystem.addResources(planet.id, planetIncome);
+      // Income is now aggregated to Faction level in PhaseProcessor
 
       // Fire event
       this.onIncomeCalculated?.(planet.id, planetIncome);

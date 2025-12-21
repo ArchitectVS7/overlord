@@ -42,12 +42,19 @@ jest.mock('phaser', () => ({
         destroy(): void { this.list = []; this.data.clear(); }
       },
       Graphics: class MockGraphics {
+        x = 0; y = 0;
         fillStyle(): this { return this; }
         fillRoundedRect(): this { return this; }
         fillRect(): this { return this; }
+        fillCircle(): this { return this; }
         lineStyle(): this { return this; }
+        lineBetween(): this { return this; }
         strokeRoundedRect(): this { return this; }
         strokeRect(): this { return this; }
+        strokeCircle(): this { return this; }
+        setPosition(x: number, y: number): this { this.x = x; this.y = y; return this; }
+        setInteractive(): this { return this; }
+        on(): this { return this; }
         clear(): this { return this; }
         destroy(): void {}
       },
@@ -65,6 +72,8 @@ jest.mock('phaser', () => ({
         setColor(): this { return this; }
         setInteractive(): this { return this; }
         setScrollFactor(): this { return this; }
+        setVisible(): this { return this; }
+        setWordWrapWidth(): this { return this; }
         on(): this { return this; }
         destroy(): void {}
       },
@@ -74,7 +83,16 @@ jest.mock('phaser', () => ({
         setScrollFactor(): this { return this; }
         setDepth(): this { return this; }
         setVisible(): this { return this; }
+        setStrokeStyle(): this { return this; }
         on(): this { return this; }
+        destroy(): void {}
+      },
+      Zone: class MockZone {
+        setInteractive(): this { return this; }
+        on(): this { return this; }
+        setDepth(): this { return this; }
+        setData(): this { return this; }
+        getData(): unknown { return undefined; }
         destroy(): void {}
       }
     },
@@ -146,6 +164,7 @@ function createMockSceneContext() {
             setDepth: jest.fn().mockReturnThis(),
             setVisible: jest.fn().mockReturnThis(),
             setFillStyle: jest.fn().mockReturnThis(),
+            setStrokeStyle: jest.fn().mockReturnThis(),
             on: jest.fn().mockReturnThis(),
             destroy: jest.fn()
           };
@@ -153,14 +172,21 @@ function createMockSceneContext() {
         }),
         graphics: jest.fn(() => {
           const gfx = {
+            x: 0,
             y: 0,
             alpha: 1,
             fillStyle: jest.fn().mockReturnThis(),
             fillRoundedRect: jest.fn().mockReturnThis(),
             fillRect: jest.fn().mockReturnThis(),
+            fillCircle: jest.fn().mockReturnThis(),
             lineStyle: jest.fn().mockReturnThis(),
+            lineBetween: jest.fn().mockReturnThis(),
             strokeRoundedRect: jest.fn().mockReturnThis(),
             strokeRect: jest.fn().mockReturnThis(),
+            strokeCircle: jest.fn().mockReturnThis(),
+            setPosition: jest.fn().mockReturnThis(),
+            setInteractive: jest.fn().mockReturnThis(),
+            on: jest.fn().mockReturnThis(),
             beginPath: jest.fn().mockReturnThis(),
             moveTo: jest.fn().mockReturnThis(),
             lineTo: jest.fn().mockReturnThis(),
@@ -174,7 +200,15 @@ function createMockSceneContext() {
           };
           addedObjects.push(gfx);
           return gfx;
-        })
+        }),
+        zone: jest.fn(() => ({
+          setInteractive: jest.fn().mockReturnThis(),
+          on: jest.fn().mockReturnThis(),
+          setDepth: jest.fn().mockReturnThis(),
+          setData: jest.fn().mockReturnThis(),
+          getData: jest.fn(),
+          destroy: jest.fn()
+        }))
       },
       start: jest.fn()
     },

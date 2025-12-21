@@ -248,7 +248,7 @@ describe('ResourceHUD', () => {
 
     it('should return red for Critical level', () => {
       const color = (resourceHUD as any).getLevelColor.call(resourceHUD, ResourceLevel.Critical);
-      expect(color).toBe('#ff0000');
+      expect(color).toBe('#ff4444');
     });
   });
 

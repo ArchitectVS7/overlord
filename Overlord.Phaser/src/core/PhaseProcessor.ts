@@ -168,12 +168,18 @@ export class PhaseProcessor {
       const playerTaxRevenue = this.taxationSystem.calculateFactionTaxRevenue(FactionType.Player);
       playerIncome.credits += playerTaxRevenue;
 
+      // Apply total income to Player Faction (Global Economy)
+      this.gameState.playerFaction.resources.add(playerIncome);
+
       // Calculate and apply income for AI (production resources)
       const aiIncome = this.incomeSystem.calculateFactionIncome(FactionType.AI);
 
       // Calculate and apply tax revenue for AI (credits)
       const aiTaxRevenue = this.taxationSystem.calculateFactionTaxRevenue(FactionType.AI);
       aiIncome.credits += aiTaxRevenue;
+
+      // Apply total income to AI Faction (Global Economy)
+      this.gameState.aiFaction.resources.add(aiIncome);
 
       // Fire notification event
       this.onIncomeProcessed?.(playerIncome, aiIncome);

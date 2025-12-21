@@ -59,6 +59,7 @@ jest.mock('phaser', () => ({
         setText(t: string): this { this.text = t; return this; }
         setOrigin(): this { return this; }
         setWordWrapWidth(): this { return this; }
+        setVisible(v: boolean): this { this.visible = v; return this; }
         setColor(c: string): this { this.style.color = c; return this; }
         setInteractive(): this { return this; }
         on(): this { return this; }
@@ -82,6 +83,12 @@ jest.mock('phaser', () => ({
         setVisible(v: boolean): this { this.visible = v; return this; }
         on(): this { return this; }
         destroy(): void {}
+      },
+      Zone: class MockZone {
+        setInteractive(): this { return this; }
+        on(): this { return this; }
+        setDepth(): this { return this; }
+        destroy(): void {}
       }
     }
   }
@@ -101,7 +108,9 @@ const createMockScene = () => ({
     rectangle: jest.fn((x: number, y: number, w: number, h: number) =>
       new (jest.requireMock('phaser').default.GameObjects.Rectangle)(null, x, y, w, h)),
     container: jest.fn((x: number, y: number) =>
-      new (jest.requireMock('phaser').default.GameObjects.Container)(null, x, y))
+      new (jest.requireMock('phaser').default.GameObjects.Container)(null, x, y)),
+    zone: jest.fn((x: number, y: number, w: number, h: number) =>
+      new (jest.requireMock('phaser').default.GameObjects.Zone)())
   },
   cameras: {
     main: {

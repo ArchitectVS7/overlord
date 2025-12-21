@@ -4,7 +4,7 @@ import { GameState } from '@core/GameState';
 import { InputSystem } from '@core/InputSystem';
 import { TurnSystem } from '@core/TurnSystem';
 import { PhaseProcessor } from '@core/PhaseProcessor';
-import { Difficulty, FactionType, TurnPhase, VictoryResult } from '@core/models/Enums';
+import { CraftType, Difficulty, FactionType, TurnPhase, VictoryResult } from '@core/models/Enums';
 import { PlanetEntity } from '@core/models/PlanetEntity';
 import { InputManager } from './InputManager';
 import { CameraController } from './controllers/CameraController';
@@ -20,6 +20,9 @@ import { SpacecraftPurchasePanel } from './ui/SpacecraftPurchasePanel';
 import { PlatoonLoadingPanel } from './ui/PlatoonLoadingPanel';
 import { SpacecraftNavigationPanel } from './ui/SpacecraftNavigationPanel';
 import { InvasionPanel } from './ui/InvasionPanel';
+import { ResearchPanel } from './ui/ResearchPanel';
+import { BombardmentPanel } from './ui/BombardmentPanel';
+import { BombardmentSystem } from '@core/BombardmentSystem';
 import { BattleResultsPanel } from './ui/BattleResultsPanel';
 import { NotificationManager } from './ui/NotificationToast';
 import { OpponentInfoPanel } from './ui/OpponentInfoPanel';
@@ -68,6 +71,9 @@ export class GalaxyMapScene extends Phaser.Scene {
   private spacecraftNavigationPanel!: SpacecraftNavigationPanel;
   private invasionPanel!: InvasionPanel;
   private battleResultsPanel!: BattleResultsPanel;
+  private researchPanel!: ResearchPanel;
+  private bombardmentPanel!: BombardmentPanel;
+  private bombardmentSystem!: BombardmentSystem;
   private notificationManager!: NotificationManager;
   private opponentInfoPanel!: OpponentInfoPanel;
   private platoonSystem!: PlatoonSystem;
@@ -198,15 +204,19 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.cameraController.enableDragPan();
     this.cameraController.enableWheelZoom();
 
-    // Create top menu bar with help and reset camera
+    // Create top menu bar with help, reset camera, and research
     this.topMenuBar = new TopMenuBar(this, {
       showHome: true,
       showHelp: true,
       showResetCamera: true,
+      showResearch: true,
       onResetCamera: () => {
         if (!this.cameraController.getIsDragging()) {
           this.cameraController.resetView(true);
         }
+      },
+      onResearch: () => {
+        this.researchPanel?.show();
       },
     });
     this.topMenuBar.setScrollFactor(0);
@@ -404,6 +414,37 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Create OpponentInfoPanel - Story 7-2
     this.opponentInfoPanel = new OpponentInfoPanel(this, 20, 140);
+
+    // Create ResearchPanel - Weapon Research UI
+    this.researchPanel = new ResearchPanel(this, this.phaseProcessor.getUpgradeSystem());
+    this.researchPanel.onResearchStarted = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Create BombardmentSystem and BombardmentPanel - Story 6-4
+    this.bombardmentSystem = new BombardmentSystem(this.gameState);
+    this.bombardmentPanel = new BombardmentPanel(this, this.bombardmentSystem);
+    this.bombardmentPanel.onBombard = (planet, result) => {
+      // Show bombardment results notification
+      this.notificationManager.showNotification(
+        `Bombardment of ${planet.name}: ${result.structuresDestroyed} structures destroyed, ` +
+        `${result.civilianCasualties} casualties. Morale now ${result.newMorale}%`,
+        'warning'
+      );
+      this.resourceHUD.updateDisplay();
+    };
+
+    // Wire up PlanetInfoPanel Bombard button to BombardmentPanel
+    this.planetInfoPanel.onBombardClick = (planet) => {
+      this.planetInfoPanel.hide();
+      // Get player's Battle Cruisers at this planet
+      const cruisers = this.gameState.craft.filter(
+        c => c.owner === FactionType.Player &&
+             c.type === CraftType.BattleCruiser &&
+             c.planetID === planet.id
+      );
+      this.bombardmentPanel.show(planet, cruisers);
+    };
 
     // Create AIDecisionSystem - Story 7-1
     const aiIncomeSystem = this.phaseProcessor.getIncomeSystem();
