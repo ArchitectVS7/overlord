@@ -11,7 +11,7 @@ describe('PlanetInfoPanel Logic', () => {
   // Helper function to get owner color hex (mirrors panel logic)
   function getOwnerColorHex(owner: FactionType): string {
     switch (owner) {
-      case FactionType.Player: return '#00ff00';
+      case FactionType.Player: return '#00bfff';
       case FactionType.AI: return '#ff0000';
       case FactionType.Neutral: return '#808080';
       default: return '#ffffff';
@@ -26,8 +26,8 @@ describe('PlanetInfoPanel Logic', () => {
   }
 
   describe('Owner Color Mapping', () => {
-    test('Player owner returns green', () => {
-      expect(getOwnerColorHex(FactionType.Player)).toBe('#00ff00');
+    test('Player owner returns cyan', () => {
+      expect(getOwnerColorHex(FactionType.Player)).toBe('#00bfff');
     });
 
     test('AI owner returns red', () => {
@@ -39,7 +39,7 @@ describe('PlanetInfoPanel Logic', () => {
     });
 
     test('OWNER_COLORS config matches expected values', () => {
-      expect(OWNER_COLORS.Player).toBe(0x00ff00);
+      expect(OWNER_COLORS.Player).toBe(0x00bfff);
       expect(OWNER_COLORS.AI).toBe(0xff0000);
       expect(OWNER_COLORS.Neutral).toBe(0x808080);
     });

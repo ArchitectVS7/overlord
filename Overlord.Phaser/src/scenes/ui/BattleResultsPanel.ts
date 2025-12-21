@@ -37,6 +37,45 @@ export interface BattleResultData {
     fuel: number;
   };
   defeatReason?: string;
+  instantSurrender?: boolean;
+}
+
+/**
+ * Generates a dynamic battle narrative based on combat outcome.
+ */
+function generateBattleNarrative(data: BattleResultData): string {
+  // Instant surrender - no combat
+  if (data.instantSurrender) {
+    return 'The planet surrendered without resistance!';
+  }
+
+  const totalCasualties = data.attackerCasualties + data.defenderCasualties;
+  if (totalCasualties === 0) {
+    return data.victory ? 'A swift and bloodless victory!' : 'The invasion was repelled.';
+  }
+
+  const attackerRatio = data.attackerCasualties / Math.max(totalCasualties, 1);
+  const defenderRatio = data.defenderCasualties / Math.max(totalCasualties, 1);
+
+  if (data.victory) {
+    if (attackerRatio < 0.2) {
+      return 'An overwhelming victory with minimal losses!';
+    } else if (attackerRatio < 0.4) {
+      return 'A decisive victory, though not without cost.';
+    } else if (attackerRatio < 0.6) {
+      return 'Hard-fought victory with significant casualties.';
+    } else {
+      return 'A pyrrhic victory - heavy losses sustained.';
+    }
+  } else {
+    if (defenderRatio < 0.2) {
+      return 'The defenders held firm with minimal losses.';
+    } else if (defenderRatio < 0.4) {
+      return 'Strong resistance repelled the invasion.';
+    } else {
+      return 'A fierce battle, but the defenders prevailed.';
+    }
+  }
 }
 
 export class BattleResultsPanel extends Phaser.GameObjects.Container {
@@ -139,7 +178,19 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     });
     planetText.setOrigin(0.5, 0);
     this.contentContainer.add(planetText);
-    yPos += 40;
+    yPos += 30;
+
+    // Battle narrative
+    const narrative = generateBattleNarrative(data);
+    const narrativeText = this.scene.add.text(PANEL_WIDTH / 2, yPos, narrative, {
+      fontSize: '13px',
+      fontFamily: FONTS.PRIMARY,
+      color: LABEL_COLOR,
+      fontStyle: 'italic',
+    });
+    narrativeText.setOrigin(0.5, 0);
+    this.contentContainer.add(narrativeText);
+    yPos += 30;
 
     // Casualties section
     const casualtyLabel = this.scene.add.text(PADDING, yPos, 'Battle Casualties:', {
@@ -215,7 +266,19 @@ export class BattleResultsPanel extends Phaser.GameObjects.Container {
     });
     planetText.setOrigin(0.5, 0);
     this.contentContainer.add(planetText);
-    yPos += 40;
+    yPos += 30;
+
+    // Battle narrative
+    const narrative = generateBattleNarrative(data);
+    const narrativeText = this.scene.add.text(PANEL_WIDTH / 2, yPos, narrative, {
+      fontSize: '13px',
+      fontFamily: FONTS.PRIMARY,
+      color: LABEL_COLOR,
+      fontStyle: 'italic',
+    });
+    narrativeText.setOrigin(0.5, 0);
+    this.contentContainer.add(narrativeText);
+    yPos += 30;
 
     // Casualties section
     const casualtyLabel = this.scene.add.text(PADDING, yPos, 'Battle Casualties:', {

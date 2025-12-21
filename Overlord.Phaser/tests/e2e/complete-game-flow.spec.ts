@@ -173,7 +173,7 @@ test.describe('Complete Game Flow - New User Onboarding to Full Turn Cycle', () 
         return activeScenes.map((s: any) => s.scene.key);
       });
       
-      console.log(`Active scenes after clicking ${pos.name}:`, currentScenes);
+      console.log(`Active scenes after clicking ${pos.name}:`, currentScene);
       
       await page.screenshot({ 
         path: `test-results/04-click-test-${pos.name.toLowerCase().replace(' ', '-')}.png` 

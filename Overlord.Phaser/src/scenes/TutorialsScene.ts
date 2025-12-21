@@ -2,8 +2,7 @@
  * TutorialsScene - Entry point for tutorial scenarios
  *
  * Displays the list of available tutorials for players to learn game mechanics.
- * This scene is identical in function to FlashConflictsScene but shows only
- * tutorial-type scenarios.
+ * Launches GalaxyMapScene with the selected tutorial scenario.
  */
 
 import Phaser from 'phaser';
@@ -124,7 +123,7 @@ export class TutorialsScene extends Phaser.Scene {
    */
   private startScenario(scenario: Scenario): void {
     console.log(`Starting tutorial: ${scenario.id}`);
-    // Launch the ScenarioGameScene with the selected tutorial
-    this.scene.start('ScenarioGameScene', { scenario });
+    // Launch the GalaxyMapScene with the selected tutorial
+    this.scene.start('GalaxyMapScene', { scenario });
   }
 }

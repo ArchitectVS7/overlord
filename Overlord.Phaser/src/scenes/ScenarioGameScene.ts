@@ -1,7 +1,17 @@
 /**
+ * @deprecated This scene is deprecated. Use GalaxyMapScene via New Campaign flow instead.
+ *
  * ScenarioGameScene - Main gameplay scene for scenario execution
  * Story 1-3: Scenario Initialization and Victory Conditions
  * Story 1-4: Tutorial Step Guidance System
+ *
+ * DEPRECATION NOTICE:
+ * This scene was used for Flash Conflicts and Tutorials but has been superseded by
+ * GalaxyMapScene which provides full gameplay with all 21 game systems integrated.
+ * New tests and tutorials should use the New Campaign -> GalaxyMapScene flow.
+ *
+ * This file is kept for backwards compatibility with existing scenario JSON files
+ * but should not be used for new development.
  *
  * Features:
  * - Initializes GameState from scenario configuration

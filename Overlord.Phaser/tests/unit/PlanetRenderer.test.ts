@@ -68,7 +68,7 @@ describe('PlanetRenderer Mapping Logic', () => {
 
     test('Player faction maps to Player color', () => {
       expect(FACTION_MAP[FactionType.Player]).toBe('Player');
-      expect(OWNER_COLORS.Player).toBe(0x00ff00); // Green
+      expect(OWNER_COLORS.Player).toBe(0x00bfff); // Cyan
     });
 
     test('AI faction maps to AI color', () => {

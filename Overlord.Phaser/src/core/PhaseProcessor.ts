@@ -3,8 +3,13 @@ import { ResourceSystem } from './ResourceSystem';
 import { IncomeSystem } from './IncomeSystem';
 import { PopulationSystem } from './PopulationSystem';
 import { BuildingSystem } from './BuildingSystem';
+import { DefenseSystem } from './DefenseSystem';
+import { UpgradeSystem } from './UpgradeSystem';
+import { SpaceCombatSystem } from './SpaceCombatSystem';
+import { TaxationSystem } from './TaxationSystem';
 import { TurnPhase, FactionType } from './models/Enums';
 import { ResourceDelta } from './models/ResourceModels';
+import { SpaceBattle, SpaceBattleResult } from './models/CombatModels';
 
 /**
  * Result of phase processing
@@ -32,6 +37,14 @@ export interface EndPhaseResult extends PhaseProcessingResult {
 }
 
 /**
+ * Result of Combat phase processing
+ */
+export interface CombatPhaseResult extends PhaseProcessingResult {
+  battlesResolved: number;
+  craftsDestroyed: number;
+}
+
+/**
  * Phase Processor
  * Coordinates processing for each turn phase.
  * Story 2-3: Turn Phase Processing
@@ -48,12 +61,24 @@ export class PhaseProcessor {
   private readonly incomeSystem: IncomeSystem;
   private readonly populationSystem: PopulationSystem;
   private readonly buildingSystem: BuildingSystem;
+  private readonly defenseSystem: DefenseSystem;
+  private readonly upgradeSystem: UpgradeSystem;
+  private readonly spaceCombatSystem: SpaceCombatSystem;
+  private readonly taxationSystem: TaxationSystem;
 
   // Events for UI notifications
   public onIncomeProcessed?: (playerIncome: ResourceDelta, aiIncome: ResourceDelta) => void;
   public onBuildingCompleted?: (planetId: number, buildingType: string) => void;
   public onPopulationGrowth?: (planetId: number, growth: number) => void;
   public onPhaseProcessingError?: (phase: TurnPhase, error: string) => void;
+
+  // Combat events
+  public onSpaceBattleStarted?: (battle: SpaceBattle) => void;
+  public onSpaceBattleCompleted?: (battle: SpaceBattle, result: SpaceBattleResult) => void;
+  public onCraftDestroyed?: (craftID: number, owner: FactionType) => void;
+
+  // Tax events
+  public onTaxRevenueCalculated?: (planetID: number, revenue: number) => void;
 
   constructor(gameState: GameState) {
     if (!gameState) {
@@ -65,10 +90,30 @@ export class PhaseProcessor {
     this.incomeSystem = new IncomeSystem(gameState, this.resourceSystem);
     this.populationSystem = new PopulationSystem(gameState, this.resourceSystem);
     this.buildingSystem = new BuildingSystem(gameState);
+    this.defenseSystem = new DefenseSystem(gameState);
+    this.upgradeSystem = new UpgradeSystem(gameState);
+    this.spaceCombatSystem = new SpaceCombatSystem(gameState, this.upgradeSystem, this.defenseSystem);
+    this.taxationSystem = new TaxationSystem(gameState, this.resourceSystem);
 
     // Wire up building completion events
     this.buildingSystem.onBuildingCompleted = (planetId, buildingType) => {
       this.onBuildingCompleted?.(planetId, String(buildingType));
+    };
+
+    // Wire up combat events
+    this.spaceCombatSystem.onSpaceBattleStarted = battle => {
+      this.onSpaceBattleStarted?.(battle);
+    };
+    this.spaceCombatSystem.onSpaceBattleCompleted = (battle, result) => {
+      this.onSpaceBattleCompleted?.(battle, result);
+    };
+    this.spaceCombatSystem.onCraftDestroyed = (craftID, owner) => {
+      this.onCraftDestroyed?.(craftID, owner);
+    };
+
+    // Wire up taxation events
+    this.taxationSystem.onTaxRevenueCalculated = (planetID, revenue) => {
+      this.onTaxRevenueCalculated?.(planetID, revenue);
     };
   }
 
@@ -116,11 +161,25 @@ export class PhaseProcessor {
     const startTime = performance.now();
 
     try {
-      // Calculate and apply income for player
+      // Calculate and apply income for player (production resources)
       const playerIncome = this.incomeSystem.calculateFactionIncome(FactionType.Player);
 
-      // Calculate and apply income for AI
+      // Calculate and apply tax revenue for player (credits)
+      const playerTaxRevenue = this.taxationSystem.calculateFactionTaxRevenue(FactionType.Player);
+      playerIncome.credits += playerTaxRevenue;
+
+      // Apply total income to Player Faction (Global Economy)
+      this.gameState.playerFaction.resources.add(playerIncome);
+
+      // Calculate and apply income for AI (production resources)
       const aiIncome = this.incomeSystem.calculateFactionIncome(FactionType.AI);
+
+      // Calculate and apply tax revenue for AI (credits)
+      const aiTaxRevenue = this.taxationSystem.calculateFactionTaxRevenue(FactionType.AI);
+      aiIncome.credits += aiTaxRevenue;
+
+      // Apply total income to AI Faction (Global Economy)
+      this.gameState.aiFaction.resources.add(aiIncome);
 
       // Fire notification event
       this.onIncomeProcessed?.(playerIncome, aiIncome);
@@ -165,16 +224,36 @@ export class PhaseProcessor {
   }
 
   /**
-   * Processes Combat phase: AI decisions and combat resolution.
+   * Processes Combat phase: resolves space battles at all planets.
    * NFR-P3: Must complete within 2 seconds.
-   * Note: AI system integration is in Epic 7.
    */
-  public processCombatPhase(): PhaseProcessingResult {
+  public processCombatPhase(): CombatPhaseResult {
     const startTime = performance.now();
+    let battlesResolved = 0;
+    let craftsDestroyed = 0;
 
     try {
-      // AI decision making will be integrated in Story 7-1
-      // For now, just log and return success
+      // Check all planets for space battles
+      for (const planet of this.gameState.planets) {
+        // Check if opposing fleets are present at this planet
+        if (this.spaceCombatSystem.shouldSpaceBattleOccur(planet.id)) {
+          // Determine attacker (non-owner faction with ships present)
+          const craft = this.gameState.craft.filter(c => c.planetID === planet.id && !c.isDeployed);
+          const attackerCraft = craft.find(c => c.owner !== planet.owner);
+
+          if (attackerCraft) {
+            const attackerFaction = attackerCraft.owner;
+
+            // Initiate and execute space battle
+            const battle = this.spaceCombatSystem.initiateSpaceBattle(planet.id, attackerFaction);
+            if (battle) {
+              const result = this.spaceCombatSystem.executeSpaceCombat(battle);
+              battlesResolved++;
+              craftsDestroyed += result.destroyedCraftIDs.length;
+            }
+          }
+        }
+      }
 
       const processingTime = performance.now() - startTime;
 
@@ -186,6 +265,8 @@ export class PhaseProcessor {
       return {
         success: true,
         processingTimeMs: processingTime,
+        battlesResolved,
+        craftsDestroyed,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during combat processing';
@@ -194,6 +275,8 @@ export class PhaseProcessor {
         success: false,
         processingTimeMs: performance.now() - startTime,
         error: errorMessage,
+        battlesResolved,
+        craftsDestroyed,
       };
     }
   }
@@ -297,5 +380,33 @@ export class PhaseProcessor {
    */
   public getPopulationSystem(): PopulationSystem {
     return this.populationSystem;
+  }
+
+  /**
+   * Gets the DefenseSystem for external use.
+   */
+  public getDefenseSystem(): DefenseSystem {
+    return this.defenseSystem;
+  }
+
+  /**
+   * Gets the UpgradeSystem for external use.
+   */
+  public getUpgradeSystem(): UpgradeSystem {
+    return this.upgradeSystem;
+  }
+
+  /**
+   * Gets the SpaceCombatSystem for external use.
+   */
+  public getSpaceCombatSystem(): SpaceCombatSystem {
+    return this.spaceCombatSystem;
+  }
+
+  /**
+   * Gets the TaxationSystem for external use.
+   */
+  public getTaxationSystem(): TaxationSystem {
+    return this.taxationSystem;
   }
 }

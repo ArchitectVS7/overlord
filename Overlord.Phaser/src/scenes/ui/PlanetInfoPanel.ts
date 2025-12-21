@@ -64,6 +64,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
   public onSpacecraftClick?: (planet: PlanetEntity) => void;
   public onNavigateClick?: (planet: PlanetEntity) => void;
   public onInvadeClick?: (planet: PlanetEntity) => void;
+  public onBombardClick?: (planet: PlanetEntity) => void;
   public onDeployProcessorClick?: (planet: PlanetEntity) => void;
   public onTaxRateChanged?: (planetID: number, newTaxRate: number) => void;
 
@@ -152,7 +153,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     const buttonHeight = BUTTON_HEIGHT;
 
     // Button positions relative to panel (content starts at PADDING)
-    const startY = HEADER_HEIGHT + 280 + 25; // Same as in createActionButtons
+    const startY = HEADER_HEIGHT + 370; // Must match createActionButtons
     const buttonConfigs = [
       { label: 'Build', x: 0, y: startY },
       { label: 'Commission', x: 125, y: startY },
@@ -160,6 +161,7 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
       { label: 'Spacecraft', x: 125, y: startY + 42 },
       { label: 'Navigate', x: 0, y: startY + 84 },
       { label: 'Invade', x: 125, y: startY + 84 },
+      { label: 'Bombard', x: 0, y: startY + 126 },
     ];
 
     for (const btn of buttonConfigs) {
@@ -214,6 +216,9 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
         break;
       case 'Invade':
         if (this.onInvadeClick) this.onInvadeClick(this.planet);
+        break;
+      case 'Bombard':
+        if (this.onBombardClick) this.onBombardClick(this.planet);
         break;
       case 'Close':
         this.hide();
@@ -573,7 +578,8 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
     this.createButton('Spacecraft', 125, buttonY + 42, true, 'Purchase spacecraft (Story 5-3)');
     this.createButton('Navigate', 0, buttonY + 84, true, 'Navigate spacecraft (Story 5-5)');
     this.createButton('Invade', 125, buttonY + 84, true, 'Initiate planetary invasion');
-    this.createButton('Deploy', 0, buttonY + 84, true, 'Deploy Atmosphere Processor to colonize'); // index 6
+    this.createButton('Bombard', 0, buttonY + 126, true, 'Orbital bombardment of enemy planet'); // index 6
+    this.createButton('Deploy', 0, buttonY + 84, true, 'Deploy Atmosphere Processor to colonize'); // index 7
   }
 
   private createButton(
@@ -923,6 +929,14 @@ export class PlanetInfoPanel extends Phaser.GameObjects.Container {
           this.enableButton(button, () => {
             if (this.planet && this.onInvadeClick) {
               this.onInvadeClick(this.planet);
+            }
+          });
+        } else if (label === 'Bombard') {
+          // Show and enable Bombard button for AI-owned planets (Story 6-4)
+          button.setVisible(true);
+          this.enableButton(button, () => {
+            if (this.planet && this.onBombardClick) {
+              this.onBombardClick(this.planet);
             }
           });
         } else {

@@ -58,8 +58,8 @@ describe('VisualConfig', () => {
       });
     });
 
-    test('Player should be green', () => {
-      expect(OWNER_COLORS.Player).toBe(0x00ff00);
+    test('Player should be cyan', () => {
+      expect(OWNER_COLORS.Player).toBe(0x00bfff);
     });
 
     test('AI should be red', () => {

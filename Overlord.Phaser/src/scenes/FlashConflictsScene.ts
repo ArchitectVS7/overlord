@@ -57,8 +57,7 @@ export class FlashConflictsScene extends Phaser.Scene {
       this.showScenarioDetail(scenario);
     };
     this.listPanel.onClose = () => {
-      // Return to main menu (placeholder)
-      console.log('Return to main menu');
+      this.scene.start('MainMenuScene');
     };
 
     // Create scenario detail panel

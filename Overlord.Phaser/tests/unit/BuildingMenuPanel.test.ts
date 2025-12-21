@@ -82,6 +82,10 @@ class MockZone {
     return this;
   }
 
+  setDepth(): this {
+    return this;
+  }
+
   on(event: string, callback: () => void): this {
     if (!this._handlers.has(event)) {
       this._handlers.set(event, []);
@@ -96,6 +100,8 @@ class MockZone {
       handlers.forEach(h => h());
     }
   }
+
+  destroy(): void {}
 }
 
 class MockContainer {
@@ -151,6 +157,7 @@ jest.mock('phaser', () => ({
       Container: MockContainer,
       Text: MockText,
       Rectangle: MockRectangle,
+      Zone: MockZone,
     },
     Scene: class MockScene {},
   },
@@ -193,6 +200,13 @@ describe('BuildingMenuPanel', () => {
           if (config.onComplete) {
             config.onComplete();
           }
+          return { remove: jest.fn() };
+        }),
+      },
+      time: {
+        delayedCall: jest.fn().mockImplementation((_delay: number, callback: Function) => {
+          // Immediately invoke callback for testing
+          callback();
           return { remove: jest.fn() };
         }),
       },

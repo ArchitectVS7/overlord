@@ -58,6 +58,8 @@ jest.mock('phaser', () => ({
         x = 0;
         y = 0;
         text = '';
+        visible = true;
+        depth = 0;
         constructor(_scene: unknown, x: number, y: number, text: string) {
           this.x = x;
           this.y = y;
@@ -68,6 +70,9 @@ jest.mock('phaser', () => ({
         setColor(): this { return this; }
         setInteractive(): this { return this; }
         setScrollFactor(): this { return this; }
+        setVisible(v: boolean): this { this.visible = v; return this; }
+        setDepth(d: number): this { this.depth = d; return this; }
+        setWordWrapWidth(): this { return this; }
         on(): this { return this; }
         destroy(): void {}
       },
@@ -83,6 +88,7 @@ jest.mock('phaser', () => ({
       Zone: class MockZone {
         setInteractive(): this { return this; }
         on(): this { return this; }
+        setDepth(): this { return this; }
         destroy(): void {}
       }
     }
@@ -105,6 +111,8 @@ function createMockSceneContext() {
             setInteractive: jest.fn().mockReturnThis(),
             setScrollFactor: jest.fn().mockReturnThis(),
             setColor: jest.fn().mockReturnThis(),
+            setVisible: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
             on: jest.fn().mockReturnThis()
           };
           addedObjects.push(textObj);
@@ -158,7 +166,9 @@ function createMockSceneContext() {
         zone: jest.fn(() => {
           const zone = {
             setInteractive: jest.fn().mockReturnThis(),
-            on: jest.fn().mockReturnThis()
+            on: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
+            destroy: jest.fn()
           };
           addedObjects.push(zone);
           return zone;
@@ -233,7 +243,7 @@ describe('FlashConflictsScene', () => {
       const titleCall = textCalls.find(call => call[2] === 'Flash Conflicts');
       expect(titleCall).toBeDefined();
       expect(titleCall[0]).toBe(512); // centerX
-      expect(titleCall[1]).toBe(50);  // y position
+      expect(titleCall[1]).toBe(52);  // y position (adjusted for TopMenuBar)
     });
 
     test('should create ScenarioListPanel', () => {

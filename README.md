@@ -21,12 +21,14 @@ A modern web-based remake of the classic 4X strategy game "Overlord" (also known
 
 | Milestone | Status |
 |-----------|--------|
-| Core Game Logic | 85% Complete (18 TypeScript systems) |
-| Phaser UI Layer | 5% Complete |
-| Test Coverage | 93.78% (304 tests) |
-| Implementation Phase | Phase 4 - Active Development |
+| Core Game Logic | 95% Complete (32 TypeScript systems) |
+| Phaser UI Layer | 95% Complete (37 UI panels) |
+| Test Coverage | 1329 passing tests |
+| Implementation Phase | Near Feature-Complete |
 
-## Local Insall 
+See [ROADMAP.md](./ROADMAP.md) for detailed status and remaining work.
+
+## Local Install 
 
 ```bash
 # Clone and navigate
