@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForPhaserGame, getPhaserCanvas } from './helpers/phaser-helpers';
+import { waitForPhaserGame, getPhaserCanvas, waitForScene } from './helpers/phaser-helpers';
 
 test.describe('Game Loading', () => {
   test('should load the game page', async ({ page }) => {
@@ -35,8 +35,8 @@ test.describe('Game Loading', () => {
     await page.goto('/');
     await waitForPhaserGame(page);
 
-    // Wait a bit for the initial scene to load
-    await page.waitForTimeout(1000);
+    // Wait for MainMenuScene to be active
+    await waitForScene(page, 'MainMenuScene', 10000);
 
     // Check if MainMenuScene is active
     const isMainMenuActive = await page.evaluate(() => {

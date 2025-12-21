@@ -28,6 +28,7 @@ import { CraftSystem } from '@core/CraftSystem';
 import { EntitySystem } from '@core/EntitySystem';
 import { NavigationSystem } from '@core/NavigationSystem';
 import { CombatSystem } from '@core/CombatSystem';
+import { InvasionSystem } from '@core/InvasionSystem';
 import { AIDecisionSystem } from '@core/AIDecisionSystem';
 import { AudioManager } from '@core/AudioManager';
 import { SaveSystem } from '@core/SaveSystem';
@@ -68,6 +69,7 @@ export class GalaxyMapScene extends Phaser.Scene {
   private entitySystem!: EntitySystem;
   private navigationSystem!: NavigationSystem;
   private combatSystem!: CombatSystem;
+  private invasionSystem!: InvasionSystem;
   private aiDecisionSystem!: AIDecisionSystem;
   private volumeControlPanel!: VolumeControlPanel;
   private saveGamePanel!: SaveGamePanel;
@@ -325,6 +327,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Create CombatSystem and NavigationSystem for Story 5-5
     this.combatSystem = new CombatSystem(this.gameState, this.platoonSystem);
+    this.invasionSystem = new InvasionSystem(this.gameState, this.combatSystem);
     const resourceSystem = this.phaseProcessor.getResourceSystem();
     this.navigationSystem = new NavigationSystem(this.gameState, resourceSystem, this.combatSystem);
     this.spacecraftNavigationPanel = new SpacecraftNavigationPanel(this, this.navigationSystem);
@@ -429,43 +432,29 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up invasion callback to trigger combat - Story 6-3
     this.invasionPanel.onInvade = (planet, aggression) => {
-      // Simulate battle outcome (full combat integration in future story)
-      const attackerStrength = this.invasionPanel.getTotalStrength();
-      const defenderStrength = planet.population * 10; // Rough defender strength
+      // Execute invasion via InvasionSystem
+      const result = this.invasionSystem.invadePlanet(planet.id, FactionType.Player, aggression);
 
-      // Higher aggression = more risk but higher damage
-      const aggressionBonus = (aggression - 50) / 100; // -0.5 to +0.5
-      const attackerEffective = attackerStrength * (1 + aggressionBonus);
-
-      const victory = attackerEffective > defenderStrength;
-
-      // Calculate casualties based on aggression and outcome
-      const baseCasualties = this.invasionPanel.getTotalTroopCount();
-      const attackerLossRate = victory ? (aggression / 200) : (aggression / 100); // 0-50% or 0-100%
-      const defenderLossRate = victory ? 0.8 : 0.3;
-
-      const attackerCasualties = Math.floor(baseCasualties * attackerLossRate);
-      const defenderCasualties = Math.floor(planet.population * defenderLossRate);
+      if (!result) {
+        // Invasion failed to initiate (no platoons, no orbital control, etc.)
+        this.notificationManager.showNotification('Invasion failed - check orbital control and platoons', 'danger');
+        return;
+      }
 
       // Show battle results
       this.battleResultsPanel.show({
-        victory,
+        victory: result.attackerWins,
         planetName: planet.name,
-        attackerCasualties,
-        defenderCasualties,
-        resourcesCaptured: victory ? {
-          credits: Math.floor(planet.population * 10),
-          minerals: Math.floor(planet.population * 5),
-          fuel: Math.floor(planet.population * 2),
+        attackerCasualties: result.attackerCasualties,
+        defenderCasualties: result.defenderCasualties,
+        resourcesCaptured: result.capturedResources ? {
+          credits: result.capturedResources.credits,
+          minerals: result.capturedResources.minerals,
+          fuel: result.capturedResources.fuel,
         } : undefined,
-        defeatReason: victory ? undefined : 'Superior enemy defenses overwhelmed your forces',
+        defeatReason: result.attackerWins ? undefined : 'Superior enemy defenses overwhelmed your forces',
       }, () => {
-        // On close callback
-        if (victory) {
-          // Transfer planet ownership
-          planet.owner = FactionType.Player;
-          // Planet display will update automatically on next render
-        }
+        // On close callback - planet ownership already handled by InvasionSystem
         this.resourceHUD.updateDisplay();
       });
     };

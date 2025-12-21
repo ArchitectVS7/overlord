@@ -1,5 +1,12 @@
 /**
+ * @deprecated This scene is deprecated. Use GalaxyMapScene via New Campaign flow instead.
+ *
  * TutorialsScene - Entry point for tutorial scenarios
+ *
+ * DEPRECATION NOTICE:
+ * This scene was used to display tutorial scenarios but has been superseded.
+ * Players should learn game mechanics through the New Campaign flow which
+ * uses GalaxyMapScene with full game system integration.
  *
  * Displays the list of available tutorials for players to learn game mechanics.
  * This scene is identical in function to FlashConflictsScene but shows only
