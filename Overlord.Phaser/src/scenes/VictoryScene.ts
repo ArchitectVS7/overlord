@@ -282,16 +282,27 @@ export class VictoryScene extends Phaser.Scene {
   }
 
   /**
-   * Returns to the main menu.
+   * Returns to the appropriate menu based on scenario type.
+   * Tutorials return to TutorialsScene, campaigns return to MainMenuScene.
    */
   private returnToMainMenu(): void {
+    // Check if this was a tutorial scenario
+    const scenario = this.registry.get('currentScenario') as { type?: string } | undefined;
+    const isTutorial = scenario?.type === 'tutorial';
+
     // Clear registry data
     this.registry.remove('gameState');
     this.registry.remove('galaxy');
     this.registry.remove('turnSystem');
     this.registry.remove('phaseProcessor');
+    this.registry.remove('currentScenario');
 
-    this.scene.start('MainMenuScene');
+    // Route to appropriate scene
+    if (isTutorial) {
+      this.scene.start('TutorialsScene');
+    } else {
+      this.scene.start('MainMenuScene');
+    }
   }
 
   /**

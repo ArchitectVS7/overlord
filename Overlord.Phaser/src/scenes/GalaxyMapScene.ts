@@ -40,6 +40,12 @@ import { getAdminModeService } from '@services/AdminModeService';
 import { getUIPanelPositionService } from '@services/UIPanelPositionService';
 import { getSaveService } from '@services/SaveService';
 import { TopMenuBar } from './ui/TopMenuBar';
+import { TutorialManager } from '@core/TutorialManager';
+import { TutorialActionDetector } from '@core/TutorialActionDetector';
+import { TutorialHighlight } from './ui/TutorialHighlight';
+import { TutorialStepPanel } from './ui/TutorialStepPanel';
+import { Scenario } from '@core/models/ScenarioModels';
+import { ScenarioGameState, ScenarioInitializer } from '@core/ScenarioInitializer';
 
 export class GalaxyMapScene extends Phaser.Scene {
   private galaxy!: Galaxy;
@@ -82,8 +88,20 @@ export class GalaxyMapScene extends Phaser.Scene {
   private selectionGraphics!: Phaser.GameObjects.Graphics;
   private controlsText!: Phaser.GameObjects.Text;
 
+  // Tutorial System
+  private tutorialManager?: TutorialManager;
+  private tutorialActionDetector?: TutorialActionDetector;
+  private tutorialHighlight?: TutorialHighlight;
+  private tutorialStepPanel?: TutorialStepPanel;
+
   constructor() {
     super({ key: 'GalaxyMapScene' });
+  }
+
+  public init(data: { scenario?: Scenario }): void {
+    if (data.scenario) {
+      this.registry.set('currentScenario', data.scenario);
+    }
   }
 
   public create(): void {
@@ -102,8 +120,30 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Try to get turnSystem and phaseProcessor from registry
     const registryTurnSystem = this.registry.get('turnSystem') as TurnSystem | undefined;
     const registryPhaseProcessor = this.registry.get('phaseProcessor') as PhaseProcessor | undefined;
+    const currentScenario = this.registry.get('currentScenario') as Scenario | undefined;
 
-    if (registryGameState && registryGalaxy) {
+    if (currentScenario) {
+      // Initialize from Scenario
+      console.log(`Initializing Scenario: ${currentScenario.name}`);
+      const initializer = new ScenarioInitializer();
+      const result = initializer.initialize(currentScenario);
+      if (result.success && result.gameState) {
+        this.gameState = result.gameState;
+        // Create a Galaxy wrapper around the scenario planets
+        this.galaxy = {
+          seed: 0,
+          name: currentScenario.name,
+          difficulty: currentScenario.difficulty === 'hard' ? Difficulty.Hard : Difficulty.Normal,
+          planets: this.gameState.planets
+        };
+        this.turnSystem = new TurnSystem(this.gameState);
+        this.phaseProcessor = new PhaseProcessor(this.gameState);
+      } else {
+        console.error('Failed to initialize scenario:', result.error);
+        // Fallback to default
+        this.createDefaultState();
+      }
+    } else if (registryGameState && registryGalaxy) {
       // Use campaign-initialized state
       this.gameState = registryGameState;
       this.galaxy = registryGalaxy;
@@ -112,15 +152,10 @@ export class GalaxyMapScene extends Phaser.Scene {
       console.log(`Using campaign state: Difficulty=${registryGameState.campaignConfig?.difficulty}, AI=${registryGameState.campaignConfig?.aiPersonality}`);
     } else {
       // Fallback for direct scene access (testing/development)
-      console.warn('No campaign state in registry - creating default state');
-      this.gameState = new GameState();
-      const generator = new GalaxyGenerator();
-      this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
-      this.gameState.planets = this.galaxy.planets;
-      this.gameState.rebuildLookups();
-      this.turnSystem = new TurnSystem(this.gameState);
-      this.phaseProcessor = new PhaseProcessor(this.gameState);
+      this.createDefaultState();
     }
+
+    // Initialize input system (platform-agnostic)
 
     // Initialize input system (platform-agnostic)
     this.inputSystem = new InputSystem({
@@ -224,6 +259,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     // Wire up PlanetInfoPanel Build button to BuildingMenuPanel
     this.planetInfoPanel.onBuildClick = (planet) => {
       console.log('BUILD CLICK - planet:', planet.name);
+      this.tutorialActionDetector?.reportButtonClick('build');
       this.planetInfoPanel.hide();
       this.buildingMenuPanel.show(planet);
       console.log('BUILD CLICK - buildingMenuPanel visible:', this.buildingMenuPanel.visible);
@@ -243,6 +279,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up PlanetInfoPanel Commission button to PlatoonCommissionPanel
     this.planetInfoPanel.onCommissionClick = (planet) => {
+      this.tutorialActionDetector?.reportPlatoonCommission(); // Detect commission click
       this.planetInfoPanel.hide();
       const platoonCount = this.entitySystem.getPlatoonsAtPlanet(planet.id).length;
       this.platoonCommissionPanel.show(planet, () => {
@@ -256,6 +293,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up PlanetInfoPanel Platoons button to PlatoonDetailsPanel
     this.planetInfoPanel.onPlatoonsClick = (planet) => {
+      this.tutorialActionDetector?.reportButtonClick('platoons');
       this.planetInfoPanel.hide();
       const platoons = this.entitySystem.getPlatoonsAtPlanet(planet.id);
       this.platoonDetailsPanel.show(planet, platoons, () => {
@@ -275,6 +313,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up PlanetInfoPanel Spacecraft button to SpacecraftPurchasePanel
     this.planetInfoPanel.onSpacecraftClick = (planet) => {
+      this.tutorialActionDetector?.reportButtonClick('spacecraft');
       this.planetInfoPanel.hide();
       const fleetCount = this.entitySystem.getCraftAtPlanet(planet.id).length;
       this.spacecraftPurchasePanel.show(planet, () => {
@@ -334,6 +373,7 @@ export class GalaxyMapScene extends Phaser.Scene {
 
     // Wire up PlanetInfoPanel Navigate button to SpacecraftNavigationPanel
     this.planetInfoPanel.onNavigateClick = (planet) => {
+      this.tutorialActionDetector?.reportButtonClick('navigate');
       // Get spacecraft at this planet
       const craft = this.entitySystem.getCraftAtPlanet(planet.id);
       if (craft.length === 0) { return; }
@@ -539,6 +579,12 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.addDebugInfo();
     this.addControlsHelp();
 
+    // Initialize Tutorial System
+    this.initializeTutorialSystem();
+
+    // Check if we should start a Scenario/Tutorial
+    this.checkScenarioStart();
+
     // Auto-select player's home planet (AC5: Default Selection)
     this.autoSelectHomePlanet();
 
@@ -696,7 +742,9 @@ export class GalaxyMapScene extends Phaser.Scene {
         break;
       case 'endTurn':
         console.log('End turn (Space pressed in action phase)');
+        this.tutorialActionDetector?.reportTurnEnd();
         // TODO: End turn
+        this.handleEndTurn();
         break;
     }
   }
@@ -761,6 +809,13 @@ export class GalaxyMapScene extends Phaser.Scene {
       // Show planet info panel
       this.planetInfoPanel.setPlanet(planet);
       this.planetInfoPanel.show();
+
+      // Report to tutorial system
+      this.tutorialActionDetector?.reportPlanetSelection(planet.name);
+
+      // If the tutorial action is just waiting for the panel to open (e.g. "acknowledge"),
+      // we might want to check if opening the panel satisfies something.
+      // But typically "planet selection" is the action.
     }
   }
 
@@ -797,6 +852,150 @@ export class GalaxyMapScene extends Phaser.Scene {
         this.selectionGraphics.strokeCircle(container.x, container.y, radius);
       }
     }
+  }
+
+  // ==================== Tutorial System ====================
+
+  private initializeTutorialSystem(): void {
+    this.tutorialManager = new TutorialManager();
+    this.tutorialActionDetector = new TutorialActionDetector();
+    this.tutorialHighlight = new TutorialHighlight(this);
+    this.tutorialStepPanel = new TutorialStepPanel(this);
+
+    // Wire up events
+    this.tutorialManager.onStepStarted = (step) => {
+      this.onTutorialStepStarted(step);
+    };
+
+    this.tutorialManager.onStepCompleted = () => {
+      this.onTutorialStepCompleted();
+    };
+
+    this.tutorialManager.onTutorialComplete = () => {
+      this.onTutorialComplete();
+    };
+
+    this.tutorialActionDetector.onActionCompleted = () => {
+      this.tutorialManager?.completeCurrentStep();
+    };
+
+    // Wire up panel callbacks
+    this.tutorialStepPanel.onSkip = () => {
+      this.tutorialManager?.skip();
+    };
+
+    this.tutorialStepPanel.onNext = () => {
+      this.tutorialActionDetector?.reportButtonClick('acknowledge');
+    };
+  }
+
+  private checkScenarioStart(): void {
+    // Check if we are running in a scenario context
+    // This is set by ScenarioInitializer via MainMenu -> TutorialsScene
+    const scenarioGameState = this.gameState as ScenarioGameState;
+
+    // Also check registry for 'scenario' passed from init data
+    // If the scene started with a scenario in init data, we might need to load it here
+    // But scenario loading usually happens BEFORE create, in init().
+    // We can assume if this.gameState has scenarioId, we are good.
+
+    if (scenarioGameState && scenarioGameState.scenarioId) {
+      // Find the scenario definition (we might need to load it or it might be in registry)
+      // For now, assuming TutorialManager needs the Scenario object.
+      // We can get it from the registry if we put it there.
+      const scenario = this.registry.get('currentScenario') as Scenario | undefined;
+
+      if (scenario) {
+        console.log(`Starting Scenario: ${scenario.name}`);
+        this.tutorialManager?.initialize(scenario);
+      } else {
+        console.warn('Scenario ID present but Scenario object not found in registry');
+      }
+    }
+  }
+
+  private onTutorialStepStarted(step: import('@core/models/TutorialModels').TutorialStep): void {
+    if (!this.tutorialStepPanel || !this.tutorialManager) return;
+
+    // Show step in panel
+    this.tutorialStepPanel.showStep(
+      step,
+      this.tutorialManager.getCurrentStepIndex() + 1,
+      this.tutorialManager.getStepCount()
+    );
+
+    // Handle highlighting
+    this.tutorialHighlight?.clear();
+
+    if (step.highlight) {
+      const target = this.resolveHighlightTarget(step.highlight);
+      if (target) {
+        this.tutorialHighlight?.showGlow(target, true);
+      }
+    }
+
+    // Determine what action to watch
+    if (step.action) {
+      this.tutorialActionDetector?.watchFor(step.action);
+    }
+  }
+
+  private resolveHighlightTarget(highlightId: string): { x: number, y: number, width: number, height: number } | undefined {
+    // Check planets first (format: "planet-{id}" or "planet-1")
+    if (highlightId.startsWith('planet-')) {
+      // ID might be numeric or "planet-1" string from json
+      // Our planetContainers are keyed by string(id)
+
+      // If coming from scenario json "planet-1", we need to map to planet ID.
+      // ScenarioInitializer sets planet IDs sequentially starting at 1.
+      // So "planet-1" usually means ID 1.
+      const idPart = highlightId.replace('planet-', '');
+      const container = this.planetContainers.get(idPart);
+
+      if (container) {
+        // Return bounds of the planet container + hit area
+        // We can approximate or use getBounds (which might be expensive or strict)
+        return {
+          x: container.x - 40,
+          y: container.y - 40,
+          width: 80,
+          height: 80
+        };
+      }
+    }
+
+    // Check specific UI panels
+    if (highlightId === 'planet-info-panel') {
+      if (this.planetInfoPanel && this.planetInfoPanel.visible) {
+        // PlanetInfoPanel is fixed to camera, so x/y are screen coords
+        // It's a container.
+        return {
+          x: this.planetInfoPanel.x,
+          y: this.planetInfoPanel.y,
+          width: 280, // PANEL_WIDTH
+          height: 560 // PANEL_HEIGHT
+        };
+      }
+    }
+
+    // Fallback or other UI elements
+    return undefined;
+  }
+
+  private onTutorialStepCompleted(): void {
+    this.tutorialHighlight?.clear();
+    this.tutorialStepPanel?.showCompletion();
+  }
+
+  private onTutorialComplete(): void {
+    this.tutorialHighlight?.clear();
+    this.tutorialStepPanel?.hide();
+    console.log('Tutorial Complete');
+    // Maybe show a victory/completion modal?
+  }
+
+  private handleEndTurn(): void {
+    this.turnSystem.advancePhase();
   }
 
   private addDebugInfo(): void {
@@ -1282,6 +1481,17 @@ export class GalaxyMapScene extends Phaser.Scene {
     if (positions.size > 0) {
       console.log(`Applied ${positions.size} stored panel positions for GalaxyMapScene`);
     }
+  }
+
+  private createDefaultState(): void {
+    console.warn('Creating default state (no campaign/scenario found)');
+    this.gameState = new GameState();
+    const generator = new GalaxyGenerator();
+    this.galaxy = generator.generateGalaxy(42, Difficulty.Normal);
+    this.gameState.planets = this.galaxy.planets;
+    this.gameState.rebuildLookups();
+    this.turnSystem = new TurnSystem(this.gameState);
+    this.phaseProcessor = new PhaseProcessor(this.gameState);
   }
 
   public shutdown(): void {

@@ -1,16 +1,8 @@
 /**
- * @deprecated This scene is deprecated. Use GalaxyMapScene via New Campaign flow instead.
- *
  * TutorialsScene - Entry point for tutorial scenarios
  *
- * DEPRECATION NOTICE:
- * This scene was used to display tutorial scenarios but has been superseded.
- * Players should learn game mechanics through the New Campaign flow which
- * uses GalaxyMapScene with full game system integration.
- *
  * Displays the list of available tutorials for players to learn game mechanics.
- * This scene is identical in function to FlashConflictsScene but shows only
- * tutorial-type scenarios.
+ * Launches GalaxyMapScene with the selected tutorial scenario.
  */
 
 import Phaser from 'phaser';
@@ -131,7 +123,7 @@ export class TutorialsScene extends Phaser.Scene {
    */
   private startScenario(scenario: Scenario): void {
     console.log(`Starting tutorial: ${scenario.id}`);
-    // Launch the ScenarioGameScene with the selected tutorial
-    this.scene.start('ScenarioGameScene', { scenario });
+    // Launch the GalaxyMapScene with the selected tutorial
+    this.scene.start('GalaxyMapScene', { scenario });
   }
 }

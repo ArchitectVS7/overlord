@@ -36,11 +36,15 @@ export class TutorialStepPanel {
   private instructionText!: Phaser.GameObjects.Text;
   private completionText!: Phaser.GameObjects.Text;
   private skipButton!: Phaser.GameObjects.Text;
+  private nextButton!: Phaser.GameObjects.Container;
+  private nextButtonText!: Phaser.GameObjects.Text;
+  private nextButtonBg!: Phaser.GameObjects.Graphics;
 
   private visible: boolean = false;
 
   // Callbacks
   public onSkip?: () => void;
+  public onNext?: () => void;
   public onCompletionDone?: () => void;
 
   constructor(scene: Phaser.Scene) {
@@ -129,6 +133,54 @@ export class TutorialStepPanel {
       this.triggerSkip();
     });
     this.container.add(this.skipButton);
+
+    // Next button (for 'acknowledge' actions)
+    this.createNextButton();
+  }
+
+  private createNextButton(): void {
+    const buttonWidth = 100;
+    const buttonHeight = 36;
+    const x = PANEL_WIDTH - PADDING - buttonWidth;
+    const y = PANEL_HEIGHT - PADDING - 50;
+
+    this.nextButton = this.scene.add.container(x, y);
+
+    this.nextButtonBg = this.scene.add.graphics();
+    this.nextButtonBg.fillStyle(0x00bfff, 1); // Blue button
+    this.nextButtonBg.fillRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    this.nextButton.add(this.nextButtonBg);
+
+    this.nextButtonText = this.scene.add.text(buttonWidth / 2, buttonHeight / 2, 'NEXT', {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      padding: { x: 30, y: 8 },
+    });
+    this.nextButtonText.setOrigin(0.5);
+    this.nextButton.add(this.nextButtonText);
+
+    // Use text-based interaction instead of zone (fixes scrollFactor(0) hit detection - P003)
+    this.nextButtonText.setInteractive({ useHandCursor: true });
+
+    this.nextButtonText.on('pointerover', () => {
+      this.nextButtonBg.clear();
+      this.nextButtonBg.fillStyle(0x33ccff, 1); // Lighter blue
+      this.nextButtonBg.fillRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    });
+
+    this.nextButtonText.on('pointerout', () => {
+      this.nextButtonBg.clear();
+      this.nextButtonBg.fillStyle(0x00bfff, 1);
+      this.nextButtonBg.fillRoundedRect(0, 0, buttonWidth, buttonHeight, 6);
+    });
+
+    this.nextButtonText.on('pointerdown', () => {
+      this.onNext?.();
+    });
+
+    this.nextButton.setVisible(false);
+    this.container.add(this.nextButton);
   }
 
   /**
@@ -141,6 +193,12 @@ export class TutorialStepPanel {
     this.stepText.setText(`Step ${currentIndex} of ${totalSteps}`);
     this.instructionText.setText(step.text);
     this.completionText.setVisible(false);
+    
+    // Show Next button if action target is 'acknowledge' (user just needs to read/click next)
+    // Tutorial JSONs use { type: 'click_button', target: 'acknowledge' } pattern
+    const showNext = step.action && 'target' in step.action && step.action.target === 'acknowledge';
+    this.nextButton.setVisible(!!showNext);
+
     this.show();
   }
 
@@ -149,7 +207,9 @@ export class TutorialStepPanel {
    */
   public showCompletion(): void {
     // Hide instruction, show completion
+    // Hide instruction and next button, show completion
     this.instructionText.setVisible(false);
+    this.nextButton.setVisible(false);
     this.completionText.setVisible(true);
     this.completionText.setAlpha(0);
 
@@ -215,6 +275,9 @@ export class TutorialStepPanel {
     this.skipButton.off('pointerover');
     this.skipButton.off('pointerout');
     this.skipButton.off('pointerdown');
+    this.nextButtonText.off('pointerover');
+    this.nextButtonText.off('pointerout');
+    this.nextButtonText.off('pointerdown');
     this.container.destroy();
   }
 }
