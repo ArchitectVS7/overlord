@@ -280,6 +280,11 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.resourceHUD.updateDisplay();
     };
 
+    // Wire up building scrap to refresh ResourceHUD
+    this.buildingMenuPanel.onBuildingScrap = () => {
+      this.resourceHUD.updateDisplay();
+    };
+
     // Create PlatoonSystem and EntitySystem for military features (Story 5-1)
     this.entitySystem = new EntitySystem(this.gameState);
     this.platoonSystem = new PlatoonSystem(this.gameState, this.entitySystem);
@@ -444,6 +449,26 @@ export class GalaxyMapScene extends Phaser.Scene {
              c.planetID === planet.id
       );
       this.bombardmentPanel.show(planet, cruisers);
+    };
+
+    // Wire up PlanetInfoPanel Deploy button for neutral planets
+    this.planetInfoPanel.onDeployProcessorClick = (planet) => {
+      const apCraft = this.gameState.craft.find(c =>
+        c.type === CraftType.AtmosphereProcessor &&
+        c.planetID === planet.id &&
+        !c.inTransit
+      );
+      if (apCraft) {
+        const success = this.craftSystem.deployAtmosphereProcessor(apCraft.id);
+        if (success) {
+          this.notificationManager?.showNotification(
+            `Terraforming initiated on ${planet.name}! 10 turns to completion.`,
+            'info'
+          );
+          this.resourceHUD.updateDisplay();
+          this.planetInfoPanel.setPlanet(planet);
+        }
+      }
     };
 
     // Create AIDecisionSystem - Story 7-1
@@ -850,6 +875,14 @@ export class GalaxyMapScene extends Phaser.Scene {
       // Show planet info panel
       this.planetInfoPanel.setPlanet(planet);
       this.planetInfoPanel.show();
+
+      // Check for Atmosphere Processor at planet for Deploy button
+      const apCraft = this.gameState.craft.filter(c =>
+        c.type === CraftType.AtmosphereProcessor &&
+        c.planetID === planet.id &&
+        !c.inTransit
+      );
+      this.planetInfoPanel.setHasAtmosphereProcessor(apCraft.length > 0);
 
       // Report to tutorial system
       this.tutorialActionDetector?.reportPlanetSelection(planet.name);
