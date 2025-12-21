@@ -559,6 +559,7 @@ export class GalaxyMapScene extends Phaser.Scene {
           fuel: result.capturedResources.fuel,
         } : undefined,
         defeatReason: result.attackerWins ? undefined : 'Superior enemy defenses overwhelmed your forces',
+        instantSurrender: result.instantSurrender,
       }, () => {
         // On close callback - planet ownership already handled by InvasionSystem
         this.resourceHUD.updateDisplay();
