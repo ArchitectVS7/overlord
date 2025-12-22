@@ -298,23 +298,23 @@ Total Cost = Equipment Cost + Weapon Cost
 
 | Equipment | Cost | Combat Modifier |
 |-----------|------|-----------------|
-| Civilian | 20,000₡ | 0.5× |
-| Basic | 35,000₡ | 1.0× |
-| Standard | 55,000₡ | 1.5× |
-| Advanced | 80,000₡ | 2.0× |
-| Elite | 109,000₡ | 2.5× |
+| Civilian | 2,500₡ | 0.5× |
+| Basic | 6,000₡ | 1.0× |
+| Standard | 10,000₡ | 1.5× |
+| Advanced | 16,000₡ | 2.0× |
+| Elite | 25,000₡ | 2.5× |
 
 #### Weapon Levels
 
 | Weapon | Cost | Combat Modifier |
 |--------|------|-----------------|
-| Pistol | 5,000₡ | 0.8× |
-| Rifle | 10,000₡ | 1.0× |
-| Assault Rifle | 18,000₡ | 1.3× |
-| Plasma | 30,000₡ | 1.6× |
+| Pistol | 500₡ | 0.8× |
+| Rifle | 2,000₡ | 1.0× |
+| Assault Rifle | 3,500₡ | 1.3× |
+| Plasma | 6,000₡ | 1.6× |
 
 **Example Platoon:**
-- **Standard Equipment** (55,000₡) + **Rifle** (10,000₡) = **65,000₡ total**
+- **Standard Equipment** (10,000₡) + **Rifle** (2,000₡) = **12,000₡ total**
 - Combat Strength: Troops × 1.5 (equipment) × 1.0 (weapon) = 1.5× base strength
 
 **Commissioned platoons:**
@@ -324,9 +324,9 @@ Total Cost = Equipment Cost + Weapon Cost
 
 ### Platoon Strategy
 
-**Early Game:** Commission Basic/Pistol platoons (40,000₡) to save credits
-**Mid Game:** Upgrade to Standard/Rifle (65,000₡) for balanced cost/strength
-**Late Game:** Deploy Elite/Plasma (139,000₡) for maximum combat power
+**Early Game:** Commission Civilian/Pistol platoons (3,000₡) or Basic/Rifle (8,000₡) for quick deployment
+**Mid Game:** Upgrade to Standard/Assault Rifle (13,500₡) for balanced cost/strength
+**Late Game:** Deploy Elite/Plasma (31,000₡) for maximum combat power
 
 ---
 
@@ -570,8 +570,11 @@ You can adjust tax rates per planet from **0% to 100%**.
 
 **Tax Revenue Formula:**
 ```
-Revenue = (Population × Tax Rate × Planet Modifier) ÷ 100
+Revenue = (Population × 10 × Tax Rate × Planet Modifier) ÷ 100
 ```
+
+**Example:** 500 population @ 50% tax on Metropolis (2× multiplier):
+- Revenue = (500 × 10 × 50 × 2) ÷ 100 = **5,000 credits per turn**
 
 **Planet Modifiers:**
 - Metropolis: 2× revenue
@@ -683,7 +686,7 @@ Understanding AI behavior helps you win:
 2. **Random Build Skips:** 40-60% chance AI does nothing on economy phase—exploit this delay
 3. **Threshold-Based Attacks:** AI won't attack until meeting strength threshold—you can prepare
 4. **No Docking Bay Priority:** AI may build many Mining Stations before Docking Bay, delaying spacecraft
-5. **High Platoon Cost:** 65,000₡ per Standard/Rifle platoon means AI struggles to afford military early
+5. **No Strategic Specialization:** AI builds all structures equally; player can optimize planet types for efficiency
 
 ---
 
@@ -699,27 +702,21 @@ Both player and AI begin with identical starting resources:
 
 **Homeworld Advantage:** Metropolis planets generate 2× tax revenue, giving both factions a strong economic base.
 
-### Critical Game Balance Issues (As of v1.0)
+### Economic Balance
 
-#### Issue 1: Platoon Costs Too High
-**Problem:** Standard/Rifle platoons cost 65,000₡, but players only generate ~150₡/turn from buildings.
-**Impact:** Both player and AI cannot afford military until Turn 20-30, creating a "cold war" stalemate.
-**Recommended Fix:** Reduce platoon costs to 5,000-10,000₡ for early-game viability.
+The game economy is balanced around steady progression:
+- **Turn 1-5:** Infrastructure buildup (buildings cost 2k-12k credits)
+- **Turn 5-10:** First military units (platoons cost 3k-13k credits)
+- **Turn 10-20:** Expansion phase (colonize neutral planets)
+- **Turn 20-40:** Military buildup and first major battles
+- **Turn 40-80:** Strategic warfare for territory control
+- **Turn 80-120:** Endgame - victory condition achieved
 
-#### Issue 2: Building Slots Fill Too Quickly
-**Problem:** 5 surface + 3 orbital slots fill by Turn 3-5.
-**Impact:** Cannot expand economy without capturing new planets—early game bottleneck.
-**Recommended Fix:** Increase slot limits OR make buildings more expensive to slow construction.
-
-#### Issue 3: AI Rarely Builds Docking Bay Early
-**Problem:** AI builds Mining Stations before Docking Bay due to random priority.
-**Impact:** AI cannot purchase Atmosphere Processors to expand, gets stuck at 1 planet forever.
-**Recommended Fix:** Prioritize Docking Bay construction before Mining Stations.
-
-#### Issue 4: No Scrap/Demolish System
-**Problem:** Once slots are full, players cannot demolish old buildings to build new ones.
-**Impact:** Planets become frozen in early-game configuration.
-**Recommended Fix:** Add building demolition/upgrade system.
+**Key Economic Metrics:**
+- Starting credits: 50,000₡ (player), 40,000₡ (AI on Easy/Normal), 50,000₡ (AI on Hard)
+- Typical income: 5,000₡ per turn per Metropolis planet @ 50% tax
+- Time to first platoon: 2-3 turns after initial infrastructure
+- Time to Battle Cruiser: 8-10 turns
 
 ### Recommended Difficulty Curve
 
@@ -778,12 +775,12 @@ Both player and AI begin with identical starting resources:
 ### Platoon Cost Examples
 | Equipment | Weapon | Total Cost | Combat Modifier |
 |-----------|--------|------------|-----------------|
-| Civilian | Pistol | 25,000₡ | 0.4× |
-| Basic | Pistol | 40,000₡ | 0.8× |
-| Basic | Rifle | 45,000₡ | 1.0× |
-| Standard | Rifle | 65,000₡ | 1.5× |
-| Advanced | Assault Rifle | 98,000₡ | 2.6× |
-| Elite | Plasma | 139,000₡ | 4.0× |
+| Civilian | Pistol | 3,000₡ | 0.4× |
+| Basic | Pistol | 6,500₡ | 0.8× |
+| Basic | Rifle | 8,000₡ | 1.0× |
+| Standard | Rifle | 12,000₡ | 1.5× |
+| Advanced | Assault Rifle | 19,500₡ | 2.6× |
+| Elite | Plasma | 31,000₡ | 4.0× |
 
 ### Combat Modifiers Summary
 | Equipment Level | Modifier | Weapon Level | Modifier |
@@ -820,19 +817,19 @@ Both player and AI begin with identical starting resources:
 - **AI Action:** Cannot afford anything, waits
 
 ### Turn 5
-- **Income:** Taxation generates ~1,000₡ per turn
-- **Action:** Purchase Battle Cruiser (50,000₡)
+- **Income:** Taxation generates ~5,000₡ per turn
+- **Action:** Commission first platoon (12,000₡ Standard/Rifle)
 - **AI Action:** Atmosphere Processor reaches neutral planet
 
 ### Turns 6-10
-- **Income:** Steady resource accumulation
-- **Action:** Wait for neutral planet colonization (Turn 14)
-- **AI Action:** Colonization completes, AI expands to second planet
+- **Income:** Steady resource accumulation (5,000₡/turn)
+- **Action:** Commission 2nd platoon, build Battle Cruiser
+- **AI Action:** Colonization completes (Turn 15), AI expands to second planet
 
-### Turn 11+
-- **Income:** Two planets generating resources
-- **Action:** Commission platoons, build military
-- **AI Action:** Builds infrastructure on new planet
+### Turn 11-15
+- **Income:** Increased income as population grows
+- **Action:** Platoons complete training, load onto Battle Cruiser
+- **AI Action:** Builds infrastructure on new planet, commissions military
 
 **Strategic Lesson:** First player to expand to 2-3 planets gains massive economic advantage!
 
