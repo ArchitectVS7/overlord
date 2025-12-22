@@ -66,7 +66,8 @@ export class TaxationSystem {
 
   /**
    * Calculates tax revenue for a single planet.
-   * Formula: (Population ÷ 10) × (TaxRate ÷ 100) × PlanetMultiplier
+   * Formula: (Population × 10) × (TaxRate ÷ 100) × PlanetMultiplier
+   * REBALANCED: Increased taxation rate 100× to make military affordable within reasonable timeframe
    * @param planetID Planet ID
    * @returns Tax revenue in Credits
    */
@@ -81,8 +82,9 @@ export class TaxationSystem {
       return 0;
     }
 
-    // Base calculation: (Population ÷ 10) × (TaxRate ÷ 100)
-    const baseRevenue = (planet.population / 10.0) * (planet.taxRate / 100.0);
+    // Base calculation: (Population × 10) × (TaxRate ÷ 100)
+    // 500 pop @ 50% tax = 2,500 credits/turn
+    const baseRevenue = (planet.population * 10.0) * (planet.taxRate / 100.0);
 
     // Apply planet multiplier (Metropolis = 2.0x, others = 1.0x)
     const planetMultiplier = planet.resourceMultipliers.credits;
@@ -145,8 +147,8 @@ export class TaxationSystem {
     // Clamp to valid range
     taxRate = Math.max(TaxationSystem.MIN_TAX_RATE, Math.min(TaxationSystem.MAX_TAX_RATE, taxRate));
 
-    // Calculate with simulated tax rate
-    const baseRevenue = (planet.population / 10.0) * (taxRate / 100.0);
+    // Calculate with simulated tax rate (matches calculatePlanetTaxRevenue formula)
+    const baseRevenue = (planet.population * 10.0) * (taxRate / 100.0);
     const planetMultiplier = planet.resourceMultipliers.credits;
     const totalRevenue = baseRevenue * planetMultiplier;
 

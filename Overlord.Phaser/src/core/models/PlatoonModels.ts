@@ -2,6 +2,8 @@ import { EquipmentLevel, WeaponLevel } from './Enums';
 
 /**
  * Platoon costs based on equipment and weapon levels.
+ * REBALANCED: Costs reduced 5× to align with increased taxation income
+ * Progression: Civilian (~3k) → Basic (~8k) → Standard (~13k) → Advanced (~20k) → Elite (~30k)
  */
 export class PlatoonCosts {
   /**
@@ -10,15 +12,15 @@ export class PlatoonCosts {
   public static getEquipmentCost(level: EquipmentLevel): number {
     switch (level) {
       case EquipmentLevel.Civilian:
-        return 20000;
+        return 2500;   // Was 20,000 (÷8 for early game viability)
       case EquipmentLevel.Basic:
-        return 35000;
+        return 6000;   // Was 35,000 (÷5.8)
       case EquipmentLevel.Standard:
-        return 55000;
+        return 10000;  // Was 55,000 (÷5.5)
       case EquipmentLevel.Advanced:
-        return 80000;
+        return 16000;  // Was 80,000 (÷5)
       case EquipmentLevel.Elite:
-        return 109000;
+        return 25000;  // Was 109,000 (÷4.4)
       default:
         return 0;
     }
@@ -30,13 +32,13 @@ export class PlatoonCosts {
   public static getWeaponCost(level: WeaponLevel): number {
     switch (level) {
       case WeaponLevel.Pistol:
-        return 5000;
+        return 500;    // Was 5,000 (÷10)
       case WeaponLevel.Rifle:
-        return 10000;
+        return 2000;   // Was 10,000 (÷5)
       case WeaponLevel.AssaultRifle:
-        return 18000;
+        return 3500;   // Was 18,000 (÷5.1)
       case WeaponLevel.Plasma:
-        return 30000;
+        return 6000;   // Was 30,000 (÷5)
       default:
         return 0;
     }
