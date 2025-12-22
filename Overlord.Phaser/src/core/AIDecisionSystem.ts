@@ -109,6 +109,12 @@ export class AIDecisionSystem {
    */
   public onAIPurchasing?: (craftType: CraftType, planetID: number) => void;
 
+  /**
+   * Event fired when AI owns no planets and cannot take any action.
+   * Indicates AI defeat is imminent.
+   */
+  public onAIDefeated?: () => void;
+
   constructor(
     gameState: GameState,
     incomeSystem: IncomeSystem,
@@ -832,6 +838,7 @@ export class AIDecisionSystem {
     const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
     if (aiPlanets.length === 0) {
       console.error('[AI] CRITICAL: AI owns no planets, cannot execute any fallback action. AI defeat imminent.');
+      this.onAIDefeated?.();
       return;
     }
 

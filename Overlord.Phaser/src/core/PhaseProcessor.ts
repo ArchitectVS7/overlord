@@ -518,4 +518,38 @@ export class PhaseProcessor {
       };
     }
   }
+
+  /**
+   * Checks if AIDecisionSystem is configured.
+   * @returns True if AI system is configured
+   */
+  public isAIConfigured(): boolean {
+    return this.aiDecisionSystem !== undefined;
+  }
+
+  /**
+   * Checks if InvasionSystem is configured.
+   * @returns True if invasion system is configured
+   */
+  public isInvasionConfigured(): boolean {
+    return this.invasionSystem !== undefined;
+  }
+
+  /**
+   * Validates PhaseProcessor configuration and returns any warnings.
+   * @returns Object with valid flag and array of warning messages
+   */
+  public validateConfiguration(): { valid: boolean; warnings: string[] } {
+    const warnings: string[] = [];
+
+    if (!this.aiDecisionSystem) {
+      warnings.push('AIDecisionSystem not configured - AI will not take turns');
+    }
+
+    if (!this.invasionSystem) {
+      warnings.push('InvasionSystem not configured - ground invasions disabled');
+    }
+
+    return { valid: warnings.length === 0, warnings };
+  }
 }
