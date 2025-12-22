@@ -27,12 +27,27 @@ enum AttackOutcome {
   FailedInvalidState = 'FAILED_INVALID_STATE',
 }
 
+enum DefendOutcome {
+  Success = 'DEFEND_SUCCESS',
+  FailedNoHomeworld = 'DEFEND_FAILED_NO_HOMEWORLD',
+  FailedInsufficientResources = 'DEFEND_FAILED_INSUFFICIENT_RESOURCES',
+  FailedInvalidState = 'DEFEND_FAILED_INVALID_STATE',
+}
+
 type AttackResult = {
   outcome: AttackOutcome;
   targetId?: number;
   targetsFound: number;
   cruisersFound: number;
   platoonsFound: number;
+  failureDetail?: string;
+};
+
+type DefendResult = {
+  outcome: DefendOutcome;
+  homeworldPresent: boolean;
+  creditsAvailable: number;
+  defensiveActionsAttempted: number;
   failureDetail?: string;
 };
 
@@ -266,8 +281,11 @@ export class AIDecisionSystem {
 
     // Priority 1: Defend if under attack (emergency response)
     if (assessment.underAttack) {
-      console.log('[AI] Defending (under attack)');
-      this.reinforceDefenses();
+      console.log('[AI] Defend attempt (under attack)');
+      const defendResult = this.reinforceDefenses();
+      if (defendResult.outcome !== DefendOutcome.Success) {
+        this.applyFallbackAction();
+      }
     }
 
     // Priority 2: ALWAYS expand to neutral planets (growth = victory)
@@ -407,10 +425,21 @@ export class AIDecisionSystem {
   /**
    * Reinforces defenses at threatened planets.
    */
-  private reinforceDefenses(): void {
+  private reinforceDefenses(): DefendResult {
     const hitotsu = this.gameState.planets.find(p => p.owner === FactionType.AI && p.name === 'Hitotsu');
+    const homeworldPresent = Boolean(hitotsu);
+    const creditsAvailable = hitotsu ? hitotsu.resources.credits : 0;
+    const defensiveActionsAttempted = 1;
+
     if (!hitotsu) {
-      return;
+      const result: DefendResult = {
+        outcome: DefendOutcome.FailedNoHomeworld,
+        homeworldPresent,
+        creditsAvailable,
+        defensiveActionsAttempted,
+      };
+      console.warn('[AI] Defend failed', result);
+      return result;
     }
 
     // Check if we can afford a platoon
@@ -418,7 +447,15 @@ export class AIDecisionSystem {
     const cost = new ResourceCost();
     cost.credits = totalCost;
     if (!hitotsu.resources.canAfford(cost)) {
-      return;
+      const result: DefendResult = {
+        outcome: DefendOutcome.FailedInsufficientResources,
+        homeworldPresent,
+        creditsAvailable,
+        defensiveActionsAttempted,
+        failureDetail: `requires_${totalCost}_credits`,
+      };
+      console.warn('[AI] Defend failed', result);
+      return result;
     }
 
     // Train defensive platoon
@@ -429,10 +466,29 @@ export class AIDecisionSystem {
       EquipmentLevel.Standard,
       WeaponLevel.Rifle,
     );
+    if (platoonId < 0) {
+      const result: DefendResult = {
+        outcome: DefendOutcome.FailedInvalidState,
+        homeworldPresent,
+        creditsAvailable,
+        defensiveActionsAttempted,
+        failureDetail: 'commission_failed',
+      };
+      console.warn('[AI] Defend failed', result);
+      return result;
+    }
     if (platoonId >= 0) {
       this.didMutate = true;
     }
     this.onAICommissioning?.(hitotsu.id, 100, EquipmentLevel.Standard, WeaponLevel.Rifle);
+    const result: DefendResult = {
+      outcome: DefendOutcome.Success,
+      homeworldPresent,
+      creditsAvailable,
+      defensiveActionsAttempted,
+    };
+    console.log('[AI] Defend succeeded', result);
+    return result;
   }
 
   /**
