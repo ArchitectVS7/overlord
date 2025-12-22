@@ -101,6 +101,8 @@ export class BBSGameController {
       AIDifficulty.Normal,
       Math.random
     );
+    // Inject NavigationSystem so AI can actually move ships during attacks
+    this.aiSystem.setNavigationSystem(this.navigationSystem);
     this.phaseProcessor.configureEndPhase({
       aiDecisionSystem: this.aiSystem,
       victoryChecker: () => this.turnSystem.checkVictoryConditions(),

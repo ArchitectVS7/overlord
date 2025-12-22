@@ -6,11 +6,17 @@ import { BuildingSystem } from './BuildingSystem';
 import { DefenseSystem } from './DefenseSystem';
 import { UpgradeSystem } from './UpgradeSystem';
 import { SpaceCombatSystem } from './SpaceCombatSystem';
+import { InvasionSystem } from './InvasionSystem';
+import { CombatSystem } from './CombatSystem';
+import { PlatoonSystem } from './PlatoonSystem';
 import { AIDecisionSystem } from './AIDecisionSystem';
 import { TaxationSystem } from './TaxationSystem';
-import { TurnPhase, FactionType, VictoryResult } from './models/Enums';
+import { TurnPhase, FactionType, VictoryResult, CraftType } from './models/Enums';
 import { ResourceDelta } from './models/ResourceModels';
-import { SpaceBattle, SpaceBattleResult } from './models/CombatModels';
+import { SpaceBattle, SpaceBattleResult, InvasionResult } from './models/CombatModels';
+
+// Note: CombatSystem and PlatoonSystem imported for configureInvasionSystem() API compatibility
+// The InvasionSystem already has internal references to these systems
 
 /**
  * Result of phase processing
@@ -45,6 +51,8 @@ export interface EndPhaseResult extends PhaseProcessingResult {
 export interface CombatPhaseResult extends PhaseProcessingResult {
   battlesResolved: number;
   craftsDestroyed: number;
+  invasionsProcessed: number;
+  planetsCaptured: number;
 }
 
 /**
@@ -69,6 +77,7 @@ export class PhaseProcessor {
   private readonly spaceCombatSystem: SpaceCombatSystem;
   private readonly taxationSystem: TaxationSystem;
   private aiDecisionSystem?: AIDecisionSystem;
+  private invasionSystem?: InvasionSystem;
   private victoryChecker?: () => VictoryResult;
   private onVictoryAchieved?: (result: VictoryResult) => void;
 
@@ -82,6 +91,11 @@ export class PhaseProcessor {
   public onSpaceBattleStarted?: (battle: SpaceBattle) => void;
   public onSpaceBattleCompleted?: (battle: SpaceBattle, result: SpaceBattleResult) => void;
   public onCraftDestroyed?: (craftID: number, owner: FactionType) => void;
+
+  // Invasion events
+  public onInvasionStarted?: (planetID: number, attackerFaction: FactionType) => void;
+  public onInvasionCompleted?: (planetID: number, result: InvasionResult) => void;
+  public onPlanetCaptured?: (planetID: number, newOwner: FactionType, capturedResources: ResourceDelta) => void;
 
   // Tax events
   public onTaxRevenueCalculated?: (planetID: number, revenue: number) => void;
@@ -252,16 +266,18 @@ export class PhaseProcessor {
   }
 
   /**
-   * Processes Combat phase: resolves space battles at all planets.
+   * Processes Combat phase: resolves space battles and ground invasions at all planets.
    * NFR-P3: Must complete within 2 seconds.
    */
   public processCombatPhase(): CombatPhaseResult {
     const startTime = performance.now();
     let battlesResolved = 0;
     let craftsDestroyed = 0;
+    let invasionsProcessed = 0;
+    let planetsCaptured = 0;
 
     try {
-      // Check all planets for space battles
+      // Phase 1: Process all space battles first
       for (const planet of this.gameState.planets) {
         // Check if opposing fleets are present at this planet
         if (this.spaceCombatSystem.shouldSpaceBattleOccur(planet.id)) {
@@ -283,6 +299,49 @@ export class PhaseProcessor {
         }
       }
 
+      // Phase 2: Process ground invasions (if InvasionSystem is configured)
+      if (this.invasionSystem) {
+        for (const planet of this.gameState.planets) {
+          // Skip if planet is neutral
+          if (planet.owner === FactionType.Neutral) {
+            continue;
+          }
+
+          // Find Battle Cruisers in orbit belonging to non-owner with platoons
+          const enemyCruisersWithPlatoons = this.gameState.craft.filter(
+            c =>
+              c.planetID === planet.id &&
+              c.owner !== planet.owner &&
+              c.type === CraftType.BattleCruiser &&
+              c.carriedPlatoonIDs.length > 0 &&
+              !c.isDeployed,
+          );
+
+          if (enemyCruisersWithPlatoons.length > 0) {
+            const attackerFaction = enemyCruisersWithPlatoons[0].owner;
+
+            // Check if attacker has orbital control (no enemy craft remaining)
+            if (this.invasionSystem.hasOrbitalControl(planet.id, attackerFaction)) {
+              // Execute ground invasion
+              const invasionResult = this.invasionSystem.invadePlanet(
+                planet.id,
+                attackerFaction,
+                100, // Full aggression for automated combat
+              );
+
+              if (invasionResult) {
+                invasionsProcessed++;
+                this.onInvasionCompleted?.(planet.id, invasionResult);
+
+                if (invasionResult.planetCaptured) {
+                  planetsCaptured++;
+                }
+              }
+            }
+          }
+        }
+      }
+
       const processingTime = performance.now() - startTime;
 
       // Warn if processing exceeded 2 seconds (NFR-P3)
@@ -295,6 +354,8 @@ export class PhaseProcessor {
         processingTimeMs: processingTime,
         battlesResolved,
         craftsDestroyed,
+        invasionsProcessed,
+        planetsCaptured,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during combat processing';
@@ -305,6 +366,8 @@ export class PhaseProcessor {
         error: errorMessage,
         battlesResolved,
         craftsDestroyed,
+        invasionsProcessed,
+        planetsCaptured,
       };
     }
   }
@@ -324,6 +387,8 @@ export class PhaseProcessor {
       if (this.aiDecisionSystem) {
         this.aiDecisionSystem.executeAITurn();
         aiTurnProcessed = true;
+      } else {
+        console.warn('[End Phase] AIDecisionSystem not configured - AI will not take turns. Call configureEndPhase() to enable AI.');
       }
 
       if (this.victoryChecker) {
@@ -430,5 +495,27 @@ export class PhaseProcessor {
     this.aiDecisionSystem = options.aiDecisionSystem;
     this.victoryChecker = options.victoryChecker;
     this.onVictoryAchieved = options.onVictoryAchieved;
+  }
+
+  /**
+   * Configures Combat phase processing for ground invasions.
+   * Required for automatic ground combat resolution after space battles.
+   */
+  public configureInvasionSystem(options: {
+    invasionSystem: InvasionSystem;
+    combatSystem: CombatSystem;
+    platoonSystem: PlatoonSystem;
+  }): void {
+    this.invasionSystem = options.invasionSystem;
+
+    // Wire up invasion events
+    if (this.invasionSystem) {
+      this.invasionSystem.onInvasionStarted = (planetID, attackerFaction) => {
+        this.onInvasionStarted?.(planetID, attackerFaction);
+      };
+      this.invasionSystem.onPlanetCaptured = (planetID, newOwner, capturedResources) => {
+        this.onPlanetCaptured?.(planetID, newOwner, capturedResources);
+      };
+    }
   }
 }

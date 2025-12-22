@@ -388,6 +388,13 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.navigationSystem = new NavigationSystem(this.gameState, resourceSystem, this.combatSystem);
     this.spacecraftNavigationPanel = new SpacecraftNavigationPanel(this, this.navigationSystem);
 
+    // Configure PhaseProcessor with InvasionSystem for automatic ground combat
+    this.phaseProcessor.configureInvasionSystem({
+      invasionSystem: this.invasionSystem,
+      combatSystem: this.combatSystem,
+      platoonSystem: this.platoonSystem,
+    });
+
     // Wire up PlanetInfoPanel Navigate button to SpacecraftNavigationPanel
     this.planetInfoPanel.onNavigateClick = (planet) => {
       this.tutorialActionDetector?.reportButtonClick('navigate');
@@ -485,6 +492,8 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.craftSystem,
       this.platoonSystem,
     );
+    // Inject NavigationSystem so AI can actually move ships during attacks
+    this.aiDecisionSystem.setNavigationSystem(this.navigationSystem);
     this.phaseProcessor.configureEndPhase({
       aiDecisionSystem: this.aiDecisionSystem,
       victoryChecker: () => this.turnSystem.checkVictoryConditions(),
