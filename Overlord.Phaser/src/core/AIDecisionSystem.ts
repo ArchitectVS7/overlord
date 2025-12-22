@@ -4,6 +4,7 @@ import { ResourceSystem } from './ResourceSystem';
 import { BuildingSystem } from './BuildingSystem';
 import { CraftSystem } from './CraftSystem';
 import { PlatoonSystem } from './PlatoonSystem';
+import { NavigationSystem } from './NavigationSystem';
 import {
   FactionType,
   AIPersonality,
@@ -65,6 +66,7 @@ export class AIDecisionSystem {
   private readonly buildingSystem: BuildingSystem;
   private readonly craftSystem: CraftSystem;
   private readonly platoonSystem: PlatoonSystem;
+  private navigationSystem?: NavigationSystem;
 
   // AI configuration
   private personality: AIPersonality;
@@ -197,6 +199,14 @@ export class AIDecisionSystem {
    */
   public setDifficulty(difficulty: AIDifficulty): void {
     this.difficulty = difficulty;
+  }
+
+  /**
+   * Sets the NavigationSystem for AI fleet movement.
+   * Required for AI to actually move ships during attacks.
+   */
+  public setNavigationSystem(navigationSystem: NavigationSystem): void {
+    this.navigationSystem = navigationSystem;
   }
 
   /**
@@ -696,8 +706,49 @@ export class AIDecisionSystem {
       return result;
     }
 
-    // NOTE: Actual movement would require a NavigationSystem
-    // For now, just fire the event
+    // Check if NavigationSystem is available for actual ship movement
+    if (!this.navigationSystem) {
+      console.warn('[AI] Attack declared but NavigationSystem not configured - ships cannot move');
+      this.onAIAttacking?.(target.id);
+      const result: AttackResult = {
+        outcome: AttackOutcome.FailedInvalidState,
+        targetId: target.id,
+        targetsFound,
+        cruisersFound,
+        platoonsFound,
+        failureDetail: 'navigation_system_not_configured',
+      };
+      return result;
+    }
+
+    // Move Battle Cruisers to target planet
+    let shipsMoved = 0;
+    for (const cruiser of battleCruisers) {
+      // Only move ships with platoons aboard (the actual invasion force)
+      if (cruiser.carriedPlatoonIDs.length > 0) {
+        const moveSuccess = this.navigationSystem.moveShip(cruiser.id, target.id);
+        if (moveSuccess) {
+          shipsMoved++;
+          console.log(`[AI]   Moved Battle Cruiser ${cruiser.id} to ${target.name}`);
+        } else {
+          console.log(`[AI]   Failed to move Battle Cruiser ${cruiser.id} (insufficient fuel or invalid destination)`);
+        }
+      }
+    }
+
+    if (shipsMoved === 0) {
+      const result: AttackResult = {
+        outcome: AttackOutcome.FailedInvalidState,
+        targetId: target.id,
+        targetsFound,
+        cruisersFound,
+        platoonsFound,
+        failureDetail: 'no_ships_could_move',
+      };
+      console.warn('[AI] Attack failed - no ships could move', result);
+      return result;
+    }
+
     this.onAIAttacking?.(target.id);
     const result: AttackResult = {
       outcome: AttackOutcome.Success,
@@ -706,7 +757,7 @@ export class AIDecisionSystem {
       cruisersFound,
       platoonsFound,
     };
-    console.log('[AI] Attack succeeded', result);
+    console.log(`[AI] Attack succeeded - ${shipsMoved} ships en route to ${target.name}`, result);
     this.didMutate = true;
     return result;
   }
@@ -776,6 +827,14 @@ export class AIDecisionSystem {
 
   private applyFallbackAction(): void {
     this.fallbackAttempted = true;
+
+    // Validate AI still owns planets - if not, no fallback is possible
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    if (aiPlanets.length === 0) {
+      console.error('[AI] CRITICAL: AI owns no planets, cannot execute any fallback action. AI defeat imminent.');
+      return;
+    }
+
     if (this.adjustTaxRateFallback()) {
       return;
     }
