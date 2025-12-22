@@ -20,6 +20,22 @@ import { PlatoonCosts } from './models/PlatoonModels';
 import { ResourceCost } from './models/ResourceModels';
 import { BuildingCosts } from './models/BuildingModels';
 
+enum AttackOutcome {
+  Success = 'SUCCESS',
+  FailedNoTarget = 'FAILED_NO_TARGET',
+  FailedInsufficientForces = 'FAILED_INSUFFICIENT_FORCES',
+  FailedInvalidState = 'FAILED_INVALID_STATE',
+}
+
+type AttackResult = {
+  outcome: AttackOutcome;
+  targetId?: number;
+  targetsFound: number;
+  cruisersFound: number;
+  platoonsFound: number;
+  failureDetail?: string;
+};
+
 /**
  * Platform-agnostic AI decision-making system.
  * Executes AI turn, evaluates game state, and makes strategic decisions.
@@ -40,6 +56,7 @@ export class AIDecisionSystem {
   private personalityConfig: AIPersonalityConfig;
   private difficulty: AIDifficulty;
   private didMutate: boolean = false;
+  private fallbackAttempted: boolean = false;
 
   /**
    * Event fired when AI turn starts.
@@ -173,6 +190,7 @@ export class AIDecisionSystem {
   public executeAITurn(): void {
     this.onAITurnStarted?.();
     this.didMutate = false;
+    this.fallbackAttempted = false;
     const beforeFingerprint = this.createAIFingerprint();
 
     // Assess game state
@@ -181,7 +199,7 @@ export class AIDecisionSystem {
     // Execute decision tree
     this.executeDecisions(assessment);
 
-    if (!this.didMutate) {
+    if (!this.didMutate && !this.fallbackAttempted) {
       this.applyFallbackAction();
     }
 
@@ -277,8 +295,10 @@ export class AIDecisionSystem {
     // Priority 5: Attack if we have military advantage
     // Personality affects aggressiveness, but all AIs attack eventually
     if (assessment.canAttack && !assessment.underAttack) {
-      console.log('[AI] Launching attack');
-      this.launchAttack();
+      const attackResult = this.launchAttack();
+      if (attackResult.outcome !== AttackOutcome.Success) {
+        this.applyFallbackAction();
+      }
     }
   }
 
@@ -545,42 +565,94 @@ export class AIDecisionSystem {
   /**
    * Launches attack on player planet.
    */
-  private launchAttack(): void {
-    // Aggressive personality attacks more often
-    if (this.personality === AIPersonality.Defensive) {
-      // Defensive personality rarely attacks
-      if (this.random() > 0.2) {
-        return;
-      }
-    }
-
+  private launchAttack(): AttackResult {
     // Find target (weakest player planet)
     const playerPlanets = this.gameState.planets.filter(p => p.owner === FactionType.Player);
-    if (playerPlanets.length === 0) {
-      return;
-    }
-
-    // Avoid Starbase initially
-    let target = playerPlanets
-      .filter(p => p.name !== 'Starbase')
-      .sort((a, b) => this.getPlanetDefenseStrength(a.id) - this.getPlanetDefenseStrength(b.id))[0];
-
-    if (!target) {
-      target = playerPlanets[0]; // Attack Starbase if only option
-    }
+    const nonStarbaseTargets = playerPlanets.filter(p => p.name !== 'Starbase');
+    const targetCandidates = nonStarbaseTargets.length > 0 ? nonStarbaseTargets : playerPlanets;
+    const targetsFound = targetCandidates.length;
 
     // Get AI Battle Cruisers with platoons
     const battleCruisers = this.gameState.craft.filter(
       c => c.owner === FactionType.AI && c.type === CraftType.BattleCruiser && c.carriedPlatoonIDs.length > 0,
     );
+    const cruisersFound = battleCruisers.length;
+    const platoonsFound = battleCruisers.reduce((total, cruiser) => total + cruiser.carriedPlatoonIDs.length, 0);
+
+    console.log('[AI] Attack attempt', {
+      targetsFound,
+      cruisersFound,
+      platoonsFound,
+    });
+
+    // Aggressive personality attacks more often
+    if (this.personality === AIPersonality.Defensive) {
+      // Defensive personality rarely attacks
+      if (this.random() > 0.2) {
+        const result: AttackResult = {
+          outcome: AttackOutcome.FailedInvalidState,
+          targetsFound,
+          cruisersFound,
+          platoonsFound,
+          failureDetail: 'defensive_personality_skip',
+        };
+        console.warn('[AI] Attack failed', result);
+        return result;
+      }
+    }
+
+    if (playerPlanets.length === 0) {
+      const result: AttackResult = {
+        outcome: AttackOutcome.FailedNoTarget,
+        targetsFound,
+        cruisersFound,
+        platoonsFound,
+      };
+      console.warn('[AI] Attack failed', result);
+      return result;
+    }
+
+    // Avoid Starbase initially
+    let target = targetCandidates
+      .sort((a, b) => this.getPlanetDefenseStrength(a.id) - this.getPlanetDefenseStrength(b.id))[0];
+
+    if (!target) {
+      const result: AttackResult = {
+        outcome: AttackOutcome.FailedInvalidState,
+        targetsFound,
+        cruisersFound,
+        platoonsFound,
+        failureDetail: 'target_selection_failed',
+      };
+      console.warn('[AI] Attack failed', result);
+      return result;
+    }
 
     if (battleCruisers.length < 2) {
-      return; // Need at least 2 cruisers
+      const result: AttackResult = {
+        outcome: AttackOutcome.FailedInsufficientForces,
+        targetsFound,
+        cruisersFound,
+        platoonsFound,
+        failureDetail: 'requires_two_cruisers',
+      };
+      console.warn('[AI] Attack failed', result);
+      return result;
     }
 
     // NOTE: Actual movement would require a NavigationSystem
     // For now, just fire the event
     this.onAIAttacking?.(target.id);
+    const result: AttackResult = {
+      outcome: AttackOutcome.Success,
+      targetId: target.id,
+      targetsFound,
+      cruisersFound,
+      platoonsFound,
+    };
+    console.log('[AI] Attack succeeded', result);
+    this.didMutate = true;
+    return result;
   }
 
   /**
@@ -647,6 +719,7 @@ export class AIDecisionSystem {
   }
 
   private applyFallbackAction(): void {
+    this.fallbackAttempted = true;
     if (this.adjustTaxRateFallback()) {
       return;
     }
