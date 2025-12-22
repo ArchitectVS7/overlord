@@ -119,9 +119,9 @@ export class TopMenuBar {
     this.homeButton.setInteractive({ useHandCursor: true });
     this.elements.push(this.homeButton);
 
-    // Click handler - navigate to main menu
+    // Click handler - navigate to BBS game
     this.homeButton.on('pointerdown', () => {
-      this.scene.scene.start('MainMenuScene');
+      this.scene.scene.start('BBSGameScene');
     });
 
     // Hover effects
