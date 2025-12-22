@@ -202,7 +202,7 @@ export class GalaxyGenerator {
     planet.scaleMultiplier = localRandom.nextInRange(1.0, 1.5); // 1.0-1.5
     planet.colonized = true; // Metropolis planets start colonized
     planet.resources = resources;
-    planet.population = 1000; // Starting population
+    planet.population = 500; // Starting population (matches GAME-BALANCE.md)
     planet.morale = 75;       // 75% morale (good starting conditions)
     planet.taxRate = 50;      // 50% tax rate (moderate)
     planet.growthRate = 0;    // Will be calculated by PopulationSystem

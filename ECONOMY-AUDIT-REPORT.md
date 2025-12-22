@@ -186,10 +186,16 @@ Turn 12-13: Load platoon, travel to enemy
 
 ## **ECONOMY STATUS: PLAYABLE** ✅
 
-The economy is functional and actually **more generous** than documented due to the doubled starting population. Players can afford military units immediately and launch invasions by Turn 12-13.
+The economy is functional. Players can afford military units within the first few turns and launch invasions by Turn 12-15.
 
-### Recommendation
-Align `GalaxyGenerator.ts:205` to `population = 500` to match documentation, OR update GAME-BALANCE.md to reflect actual starting population of 1,000. The current state is playable but inconsistent with documentation.
+### Resolution Applied
+**FIXED:** Changed `GalaxyGenerator.ts:205` from `population = 1000` to `population = 500` to match GAME-BALANCE.md documentation.
+
+Post-fix values:
+- Starting population: 500 ✓
+- Income per turn: 5,000₡ ✓
+- Turns-to-first-platoon: 2-3 turns ✓
+- Turns-to-first-invasion: ~15 turns ✓
 
 ---
 
