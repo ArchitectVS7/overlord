@@ -101,6 +101,13 @@ export class BBSGameController {
       AIDifficulty.Normal,
       Math.random
     );
+    this.phaseProcessor.configureEndPhase({
+      aiDecisionSystem: this.aiSystem,
+      victoryChecker: () => this.turnSystem.checkVictoryConditions(),
+      onVictoryAchieved: (result) => {
+        this.turnSystem.onVictoryAchieved?.(result);
+      },
+    });
 
     // Wire events
     this.wireEvents();
@@ -115,10 +122,6 @@ export class BBSGameController {
     };
 
     this.turnSystem.onPhaseChanged = (phase: TurnPhase) => {
-      // Process Income phase when it starts
-      if (phase === TurnPhase.Income) {
-        this.phaseProcessor.processPhase(TurnPhase.Income);
-      }
       this.onPhaseChanged?.(phase);
     };
 
@@ -203,6 +206,7 @@ export class BBSGameController {
 
     // Start turn 1
     this.turnSystem.startNewGame();
+    this.runAutomaticPhases();
 
     this.onMessage?.('New campaign started!');
   }
@@ -213,27 +217,39 @@ export class BBSGameController {
   public endTurn(): void {
     if (!this.gameStarted || this.gameOver) return;
 
-    // Process combat phase
-    this.phaseProcessor.processPhase(TurnPhase.Combat);
-
-    // Execute AI turn - THE CRITICAL LINE
-    this.onMessage?.('AI is thinking...');
-    this.aiSystem.executeAITurn();
-
-    // Process end phase
-    this.phaseProcessor.processPhase(TurnPhase.End);
-
-    // Check victory conditions
-    const result = this.turnSystem.checkVictoryConditions();
-    if (result !== VictoryResult.None) {
-      this.gameOver = true;
-      this.victoryResult = result;
-      this.onGameOver?.(result);
-      return;
+    if (this.turnSystem.getCurrentPhase() === TurnPhase.Action) {
+      this.turnSystem.advancePhase();
     }
 
-    // Advance to next turn
-    this.turnSystem.advancePhase();
+    this.runAutomaticPhases();
+  }
+
+  private runAutomaticPhases(): void {
+    let phase = this.turnSystem.getCurrentPhase();
+
+    while (phase !== TurnPhase.Action) {
+      if (phase === TurnPhase.End) {
+        this.onMessage?.('AI is thinking...');
+      }
+
+      const result = this.phaseProcessor.processPhase(phase);
+      if (!result.success) {
+        this.onMessage?.(`Phase processing failed: ${result.error}`);
+        break;
+      }
+
+      if (phase === TurnPhase.End) {
+        const endResult = result as ReturnType<PhaseProcessor['processEndPhase']>;
+        if (endResult.victoryResult !== VictoryResult.None) {
+          this.gameOver = true;
+          this.victoryResult = endResult.victoryResult;
+          this.onGameOver?.(endResult.victoryResult);
+          return;
+        }
+      }
+
+      phase = this.turnSystem.advancePhase();
+    }
   }
 
   /**

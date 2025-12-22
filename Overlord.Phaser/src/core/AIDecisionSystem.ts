@@ -18,6 +18,7 @@ import {
 import { AIPersonalityConfig, AIAssessment } from './models/AIModels';
 import { PlatoonCosts } from './models/PlatoonModels';
 import { ResourceCost } from './models/ResourceModels';
+import { BuildingCosts } from './models/BuildingModels';
 
 /**
  * Platform-agnostic AI decision-making system.
@@ -38,6 +39,7 @@ export class AIDecisionSystem {
   private personality: AIPersonality;
   private personalityConfig: AIPersonalityConfig;
   private difficulty: AIDifficulty;
+  private didMutate: boolean = false;
 
   /**
    * Event fired when AI turn starts.
@@ -170,12 +172,33 @@ export class AIDecisionSystem {
    */
   public executeAITurn(): void {
     this.onAITurnStarted?.();
+    this.didMutate = false;
+    const beforeFingerprint = this.createAIFingerprint();
 
     // Assess game state
     const assessment = this.assessGameState();
 
     // Execute decision tree
     this.executeDecisions(assessment);
+
+    if (!this.didMutate) {
+      this.applyFallbackAction();
+    }
+
+    const afterFingerprint = this.createAIFingerprint();
+    if (beforeFingerprint === afterFingerprint) {
+      console.error('[AI] No state change detected after AI turn', {
+        turn: this.gameState.currentTurn,
+        aiPlanets: this.gameState.planets.filter(p => p.owner === FactionType.AI).length,
+        resources: {
+          credits: this.gameState.aiFaction.resources.credits,
+          minerals: this.gameState.aiFaction.resources.minerals,
+          fuel: this.gameState.aiFaction.resources.fuel,
+          food: this.gameState.aiFaction.resources.food,
+          energy: this.gameState.aiFaction.resources.energy,
+        },
+      });
+    }
 
     this.onAITurnCompleted?.();
   }
@@ -379,7 +402,16 @@ export class AIDecisionSystem {
     }
 
     // Train defensive platoon
-    this.platoonSystem.commissionPlatoon(hitotsu.id, FactionType.AI, 100, EquipmentLevel.Standard, WeaponLevel.Rifle);
+    const platoonId = this.platoonSystem.commissionPlatoon(
+      hitotsu.id,
+      FactionType.AI,
+      100,
+      EquipmentLevel.Standard,
+      WeaponLevel.Rifle,
+    );
+    if (platoonId >= 0) {
+      this.didMutate = true;
+    }
     this.onAICommissioning?.(hitotsu.id, 100, EquipmentLevel.Standard, WeaponLevel.Rifle);
   }
 
@@ -435,6 +467,7 @@ export class AIDecisionSystem {
       if (platoonId >= 0) {
         console.log(`[AI]     ✓ Platoon ${platoonId} commissioned on ${planet.name}`);
         this.onAICommissioning?.(planet.id, troops, equipment, weapon);
+        this.didMutate = true;
         return; // Train one per turn
       } else {
         console.log(`[AI]     ✗ Commission failed`);
@@ -474,6 +507,7 @@ export class AIDecisionSystem {
         console.log(`[AI]     Build result: ${result}`);
         if (result) {
           this.onAIBuilding?.(planet.id, BuildingType.MiningStation);
+          this.didMutate = true;
           built = true;
         }
       }
@@ -485,6 +519,7 @@ export class AIDecisionSystem {
         console.log(`[AI]     Build result: ${result}`);
         if (result) {
           this.onAIBuilding?.(planet.id, BuildingType.HorticulturalStation);
+          this.didMutate = true;
           built = true;
         }
       }
@@ -496,6 +531,7 @@ export class AIDecisionSystem {
         console.log(`[AI]     Build result: ${result}`);
         if (result) {
           this.onAIBuilding?.(planet.id, BuildingType.DockingBay);
+          this.didMutate = true;
           built = true;
         }
       }
@@ -574,6 +610,7 @@ export class AIDecisionSystem {
       if (craftId >= 0) {
         console.log(`[AI]     ✓ Atmosphere Processor ${craftId} purchased!`);
         this.onAIPurchasing?.(CraftType.AtmosphereProcessor, planet.id);
+        this.didMutate = true;
         return; // Purchase one per turn
       } else {
         console.log(`[AI]     ✗ Purchase failed (no resources or no docking bay)`);
@@ -607,5 +644,151 @@ export class AIDecisionSystem {
     }
 
     return strength;
+  }
+
+  private applyFallbackAction(): void {
+    if (this.adjustTaxRateFallback()) {
+      return;
+    }
+
+    if (this.queueCheapestConstruction()) {
+      return;
+    }
+
+    if (this.commissionCheapestPlatoon()) {
+      return;
+    }
+
+    console.warn('[AI] No fallback action available');
+  }
+
+  private adjustTaxRateFallback(): boolean {
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    if (aiPlanets.length === 0) {
+      return false;
+    }
+
+    for (const planet of aiPlanets) {
+      const currentRate = planet.taxRate;
+      let nextRate = currentRate;
+
+      if (currentRate < 50) {
+        nextRate = currentRate + 1;
+      } else if (currentRate > 50) {
+        nextRate = currentRate - 1;
+      } else if (currentRate < 100) {
+        nextRate = currentRate + 1;
+      } else if (currentRate > 0) {
+        nextRate = currentRate - 1;
+      }
+
+      nextRate = Math.max(0, Math.min(100, nextRate));
+
+      if (nextRate !== currentRate) {
+        planet.taxRate = nextRate;
+        this.didMutate = true;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private queueCheapestConstruction(): boolean {
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    if (aiPlanets.length === 0) {
+      return false;
+    }
+
+    const buildOptions = [
+      BuildingType.MiningStation,
+      BuildingType.HorticulturalStation,
+      BuildingType.DockingBay,
+      BuildingType.OrbitalDefense,
+      BuildingType.SurfacePlatform,
+    ];
+
+    for (const planet of aiPlanets) {
+      const affordableOptions = buildOptions
+        .filter(type => this.buildingSystem.canBuild(planet.id, type))
+        .sort((a, b) => {
+          const costA = BuildingCosts.getCost(a);
+          const costB = BuildingCosts.getCost(b);
+          return (costA.credits + costA.minerals + costA.fuel + costA.food + costA.energy)
+            - (costB.credits + costB.minerals + costB.fuel + costB.food + costB.energy);
+        });
+
+      for (const buildingType of affordableOptions) {
+        if (this.buildingSystem.startConstruction(planet.id, buildingType)) {
+          this.onAIBuilding?.(planet.id, buildingType);
+          this.didMutate = true;
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private commissionCheapestPlatoon(): boolean {
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    if (aiPlanets.length === 0) {
+      return false;
+    }
+
+    const equipment = EquipmentLevel.Standard;
+    const weapon = WeaponLevel.Pistol;
+    const totalCost = PlatoonCosts.getTotalCost(equipment, weapon);
+
+    for (const planet of aiPlanets) {
+      if (planet.resources.credits < totalCost) {
+        continue;
+      }
+      if (planet.population < PlatoonSystem.MinTroops) {
+        continue;
+      }
+
+      const platoonId = this.platoonSystem.commissionPlatoon(
+        planet.id,
+        FactionType.AI,
+        PlatoonSystem.MinTroops,
+        equipment,
+        weapon,
+      );
+
+      if (platoonId >= 0) {
+        this.onAICommissioning?.(planet.id, PlatoonSystem.MinTroops, equipment, weapon);
+        this.didMutate = true;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private createAIFingerprint(): string {
+    const resources = this.gameState.aiFaction.resources;
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    const taxRates = aiPlanets.map(p => p.taxRate).join(',');
+    const queuedBuilds = aiPlanets.reduce(
+      (count, planet) => count + planet.structures.filter(s => s.status === BuildingStatus.UnderConstruction).length,
+      0,
+    );
+    const fleetOrders = this.gameState.craft.filter(
+      c => c.owner === FactionType.AI && c.inTransit,
+    ).length;
+
+    return JSON.stringify({
+      resources: {
+        credits: resources.credits,
+        minerals: resources.minerals,
+        fuel: resources.fuel,
+        food: resources.food,
+        energy: resources.energy,
+      },
+      taxRates,
+      queuedBuilds,
+      fleetOrders,
+    });
   }
 }

@@ -112,6 +112,67 @@ describe('PhaseProcessor', () => {
 
       expect(result.processingTimeMs).toBeGreaterThanOrEqual(0);
     });
+
+    it('should complete construction during Income phase', () => {
+      const playerPlanet = gameState.planets.find(p => p.owner === FactionType.Player);
+      if (playerPlanet) {
+        const building = new Structure();
+        building.id = 100;
+        building.type = BuildingType.MiningStation;
+        building.status = BuildingStatus.UnderConstruction;
+        building.turnsRemaining = 1; // Will complete next update
+        playerPlanet.structures.push(building);
+      }
+
+      const completedBuildings: { planetId: number; buildingType: string }[] = [];
+      phaseProcessor.onBuildingCompleted = (planetId, buildingType) => {
+        completedBuildings.push({ planetId, buildingType });
+      };
+
+      phaseProcessor.processIncomePhase();
+
+      expect(completedBuildings.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should apply population growth during Income phase', () => {
+      const growthEvents: { planetId: number; growth: number }[] = [];
+      phaseProcessor.onPopulationGrowth = (planetId, growth) => {
+        growthEvents.push({ planetId, growth });
+      };
+
+      const playerPlanet = gameState.planets.find(p => p.owner === FactionType.Player);
+      if (playerPlanet) {
+        playerPlanet.population = 100;
+        playerPlanet.maxPopulation = 1000;
+        playerPlanet.morale = 100;
+        playerPlanet.resources.food = 1000;
+      }
+
+      phaseProcessor.processIncomePhase();
+
+      expect(growthEvents.length).toBeGreaterThan(0);
+    });
+
+    it('should not advance construction during End phase', () => {
+      const playerPlanet = gameState.planets.find(p => p.owner === FactionType.Player);
+      if (playerPlanet) {
+        const building = new Structure();
+        building.id = 200;
+        building.type = BuildingType.MiningStation;
+        building.status = BuildingStatus.UnderConstruction;
+        building.turnsRemaining = 1;
+        playerPlanet.structures.push(building);
+      }
+
+      phaseProcessor.processEndPhase();
+
+      const buildingAfter = gameState.planets
+        .find(p => p.owner === FactionType.Player)
+        ?.structures.find(s => s.id === 200);
+
+      expect(buildingAfter?.turnsRemaining).toBe(1);
+      expect(buildingAfter?.status).toBe(BuildingStatus.UnderConstruction);
+    });
   });
 
   describe('processActionPhase', () => {
@@ -144,72 +205,11 @@ describe('PhaseProcessor', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should track building completions', () => {
-      // Add a building under construction that will complete
-      const playerPlanet = gameState.planets.find(p => p.owner === FactionType.Player);
-      if (playerPlanet) {
-        const building = new Structure();
-        building.id = 100;
-        building.type = BuildingType.MiningStation;
-        building.status = BuildingStatus.UnderConstruction;
-        building.turnsRemaining = 1; // Will complete next update
-        playerPlanet.structures.push(building);
-      }
-
+    it('should default to no AI or victory checks', () => {
       const result = phaseProcessor.processEndPhase() as EndPhaseResult;
 
-      expect(result.buildingsCompleted).toBeGreaterThanOrEqual(0);
-    });
-
-    it('should track population growth', () => {
-      const result = phaseProcessor.processEndPhase() as EndPhaseResult;
-
-      expect(result.populationGrowth).toBeGreaterThanOrEqual(0);
-    });
-
-    it('should fire onPopulationGrowth event for significant growth', () => {
-      const growthEvents: { planetId: number; growth: number }[] = [];
-
-      phaseProcessor.onPopulationGrowth = (planetId, growth) => {
-        growthEvents.push({ planetId, growth });
-      };
-
-      // Set up planet with conditions for growth
-      const playerPlanet = gameState.planets.find(p => p.owner === FactionType.Player);
-      if (playerPlanet) {
-        playerPlanet.population = 100;
-        playerPlanet.maxPopulation = 1000;
-        playerPlanet.morale = 100;
-      }
-
-      phaseProcessor.processEndPhase();
-
-      // Growth events may or may not fire depending on growth amount
-      expect(growthEvents).toBeDefined();
-    });
-
-    it('should fire onBuildingCompleted event when building finishes', () => {
-      const completedBuildings: { planetId: number; buildingType: string }[] = [];
-
-      phaseProcessor.onBuildingCompleted = (planetId, buildingType) => {
-        completedBuildings.push({ planetId, buildingType });
-      };
-
-      // Add a building about to complete
-      const playerPlanet = gameState.planets.find(p => p.owner === FactionType.Player);
-      if (playerPlanet) {
-        const building = new Structure();
-        building.id = 100;
-        building.type = BuildingType.HorticulturalStation;
-        building.status = BuildingStatus.UnderConstruction;
-        building.turnsRemaining = 1; // Will complete next update
-        playerPlanet.structures.push(building);
-      }
-
-      phaseProcessor.processEndPhase();
-
-      // Building should complete (if BuildingSystem processes it correctly)
-      expect(completedBuildings).toBeDefined();
+      expect(result.aiTurnProcessed).toBe(false);
+      expect(result.victoryResult).toBeDefined();
     });
   });
 

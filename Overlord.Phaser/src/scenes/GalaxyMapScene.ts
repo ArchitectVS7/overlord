@@ -244,7 +244,9 @@ export class GalaxyMapScene extends Phaser.Scene {
     this.planetInfoPanel = new PlanetInfoPanel(this, this.phaseProcessor.getBuildingSystem());
 
     // Create Turn HUD (top-left corner, fixed to camera)
-    this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor);
+    this.turnHUD = new TurnHUD(this, 150, 60, this.gameState, this.turnSystem, this.phaseProcessor, {
+      onEndTurnRequested: () => this.runAutomaticPhases(),
+    });
     this.turnHUD.setScrollFactor(0);
     this.turnHUD.setDepth(500);
 
@@ -483,6 +485,13 @@ export class GalaxyMapScene extends Phaser.Scene {
       this.craftSystem,
       this.platoonSystem,
     );
+    this.phaseProcessor.configureEndPhase({
+      aiDecisionSystem: this.aiDecisionSystem,
+      victoryChecker: () => this.turnSystem.checkVictoryConditions(),
+      onVictoryAchieved: (result) => {
+        this.turnSystem.onVictoryAchieved?.(result);
+      },
+    });
 
     // Set opponent info panel - Story 7-2
     const personalityName = this.aiDecisionSystem.getPersonalityName();
@@ -661,8 +670,7 @@ export class GalaxyMapScene extends Phaser.Scene {
     if (this.gameState.currentPhase === TurnPhase.Income) {
       // Small delay to ensure TurnHUD is ready to show notifications
       this.time.delayedCall(100, () => {
-        this.turnSystem.processIncomePhase();
-        this.turnSystem.advancePhase(); // Move to Action phase
+        this.runAutomaticPhases();
       });
     }
   }
@@ -1070,7 +1078,32 @@ export class GalaxyMapScene extends Phaser.Scene {
   }
 
   private handleEndTurn(): void {
-    this.turnSystem.advancePhase();
+    this.runAutomaticPhases();
+  }
+
+  private runAutomaticPhases(): void {
+    let phase = this.turnSystem.getCurrentPhase();
+
+    if (phase === TurnPhase.Action) {
+      phase = this.turnSystem.advancePhase();
+    }
+
+    while (phase !== TurnPhase.Action) {
+      const result = this.phaseProcessor.processPhase(phase);
+      if (!result.success) {
+        console.error(`Phase processing failed: ${result.error}`);
+        break;
+      }
+
+      if (phase === TurnPhase.End) {
+        const endResult = result as ReturnType<PhaseProcessor['processEndPhase']>;
+        if (endResult.victoryResult !== VictoryResult.None) {
+          return;
+        }
+      }
+
+      phase = this.turnSystem.advancePhase();
+    }
   }
 
   private addDebugInfo(): void {
