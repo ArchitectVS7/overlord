@@ -1,386 +1,449 @@
 # UX Flow & Responsibility Audit
 
-**Audit Date:** 2025-12-22
+**Audit Date:** 2025-12-22 (Updated)
 **Auditor:** Claude (UX Flow & Responsibility Auditor)
 **Codebase:** Overlord 4X Strategy Game
+**Interface:** BBS Edition (Graphical mode removed as of commit cab4e9c)
 
 ---
 
 ## 1. Screen Enumeration
 
-### Primary Interface Path (BBS Mode - DEFAULT)
+### Current Interface (BBS Mode - ONLY Interface)
 
-| Screen | File | Scene Key |
-|--------|------|-----------|
-| Boot | `BootScene.ts` | `BootScene` |
-| Authentication | `AuthScene.ts` | `AuthScene` |
-| **BBS Game (Main)** | `BBSGameScene.ts` | `BBSGameScene` |
+| Scene | File | Scene Key | Purpose |
+|-------|------|-----------|---------|
+| Boot | `BootScene.ts` | `BootScene` | Startup, env check, auth routing |
+| Authentication | `AuthScene.ts` | `AuthScene` | Login/Register/Guest mode |
+| **BBS Game** | `BBSGameScene.ts` | `BBSGameScene` | All gameplay (menu screens are modal states) |
 
-### Secondary Interface Path (Graphical Mode)
+### BBS Menu Screens (Within BBSGameScene)
 
-| Screen | File | Scene Key |
-|--------|------|-----------|
-| Main Menu | `MainMenuScene.ts` | `MainMenuScene` |
-| Campaign Config | `CampaignConfigScene.ts` | `CampaignConfigScene` |
-| Galaxy Map (Game) | `GalaxyMapScene.ts` | `GalaxyMapScene` |
-| How to Play | `HowToPlayScene.ts` | `HowToPlayScene` |
-| Tutorials | `TutorialsScene.ts` | `TutorialsScene` |
-| Flash Conflicts | `FlashConflictsScene.ts` | `FlashConflictsScene` |
-| Scenario Game | `ScenarioGameScene.ts` | `ScenarioGameScene` |
-| Victory | `VictoryScene.ts` | `VictoryScene` |
-| Defeat | `DefeatScene.ts` | `DefeatScene` |
+| Screen | Enum Value | Description |
+|--------|------------|-------------|
+| Start Menu | `START_MENU` | Main menu before game starts |
+| In-Game | `IN_GAME` | Primary game interface with all commands |
+| Galaxy | `GALAXY` | Planet list and selection |
+| Planet | `PLANET` | Detailed planet info view |
+| Build | `BUILD` | Structure construction (2-step: select planet, then building) |
+| Shipyard | `SHIPYARD` | Spacecraft purchase (2-step: select planet, then craft) |
+| Commission | `COMMISSION` | Platoon recruitment (2-step: select planet, then config) |
+| Move Fleet | `MOVE_FLEET` | Ship movement (2-step: select craft, then destination) |
+| Attack | `ATTACK` | Combat initiation (2-step: select target, then attack type) |
+| Tax Rate | `TAX_RATE` | Tax adjustment (2-step: select planet, then rate) |
+| Research | `RESEARCH` | Weapon tier upgrades |
+| Help | `HELP` | Keyboard command reference |
+| How to Play | `HOW_TO_PLAY` | 8-chapter tutorial/help content |
+| Victory | `VICTORY` | Win screen |
+| Defeat | `DEFEAT` | Loss screen |
 
 ---
 
 ## 2. Screen → Responsibility Table
 
-### 2.1 BBS Interface (Primary - Default Path)
-
-#### BBSGameScene - Start Menu Mode
+### 2.1 Boot Scene
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Start a new game, load saved game, access help |
-| **Actions Available** | `[N]` New Campaign, `[L]` Load Campaign, `[H]` How to Play, `[Q]` Quit |
-| **Data Shown** | Menu options, keyboard shortcuts |
-| **Decisions** | Game mode selection |
+| **Player Intent** | None (automatic) |
+| **Actions Available** | None - automatic transition |
+| **Data Shown** | Console startup messages |
+| **Decisions Made** | None |
 
-#### BBSGameScene - InGame Mode (Main Game Screen)
+### 2.2 Auth Scene
+| Aspect | Details |
+|--------|---------|
+| **Player Intent** | Authenticate or play as guest |
+| **Actions Available** | Sign In, Register, Forgot Password, Play as Guest |
+| **Data Shown** | Login/Register forms, guest option |
+| **Decisions Made** | Authentication method |
+
+### 2.3 BBS Game Scene - Start Menu
+| Aspect | Details |
+|--------|---------|
+| **Player Intent** | Start a new game, continue, access help |
+| **Actions Available** | `[N]` New Campaign, `[C]` Continue (if game active), `[H]` How to Play, `[D]` Download Debug Log |
+| **Data Shown** | Menu options, campaign status indicator |
+| **Decisions Made** | Game mode selection |
+
+### 2.4 BBS Game Scene - In-Game (Primary)
 | Aspect | Details |
 |--------|---------|
 | **Player Intent** | Manage empire, issue commands, progress turns |
-| **Actions Available** | `[B]` Build, `[S]` Ships, `[A]` Attack, `[M]` Move, `[T]` Troops, `[G]` Galaxy View, `[P]` Planet Info, `[E]` End Turn, `[H]` Help, `[Q]` Quit |
-| **Data Shown** | Empire resources (header), command log, galaxy status |
-| **Decisions** | ALL strategic decisions (build, military, exploration, economy) |
+| **Actions Available** | `[G]` Galaxy, `[P]` Planet, `[B]` Build, `[C]` Commission, `[S]` Shipyard, `[M]` Move, `[A]` Attack, `[T]` Tax, `[R]` Research, `[H]` Help, `[E]` End Turn, `[Q]` Quit |
+| **Data Shown** | Turn number, phase, credits, planets/craft/platoons count, contextual hints, message log |
+| **Decisions Made** | ALL strategic decisions |
 
-#### BBSGameScene - Galaxy View Mode
+### 2.5 BBS Game Scene - Galaxy View
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | View spatial relationships between planets |
-| **Actions Available** | `[←/→]` Cycle planets, `[Enter]` Select, `[Esc]` Return |
-| **Data Shown** | ASCII galaxy map, planet positions, ownership colors |
-| **Decisions** | Target selection for operations |
+| **Player Intent** | View all planets, select target |
+| **Actions Available** | `[1-9]` Select planet by number, `[ESC]` Back |
+| **Data Shown** | Planet list with name, owner, type, population, craft count |
+| **Decisions Made** | Planet selection for viewing |
 
-#### BBSGameScene - Planet Info Mode
+### 2.6 BBS Game Scene - Planet View
 | Aspect | Details |
 |--------|---------|
 | **Player Intent** | View detailed planet information |
-| **Actions Available** | `[←/→]` Cycle planets, `[Esc]` Return |
-| **Data Shown** | Population, morale, resources, buildings, garrison |
-| **Decisions** | Information gathering (no direct actions) |
+| **Actions Available** | `[ESC]` Back (read-only view) |
+| **Data Shown** | Owner, type, population, morale, tax rate, resources, structures, orbiting craft |
+| **Decisions Made** | None (informational only) |
 
-#### BBSGameScene - Build Mode
+### 2.7 BBS Game Scene - Build
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Construct buildings on owned planets |
-| **Actions Available** | `[1-5]` Select building type, `[Esc]` Cancel |
-| **Data Shown** | Available buildings, costs, current planet context |
-| **Decisions** | Building selection |
+| **Player Intent** | Construct structures on owned planets |
+| **Actions Available** | Step 1: `[1-9]` Select planet | Step 2: `[1-5]` Select building type |
+| **Data Shown** | Step 1: Planet list with slot counts | Step 2: Building options with costs/status |
+| **Decisions Made** | WHERE to build, WHAT to build |
 
-#### BBSGameScene - Attack Mode
+### 2.8 BBS Game Scene - Shipyard
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Initiate combat against enemy planets |
-| **Actions Available** | Planet selection, attack confirmation |
-| **Data Shown** | Target options, military strength comparisons |
-| **Decisions** | Target selection, attack execution |
+| **Player Intent** | Purchase spacecraft |
+| **Actions Available** | Step 1: `[1-9]` Select planet | Step 2: `[1-4]` Select craft type |
+| **Data Shown** | Step 1: Planet list with docking bay count | Step 2: Craft options with costs |
+| **Decisions Made** | WHERE to build craft, WHAT craft to build |
 
----
-
-### 2.2 Graphical Interface (Secondary Path)
-
-#### MainMenuScene
+### 2.9 BBS Game Scene - Commission
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Navigate to game modes |
-| **Actions Available** | New Campaign, Load Campaign, Tutorials, Flash Conflicts, Statistics, How to Play |
-| **Data Shown** | Menu buttons, player profile (if authenticated) |
-| **Decisions** | Game mode selection |
+| **Player Intent** | Recruit and equip platoons |
+| **Actions Available** | Step 1: `[1-9]` Select planet | Step 2: `[1-4]` Select platoon configuration |
+| **Data Shown** | Step 1: Planet list with population/platoon counts | Step 2: Platoon options with costs |
+| **Decisions Made** | WHERE to recruit, WHAT equipment/size |
 
-#### CampaignConfigScene
+### 2.10 BBS Game Scene - Move Fleet
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Configure new campaign settings |
-| **Actions Available** | Select difficulty, galaxy size, AI count, Start Campaign |
-| **Data Shown** | Configuration options, descriptions |
-| **Decisions** | Campaign parameters |
+| **Player Intent** | Reposition spacecraft |
+| **Actions Available** | Step 1: `[1-9]` Select craft | Step 2: `[1-9]` Select destination |
+| **Data Shown** | Step 1: Craft list with types/locations | Step 2: Planet list with owners |
+| **Decisions Made** | WHICH craft to move, WHERE to move it |
 
-#### GalaxyMapScene (Main Graphical Game)
+### 2.11 BBS Game Scene - Attack
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Visual empire management |
-| **Actions Available** | Click planets, End Turn button, HUD interactions |
-| **Data Shown** | Visual galaxy map, resource HUD, planet sprites, spacecraft |
-| **Decisions** | Planet selection triggers PlanetInfoPanel |
+| **Player Intent** | Initiate combat against enemy/neutral planets |
+| **Actions Available** | Step 1: `[1-9]` Select target | Step 2: `[1]` Bombard or `[2]` Invade |
+| **Data Shown** | Step 1: Target planets with forces | Step 2: Attack options with requirements |
+| **Decisions Made** | WHERE to attack, HOW to attack |
 
-#### PlanetInfoPanel (UI Overlay in GalaxyMapScene)
+### 2.12 BBS Game Scene - Tax Rate
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Manage selected planet |
-| **Actions Available** | Build, Commission, Platoons, Spacecraft, Navigate, Invade, Bombard, Deploy |
-| **Data Shown** | Planet name/type/owner, population, morale, resources, construction progress, tax rate |
-| **Decisions** | Building, military unit creation, tax adjustment, invasion |
+| **Player Intent** | Adjust planetary tax rates |
+| **Actions Available** | Step 1: `[1-9]` Select planet | Step 2: `[1-6]` Select rate |
+| **Data Shown** | Step 1: Planet list with current rates/morale | Step 2: Rate options with effects |
+| **Decisions Made** | WHICH planet to adjust, WHAT rate to set |
 
-#### HowToPlayScene
+### 2.13 BBS Game Scene - Research
 | Aspect | Details |
 |--------|---------|
-| **Player Intent** | Learn game mechanics |
-| **Actions Available** | Navigate chapters, scroll content |
-| **Data Shown** | Help chapters, game instructions |
-| **Decisions** | None (informational) |
-
-#### TutorialsScene
-| Aspect | Details |
-|--------|---------|
-| **Player Intent** | Learn through guided scenarios |
-| **Actions Available** | Select tutorial, view details, start scenario |
-| **Data Shown** | Tutorial list, completion status, star ratings |
-| **Decisions** | Tutorial selection |
-
-#### FlashConflictsScene
-| Aspect | Details |
-|--------|---------|
-| **Player Intent** | Play tactical mini-scenarios |
-| **Actions Available** | Select scenario, view details, start scenario |
-| **Data Shown** | Scenario list, completion status, star ratings |
-| **Decisions** | Scenario selection |
-
-#### VictoryScene / DefeatScene
-| Aspect | Details |
-|--------|---------|
-| **Player Intent** | Review game outcome |
-| **Actions Available** | Continue (return to menu), Save Campaign |
-| **Data Shown** | Victory/defeat message, campaign statistics |
-| **Decisions** | Save game, return to menu |
+| **Player Intent** | Upgrade weapon technology |
+| **Actions Available** | `[1]` Start research (if available), `[ESC]` Back |
+| **Data Shown** | Current tier, research progress, next tier cost/duration |
+| **Decisions Made** | Whether to invest in research |
 
 ---
 
 ## 3. Navigation Flow Diagram
 
 ```
-                              ┌─────────────┐
-                              │  BootScene  │
-                              └──────┬──────┘
-                                     │
-                    ┌────────────────┴────────────────┐
-                    ▼                                 ▼
-             ┌──────────────┐                ┌────────────────┐
-             │  AuthScene   │                │ (Skip if auth  │
-             │              │                │   unavailable) │
-             └──────┬───────┘                └───────┬────────┘
-                    │                                │
-                    └────────────────┬───────────────┘
-                                     ▼
-                         ┌───────────────────┐
-                         │   BBSGameScene    │ ◄── DEFAULT PATH
-                         │   (Start Menu)    │
-                         └─────────┬─────────┘
-                                   │
-            ┌──────────────────────┼──────────────────────┐
-            ▼                      ▼                      ▼
-    ┌───────────────┐     ┌───────────────┐      ┌───────────────┐
-    │ [N] New       │     │ [L] Load      │      │ [H] How to    │
-    │   Campaign    │     │   Campaign    │      │     Play      │
-    └───────┬───────┘     └───────┬───────┘      └───────────────┘
-            │                     │
-            └──────────┬──────────┘
-                       ▼
-            ┌───────────────────┐
-            │   BBSGameScene    │
-            │    (InGame)       │
-            └─────────┬─────────┘
-                      │
-    ┌─────────┬───────┼───────┬─────────┬─────────┐
-    ▼         ▼       ▼       ▼         ▼         ▼
- [B]Build  [S]Ships [A]Attack [M]Move [G]Galaxy [E]EndTurn
-    │         │       │       │         │         │
-    ▼         ▼       ▼       ▼         ▼         ▼
- (modal)  (modal) (modal) (modal) (view mode)  (process)
-```
-
-### Graphical Interface Path (Accessed via MainMenuScene)
-
-```
-┌────────────────┐
-│ MainMenuScene  │
-└───────┬────────┘
-        │
-   ┌────┴────┬──────────┬───────────┬─────────────┐
-   ▼         ▼          ▼           ▼             ▼
-┌────────┐ ┌────────┐ ┌──────────┐ ┌───────────┐ ┌──────────────┐
-│New     │ │Load    │ │Tutorials │ │Flash      │ │How to Play   │
-│Campaign│ │Campaign│ │          │ │Conflicts  │ │              │
-└───┬────┘ └───┬────┘ └────┬─────┘ └─────┬─────┘ └──────────────┘
-    │          │           │             │
-    ▼          │           ▼             ▼
-┌───────────┐  │    ┌────────────┐ ┌────────────────┐
-│Campaign   │  │    │TutorialsScn│ │FlashConflictsScn│
-│Config     │  │    └─────┬──────┘ └───────┬────────┘
-└─────┬─────┘  │          │                │
-      │        │          ▼                ▼
-      │        │    ┌────────────┐   ┌────────────────┐
-      └────────┴───►│GalaxyMap   │   │ScenarioGame    │
-                    │Scene       │   │Scene           │
-                    └─────┬──────┘   └───────┬────────┘
-                          │                  │
-                    ┌─────┴──────┐     ┌─────┴──────┐
-                    ▼            ▼     ▼            ▼
-               ┌─────────┐  ┌────────┐ ┌─────────┐ ┌────────┐
-               │Victory  │  │Defeat  │ │Victory  │ │Defeat  │
-               │Scene    │  │Scene   │ │Scene    │ │Scene   │
-               └─────────┘  └────────┘ └─────────┘ └────────┘
+                         ┌─────────────┐
+                         │  BootScene  │
+                         └──────┬──────┘
+                                │
+               ┌────────────────┴────────────────┐
+               │                                 │
+        Supabase OK?                      Supabase Unavailable
+               │                                 │
+               ▼                                 │
+        ┌──────────────┐                         │
+        │  AuthScene   │                         │
+        │  (Login/     │                         │
+        │   Guest)     │                         │
+        └──────┬───────┘                         │
+               │                                 │
+               └────────────┬────────────────────┘
+                            ▼
+              ┌─────────────────────────┐
+              │      BBSGameScene       │
+              │      (START_MENU)       │
+              └────────────┬────────────┘
+                           │
+       ┌───────────────────┼───────────────────┐
+       │                   │                   │
+       ▼                   ▼                   ▼
+    [N] New          [C] Continue        [H] How to Play
+    Campaign         (if active)              │
+       │                   │                   │
+       └─────────┬─────────┘                   │
+                 ▼                             │
+    ┌─────────────────────────┐                │
+    │      BBSGameScene       │                │
+    │       (IN_GAME)         │                │
+    └────────────┬────────────┘                │
+                 │                             │
+    ┌────┬───┬───┼───┬───┬───┬───┬───┬───┐    │
+    ▼    ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼    ▼
+  [G]  [P] [B] [S] [C] [M] [A] [T] [R] [H] [HOW_TO_PLAY]
+   │    │   │   │   │   │   │   │   │   │
+   ▼    ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼
+GALAXY PLANET BUILD SHIP COMM MOVE ATK TAX RES HELP
+   │           │   │   │   │   │   │   │
+   └───────────┴───┴───┴───┴───┴───┴───┘
+         All return to IN_GAME via [ESC]
 ```
 
 ---
 
 ## 4. Analysis vs. Playthrough Manual
 
-### 4.1 Manual Expectation Check
+### 4.1 Critical Discrepancy: Manual Describes REMOVED Interface
 
-| Manual Section | Expected Location | Actual Location | Status |
-|----------------|-------------------|-----------------|--------|
-| Building structures | Planet screen | BBS: Main screen `[B]`<br>Graphical: PlanetInfoPanel | ⚠️ Different |
-| Commissioning platoons | Planet screen | BBS: Main screen `[T]`<br>Graphical: PlanetInfoPanel | ⚠️ Different |
-| Purchasing spacecraft | Planet screen | BBS: Main screen `[S]`<br>Graphical: PlanetInfoPanel | ⚠️ Different |
-| Navigation/movement | Planet/ship context | BBS: Main screen `[M]`<br>Graphical: PlanetInfoPanel | ⚠️ Different |
-| Attacking | Military context | BBS: Main screen `[A]`<br>Graphical: PlanetInfoPanel | ⚠️ Different |
-| Ending turn | Main screen | BBS: Main screen `[E]`<br>Graphical: HUD button | ✅ Consistent |
-| Tax adjustment | Planet screen | Graphical: PlanetInfoPanel<br>BBS: Not implemented | ⚠️ Missing in BBS |
+**BLOCKING FINDING:** The Playthrough Manual (`OVERLORD-COMPLETE-PLAYTHROUGH-MANUAL.md`) describes a **graphical click-based interface** that was REMOVED in commit `cab4e9c`.
 
-### 4.2 Identified Issues
+| Manual Instruction | Manual Says | Actual BBS Interface |
+|--------------------|-------------|---------------------|
+| Planet selection | "Click your planet" | Press `[G]` then `[1-9]` |
+| Building | "Click [BUILD] button" | Press `[B]`, then `[1-9]`, then `[1-5]` |
+| Tax adjustment | "Drag slider" | Press `[T]`, then `[1-9]`, then `[1-6]` |
+| Fleet movement | "Click [NAVIGATE]" | Press `[M]`, then `[1-9]`, then `[1-9]` |
+| End turn | "Press SPACE" / "Click button" | Press `[E]` |
 
-#### Issue #1: Dual Interface Inconsistency
-- **Severity:** HIGH
-- **Description:** Game has two completely different interfaces (BBS vs Graphical) with different action locations
-- **Impact:** User confusion when switching between modes or following tutorials
-- **Manual Reference:** Manual appears to describe graphical interface, but BBS is the default
+**Recommendation:** The Playthrough Manual MUST be updated to reflect the BBS keyboard interface.
 
-#### Issue #2: BUILD Action Location
-- **Severity:** MEDIUM
-- **Question:** Should BUILD exist on Planet screen instead of Main screen?
-- **Analysis:**
-  - **BBS Interface:** BUILD is on main screen `[B]` → prompts for planet selection
-  - **Graphical Interface:** BUILD is inside PlanetInfoPanel → requires clicking planet first
-  - **Manual Expectation:** "Select a planet, then build" pattern (graphical)
-  - **Recommendation:** Graphical approach is more intuitive (context-first), but BBS approach is faster for keyboard users. Both are valid.
+### 4.2 Manual Expectation vs. BBS Implementation
 
-#### Issue #3: Auth Gating Bypass
-- **Severity:** LOW
-- **Question:** Does the game start without user intent due to missing auth gating?
-- **Analysis:**
-  - `BootScene` checks Supabase availability
-  - If Supabase unavailable → proceeds to `BBSGameScene` directly (anonymous mode)
-  - If Supabase available → routes to `AuthScene` first
-  - **Finding:** Game can start without explicit auth, but this is intentional for offline play
+| Manual Section | Expected Pattern | BBS Pattern | Match? |
+|----------------|------------------|-------------|--------|
+| Building structures | Select planet → Build menu | Build menu → Select planet → Select building | ⚠️ REVERSED |
+| Commissioning | Select planet → Platoons tab | Commission menu → Select planet → Configure | ⚠️ REVERSED |
+| Spacecraft purchase | Select planet → Spacecraft menu | Shipyard menu → Select planet → Select craft | ⚠️ REVERSED |
+| Fleet movement | Select craft → Select destination | Move menu → Select craft → Select destination | ✅ MATCHES |
+| Attacking | Arrive at planet → Attack | Attack menu → Select target → Select type | ✅ MATCHES |
+| Tax adjustment | Select planet → Adjust slider | Tax menu → Select planet → Select rate | ⚠️ REVERSED |
+| End turn | Space/Enter | `[E]` key | ⚠️ DIFFERENT |
 
-#### Issue #4: Action Discoverability
-- **Severity:** MEDIUM
-- **Question:** Are critical actions discoverable without reading the manual?
-- **Analysis:**
-  - **BBS Interface:** Clear keyboard shortcuts displayed at bottom of screen
-  - **Graphical Interface:** Requires clicking a planet to see action buttons
-  - **Finding:** First-time graphical users may not realize they need to click planets
+### 4.3 Pattern Analysis
+
+The BBS interface uses a **Command-First** pattern:
+1. Select the ACTION you want to perform
+2. Then select the TARGET for that action
+3. Then confirm/configure specifics
+
+The Manual describes a **Context-First** pattern:
+1. Select the OBJECT (planet/craft)
+2. Then see available actions in context
+3. Then perform the action
+
+**Neither pattern is wrong** - both are valid UX approaches. The BBS Command-First pattern is faster for keyboard-driven interfaces and is common in CLI/BBS systems. The Context-First pattern is more intuitive for mouse-driven graphical interfaces.
 
 ---
 
-## 5. Misplaced Actions Analysis
+## 5. Specific Audit Questions
+
+### 5.1 Should BUILD exist on Planet screen instead of Main screen?
+
+**Analysis:**
+
+| Approach | Current BBS | Alternative (Context-First) |
+|----------|-------------|----------------------------|
+| Navigation | `[B]` from main → planet select → building select | `[G]` → planet select → `[B]` → building select |
+| Keystrokes | 3 presses minimum | 4 presses minimum |
+| Mental model | "I want to BUILD" → "WHERE?" | "I'm looking at THIS planet" → "BUILD here" |
+
+**Verdict:** The current placement is **CORRECT for the BBS interface paradigm**. Command-First is the standard pattern for keyboard-driven menus. Requiring users to navigate to a planet first would add unnecessary steps.
+
+**However:** The Planet screen (`[P]`) is currently READ-ONLY with no actions. Adding a contextual build option there (e.g., `[B]` while viewing a planet triggers build for that planet) would ENHANCE discoverability without breaking the existing flow.
+
+**Recommendation:** LOW PRIORITY - Keep current, optionally add contextual shortcuts to Planet view.
+
+### 5.2 Does the game start without user intent due to missing auth gating?
+
+**Analysis:**
+
+| Scenario | Behavior | Assessment |
+|----------|----------|------------|
+| Supabase available + not authenticated | Routes to AuthScene first | ✅ CORRECT |
+| Supabase available + already authenticated | Proceeds to BBSGameScene | ✅ CORRECT |
+| Supabase available + guest session exists | Proceeds to BBSGameScene | ✅ CORRECT |
+| Supabase unavailable | Proceeds to BBSGameScene (offline mode) | ⚠️ INTENTIONAL |
+
+**Code evidence (BootScene.ts:76-101):**
+```typescript
+if (authService.isAuthenticated()) {
+  this.scene.start('BBSGameScene');
+} else if (guestService.isGuestMode()) {
+  this.scene.start('BBSGameScene');
+} else {
+  this.scene.start('AuthScene'); // Auth required
+}
+```
+
+**Verdict:** The auth gating is **CORRECT**. The game requires either:
+- User authentication (sign in), OR
+- Explicit guest mode selection, OR
+- Supabase unavailable (intentional offline fallback)
+
+Users cannot accidentally enter the game without making an intentional choice.
+
+### 5.3 Are critical actions discoverable without reading the manual?
+
+**Analysis:**
+
+| Critical Action | Discovery Method | Discoverable? |
+|----------------|------------------|---------------|
+| **Build** | Main menu shows `[B] Build Structure` | ✅ YES |
+| **Deploy/Move** | Main menu shows `[M] Move Fleet` | ✅ YES |
+| **End Turn** | Main menu shows `[E] End Turn` | ✅ YES |
+| **Attack** | Main menu shows `[A] Attack` | ✅ YES |
+| **Help** | Main menu shows `[H] Help` | ✅ YES |
+| **What to build first** | Contextual hint system on main screen | ✅ YES |
+
+**Key Feature: Contextual Hint System (BBSGameScene.ts:1841-1920)**
+
+The game provides intelligent hints based on game state:
+- No mining station? → "TIP: Press [B] to build a Mining Station for resources"
+- Has mining, no food? → "TIP: Press [B] to build a Horticultural Station for food"
+- Has economy, no docking? → "TIP: Press [B] to build a Docking Bay for spacecraft"
+- Has docking, no ships? → "TIP: Press [S] to purchase a Battle Cruiser"
+- Has ships, no platoons? → "TIP: Press [C] to commission a Platoon for invasion"
+- Ready to attack? → "TIP: Press [A] to attack and invade the enemy planet!"
+
+**Verdict:** Critical actions are **HIGHLY DISCOVERABLE**. The BBS interface shows all available commands clearly, and the contextual hint system guides new players through optimal progression.
+
+---
+
+## 6. Misplaced Actions Analysis
 
 ### Actions Located on Unintuitive Screens
 
-| Action | Current Location | Expected Location | Recommendation |
-|--------|------------------|-------------------|----------------|
-| Tax Rate | PlanetInfoPanel only | Should also be in empire overview | Add empire-wide tax summary |
-| Galaxy View | BBS: Main menu `[G]` | Should be default view | Consider making persistent |
+| Action | Current Location | Issue | Recommendation |
+|--------|------------------|-------|----------------|
+| (None identified) | - | BBS layout is logical | N/A |
 
 ### Actions Duplicated Across Screens
 
 | Action | Locations | Issue | Recommendation |
 |--------|-----------|-------|----------------|
-| Help | Multiple screens | Inconsistent content | Unify help content |
-| Return to Menu | Victory, Defeat, HowToPlay | Consistent | ✅ OK |
+| `[ESC]` Back | All sub-screens | Consistent | ✅ OK |
+| `[H]` Help | Start menu + In-game | Consistent | ✅ OK |
 
 ### Missing Navigation or Confirmation Steps
 
-| Flow | Missing Element | Risk | Recommendation |
-|------|-----------------|------|----------------|
-| Attack execution | Damage preview | Surprise outcomes | Add combat preview |
-| Building construction | Cost confirmation | Accidental builds | ✅ Already has confirmation |
-| End Turn | Pending actions warning | Missed opportunities | Consider "X actions remaining" |
+| Flow | Missing Element | Risk Level | Recommendation |
+|------|-----------------|------------|----------------|
+| Build | Pre-build resource check | LOW | Already shows "NO FUNDS"/"NO SLOT" |
+| Attack | Combat preview/odds | MEDIUM | Add strength comparison before confirm |
+| End Turn | Pending actions warning | LOW | Consider "You have unspent resources" |
 
 ---
 
-## 6. First-Time Player Experience Check
+## 7. First-Time Player Experience Check
 
 ### Can a first-time player reasonably find how to:
 
-| Action | BBS Interface | Graphical Interface | Verdict |
-|--------|---------------|---------------------|---------|
-| **Build** | ✅ `[B]` shown in menu | ⚠️ Must click planet first | PASSABLE |
-| **Deploy** | ⚠️ `[M]` for move ships | ⚠️ Hidden in planet panel | NEEDS IMPROVEMENT |
-| **End Turn** | ✅ `[E]` shown in menu | ✅ Button visible in HUD | ✅ OK |
+| Action | Method | Verdict |
+|--------|--------|---------|
+| **Build** | Menu shows `[B] Build Structure` + hint system | ✅ PASS |
+| **Deploy** | Menu shows `[M] Move Fleet` + hint system | ✅ PASS |
+| **End Turn** | Menu shows `[E] End Turn` + hint system | ✅ PASS |
+| **Get Help** | Menu shows `[H] Help` + `[H] How to Play` | ✅ PASS |
 
 ### STOP CONDITION CHECK
 
 > **If a first-time player cannot reasonably find how to build, deploy, or end a turn, STOP and flag UX as BLOCKING.**
 
 **Assessment:**
-- **Build:** PASSABLE - BBS shows hotkey, Graphical requires planet click (learnable)
-- **Deploy:** NEEDS IMPROVEMENT - Both interfaces require discovery
-- **End Turn:** OK - Both interfaces make this clear
+- **Build:** ✅ PASS - `[B]` clearly shown + contextual hints
+- **Deploy:** ✅ PASS - `[M]` clearly shown + contextual hints
+- **End Turn:** ✅ PASS - `[E]` clearly shown + contextual hints
 
-**VERDICT: UX is NOT BLOCKING** - All critical actions are findable, though "deploy" could be more discoverable.
-
----
-
-## 7. Recommended Screen Reassignment
-
-### Minimal UI Change Set (Low-Risk)
-
-| Change | Screen | Description | Risk Level |
-|--------|--------|-------------|------------|
-| 1 | GalaxyMapScene | Add tooltip on first planet click: "Click a planet to see actions" | LOW |
-| 2 | GalaxyMapScene | Add "?" button to HUD linking to How to Play | LOW |
-| 3 | BBSGameScene | Add `[?]` quick help overlay for hotkeys | LOW |
-| 4 | PlanetInfoPanel | Add visual indicator for actionable planets (pulse effect) | LOW |
-
-### Medium-Risk Improvements
-
-| Change | Screen | Description | Risk Level |
-|--------|--------|-------------|------------|
-| 5 | GalaxyMapScene | Add top-level "Build" button in HUD (not just in panel) | MEDIUM |
-| 6 | BBSGameScene | Add tax rate adjustment command | MEDIUM |
-| 7 | Both | Unified onboarding flow for new players | MEDIUM |
-
-### High-Risk Improvements (Not Recommended Now)
-
-| Change | Description | Risk Level |
-|--------|-------------|------------|
-| Merge interfaces | Unify BBS and Graphical into single mode | HIGH |
-| Complete UI redesign | Move all actions to a command palette | HIGH |
+**VERDICT: UX is NOT BLOCKING** - All critical actions are clearly discoverable through the menu system and hint system.
 
 ---
 
-## 8. Summary
+## 8. Identified Issues and Recommendations
+
+### Critical Issues (Must Fix)
+
+| # | Issue | Severity | Recommendation |
+|---|-------|----------|----------------|
+| 1 | Playthrough Manual describes removed graphical interface | **CRITICAL** | Rewrite manual for BBS keyboard interface |
+| 2 | User Manual also describes graphical interface | **CRITICAL** | Rewrite or remove outdated sections |
+
+### Medium Issues (Should Fix)
+
+| # | Issue | Severity | Recommendation |
+|---|-------|----------|----------------|
+| 3 | Planet view is read-only | MEDIUM | Add contextual action shortcuts |
+| 4 | No combat preview before attack | MEDIUM | Add strength comparison screen |
+| 5 | "How to Play" chapters still reference clicking | MEDIUM | Verify all help content is BBS-accurate |
+
+### Low Issues (Nice to Have)
+
+| # | Issue | Severity | Recommendation |
+|---|-------|----------|----------------|
+| 6 | No keyboard shortcut quick-reference overlay | LOW | Add `[?]` for instant hotkey reminder |
+| 7 | End turn could warn about unspent resources | LOW | Consider optional warning |
+
+---
+
+## 9. Files Requiring Changes
+
+### Critical (Documentation)
+
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `OVERLORD-COMPLETE-PLAYTHROUGH-MANUAL.md` | **REWRITE** | Convert from graphical to BBS keyboard instructions |
+| `USER_MANUAL.md` | **REWRITE** | Update all click references to keyboard commands |
+
+### Medium Priority (Code)
+
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `src/scenes/BBSGameScene.ts` | Enhancement | Add contextual actions to Planet view |
+| `src/scenes/BBSGameScene.ts` | Enhancement | Add combat strength preview to Attack |
+
+### Low Priority (Code)
+
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `src/scenes/BBSGameScene.ts` | Enhancement | Add `[?]` quick-help overlay |
+| `src/scenes/BBSGameScene.ts` | Enhancement | Add end-turn resource warning |
+
+---
+
+## 10. Summary
 
 ### Key Findings
 
-1. **Two parallel interfaces exist** - BBS (keyboard, default) and Graphical (mouse, secondary)
-2. **BUILD placement is correct for each interface** - Context differs but both are valid
-3. **Auth gating works properly** - Anonymous play is intentional feature
-4. **Action discoverability needs improvement** - Especially for graphical interface
-5. **UX is NOT BLOCKING** - First-time players can find critical actions
+1. **Interface is now BBS-only** - Graphical mode was removed; all interaction is keyboard-driven
+2. **BUILD placement is CORRECT** - Command-First pattern is appropriate for BBS interface
+3. **Auth gating is CORRECT** - Users must explicitly choose sign-in, register, or guest mode
+4. **Action discoverability is EXCELLENT** - Clear menu labels + intelligent contextual hints
+5. **UX is NOT BLOCKING** - First-time players can find all critical actions
+6. **Documentation is OUTDATED** - Manuals still describe the removed graphical interface
 
 ### Priority Actions
 
-1. **LOW PRIORITY:** Add hover tooltips/hints for first-time graphical users
-2. **MEDIUM PRIORITY:** Add "getting started" prompt on first play
-3. **DEFER:** Interface unification (high risk, low immediate value)
+1. **CRITICAL:** Update Playthrough Manual for BBS keyboard interface
+2. **CRITICAL:** Update User Manual for BBS keyboard interface
+3. **MEDIUM:** Consider adding contextual actions to Planet view
+4. **MEDIUM:** Add combat preview before attack confirmation
+5. **LOW:** Add quick-help overlay for keyboard shortcuts
 
-### Files Requiring Changes
+### Overall UX Assessment
 
-For minimal improvements:
-- `src/scenes/GalaxyMapScene.ts` - Add onboarding hints
-- `src/scenes/ui/HUD.ts` - Add help button
-- `src/scenes/BBSGameScene.ts` - Add quick-help overlay
+The BBS interface is **well-designed** for its paradigm:
+- Clear command structure visible at all times
+- Intelligent hint system guides new players
+- Consistent navigation patterns (command → target → confirm)
+- Escape key universally returns to previous screen
+
+The primary issue is **documentation lag** - the manuals describe an interface that no longer exists.
 
 ---
 
