@@ -2,7 +2,7 @@
  * AuthScene - Authentication Scene
  *
  * Full-screen authentication scene with login/register tabs.
- * Redirects to MainMenuScene if already authenticated.
+ * Redirects to BBSGameScene if already authenticated.
  */
 
 import Phaser from 'phaser';
