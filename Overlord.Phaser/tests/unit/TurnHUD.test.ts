@@ -54,7 +54,7 @@ jest.mock('phaser', () => ({
 function createTestGameState(): GameState {
   const gameState = new GameState();
   gameState.currentTurn = 1;
-  gameState.currentPhase = TurnPhase.Action; // Start in Action to avoid Income auto-advance
+  gameState.currentPhase = TurnPhase.Action;
 
   // Add player and AI planets to prevent victory conditions
   const playerPlanet = new PlanetEntity(1, 'Player Home', PlanetType.Terran, new Position3D(0, 0, 0));
@@ -76,8 +76,6 @@ function createTestGameState(): GameState {
  * Note: Due to Phaser dependencies, TurnHUD is tested via TurnSystem integration
  * and mocked Phaser components. Full visual testing requires browser environment.
  *
- * Important: Income phase auto-advances to Action phase in TurnSystem.
- * Tests should start from Action phase to have predictable behavior.
  */
 describe('TurnHUD Integration', () => {
   let gameState: GameState;
@@ -106,7 +104,7 @@ describe('TurnHUD Integration', () => {
       // Advance through full turn (starting from Action)
       turnSystem.advancePhase(); // Action -> Combat
       turnSystem.advancePhase(); // Combat -> End
-      turnSystem.advancePhase(); // End -> completeTurn -> Income -> Action (new turn)
+      turnSystem.advancePhase(); // End -> Income (new turn)
 
       expect(turnStarts).toContain(2);
     });
@@ -133,7 +131,7 @@ describe('TurnHUD Integration', () => {
       // Starting from Action phase
       turnSystem.advancePhase(); // Action -> Combat
       turnSystem.advancePhase(); // Combat -> End
-      turnSystem.advancePhase(); // End -> Income -> Action (turn 2)
+      turnSystem.advancePhase(); // End -> Income (turn 2)
 
       expect(gameState.currentTurn).toBe(2);
     });
@@ -147,7 +145,7 @@ describe('TurnHUD Integration', () => {
       turnSystem.advancePhase(); // Combat -> End
       expect(gameState.currentTurn).toBe(1);
 
-      turnSystem.advancePhase(); // End -> Income -> Action (turn 2)
+      turnSystem.advancePhase(); // End -> Income (turn 2)
       expect(gameState.currentTurn).toBe(2);
     });
   });
@@ -167,12 +165,12 @@ describe('TurnHUD Integration', () => {
       turnSystem.advancePhase();
       expect(gameState.currentPhase).toBe(TurnPhase.End);
 
-      // End -> Income -> Action (Income auto-advances)
+      // End -> Income
       turnSystem.advancePhase();
-      expect(gameState.currentPhase).toBe(TurnPhase.Action);
+      expect(gameState.currentPhase).toBe(TurnPhase.Income);
     });
 
-    test('Income phase auto-advances to Action phase', () => {
+    test('Income phase advances to Action phase', () => {
       // Set up fresh state in Income phase
       const freshState = new GameState();
       freshState.currentPhase = TurnPhase.Income;
@@ -189,7 +187,7 @@ describe('TurnHUD Integration', () => {
 
       const freshTurnSystem = new TurnSystem(freshState);
 
-      // Advance from Income - should auto-advance to Action
+      // Advance from Income
       freshTurnSystem.advancePhase();
 
       expect(freshState.currentPhase).toBe(TurnPhase.Action);
@@ -263,7 +261,7 @@ describe('TurnHUD Integration', () => {
       // Complete a full turn (starting from Action)
       turnSystem.advancePhase(); // Action -> Combat
       turnSystem.advancePhase(); // Combat -> End
-      turnSystem.advancePhase(); // End -> Income -> Action (turn 2 starts)
+      turnSystem.advancePhase(); // End -> Income (turn 2 starts)
 
       expect(notificationTurn).toBe(2);
     });
@@ -309,7 +307,7 @@ describe('TurnHUD Integration', () => {
 
       // Complete turn
       turnSystem.advancePhase(); // End
-      turnSystem.advancePhase(); // Income -> Action (turn 2)
+      turnSystem.advancePhase(); // Income (turn 2)
 
       expect(gameState.currentTurn).toBe(2);
     });
@@ -337,10 +335,10 @@ describe('TurnSystem Callbacks', () => {
     // Advance through one full turn (starting from Action)
     turnSystem.advancePhase(); // Action -> Combat (phase callback)
     turnSystem.advancePhase(); // Combat -> End (phase callback)
-    turnSystem.advancePhase(); // End -> completeTurn -> Income -> Action
+    turnSystem.advancePhase(); // End -> completeTurn -> Income
+    turnSystem.advancePhase(); // Income -> Action
     // completeTurn fires: turnEnded, then turnStarted
     // transitionToPhase(Income) fires: phaseChanged(Income)
-    // Income auto-advance fires: phaseChanged(Action)
 
     // Total: 4 phase changes (Combat, End, Income, Action)
     // 1 turn ended, 1 turn started
@@ -370,7 +368,7 @@ describe('TurnSystem Callbacks', () => {
     // Complete two full turns (starting from Action)
     // Turn 1: Action -> Combat -> End -> (completeTurn: Income -> Action)
     // Turn 2: Action -> Combat -> End -> (completeTurn: Income -> Action)
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       turnSystem.advancePhase();
     }
 

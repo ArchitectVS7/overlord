@@ -6,8 +6,9 @@ import { BuildingSystem } from './BuildingSystem';
 import { DefenseSystem } from './DefenseSystem';
 import { UpgradeSystem } from './UpgradeSystem';
 import { SpaceCombatSystem } from './SpaceCombatSystem';
+import { AIDecisionSystem } from './AIDecisionSystem';
 import { TaxationSystem } from './TaxationSystem';
-import { TurnPhase, FactionType } from './models/Enums';
+import { TurnPhase, FactionType, VictoryResult } from './models/Enums';
 import { ResourceDelta } from './models/ResourceModels';
 import { SpaceBattle, SpaceBattleResult } from './models/CombatModels';
 
@@ -34,6 +35,8 @@ export interface IncomePhaseResult extends PhaseProcessingResult {
 export interface EndPhaseResult extends PhaseProcessingResult {
   buildingsCompleted: number;
   populationGrowth: number;
+  victoryResult: VictoryResult;
+  aiTurnProcessed: boolean;
 }
 
 /**
@@ -53,7 +56,7 @@ export interface CombatPhaseResult extends PhaseProcessingResult {
  * - Income Phase: Resource generation for all factions
  * - Action Phase: No automated processing (player actions)
  * - Combat Phase: AI decisions and combat resolution (future)
- * - End Phase: Building progress, population growth
+ * - End Phase: AI turn and victory checks
  */
 export class PhaseProcessor {
   private readonly gameState: GameState;
@@ -65,6 +68,9 @@ export class PhaseProcessor {
   private readonly upgradeSystem: UpgradeSystem;
   private readonly spaceCombatSystem: SpaceCombatSystem;
   private readonly taxationSystem: TaxationSystem;
+  private aiDecisionSystem?: AIDecisionSystem;
+  private victoryChecker?: () => VictoryResult;
+  private onVictoryAchieved?: (result: VictoryResult) => void;
 
   // Events for UI notifications
   public onIncomeProcessed?: (playerIncome: ResourceDelta, aiIncome: ResourceDelta) => void;
@@ -181,6 +187,28 @@ export class PhaseProcessor {
       // Apply total income to AI Faction (Global Economy)
       this.gameState.aiFaction.resources.add(aiIncome);
 
+      // Track population before/after to calculate growth notifications
+      const populationBefore = new Map<number, number>();
+      for (const planet of this.gameState.planets) {
+        populationBefore.set(planet.id, planet.population);
+      }
+
+      // Process building construction progress during Income phase
+      this.buildingSystem.updateConstruction();
+
+      // Process population growth for each faction during Income phase
+      this.populationSystem.updateFactionPopulation(FactionType.Player);
+      this.populationSystem.updateFactionPopulation(FactionType.AI);
+
+      // Fire population growth notifications
+      for (const planet of this.gameState.planets) {
+        const previousPop = populationBefore.get(planet.id) || 0;
+        const growth = planet.population - previousPop;
+        if (growth > 0) {
+          this.onPopulationGrowth?.(planet.id, growth);
+        }
+      }
+
       // Fire notification event
       this.onIncomeProcessed?.(playerIncome, aiIncome);
 
@@ -282,49 +310,26 @@ export class PhaseProcessor {
   }
 
   /**
-   * Processes End phase: building progress, population growth.
+   * Processes End phase: AI turn and victory checks.
    * NFR-P3: Must complete within 2 seconds.
    */
   public processEndPhase(): EndPhaseResult {
     const startTime = performance.now();
     let buildingsCompleted = 0;
     let totalPopulationGrowth = 0;
+    let aiTurnProcessed = false;
+    let victoryResult = VictoryResult.None;
 
     try {
-      // Track building completions via callback (MAJOR-7 fix: use try-finally for safe restoration)
-      const originalCallback = this.buildingSystem.onBuildingCompleted;
-      try {
-        this.buildingSystem.onBuildingCompleted = (planetId, buildingType) => {
-          buildingsCompleted++;
-          originalCallback?.(planetId, buildingType);
-        };
-
-        // Process building construction progress (global method)
-        this.buildingSystem.updateConstruction();
-      } finally {
-        // Always restore original callback, even if updateConstruction throws
-        this.buildingSystem.onBuildingCompleted = originalCallback;
+      if (this.aiDecisionSystem) {
+        this.aiDecisionSystem.executeAITurn();
+        aiTurnProcessed = true;
       }
 
-      // Process population growth for each faction
-      // Track population before/after to calculate growth
-      const populationBefore = new Map<number, number>();
-      for (const planet of this.gameState.planets) {
-        populationBefore.set(planet.id, planet.population);
-      }
-
-      // Update population for Player faction
-      this.populationSystem.updateFactionPopulation(FactionType.Player);
-      // Update population for AI faction
-      this.populationSystem.updateFactionPopulation(FactionType.AI);
-
-      // Calculate growth and fire events
-      for (const planet of this.gameState.planets) {
-        const previousPop = populationBefore.get(planet.id) || 0;
-        const growth = planet.population - previousPop;
-        if (growth > 0) {
-          totalPopulationGrowth += growth;
-          this.onPopulationGrowth?.(planet.id, growth);
+      if (this.victoryChecker) {
+        victoryResult = this.victoryChecker();
+        if (victoryResult !== VictoryResult.None) {
+          this.onVictoryAchieved?.(victoryResult);
         }
       }
 
@@ -340,6 +345,8 @@ export class PhaseProcessor {
         processingTimeMs: processingTime,
         buildingsCompleted,
         populationGrowth: totalPopulationGrowth,
+        victoryResult,
+        aiTurnProcessed,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during end phase processing';
@@ -350,6 +357,8 @@ export class PhaseProcessor {
         error: errorMessage,
         buildingsCompleted: 0,
         populationGrowth: 0,
+        victoryResult,
+        aiTurnProcessed,
       };
     }
   }
@@ -408,5 +417,18 @@ export class PhaseProcessor {
    */
   public getTaxationSystem(): TaxationSystem {
     return this.taxationSystem;
+  }
+
+  /**
+   * Configures End phase processing for AI and victory checks.
+   */
+  public configureEndPhase(options: {
+    aiDecisionSystem?: AIDecisionSystem;
+    victoryChecker?: () => VictoryResult;
+    onVictoryAchieved?: (result: VictoryResult) => void;
+  }): void {
+    this.aiDecisionSystem = options.aiDecisionSystem;
+    this.victoryChecker = options.victoryChecker;
+    this.onVictoryAchieved = options.onVictoryAchieved;
   }
 }

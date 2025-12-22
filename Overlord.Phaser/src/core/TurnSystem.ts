@@ -46,30 +46,30 @@ export class TurnSystem {
    * Advances to the next turn phase.
    * Call this when the player presses "End Turn" during Action phase.
    */
-  public advancePhase(): void {
+  public advancePhase(): TurnPhase {
     const currentPhase = this.gameState.currentPhase;
 
     switch (currentPhase) {
       case TurnPhase.Income:
-        // Auto-transition to Action phase after income calculation
         this.transitionToPhase(TurnPhase.Action);
-        break;
+        return this.gameState.currentPhase;
 
       case TurnPhase.Action:
         // Player ended their turn, move to Combat phase
         this.transitionToPhase(TurnPhase.Combat);
-        break;
+        return this.gameState.currentPhase;
 
       case TurnPhase.Combat:
         // Combat resolved, move to End phase
         this.transitionToPhase(TurnPhase.End);
-        break;
+        return this.gameState.currentPhase;
 
       case TurnPhase.End:
         // End phase complete, start new turn at Income phase
-        this.completeTurn();
-        break;
+        return this.advanceToNextTurn();
     }
+
+    return this.gameState.currentPhase;
   }
 
   /**
@@ -120,7 +120,6 @@ export class TurnSystem {
 
   /**
    * Starts a new game, initializing to turn 1 at Income phase.
-   * Income phase auto-advances to Action phase after processing.
    */
   public startNewGame(): void {
     this.gameState.currentTurn = 1;
@@ -128,7 +127,7 @@ export class TurnSystem {
 
     this.onTurnStarted?.(this.gameState.currentTurn);
 
-    // Transition to Income phase (which will auto-advance to Action)
+    // Transition to Income phase (caller will process phases)
     this.transitionToPhase(TurnPhase.Income);
   }
 
@@ -146,25 +145,33 @@ export class TurnSystem {
     return this.gameState.currentPhase;
   }
 
+  /**
+   * Gets the current turn phase (explicit getter).
+   */
+  public getCurrentPhase(): TurnPhase {
+    return this.gameState.currentPhase;
+  }
+
+  /**
+   * Advances to the next turn (End -> Income), checking victory conditions.
+   */
+  public advanceToNextTurn(): TurnPhase {
+    return this.completeTurn();
+  }
+
   private transitionToPhase(newPhase: TurnPhase): void {
     this.gameState.currentPhase = newPhase;
     this.gameState.lastActionTime = new Date();
 
     this.onPhaseChanged?.(newPhase);
-
-    // Auto-advance Income phase
-    if (newPhase === TurnPhase.Income) {
-      this.processIncomePhase();
-      this.advancePhase(); // Auto-transition to Action
-    }
   }
 
-  private completeTurn(): void {
+  private completeTurn(): TurnPhase {
     // Check victory conditions before ending turn
     const victoryResult = this.checkVictoryConditions();
     if (victoryResult !== VictoryResult.None) {
       this.onVictoryAchieved?.(victoryResult);
-      return; // Game ends, don't increment turn
+      return this.gameState.currentPhase; // Game ends, don't increment turn
     }
 
     // Fire turn ended event
@@ -179,5 +186,6 @@ export class TurnSystem {
 
     // Transition to Income phase (which auto-advances to Action)
     this.transitionToPhase(TurnPhase.Income);
+    return this.gameState.currentPhase;
   }
 }

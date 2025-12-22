@@ -11,12 +11,12 @@ import { COLORS, TEXT_COLORS, FONTS, HUD, PANEL, BUTTON } from '@config/UITheme'
  * Configuration options for TurnHUD
  */
 export interface TurnHUDConfig {
-  /** Delay in ms before auto-advancing Combat/End phases (default: 1500) */
-  autoAdvanceDelayMs?: number;
   /** Duration in ms for notification visibility (default: 1000 per design spec) */
   notificationDurationMs?: number;
   /** Minimum population growth to show notification (default: 10) */
   populationGrowthThreshold?: number;
+  /** Optional callback for end turn requests */
+  onEndTurnRequested?: () => void;
 }
 
 /**
@@ -56,9 +56,9 @@ export class TurnHUD extends Phaser.GameObjects.Container {
   private originalOnPhaseProcessingError?: (phase: TurnPhase, error: string) => void;
 
   // Configurable timing and thresholds (MAJOR-4, MAJOR-6 fixes)
-  private readonly autoAdvanceDelayMs: number;
   private readonly notificationDurationMs: number;
   private readonly populationGrowthThreshold: number;
+  private readonly onEndTurnRequested?: () => void;
 
   constructor(
     scene: Phaser.Scene,
@@ -73,9 +73,9 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     this.gameState = gameState;
     this.turnSystem = turnSystem;
     this.phaseProcessor = phaseProcessor;
-    this.autoAdvanceDelayMs = config?.autoAdvanceDelayMs ?? 1500;
     this.notificationDurationMs = config?.notificationDurationMs ?? 1000; // C2.2-2: Changed from 500 to 1000 per design spec
     this.populationGrowthThreshold = config?.populationGrowthThreshold ?? 10;
+    this.onEndTurnRequested = config?.onEndTurnRequested;
 
     // Wire up phase processor events for notifications
     this.setupPhaseProcessorEvents();
@@ -264,7 +264,12 @@ export class TurnHUD extends Phaser.GameObjects.Container {
       return; // Can only end turn in Action phase
     }
 
-    // Advance to Combat phase
+    if (this.onEndTurnRequested) {
+      this.onEndTurnRequested();
+      return;
+    }
+
+    // Advance to Combat phase (fallback)
     this.turnSystem.advancePhase();
   }
 
@@ -272,21 +277,6 @@ export class TurnHUD extends Phaser.GameObjects.Container {
     // Show phase transition notification (appears immediately per NFR-P3)
     this.showNotification(`${this.getPhaseDisplayName(newPhase)} Phase`);
     this.update();
-
-    // Process the phase using PhaseProcessor (Story 2-3)
-    // This handles Income calculations, End phase building/population updates, etc.
-    const result = this.phaseProcessor.processPhase(newPhase);
-    if (!result.success) {
-      console.error(`Phase processing failed: ${result.error}`);
-    }
-
-    // Auto-advance Combat and End phases after configurable delay
-    // Note: Income auto-advances within TurnSystem
-    if (newPhase === TurnPhase.Combat || newPhase === TurnPhase.End) {
-      this.scene.time.delayedCall(this.autoAdvanceDelayMs, () => {
-        this.turnSystem.advancePhase();
-      });
-    }
   }
 
   /**

@@ -28,11 +28,10 @@ describe('TurnSystem', () => {
       expect(gameState.currentTurn).toBe(1);
     });
 
-    it('should transition to Action phase (Income auto-advances)', () => {
+    it('should start in Income phase', () => {
       turnSystem.startNewGame();
 
-      // Income phase auto-advances to Action
-      expect(gameState.currentPhase).toBe(TurnPhase.Action);
+      expect(gameState.currentPhase).toBe(TurnPhase.Income);
     });
 
     it('should fire onTurnStarted event', () => {
@@ -47,7 +46,7 @@ describe('TurnSystem', () => {
       expect(startedTurn).toBe(1);
     });
 
-    it('should fire onPhaseChanged events (Income → Action)', () => {
+    it('should fire onPhaseChanged events (Income)', () => {
       const phases: TurnPhase[] = [];
 
       turnSystem.onPhaseChanged = (phase) => {
@@ -56,10 +55,10 @@ describe('TurnSystem', () => {
 
       turnSystem.startNewGame();
 
-      expect(phases).toEqual([TurnPhase.Income, TurnPhase.Action]);
+      expect(phases).toEqual([TurnPhase.Income]);
     });
 
-    it('should fire onIncomeCalculated event', () => {
+    it('should not fire onIncomeCalculated event', () => {
       let incomeFired = false;
 
       turnSystem.onIncomeCalculated = () => {
@@ -68,22 +67,30 @@ describe('TurnSystem', () => {
 
       turnSystem.startNewGame();
 
-      expect(incomeFired).toBe(true);
+      expect(incomeFired).toBe(false);
     });
   });
 
   describe('advancePhase', () => {
     beforeEach(() => {
-      turnSystem.startNewGame(); // Starts at Action phase
+      turnSystem.startNewGame(); // Starts at Income phase
+    });
+
+    it('should advance from Income to Action', () => {
+      turnSystem.advancePhase();
+
+      expect(gameState.currentPhase).toBe(TurnPhase.Action);
     });
 
     it('should advance from Action to Combat', () => {
-      turnSystem.advancePhase();
+      turnSystem.advancePhase(); // Income -> Action
+      turnSystem.advancePhase(); // Action -> Combat
 
       expect(gameState.currentPhase).toBe(TurnPhase.Combat);
     });
 
     it('should advance from Combat to End', () => {
+      turnSystem.advancePhase(); // Income → Action
       turnSystem.advancePhase(); // Action → Combat
       turnSystem.advancePhase(); // Combat → End
 
@@ -91,12 +98,13 @@ describe('TurnSystem', () => {
     });
 
     it('should advance from End to Income (new turn)', () => {
+      turnSystem.advancePhase(); // Income → Action
       turnSystem.advancePhase(); // Action → Combat
       turnSystem.advancePhase(); // Combat → End
       turnSystem.advancePhase(); // End → Income (turn 2)
 
       expect(gameState.currentTurn).toBe(2);
-      expect(gameState.currentPhase).toBe(TurnPhase.Action); // Income auto-advances
+      expect(gameState.currentPhase).toBe(TurnPhase.Income);
     });
 
     it('should fire onPhaseChanged event', () => {
@@ -106,9 +114,9 @@ describe('TurnSystem', () => {
         changedPhase = phase;
       };
 
-      turnSystem.advancePhase();
+      turnSystem.advancePhase(); // Income -> Action
 
-      expect(changedPhase).toBe(TurnPhase.Combat);
+      expect(changedPhase).toBe(TurnPhase.Action);
     });
   });
 
@@ -118,10 +126,11 @@ describe('TurnSystem', () => {
     });
 
     it('should increment turn counter', () => {
-      // Complete full turn cycle: Action → Combat → End → Income (turn 2)
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
+      // Complete full turn cycle: Income → Action → Combat → End → Income (turn 2)
+      turnSystem.advancePhase(); // Income -> Action
+      turnSystem.advancePhase(); // Action -> Combat
+      turnSystem.advancePhase(); // Combat -> End
+      turnSystem.advancePhase(); // End -> Income (turn 2)
 
       expect(gameState.currentTurn).toBe(2);
     });
@@ -141,9 +150,10 @@ describe('TurnSystem', () => {
       };
 
       // Complete turn cycle
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
+      turnSystem.advancePhase(); // Income -> Action
+      turnSystem.advancePhase(); // Action -> Combat
+      turnSystem.advancePhase(); // Combat -> End
+      turnSystem.advancePhase(); // End -> Income (turn 2)
 
       expect(endedTurn).toBe(1);
       expect(startedTurn).toBe(2);
@@ -161,9 +171,10 @@ describe('TurnSystem', () => {
       gameState.rebuildLookups();
 
       // Complete turn cycle
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
+      turnSystem.advancePhase(); // Income -> Action
+      turnSystem.advancePhase(); // Action -> Combat
+      turnSystem.advancePhase(); // Combat -> End
+      turnSystem.advancePhase(); // End -> Income (turn 2)
 
       expect(victoryResult).toBe(VictoryResult.PlayerVictory);
       expect(gameState.currentTurn).toBe(1); // Turn doesn't increment on victory
@@ -265,10 +276,11 @@ describe('TurnSystem', () => {
 
       turnSystem.startNewGame();
 
-      // Full cycle: Action → Combat → End → Income (turn 2) → Action
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
-      turnSystem.advancePhase();
+      // Full cycle: Income → Action → Combat → End → Income (turn 2)
+      turnSystem.advancePhase(); // Income -> Action
+      turnSystem.advancePhase(); // Action -> Combat
+      turnSystem.advancePhase(); // Combat -> End
+      turnSystem.advancePhase(); // End -> Income
 
       expect(events).toEqual([
         'Phase: Income',
@@ -278,7 +290,6 @@ describe('TurnSystem', () => {
         'Turn 1 Ended',
         'Turn 2 Started',
         'Phase: Income',
-        'Phase: Action'
       ]);
     });
   });
