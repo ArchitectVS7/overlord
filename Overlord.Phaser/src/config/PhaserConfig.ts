@@ -11,6 +11,7 @@ import { CampaignConfigScene } from '@scenes/CampaignConfigScene';
 import { GalaxyMapScene } from '@scenes/GalaxyMapScene';
 import { VictoryScene } from '@scenes/VictoryScene';
 import { DefeatScene } from '@scenes/DefeatScene';
+import { BBSGameScene } from '@scenes/BBSGameScene';
 
 export const PhaserConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -18,7 +19,7 @@ export const PhaserConfig: Phaser.Types.Core.GameConfig = {
   height: 768,
   parent: 'game-container',
   backgroundColor: '#000000',
-  scene: [BootScene, AuthScene, MainMenuScene, HowToPlayScene, TutorialsScene, FlashConflictsScene, ScenarioGameScene, ScenarioPackScene, CampaignConfigScene, GalaxyMapScene, VictoryScene, DefeatScene],
+  scene: [BootScene, AuthScene, MainMenuScene, HowToPlayScene, TutorialsScene, FlashConflictsScene, ScenarioGameScene, ScenarioPackScene, CampaignConfigScene, GalaxyMapScene, VictoryScene, DefeatScene, BBSGameScene],
   physics: {
     default: 'arcade',
     arcade: {

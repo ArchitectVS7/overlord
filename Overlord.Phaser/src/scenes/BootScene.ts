@@ -74,31 +74,31 @@ export class BootScene extends Phaser.Scene {
         console.log('User settings applied');
 
         if (authService.isAuthenticated()) {
-          // Already logged in - go to main menu
-          console.log('User authenticated, proceeding to main menu');
+          // Already logged in - go to BBS game
+          console.log('User authenticated, proceeding to BBS game');
           if (adminService.isAdmin()) {
             console.log('  User has admin privileges');
           }
-          this.scene.start('MainMenuScene');
+          this.scene.start('BBSGameScene');
         } else if (guestService.isGuestMode()) {
-          // Existing guest session - go to main menu
-          console.log('Guest session restored, proceeding to main menu');
-          this.scene.start('MainMenuScene');
+          // Existing guest session - go to BBS game
+          console.log('Guest session restored, proceeding to BBS game');
+          this.scene.start('BBSGameScene');
         } else {
-          // Not logged in - go to auth scene
+          // Not logged in - go to auth scene first, then BBS
           console.log('User not authenticated, showing auth screen');
           this.scene.start('AuthScene');
         }
       } else {
-        // Supabase not available - skip auth, go directly to main menu
+        // Supabase not available - skip auth, go directly to BBS game
         // (will work with localStorage only)
-        console.log('Supabase unavailable, proceeding without authentication');
+        console.log('Supabase unavailable, proceeding to BBS game');
 
         // Still apply local settings for offline mode
         await profileService.applyAllSettings();
         console.log('Local settings applied');
 
-        this.scene.start('MainMenuScene');
+        this.scene.start('BBSGameScene');
       }
     }, 100);
   }

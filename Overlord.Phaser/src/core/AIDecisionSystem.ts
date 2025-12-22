@@ -61,6 +61,18 @@ export class AIDecisionSystem {
    */
   public onAIBuilding?: (planetID: number, buildingType: BuildingType) => void;
 
+  /**
+   * Event fired when AI commissions a platoon.
+   * Parameters: (planetID, troops, equipment, weapon)
+   */
+  public onAICommissioning?: (planetID: number, troops: number, equipment: EquipmentLevel, weapon: WeaponLevel) => void;
+
+  /**
+   * Event fired when AI purchases a craft.
+   * Parameters: (craftType, planetID)
+   */
+  public onAIPurchasing?: (craftType: CraftType, planetID: number) => void;
+
   constructor(
     gameState: GameState,
     incomeSystem: IncomeSystem,
@@ -206,34 +218,44 @@ export class AIDecisionSystem {
 
   /**
    * Executes AI decision tree based on assessment.
+   * AI ALWAYS works toward endgame: Expand → Build Economy → Build Military → Attack
    */
   private executeDecisions(assessment: AIAssessment): void {
-    // Priority 1: Defend if under attack
+    console.log(`[AI] Turn ${this.gameState.currentTurn}: threatLevel=${assessment.threatLevel.toFixed(2)}, underAttack=${assessment.underAttack}, aiPlanets=${assessment.aiPlanets}, economicStrength=${assessment.economicStrength.toFixed(2)}`);
+
+    // Priority 1: Defend if under attack (emergency response)
     if (assessment.underAttack) {
+      console.log('[AI] Defending (under attack)');
       this.reinforceDefenses();
     }
 
-    // Priority 2: Build military if threatened
-    if (assessment.threatLevel > 0.8) {
+    // Priority 2: ALWAYS expand to neutral planets (growth = victory)
+    // Expansion is CRITICAL - more planets = more resources = more armies
+    const neutralPlanets = this.gameState.planets.filter(p => p.owner === FactionType.Neutral);
+    if (neutralPlanets.length > 0) {
+      console.log('[AI] Expanding to neutral planets (ALWAYS)');
+      this.expandToNeutral();
+    }
+
+    // Priority 3: ALWAYS build economy on owned planets (turn < 30 or Economic)
+    // Need resources to build armies - build on ANY planet type
+    if (this.gameState.currentTurn < 30 || this.personality === AIPersonality.Economic) {
+      console.log('[AI] Building economy');
+      this.buildEconomy();
+    }
+
+    // Priority 4: ALWAYS build military if we have resources
+    // Build more aggressively if threatened
+    if (assessment.threatLevel > 0.8 || this.gameState.currentTurn >= 5) {
+      console.log('[AI] Building military');
       this.trainMilitary();
     }
 
-    // Priority 3: Build economy (early-mid game or economic personality)
-    if (this.gameState.currentTurn < 20 || this.personality === AIPersonality.Economic) {
-      const economicPriority = 1.0 + this.personalityConfig.economicModifier;
-      if (economicPriority > 0.5) {
-        this.buildEconomy();
-      }
-    }
-
-    // Priority 4: Attack if advantage
+    // Priority 5: Attack if we have military advantage
+    // Personality affects aggressiveness, but all AIs attack eventually
     if (assessment.canAttack && !assessment.underAttack) {
+      console.log('[AI] Launching attack');
       this.launchAttack();
-    }
-
-    // Priority 5: Expand to neutral planets (if safe)
-    if (assessment.aiPlanets < 3 && assessment.economicStrength > 0.5 && assessment.threatLevel < 1.0) {
-      this.expandToNeutral();
     }
   }
 
@@ -358,14 +380,18 @@ export class AIDecisionSystem {
 
     // Train defensive platoon
     this.platoonSystem.commissionPlatoon(hitotsu.id, FactionType.AI, 100, EquipmentLevel.Standard, WeaponLevel.Rifle);
+    this.onAICommissioning?.(hitotsu.id, 100, EquipmentLevel.Standard, WeaponLevel.Rifle);
   }
 
   /**
-   * Trains military units based on difficulty and game state.
+   * Trains military units on ANY AI planet that can afford it.
    */
   private trainMilitary(): void {
-    const hitotsu = this.gameState.planets.find(p => p.owner === FactionType.AI && p.name === 'Hitotsu');
-    if (!hitotsu) {
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    console.log(`[AI] trainMilitary: AI owns ${aiPlanets.length} planets`);
+
+    if (aiPlanets.length === 0) {
+      console.log('[AI]   No AI planets to train on!');
       return;
     }
 
@@ -391,38 +417,91 @@ export class AIDecisionSystem {
     const totalCost = PlatoonCosts.getTotalCost(equipment, weapon);
     const cost = new ResourceCost();
     cost.credits = totalCost;
-    if (!hitotsu.resources.canAfford(cost)) {
-      return;
-    }
 
-    // Train platoon
-    const troops = Math.floor(this.random() * 51) + 100; // 100-150
-    this.platoonSystem.commissionPlatoon(hitotsu.id, FactionType.AI, troops, equipment, weapon);
-  }
-
-  /**
-   * Builds economic infrastructure based on personality.
-   */
-  private buildEconomy(): void {
-    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
-
+    // Try to train on any planet that can afford it
     for (const planet of aiPlanets) {
-      // Economic personality builds more aggressively
-      const buildChance = this.personality === AIPersonality.Economic ? 0.8 : 0.4;
-      if (this.random() > buildChance) {
+      console.log(`[AI]   Checking ${planet.name} for platoon commission`);
+
+      if (!planet.resources.canAfford(cost)) {
+        console.log(`[AI]     Cannot afford (need ${totalCost} credits, have ${planet.resources.credits})`);
         continue;
       }
 
-      // Build Mining Stations on Volcanic planets
-      if (planet.type === PlanetType.Volcanic) {
-        this.buildingSystem.startConstruction(planet.id, BuildingType.MiningStation);
-        this.onAIBuilding?.(planet.id, BuildingType.MiningStation);
+      // Train platoon
+      const troops = Math.floor(this.random() * 51) + 100; // 100-150
+      console.log(`[AI]     Commissioning ${troops} troops with ${EquipmentLevel[equipment]}/${WeaponLevel[weapon]}`);
+      const platoonId = this.platoonSystem.commissionPlatoon(planet.id, FactionType.AI, troops, equipment, weapon);
+
+      if (platoonId >= 0) {
+        console.log(`[AI]     ✓ Platoon ${platoonId} commissioned on ${planet.name}`);
+        this.onAICommissioning?.(planet.id, troops, equipment, weapon);
+        return; // Train one per turn
+      } else {
+        console.log(`[AI]     ✗ Commission failed`);
+      }
+    }
+
+    console.log('[AI]   No planets could afford military training');
+  }
+
+  /**
+   * Builds economic infrastructure on ANY planet type.
+   * Priority: Mining > Horticultural > Docking Bay (for craft production)
+   */
+  private buildEconomy(): void {
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    console.log(`[AI] buildEconomy: AI owns ${aiPlanets.length} planets`);
+
+    for (const planet of aiPlanets) {
+      console.log(`[AI]   Checking planet ${planet.name} (${PlanetType[planet.type]})`);
+
+      // Economic personality builds more aggressively (80% vs 60%)
+      const buildChance = this.personality === AIPersonality.Economic ? 0.8 : 0.6;
+      const roll = this.random();
+      if (roll > buildChance) {
+        console.log(`[AI]     Skip (roll ${roll.toFixed(2)} > ${buildChance})`);
+        continue;
       }
 
-      // Build Horticultural Stations on Tropical planets
-      if (planet.type === PlanetType.Tropical) {
-        this.buildingSystem.startConstruction(planet.id, BuildingType.HorticulturalStation);
-        this.onAIBuilding?.(planet.id, BuildingType.HorticulturalStation);
+      // Try to build in priority order: Mining → Horticultural → Docking Bay
+      // Build whatever we can afford and have slots for
+      let built = false;
+
+      // Priority 1: Mining Station (minerals + fuel)
+      if (!built && this.buildingSystem.canBuild(planet.id, BuildingType.MiningStation)) {
+        console.log(`[AI]     Building Mining Station`);
+        const result = this.buildingSystem.startConstruction(planet.id, BuildingType.MiningStation);
+        console.log(`[AI]     Build result: ${result}`);
+        if (result) {
+          this.onAIBuilding?.(planet.id, BuildingType.MiningStation);
+          built = true;
+        }
+      }
+
+      // Priority 2: Horticultural Station (food for population growth)
+      if (!built && this.buildingSystem.canBuild(planet.id, BuildingType.HorticulturalStation)) {
+        console.log(`[AI]     Building Horticultural Station`);
+        const result = this.buildingSystem.startConstruction(planet.id, BuildingType.HorticulturalStation);
+        console.log(`[AI]     Build result: ${result}`);
+        if (result) {
+          this.onAIBuilding?.(planet.id, BuildingType.HorticulturalStation);
+          built = true;
+        }
+      }
+
+      // Priority 3: Docking Bay (enables craft production)
+      if (!built && this.buildingSystem.canBuild(planet.id, BuildingType.DockingBay)) {
+        console.log(`[AI]     Building Docking Bay`);
+        const result = this.buildingSystem.startConstruction(planet.id, BuildingType.DockingBay);
+        console.log(`[AI]     Build result: ${result}`);
+        if (result) {
+          this.onAIBuilding?.(planet.id, BuildingType.DockingBay);
+          built = true;
+        }
+      }
+
+      if (!built) {
+        console.log(`[AI]     No valid builds available (slots full or no resources)`);
       }
     }
   }
@@ -469,24 +548,39 @@ export class AIDecisionSystem {
   }
 
   /**
-   * Expands to neutral planets.
+   * Expands to neutral planets by purchasing Atmosphere Processors.
    */
   private expandToNeutral(): void {
     const neutralPlanets = this.gameState.planets.filter(p => p.owner === FactionType.Neutral);
+    console.log(`[AI] expandToNeutral: ${neutralPlanets.length} neutral planets available`);
+
     if (neutralPlanets.length === 0) {
+      console.log('[AI]   No neutral planets to expand to');
       return;
     }
 
-    const hitotsu = this.gameState.planets.find(p => p.owner === FactionType.AI && p.name === 'Hitotsu');
-    if (!hitotsu) {
+    const aiPlanets = this.gameState.planets.filter(p => p.owner === FactionType.AI);
+    if (aiPlanets.length === 0) {
+      console.log('[AI]   No AI planets to purchase from!');
       return;
     }
 
-    // Try to purchase Atmosphere Processor
-    this.craftSystem.purchaseCraft(CraftType.AtmosphereProcessor, hitotsu.id, FactionType.AI);
+    // Try to purchase Atmosphere Processor from any AI planet
+    for (const planet of aiPlanets) {
+      console.log(`[AI]   Trying to purchase Atmosphere Processor from ${planet.name}`);
 
-    // NOTE: Would normally send to neutral planet via NavigationSystem
-    // For now, just creating the craft is progress
+      const craftId = this.craftSystem.purchaseCraft(CraftType.AtmosphereProcessor, planet.id, FactionType.AI);
+
+      if (craftId >= 0) {
+        console.log(`[AI]     ✓ Atmosphere Processor ${craftId} purchased!`);
+        this.onAIPurchasing?.(CraftType.AtmosphereProcessor, planet.id);
+        return; // Purchase one per turn
+      } else {
+        console.log(`[AI]     ✗ Purchase failed (no resources or no docking bay)`);
+      }
+    }
+
+    console.log('[AI]   Could not purchase Atmosphere Processor from any planet');
   }
 
   /**

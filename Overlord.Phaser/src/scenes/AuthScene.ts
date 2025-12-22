@@ -355,7 +355,8 @@ export class AuthScene extends Phaser.Scene {
   }
 
   private proceedToMainMenu(): void {
-    this.scene.start('MainMenuScene');
+    // BBS Edition: Go directly to BBS game scene
+    this.scene.start('BBSGameScene');
   }
 
   public shutdown(): void {

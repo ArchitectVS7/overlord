@@ -1,0 +1,1032 @@
+{
+  "sessionId": "20251221_204220",
+  "sessionStart": "2025-12-22T02:42:20.171Z",
+  "exportTime": "2025-12-22T02:43:55.371Z",
+  "totalEntries": 128,
+  "entries": [
+    {
+      "timestamp": "2025-12-22T02:42:20.171Z",
+      "turn": 0,
+      "actor": "SYSTEM",
+      "action": "SESSION_START",
+      "details": "Session 20251221_204220 started",
+      "screen": "START_MENU"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:22.590Z",
+      "turn": 0,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "N",
+      "screen": "START_MENU"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:22.590Z",
+      "turn": 0,
+      "actor": "SYSTEM",
+      "action": "NEW_CAMPAIGN",
+      "details": "Starting new campaign",
+      "screen": "START_MENU"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:22.594Z",
+      "turn": 0,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "New campaign started!",
+      "screen": "START_MENU"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:25.662Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:25.662Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:26.809Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:28.170Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:28.171Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "Started construction of MiningStation on Starbase",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:28.172Z",
+      "turn": 1,
+      "actor": "SYSTEM",
+      "action": "UAT_COMPLETE",
+      "details": "3.1: Structure built - UAT 3.1 complete",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:28.173Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "BUILD",
+      "details": "Built MiningStation on planet 0",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:30.228Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:30.228Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:31.351Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:32.587Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:32.587Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "Started construction of MiningStation on Starbase",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:32.588Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "BUILD",
+      "details": "Built MiningStation on planet 0",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:34.707Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:34.707Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:35.749Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:36.984Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "2",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:36.985Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "Started construction of HorticulturalStation on Starbase",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:36.985Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "BUILD",
+      "details": "Built HorticulturalStation on planet 0",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:39.017Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:39.017Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:40.019Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:41.257Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "4",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:41.257Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "Started construction of DockingBay on Starbase",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:41.258Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "BUILD",
+      "details": "Built DockingBay on planet 0",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:43.275Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:43.275Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:44.316Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:45.531Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "2",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:45.531Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "Started construction of HorticulturalStation on Starbase",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:45.531Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "BUILD",
+      "details": "Built HorticulturalStation on planet 0",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:47.422Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:47.422Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:48.444Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:49.636Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:50.900Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.088Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.089Z",
+      "turn": 1,
+      "actor": "SYSTEM",
+      "action": "UAT_COMPLETE",
+      "details": "1.2: Navigation working - UAT 1.2 complete",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.873Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.873Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 1",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.873Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.875Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI purchased AtmosphereProcessor at Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.875Z",
+      "turn": 1,
+      "actor": "AI",
+      "action": "PURCHASE",
+      "details": "AI purchased AtmosphereProcessor at Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:51.877Z",
+      "turn": 1,
+      "actor": "SYSTEM",
+      "action": "UAT_COMPLETE",
+      "details": "3.4: Turn ended - UAT 3.4 complete",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:54.872Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:54.872Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:56.038Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:57.224Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:58.469Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:58.617Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:59.353Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:59.353Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 1",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:42:59.353Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:02.380Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:02.380Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:03.426Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:04.556Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:05.857Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:06.006Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:06.727Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:06.728Z",
+      "turn": 1,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 1",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:06.728Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:06.729Z",
+      "turn": 1,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:06.729Z",
+      "turn": 1,
+      "actor": "AI",
+      "action": "BUILD",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:09.688Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:09.689Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:10.813Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:12.092Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:13.354Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:13.505Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:14.284Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:14.284Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 2",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:14.284Z",
+      "turn": 2,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:17.313Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:17.313Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:18.342Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:19.529Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:20.781Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:20.946Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:21.704Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:21.704Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 2",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:21.704Z",
+      "turn": 2,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:21.705Z",
+      "turn": 2,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:21.705Z",
+      "turn": 2,
+      "actor": "AI",
+      "action": "BUILD",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:24.688Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:24.688Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:25.731Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:27.095Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:28.378Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:28.523Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:29.353Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:29.353Z",
+      "turn": 2,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 2",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:29.353Z",
+      "turn": 2,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:29.354Z",
+      "turn": 2,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:29.354Z",
+      "turn": 2,
+      "actor": "AI",
+      "action": "BUILD",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:32.714Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:32.714Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:33.741Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:34.983Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:36.316Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:36.461Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:37.347Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:37.347Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 3",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:37.347Z",
+      "turn": 3,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:37.348Z",
+      "turn": 3,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:37.348Z",
+      "turn": 3,
+      "actor": "AI",
+      "action": "BUILD",
+      "details": "AI builds MiningStation on Hitotsu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:40.421Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:40.421Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:41.428Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:42.704Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:43.992Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:44.133Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:44.904Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:44.904Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 3",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:44.904Z",
+      "turn": 3,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:47.919Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "B",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:47.919Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "OPEN_BUILD",
+      "details": "Opening build menu",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:48.905Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "1",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:50.313Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "5",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:51.556Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "Escape",
+      "screen": "BUILD"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:51.698Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_ESC",
+      "details": "Navigated back",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:52.498Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "KEY_PRESS",
+      "details": "E",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:52.499Z",
+      "turn": 3,
+      "actor": "USER",
+      "action": "END_TURN",
+      "details": "Ending turn 3",
+      "screen": "IN_GAME"
+    },
+    {
+      "timestamp": "2025-12-22T02:43:52.499Z",
+      "turn": 3,
+      "actor": "GAME",
+      "action": "MESSAGE",
+      "details": "AI is thinking...",
+      "screen": "IN_GAME"
+    }
+  ]
+}
