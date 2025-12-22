@@ -17,11 +17,9 @@
 
 ### What Is Overlord?
 
-**Overlord** is a turn-based 4X strategy game - a modern web-based remake of the classic 1990 game "Overlord" (aka "Supremacy"). This architecture supports the **Phaser 3 + TypeScript implementation** following a strategic pivot from Unity development to enable AI-assisted development with Claude Code.
+**Overlord** is a turn-based 4X strategy game - a modern web-based remake of the classic 1990 game "Overlord" (aka "Supremacy"). This architecture supports the 
 
-### Technical Pivot Rationale
 
-The project was originally developed in Unity 6000 + C# with .NET Standard 2.1 core libraries. After proving incompatible with Claude Code workflows, all 18 core game systems were successfully ported to TypeScript with:
 - **1,272 passing tests** (comprehensive coverage maintained)
 - **Platform-agnostic architecture** (zero rendering dependencies in core logic)
 - **AI-assisted development compatibility** (2-second edit → browser refresh cycle)
@@ -136,7 +134,7 @@ All 18 systems exist in `Overlord.Phaser/src/core/` with TypeScript implementati
 
 ## Project Initialization
 
-**Current Status:** Project already initialized and migrated from Unity to Phaser 3 + TypeScript.
+**Current Status:** Initial gameplay testing
 
 **Existing Setup:**
 - Webpack 5 bundler with TypeScript loader (ts-loader)

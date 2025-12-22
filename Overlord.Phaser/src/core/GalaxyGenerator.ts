@@ -81,29 +81,33 @@ export class GalaxyGenerator {
 
     // Determine planet count based on difficulty
     const planetCount = difficulty === Difficulty.Easy ? 6 :
-                        difficulty === Difficulty.Normal ? 5 : 4;
+                        difficulty === Difficulty.Normal ? 9 : 18;
 
-    // 1. Generate Starbase (Player starting planet)
+    // 1. Generate Starbase (Player starting planet) - first in list
     const starbase = this.generateStartingPlanet(
       0, 'Starbase', PlanetType.Metropolis, FactionType.Player, actualSeed,
     );
     galaxy.planets.push(starbase);
 
-    // 2. Generate Hitotsu (AI starting planet) opposite to Starbase
-    const hitotsu = this.generateStartingPlanet(
-      1, 'Hitotsu', PlanetType.Metropolis, FactionType.AI, actualSeed + 1, starbase.position,
-    );
-    galaxy.planets.push(hitotsu);
-
-    // 3. Generate neutral planets
+    // 2. Generate neutral planets in the middle
     const neutralCount = planetCount - 2;
     const availableTypes = [
       PlanetType.Volcanic,
       PlanetType.Desert,
       PlanetType.Tropical,
-      PlanetType.Volcanic, // Allow duplicates for 6-planet systems
+      PlanetType.Volcanic,
       PlanetType.Desert,
       PlanetType.Tropical,
+      PlanetType.Volcanic,
+      PlanetType.Desert,
+      PlanetType.Tropical,
+      PlanetType.Volcanic,
+      PlanetType.Desert,
+      PlanetType.Tropical,
+      PlanetType.Volcanic,
+      PlanetType.Desert,
+      PlanetType.Tropical,
+      PlanetType.Volcanic,
     ];
 
     // Shuffle available types for variety
@@ -112,14 +116,20 @@ export class GalaxyGenerator {
     for (let i = 0; i < neutralCount; i++) {
       const type = availableTypes[i % availableTypes.length];
       const planet = this.generateNeutralPlanet(
-        i + 2,
+        i + 1,
         `Planet ${String.fromCharCode(65 + i)}`, // 'A', 'B', 'C', etc.
         type,
         galaxy.planets,
-        actualSeed + i + 2,
+        actualSeed + i + 1,
       );
       galaxy.planets.push(planet);
     }
+
+    // 3. Generate Hitotsu (AI starting planet) - last in list, opposite end of galaxy
+    const hitotsu = this.generateStartingPlanet(
+      planetCount - 1, 'Hitotsu', PlanetType.Metropolis, FactionType.AI, actualSeed + planetCount, starbase.position,
+    );
+    galaxy.planets.push(hitotsu);
 
     return galaxy;
   }

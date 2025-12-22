@@ -1,6 +1,0 @@
-C:\dev\GIT\Overlord\Overlord.Console\Overlord.Console\obj\Debug\net8.0\Overlord.Console.csproj.AssemblyReference.cache
-C:\dev\GIT\Overlord\Overlord.Console\Overlord.Console\obj\Debug\net8.0\Overlord.Console.GeneratedMSBuildEditorConfig.editorconfig
-C:\dev\GIT\Overlord\Overlord.Console\Overlord.Console\obj\Debug\net8.0\Overlord.Console.AssemblyInfoInputs.cache
-C:\dev\GIT\Overlord\Overlord.Console\Overlord.Console\obj\Debug\net8.0\Overlord.Console.AssemblyInfo.cs
-C:\dev\GIT\Overlord\Overlord.Console\Overlord.Console\obj\Debug\net8.0\Overlord.Console.csproj.CoreCompileInputs.cache
-C:\dev\GIT\Overlord\Overlord.Console\Overlord.Console\obj\Debug\net8.0\Overlord.Console.sourcelink.json
