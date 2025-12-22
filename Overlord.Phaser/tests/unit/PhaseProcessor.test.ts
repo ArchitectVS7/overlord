@@ -286,6 +286,83 @@ describe('PhaseProcessor', () => {
       expect(duration).toBeLessThan(2000);
     });
   });
+
+  describe('Zero-state-change scenarios', () => {
+    describe('Income Phase - No planets owned', () => {
+      it('should return zero income when faction owns no planets', () => {
+        // Remove all player planets
+        gameState.planets = gameState.planets.filter(p => p.owner !== FactionType.Player);
+        gameState.rebuildLookups();
+
+        const result = phaseProcessor.processIncomePhase() as IncomePhaseResult;
+
+        expect(result.success).toBe(true);
+        expect(result.playerIncome.credits).toBe(0);
+        expect(result.playerIncome.minerals).toBe(0);
+        expect(result.playerIncome.fuel).toBe(0);
+        expect(result.playerIncome.food).toBe(0);
+      });
+
+      it('should fire onNoPlanetsOwned event when faction has no planets', () => {
+        let firedFaction: FactionType | undefined;
+        phaseProcessor.getIncomeSystem().onNoPlanetsOwned = (faction) => {
+          firedFaction = faction;
+        };
+
+        // Remove all player planets
+        gameState.planets = gameState.planets.filter(p => p.owner !== FactionType.Player);
+        gameState.rebuildLookups();
+
+        phaseProcessor.processIncomePhase();
+
+        expect(firedFaction).toBe(FactionType.Player);
+      });
+    });
+
+    describe('Combat Phase - No encounters', () => {
+      it('should return zero battles when no opposing forces present', () => {
+        // Default test state has no craft, so no combat should occur
+        const result = phaseProcessor.processCombatPhase();
+
+        expect(result.success).toBe(true);
+        expect(result.battlesResolved).toBe(0);
+        expect(result.invasionsProcessed).toBe(0);
+      });
+    });
+
+    describe('End Phase - AI not configured', () => {
+      it('should return aiTurnProcessed=false when AIDecisionSystem not configured', () => {
+        // PhaseProcessor created without configureEndPhase()
+        const result = phaseProcessor.processEndPhase() as EndPhaseResult;
+
+        expect(result.success).toBe(true);
+        expect(result.aiTurnProcessed).toBe(false);
+      });
+    });
+  });
+
+  describe('Configuration validation', () => {
+    it('should return warnings when AI not configured', () => {
+      const config = phaseProcessor.validateConfiguration();
+
+      expect(config.valid).toBe(false);
+      expect(config.warnings).toContain('AIDecisionSystem not configured - AI will not take turns');
+    });
+
+    it('should return warnings when InvasionSystem not configured', () => {
+      const config = phaseProcessor.validateConfiguration();
+
+      expect(config.warnings).toContain('InvasionSystem not configured - ground invasions disabled');
+    });
+
+    it('should report AI not configured via isAIConfigured()', () => {
+      expect(phaseProcessor.isAIConfigured()).toBe(false);
+    });
+
+    it('should report Invasion not configured via isInvasionConfigured()', () => {
+      expect(phaseProcessor.isInvasionConfigured()).toBe(false);
+    });
+  });
 });
 
 /**

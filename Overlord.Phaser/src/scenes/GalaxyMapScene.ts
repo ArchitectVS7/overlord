@@ -502,6 +502,12 @@ export class GalaxyMapScene extends Phaser.Scene {
       },
     });
 
+    // Validate PhaseProcessor configuration - Turn Flow Invariant Remediation
+    const configStatus = this.phaseProcessor.validateConfiguration();
+    if (!configStatus.valid) {
+      console.warn('[GalaxyMapScene] PhaseProcessor configuration warnings:', configStatus.warnings);
+    }
+
     // Set opponent info panel - Story 7-2
     const personalityName = this.aiDecisionSystem.getPersonalityName();
     const difficultyName = this.aiDecisionSystem.getDifficulty(); // Already a string enum value
